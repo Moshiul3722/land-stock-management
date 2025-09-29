@@ -1,0 +1,68 @@
+.header-card {
+    background-color: #f8f9fa;
+    /* Light grey background for the header */
+    border: none;
+    /* Remove border */
+    margin-bottom: 20px;
+    /* Space below the header */
+}
+
+.header-title {
+    font-size: 24px;
+    font-weight: bold;
+    margin-bottom: 10px;
+}
+
+.header-subtitle {
+    font-size: 18px;
+    font-weight: normal;
+    text-decoration: underline;
+}
+
+.smallestext {
+    width: 40px;
+}
+.smallertext {
+    width: 60px;
+}
+.smalltext {
+    width: 80px;
+}
+.mediumtext {
+    width: 120px;
+}
+.largetext {
+    width: 180px;
+}
+.largertext {
+    width: 220px;
+}
+.largestext {
+    width: 260px;
+}
+
+/* Add horizontal scroll to table */
+.table-responsive {
+    overflow-x: auto;
+}
+
+/* Optional: Adjust table and column width */
+#stakeholder-table th,
+#stakeholder-table td {
+    min-width: 120px;
+    /* Adjust the minimum width as needed */
+}
+
+
+.largetextarea {
+    width: 180px;
+    height: 60px;
+}
+.largertextarea {
+    width: 220px;
+    height: 60px;
+}
+.largerstextarea {
+    height: 60px;
+    width: 260px;
+}

@@ -1,0 +1,52 @@
+<?php
+
+namespace App\Services;
+
+use App\Repositories\CnfRoleRepository;
+use App\Repositories\UserRepository;
+
+class RoleService
+{
+    /** @var CnfRoleRepository $cnfRoleRepository*/
+    private $cnfRoleRepository;
+    /** @var UserRepository $userRepository*/
+    private $userRepository;
+
+    public function __construct(CnfRoleRepository $cnfRoleRepo, UserRepository $userRepo)
+    {
+        $this->cnfRoleRepository = $cnfRoleRepo;
+        $this->userRepository = $userRepo;
+    }
+
+    /**
+     * Get List of All Roles
+     */
+    public function getAllRoles()
+    {
+        // $rolesList = $this->cnfRoleRepository->all();
+        $rolesList = $this->cnfRoleRepository->allWithUser();
+        return response()->json($rolesList);
+    }
+
+    /**
+     * Get All Users of A Specific Role
+     * Providing the roleId
+     * isActive parameter is optional (by default it will be set to 1)
+     */
+    public function getAllUsersByRole($roleId, $isActive = null)
+    {
+        // Define the base search criteria
+        $searchCriteria = [
+            'role_id' => $roleId,
+            'is_active' => 1
+        ];
+
+        // Add the 'is_active' condition if $isActive is not null
+        if ($isActive !== null) {
+            $searchCriteria['is_active'] = $isActive;
+        }
+        // Retrieve users matching the search criteria
+        $userListByRole = $this->userRepository->all($searchCriteria);
+        return response()->json($userListByRole);
+    }
+}

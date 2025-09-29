@@ -1,0 +1,97 @@
+@font-face {
+    font-family: 'Hind-Siliguri';
+    src: url('../fonts/Hind_Siliguri_Light-Regular.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+}
+
+#wait{
+    display:    none;
+    position:   fixed;
+    z-index:    9000;
+    top:        0;
+    left:       0;
+    height:     100%;
+    width:      100%;
+    background: rgba( 255, 255, 255, .8 )
+    url('../img/1489.gif')
+    50% 50%
+    no-repeat;
+}
+
+body {
+    font-family: 'Hind-Siliguri', sans-serif;
+}
+
+.sidebar-dark-primary {
+    /* background-color: #ffffff; */
+    /* background-color: rgba(215, 215, 95, 0.33); */
+    background-color: rgb(153, 173, 149);
+}
+
+.sidebar-mini.layout-fixed.sidebar-collapse {
+    background-color: rgba(180, 199, 211, 0.3); /* Set your desired color */
+}
+
+p {
+    color: black;
+    font-weight: 600;
+}
+
+.brand-text {
+    color: black;
+    font-weight: 600;
+}
+
+.content-wrapper {
+    background-color: #ebf3ff;
+}
+
+ /* For all Font awsome (i class) icon i have added custom-icon class */
+ .custom-icon {
+    color: black !important;
+    }
+     /* Specific style for Dashboard */
+     .nav-link.dashboard.active {
+        /* background-color: rgb(72, 88, 72); */
+        background-color: rgb(72, 88, 72);
+        opacity: 0.9;
+        color: black !important;
+    }
+    /* Default Active Link Styling: */
+    .nav-pills .nav-link.active, .nav-pills .show > .nav-link {
+        
+        background-color: rgb(72, 88, 72);
+        opacity: 0.90;
+}
+    /* Menu and Submenu Highlighting: */
+    .nav-link.active {
+        background-color: rgb(72, 88, 72);
+        opacity: 0.90;
+        color: black !important;
+    }
+
+    .nav-item.has-treeview.menu-open > .nav-link {
+        background-color: rgb(72, 88, 72);
+        opacity: 0.90;
+        color: black !important;
+    }
+
+    .nav-item.has-treeview.menu-is-opening.menu-open > .nav-link {
+        background-color:rgb(72, 88, 72);
+        opacity: 0.90;
+        color: black !important;
+    }
+    
+
+    .nav-item.has-treeview.menu-open .nav-treeview .nav-link.active {
+        background-color: #1C4F9F5E;
+        opacity: 0.85;
+        color: black !important;
+    }
+    /* after nav link clicking colour change */
+    [class*=sidebar-dark-] .nav-treeview > .nav-item > .nav-link.active, [class*=sidebar-dark-] .nav-treeview > .nav-item > .nav-link.active:hover, [class*=sidebar-dark-] .nav-treeview > .nav-item > .nav-link.active:focus {
+        background-color: #1C4F9F5E;
+        opacity: 0.85;
+        color: black !important;
+    }

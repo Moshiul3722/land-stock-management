@@ -1,0 +1,25 @@
+<?php
+
+return [
+    'title' => 'User Management',
+    'table_header' => 'List of Users',
+    'user_name' => 'User Name',
+    'create_new_user' => 'Add New User',
+    'user_name_en' => 'Name of The User (English)',
+    'user_name_bn' => 'Name of The User (Bangla)',
+    'email' => 'E-Mail',
+    'edit_user' => 'Edit User Information',
+    'module' => 'Module',
+    'submodule' => 'Submodule',
+    'menu' => 'Menu',
+    'permission' => 'Permission',
+    'role' => 'Role',
+    'category' => 'Category',
+    'password' => 'Password',
+    'confirm_password' => 'Confirm Password',
+    'password_match' => 'Your Password doesnt match with Confirm Password!',
+    'reset_password' => 'Reset Password',
+    'reset_password_confirm' => 'Confirm Reset Password',
+    'confirm_password_empty' => 'Confirm Reset Password Field must be filled up!',
+
+];

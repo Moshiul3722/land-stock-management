@@ -1,0 +1,26 @@
+<?php
+
+return [
+    'title' => '',
+    'project_name' => 'Community Engangement, Mobilization, Resilience and Capacity Building for RIVER Project',
+    'lged' => 'Local Government Engineering Department (LGED)',
+    'page_titile' => 'Attendance Sheet for Training/Workshop/Seminar',
+    't_name' => 'Name of Training/Workshop/Seminar',
+    'facilitated_by' => 'Facilitated By',
+    'date' => 'Date',
+    'date_from' => 'From',
+    'date_to' => 'To',
+    'venue_name' => 'Venue Name',
+    'cost' => 'Total Cost',
+    'stake_name' => 'Name of Stakeholder',
+    'f_name' => 'Fathers/Husband Name',
+    'age' => 'Age',
+    'gender' => 'Sex (M/F/T)',
+    'disability' => 'Disability (Y/N)',
+    'marital_status' => 'Marital Status',
+    'occupation' => 'Occupation/Designation',
+    'mobile' => 'Mobile Number',
+    'org_name' => 'Organization / Department / Group Name',
+    'sign' => 'Signature / Thump Impression',
+    'remarks' => 'Remarks',
+];
