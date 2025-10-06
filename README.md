@@ -58,7 +58,7 @@ php artisan key:generate
 ```
 ### 6️⃣ Run Migrations
 ```bash
-php artisan migrate
+php artisan migrate:fresh --seed
 ```
 ### 7️⃣ Start the Development Server
 
