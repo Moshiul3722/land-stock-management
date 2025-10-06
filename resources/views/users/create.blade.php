@@ -71,24 +71,9 @@
                             </div>
                             <div class="col-md-6">
                                 <div class="form-group">
-                                </div>
-                            </div>
-                        </div>
-                        <div class="row">
-                            <div class="col-sm-6">
-                                <div class="form-group">
                                     <label for="role">{{ __('user.role') }} <span style="color: red;">*</span></label>
                                     <select class="js-example-basic-single custom-select form-control-border" id="role"
                                         name="role">
-                                    </select>
-                                </div>
-                            </div>
-                            <div class="col-sm-6">
-                                <div class="form-group">
-                                    <label for="districts">{{ __('geolocation.district') }} <span
-                                            style="color: red;">*</span></label>
-                                    <select class="js-example-basic-single custom-select form-control-border" id="districts"
-                                        name="districts">
                                     </select>
                                 </div>
                             </div>
@@ -291,40 +276,6 @@
                         dropdown.append($('<option></option>').attr('value', value.id).text(
                             selectedLocale === 'en' ? value.role_name_en : value
                             .role_name_bn));
-                    });
-                },
-                error: function(err) {
-                    $('#wait').hide();
-                    // Display Sweet Alert for error
-                    Swal.fire({
-                        icon: 'error',
-                        title: "{{ __('sweetalert.error') }}",
-                        text: "{{ __('sweetalert.error_title') }}",
-                        showCloseButton: true,
-                    });
-                },
-                complete: function() {
-                    $('#wait').hide();
-                }
-            });
-
-            // Getting the list of all districts
-            $.ajax({
-                url: "{{ route('geolocation.get.all.districts') }}",
-                type: 'POST',
-                dataType: 'json',
-                beforeSend: function() {
-                    $('#wait').show();
-                },
-                success: function(data) {
-                    var dropdown = $('#districts');
-                    dropdown.empty();
-                    dropdown.append($('<option></option>').attr('value', '0').text(
-                        "-- NONE --"));
-                    $.each(data, function(key, value) {
-                        dropdown.append($('<option></option>').attr('value', value.id).text(
-                            selectedLocale === 'en' ? value.name : value
-                            .name_bn));
                     });
                 },
                 error: function(err) {
