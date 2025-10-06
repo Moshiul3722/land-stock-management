@@ -28,8 +28,8 @@ Follow the steps below to set up the project on your local environment:
 
 ### 1️⃣ Clone the Repository
 ```bash
-git clone https://github.com/your-username/inventory-management-system.git
-cd inventory-management-system
+git clone https://github.com/ultracorecreatives/inv-land.git
+cd inv-land
 ```
 
 ### 2️⃣ Copy Environment File
