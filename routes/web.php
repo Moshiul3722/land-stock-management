@@ -4,8 +4,6 @@ use App\Http\Controllers\Auth\LoginController;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\NotificationController;
-use App\Http\Controllers\DataEntryController;
-use App\Http\Controllers\FormReportController;
 use App\Http\Controllers\HomeController;
 
 /*
@@ -26,31 +24,30 @@ Route::get('/', [LoginController::class, 'showLoginForm'])->name('login');
 Route::get('/home', [HomeController::class, 'index'])->name('home');
 
 
-Route::get('generator_builder', '\InfyOm\GeneratorBuilder\Controllers\GeneratorBuilderController@builder')->name('io_generator_builder');
+// Route::get('generator_builder', '\InfyOm\GeneratorBuilder\Controllers\GeneratorBuilderController@builder')->name('io_generator_builder');
 
-Route::get('field_template', '\InfyOm\GeneratorBuilder\Controllers\GeneratorBuilderController@fieldTemplate')->name('io_field_template');
+// Route::get('field_template', '\InfyOm\GeneratorBuilder\Controllers\GeneratorBuilderController@fieldTemplate')->name('io_field_template');
 
-Route::get('relation_field_template', '\InfyOm\GeneratorBuilder\Controllers\GeneratorBuilderController@relationFieldTemplate')->name('io_relation_field_template');
+// Route::get('relation_field_template', '\InfyOm\GeneratorBuilder\Controllers\GeneratorBuilderController@relationFieldTemplate')->name('io_relation_field_template');
 
-Route::post('generator_builder/generate', '\InfyOm\GeneratorBuilder\Controllers\GeneratorBuilderController@generate')->name('io_generator_builder_generate');
+// Route::post('generator_builder/generate', '\InfyOm\GeneratorBuilder\Controllers\GeneratorBuilderController@generate')->name('io_generator_builder_generate');
 
-Route::post('generator_builder/rollback', '\InfyOm\GeneratorBuilder\Controllers\GeneratorBuilderController@rollback')->name('io_generator_builder_rollback');
+// Route::post('generator_builder/rollback', '\InfyOm\GeneratorBuilder\Controllers\GeneratorBuilderController@rollback')->name('io_generator_builder_rollback');
 
-Route::post(
-    'generator_builder/generate-from-file',
-    '\InfyOm\GeneratorBuilder\Controllers\GeneratorBuilderController@generateFromFile'
-)->name('io_generator_builder_generate_from_file');
-
-
-
+// Route::post(
+//     'generator_builder/generate-from-file',
+//     '\InfyOm\GeneratorBuilder\Controllers\GeneratorBuilderController@generateFromFile'
+// )->name('io_generator_builder_generate_from_file');
 
 Route::middleware(['auth', 'permission'])->group(function () {
+
 
     Route::resource('cnfModules', App\Http\Controllers\CnfModuleController::class);
     Route::resource('cnfSubmodules', App\Http\Controllers\CnfSubmoduleController::class);
     Route::resource('cnfMenus', App\Http\Controllers\CnfMenuController::class);
     Route::resource('cnfPermissions', App\Http\Controllers\CnfPermissionController::class);
     Route::resource('cnfRoles', App\Http\Controllers\CnfRoleController::class);
+
     // Role Service Routes START
     Route::post('/getallroles', 'App\Http\Controllers\ServiceControllers\RoleServiceController@getAllRoles')->name('getAllRoles');
     Route::post('/getallusersbyrole', 'App\Http\Controllers\ServiceControllers\RoleServiceController@getAllUsersByRole')->name('getallusersbyrole');
@@ -73,25 +70,18 @@ Route::middleware(['auth', 'permission'])->group(function () {
     Route::get('/user/{id}/edit', 'App\Http\Controllers\UserController@edit')->name('users.edit');
     Route::put('/users/{user}', 'App\Http\Controllers\UserController@update')->name('users.update');
     // User Module Routes END
+
+    Route::resource('years', App\Http\Controllers\YearController::class);
+
+
+    // Localization Route
+    Route::get('change-language/{locale}', 'App\Http\Controllers\LocalizationController@changeLanguage')->name('change.language');
+
+    //NotificationService
+    Route::prefix('notifications')->group(function () {
+        Route::get('unread', [NotificationController::class, 'getUnreadNotifications']);
+        Route::put('mark-as-read', [NotificationController::class, 'markAllAsRead']);
+        Route::get('all', [NotificationController::class, 'viewAllNotifications']);
+        Route::post('send', [NotificationController::class, 'sendNotification']);
+    });
 });
-
-
-Route::resource('cnf-modules', App\Http\Controllers\CnfModuleController::class);
-Route::resource('cnf-submodules', App\Http\Controllers\CnfSubmoduleController::class);
-Route::resource('cnf-menus', App\Http\Controllers\CnfMenuController::class);
-Route::resource('cnf-permissions', App\Http\Controllers\CnfPermissionController::class);
-
-
-// Localization Route
-Route::get('change-language/{locale}', 'App\Http\Controllers\LocalizationController@changeLanguage')->name('change.language');
-
-
-//NotificationService
-Route::prefix('notifications')->group(function () {
-    Route::get('unread', [NotificationController::class, 'getUnreadNotifications']);
-    Route::put('mark-as-read', [NotificationController::class, 'markAllAsRead']);
-    Route::get('all', [NotificationController::class, 'viewAllNotifications']);
-    Route::post('send', [NotificationController::class, 'sendNotification']);
-});
-
-Route::resource('years', App\Http\Controllers\YearController::class);
