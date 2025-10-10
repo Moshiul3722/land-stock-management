@@ -5,7 +5,7 @@ namespace App\Repositories;
 use App\Models\ApprovalProcess;
 use App\Repositories\BaseRepository;
 
-class ApprovalEntityRepository extends BaseRepository
+class ApprovalProcessRepository extends BaseRepository
 {
     protected $fieldSearchable = [
         'id',
