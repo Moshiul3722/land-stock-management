@@ -50,8 +50,6 @@ Route::middleware(['auth', 'permission'])->group(function () {
     Route::resource('cnfSubmodules', App\Http\Controllers\CnfSubmoduleController::class);
     Route::resource('cnfMenus', App\Http\Controllers\CnfMenuController::class);
     Route::resource('cnfPermissions', App\Http\Controllers\CnfPermissionController::class);
-    Route::resource('cnfGenders', App\Http\Controllers\CnfGenderController::class);
-    Route::resource('cnfReligions', App\Http\Controllers\CnfReligionController::class);
     Route::resource('cnfRoles', App\Http\Controllers\CnfRoleController::class);
     // Role Service Routes START
     Route::post('/getallroles', 'App\Http\Controllers\ServiceControllers\RoleServiceController@getAllRoles')->name('getAllRoles');
@@ -96,5 +94,4 @@ Route::prefix('notifications')->group(function () {
     Route::post('send', [NotificationController::class, 'sendNotification']);
 });
 
-Route::resource('fiscalYears', App\Http\Controllers\FiscalYearController::class);
 Route::resource('years', App\Http\Controllers\YearController::class);
