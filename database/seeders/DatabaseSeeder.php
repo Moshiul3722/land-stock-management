@@ -27,7 +27,6 @@ class DatabaseSeeder extends Seeder
             SubModuleSeeder::class,
             MenuSeeder::class,
             PermissionSeeder::class,
-            FiscalYearSeeder::class,
             YearSeeder::class,
         ]);
     }
