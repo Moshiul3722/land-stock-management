@@ -8,6 +8,7 @@ use App\Repositories\BaseRepository;
 class LotRepository extends BaseRepository
 {
     protected $fieldSearchable = [
+        'id',
         'lot_number',
         'purchase_date',
         'status',
