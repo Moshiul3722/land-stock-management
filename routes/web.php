@@ -1,10 +1,12 @@
 <?php
 
 use App\Http\Controllers\Auth\LoginController;
+use App\Http\Controllers\CategoryController;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\HomeController;
+use App\Http\Controllers\ProductController;
 
 /*
 |--------------------------------------------------------------------------
@@ -40,7 +42,6 @@ Route::get('/home', [HomeController::class, 'index'])->name('home');
 // )->name('io_generator_builder_generate_from_file');
 
 Route::middleware(['auth', 'permission'])->group(function () {
-
 
     Route::resource('cnfModules', App\Http\Controllers\CnfModuleController::class);
     Route::resource('cnfSubmodules', App\Http\Controllers\CnfSubmoduleController::class);
@@ -84,4 +85,11 @@ Route::middleware(['auth', 'permission'])->group(function () {
         Route::get('all', [NotificationController::class, 'viewAllNotifications']);
         Route::post('send', [NotificationController::class, 'sendNotification']);
     });
+
+    // Product & Category Management Routes
+    Route::get('/category/create', [CategoryController::class, 'create'])->name('category.create');
+    Route::get('/category/view', [CategoryController::class, 'view'])->name('category.view');
+
+    Route::get('/product/create', [ProductController::class, 'create'])->name('product.create');
+    Route::get('/product/view', [ProductController::class, 'view'])->name('product.view');
 });
