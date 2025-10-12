@@ -50,8 +50,6 @@
                                         <td>{{ $loop->iteration }}</td>
                                         <td>{{ $category->name }}</td>
                                         <td>
-                                            <a href="{{ route('categories.show', $category) }}" class="btn btn-info btn-sm"
-                                                title="View"><i class="fa fa-eye"></i></a>
                                             <a href="{{ route('categories.edit', $category) }}"
                                                 class="btn btn-warning btn-sm" title="Edit"><i class="fa fa-edit"></i></a>
                                             <button class="btn btn-danger btn-sm delete-btn" data-id="{{ $category->id }}"
@@ -105,6 +103,7 @@
                     showCancelButton: true,
                     confirmButtonColor: '#3085d6',
                     cancelButtonColor: '#d33',
+                    cancelButtonText: "{{ __('sweetalert.cancel') }}",
                     confirmButtonText: "{{ __('sweetalert.delete_notice') }}"
                 }).then((result) => {
                     if (result.isConfirmed) {

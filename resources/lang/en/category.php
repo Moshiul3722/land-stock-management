@@ -7,4 +7,7 @@ return [
     'table_sl' => 'Serial',
     'table_name' => 'Name of the Product Category',
     'action' => 'Action',
+    'title_create' => 'Create New Product Category',
+    'description' => 'Description of the Product Category',
+
 ];
