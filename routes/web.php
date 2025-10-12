@@ -87,9 +87,6 @@ Route::middleware(['auth', 'permission'])->group(function () {
     });
 
     // Product & Category Management Routes
-    Route::get('/category/create', [CategoryController::class, 'create'])->name('category.create');
-    Route::get('/category/view', [CategoryController::class, 'view'])->name('category.view');
-
-    Route::get('/product/create', [ProductController::class, 'create'])->name('product.create');
-    Route::get('/product/view', [ProductController::class, 'view'])->name('product.view');
+    Route::resource('categories', CategoryController::class);
+    Route::resource('products', ProductController::class);
 });
