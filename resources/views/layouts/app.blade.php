@@ -40,6 +40,9 @@
     <link href="{{ asset('css/keyTable.bootstrap4.min.css') }}" rel="stylesheet">
     <link href="{{ asset('css/responsive.bootstrap4.min.css') }}" rel="stylesheet">
 
+    {{-- For Toastr --}}
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css">
+
     <link rel="stylesheet" href="{{ asset('css/app.css') }}">
 
     <!-- For Wait Loader -->
@@ -318,7 +321,8 @@
     <script src="{{ asset('js/dataTables.responsive.min.js') }}"></script>
     <script src="{{ asset('js/responsive.bootstrap4.js') }}"></script>
 
-
+    {{-- Toastr --}}
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
 
     <script>
         $(function() {
@@ -345,6 +349,30 @@
                 window.location.href = url.replace(':locale', locale);
             });
         });
+
+        // Set Toastr options
+        toastr.options = {
+            "closeButton": true,
+            "progressBar": true,
+            "positionClass": "toast-top-right",
+        };
+
+        // Check for session messages and display them
+        @if (Session::has('success'))
+            toastr.success("{{ Session::get('success') }}");
+        @endif
+
+        @if (Session::has('error'))
+            toastr.error("{{ Session::get('error') }}");
+        @endif
+
+        @if (Session::has('info'))
+            toastr.info("{{ Session::get('info') }}");
+        @endif
+
+        @if (Session::has('warning'))
+            toastr.warning("{{ Session::get('warning') }}");
+        @endif
     </script>
 
     <script src="{{ asset('js/sweetalert2@11.js') }}"></script>
@@ -361,7 +389,6 @@
         });
     </script>
     @stack('third_party_scripts')
-
     @stack('page_scripts')
     @stack('js')
 </body>
