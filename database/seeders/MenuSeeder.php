@@ -109,5 +109,61 @@ class MenuSeeder extends Seeder
             'created_by' => 1,
             'updated_by' => 1
         ]);
+
+        // Id = 8
+        CnfMenu::create([
+            'submodule_id' => 3,
+            'menu_name_en' => 'Add Category',
+            'menu_name_bn' => 'নতুন ক্যাটাগরী যুক্ত করুন',
+            'controller' => 'User',
+            'action' => 'View',
+            'route' => 'category.create',
+            'is_menu' => 1,
+            'is_active' => 1,
+            'created_by' => 1,
+            'updated_by' => 1
+        ]);
+
+        // Id = 9
+        CnfMenu::create([
+            'submodule_id' => 3,
+            'menu_name_en' => 'View List',
+            'menu_name_bn' => 'তালিকা দেখুন',
+            'controller' => 'User',
+            'action' => 'View',
+            'route' => 'category.view',
+            'is_menu' => 1,
+            'is_active' => 1,
+            'created_by' => 1,
+            'updated_by' => 1
+        ]);
+        
+        // Id = 10
+        CnfMenu::create([
+            'submodule_id' => 4,
+            'menu_name_en' => 'Add Product',
+            'menu_name_bn' => 'নতুন প্রোডাক্ট যুক্ত করুন',
+            'controller' => 'User',
+            'action' => 'View',
+            'route' => 'product.create',
+            'is_menu' => 1,
+            'is_active' => 1,
+            'created_by' => 1,
+            'updated_by' => 1
+        ]);
+        
+        // Id = 11
+        CnfMenu::create([
+            'submodule_id' => 4,
+            'menu_name_en' => 'View List',
+            'menu_name_bn' => 'তালিকা দেখুন',
+            'controller' => 'User',
+            'action' => 'View',
+            'route' => 'product.view',
+            'is_menu' => 1,
+            'is_active' => 1,
+            'created_by' => 1,
+            'updated_by' => 1
+        ]);
     }
 }

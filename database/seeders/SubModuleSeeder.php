@@ -33,5 +33,27 @@ class SubModuleSeeder extends Seeder
             'created_by' => 1,
             'updated_by' => 1
         ]);
+
+        // Id = 3
+        CnfSubmodule::create([
+            'submodule_name_en' => 'Category Management',
+            'submodule_name_bn' => 'ক্যাটাগরী  ব্যবস্থাপনা',
+            'module_id' => 2,
+            'is_active' => 1,
+            'is_null' => 0,
+            'created_by' => 1,
+            'updated_by' => 1
+        ]);
+
+        // Id = 4
+        CnfSubmodule::create([
+            'submodule_name_en' => 'Product Management',
+            'submodule_name_bn' => 'প্রোডাক্ট  ব্যবস্থাপনা',
+            'module_id' => 2,
+            'is_active' => 1,
+            'is_null' => 0,
+            'created_by' => 1,
+            'updated_by' => 1
+        ]);
     }
 }

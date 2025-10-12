@@ -22,24 +22,8 @@ class ModuleSeeder extends Seeder
         ]);
         // Id = 2
         CnfModule::create([
-            'module_name_en' => 'Data Entry',
-            'module_name_bn' => 'তথ্য পূরণ',
-            'is_active' => 1,
-            'created_by' => 1,
-            'updated_by' => 1
-        ]);
-        // Id = 3
-        CnfModule::create([
-            'module_name_en' => 'All Reports',
-            'module_name_bn' => 'সমস্ত রিপোর্ট',
-            'is_active' => 1,
-            'created_by' => 1,
-            'updated_by' => 1
-        ]);
-        // Id = 4
-        CnfModule::create([
-            'module_name_en' => 'Approval',
-            'module_name_bn' => 'অ্যাপ্রুভাল',
+            'module_name_en' => 'Product Setup',
+            'module_name_bn' => 'প্রোডাক্ট সেটাপ',
             'is_active' => 1,
             'created_by' => 1,
             'updated_by' => 1
