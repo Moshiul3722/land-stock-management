@@ -45,9 +45,8 @@
 
     <link rel="stylesheet" href="{{ asset('css/app.css') }}">
 
-    <!-- For Wait Loader -->
-    <link rel="stylesheet" href="{{ asset('css/dsip.css') }}" />
-    <link rel="stylesheet" href="{{ asset('css/forms.css') }}" />
+    <!-- For Wait Loader & Custom CSS -->
+    <link rel="stylesheet" href="{{ asset('css/land.css') }}" />
     <!-- Select2 -->
     {{-- <link href="{{ asset('css/select2npm.min.css') }}" rel="stylesheet" />
 

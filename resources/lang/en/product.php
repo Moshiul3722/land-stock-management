@@ -1,0 +1,13 @@
+<?php
+
+return [
+    'title' => 'Product Management',
+    'product_list' => 'List of Product',
+    'toastr_delete' => 'Product has been deleted',
+
+    'filter' => 'ফিল্টার',
+    'role' => 'রোল',
+    'role_wise_permission' => 'রোল ভিত্তিক মেন্যু পারমিশন',
+    'no_record_found' => 'আপনার ফিল্টার অনুযায়ী কোনও তথ্য পাওয়া যায়নি!',
+
+];

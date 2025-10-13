@@ -14,7 +14,7 @@
     height:     100%;
     width:      100%;
     background: rgba( 255, 255, 255, .8 )
-    url('../img/1489.gif')
+    url('../img/1485.gif')
     50% 50%
     no-repeat;
 }
@@ -60,7 +60,7 @@ p {
     }
     /* Default Active Link Styling: */
     .nav-pills .nav-link.active, .nav-pills .show > .nav-link {
-        
+
         background-color: rgb(72, 88, 72);
         opacity: 0.90;
 }
@@ -82,7 +82,7 @@ p {
         opacity: 0.90;
         color: black !important;
     }
-    
+
 
     .nav-item.has-treeview.menu-open .nav-treeview .nav-link.active {
         background-color: #1C4F9F5E;
