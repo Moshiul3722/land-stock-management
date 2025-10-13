@@ -254,4 +254,17 @@ abstract class BaseRepository
         $query = $this->allQuery($search, $skip, $limit)->with('creator');
         return $query->get($columns);
     }
+
+    /**
+     * Find records by a specific column.
+     *
+     * @param string $field
+     * @param mixed $value
+     * @param array $columns
+     * @return \Illuminate\Database\Eloquent\Collection
+     */
+    public function findBy($field, $value, $columns = ['*'])
+    {
+        return $this->model->where($field, $value)->get($columns);
+    }
 }
