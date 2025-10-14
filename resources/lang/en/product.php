@@ -9,6 +9,7 @@ return [
     'cateogory' => 'Product Category',
     'purchase_type' => 'Product Purchase Type',
     'description' => 'Description of the Product',
+    'edit_product_title' => 'Edit Product Details',
 
 
     'filter' => 'ফিল্টার',

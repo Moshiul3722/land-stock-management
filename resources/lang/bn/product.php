@@ -9,6 +9,7 @@ return [
     'cateogory' => 'প্রোডাক্ট ক্যাটেগরী',
     'purchase_type' => 'ক্রয়ের ধরণ',
     'description' => 'প্রোডাক্টের বিস্তারিত',
+    'edit_product_title' => 'প্রোডাক্টের তথ্য হালনাগাদ',
 
     'filter' => 'ফিল্টার',
     'role' => 'রোল',
