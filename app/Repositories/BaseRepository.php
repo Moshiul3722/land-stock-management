@@ -267,4 +267,14 @@ abstract class BaseRepository
     {
         return $this->model->where($field, $value)->get($columns);
     }
+
+    /**
+     * Count the number of records.
+     *
+     * @return int
+     */
+    public function count()
+    {
+        return $this->model->count();
+    }
 }

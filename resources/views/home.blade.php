@@ -21,13 +21,13 @@
                 <!-- small box -->
                 <div class="small-box bg-info">
                     <div class="inner">
-                        <h3>45</h3>
+                        <h3>{{ $userCount }}</h3>
                         <p>Users</p>
                     </div>
                     <div class="icon">
                         <i class="fas fa-users"></i>
                     </div>
-                    <a href="#" class="small-box-footer">More info <i class="fas fa-arrow-circle-right"></i></a>
+                    <a href="{{ route('users.index') }}" class="small-box-footer">More info <i class="fas fa-arrow-circle-right"></i></a>
                 </div>
             </div>
 
@@ -35,13 +35,13 @@
                 <!-- small box -->
                 <div class="small-box bg-success">
                     <div class="inner">
-                        <h3>4</h3>
+                        <h3>{{ $roleCount }}</h3>
                         <p>Roles</p>
                     </div>
                     <div class="icon">
                         <i class="fas fa-user-tie"></i>
                     </div>
-                    <a href="#" class="small-box-footer">More info <i class="fas fa-arrow-circle-right"></i></a>
+                    <a href="{{ route('cnfRoles.index') }}" class="small-box-footer">More info <i class="fas fa-arrow-circle-right"></i></a>
                 </div>
             </div>
 
@@ -49,13 +49,13 @@
                 <!-- small box -->
                 <div class="small-box bg-danger">
                     <div class="inner">
-                        <h3>43</h3>
+                        <h3>{{ $categoryCount }}</h3>
                         <p>Product Categories</p>
                     </div>
                     <div class="icon">
                         <i class="fas fa-chart-line"></i>
                     </div>
-                    <a href="#" class="small-box-footer">More info <i class="fas fa-arrow-circle-right"></i></a>
+                    <a href="{{ route('categories.index') }}" class="small-box-footer">More info <i class="fas fa-arrow-circle-right"></i></a>
                 </div>
             </div>
 
@@ -63,13 +63,13 @@
                 <!-- small box -->
                 <div class="small-box bg-primary">
                     <div class="inner">
-                        <h3>693</h3>
+                        <h3>{{ $productCount }}</h3>
                         <p>Products</p>
                     </div>
                     <div class="icon">
                         <i class="fas fa-users-cog"></i>
                     </div>
-                    <a href="#" class="small-box-footer">More info <i class="fas fa-arrow-circle-right"></i></a>
+                    <a href="{{ route('products.index') }}" class="small-box-footer">More info <i class="fas fa-arrow-circle-right"></i></a>
                 </div>
             </div>
 
@@ -192,3 +192,4 @@
         });
     </script>
 @endpush
+

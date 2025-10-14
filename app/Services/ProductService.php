@@ -135,4 +135,14 @@ class ProductService
 
         return $result;
     }
+
+    /**
+     * Get the total number of products.
+     *
+     * @return int
+     */
+    public function getTotalCount()
+    {
+        return $this->productRepository->count();
+    }
 }

@@ -49,4 +49,14 @@ class RoleService
         $userListByRole = $this->userRepository->all($searchCriteria);
         return response()->json($userListByRole);
     }
+
+    /**
+     * Get the total number of roles.
+     *
+     * @return int
+     */
+    public function getTotalCount()
+    {
+        return $this->cnfRoleRepository->count();
+    }
 }

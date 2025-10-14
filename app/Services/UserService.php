@@ -103,4 +103,14 @@ class UserService
             return response()->json(['error' => $e->getMessage()], 500);
         }
     }
+
+    /**
+     * Get the total number of users.
+     *
+     * @return int
+     */
+    public function getTotalCount()
+    {
+        return $this->userRepository->count();
+    }
 }
