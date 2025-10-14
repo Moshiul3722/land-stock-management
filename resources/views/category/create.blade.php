@@ -58,7 +58,7 @@
 
                             <div class="form-group mt-4">
                                 <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> {{ __('buttons.save') }}</button>
-                                <a href="{{ route('categories.index') }}" class="btn btn-secondary"><i class="fas fa-ban"></i> Cancel</a>
+                                <a href="{{ route('categories.index') }}" class="btn btn-secondary"><i class="fas fa-ban"></i> {{ __('buttons.cancel') }}</a>
                             </div>
                         </form>
                     </div>

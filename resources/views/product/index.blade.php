@@ -29,7 +29,7 @@
                         <div class="d-flex justify-content-between align-items-center">
                             <h3 class="card-title">{{ __('menupermission.filter') }}</h3>
                             <div>
-                                <a href="{{ route('users.create') }}" class="btn btn-sm btn-success"
+                                <a href="{{ route('products.create') }}" class="btn btn-sm btn-success"
                                     title="{{ __('buttons.create') }}">
                                     <i class="fas fa-plus"></i>
                                 </a>
@@ -92,10 +92,25 @@
                         $('#wait').hide();
                         $('#product-list-container').html(response);
                         $('#products-table').DataTable({
-                            "columnDefs": [
-                                { "width": "20%", "targets": [0, 2, 3], "className": "text-center" },
-                                { "width": "40%", "targets": 1 }
-                            ]
+                            "columnDefs": [{
+                                    "width": "20%",
+                                    "targets": [2, 3]
+                                },
+                                {
+                                    "width": "10%",
+                                    "targets": 0,
+                                    "className": "text-center"
+                                },
+                                {
+                                    "width": "30%",
+                                    "targets": 1
+                                },
+                                {
+                                    "width": "20%",
+                                    "targets": 4,
+                                    "className": "text-center"
+                                }
+                            ]
                         });
                     },
                     error: function(xhr) {
