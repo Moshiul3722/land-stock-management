@@ -36,12 +36,12 @@
                             @csrf
                             @method('PUT')
                             <div class="form-group mb-3">
-                                <label for="name">Product Name</label>
+                                <label for="name">{{ __('product.product_name') }}</label> <span style="color: red;">*</span>
                                 <input type="text" class="form-control" id="name" name="name"
                                     value="{{ old('name', $product->name) }}" required>
                             </div>
                             <div class="form-group mb-3">
-                                <label for="category_id">Category</label>
+                                <label for="category_id">{{ __('product.cateogory') }}</label> <span style="color: red;">*</span>
                                 <select class="form-control" id="category_id" name="category_id" required>
                                     <option value="">Select Category</option>
                                     @foreach ($categories as $category)
@@ -52,7 +52,7 @@
                                 </select>
                             </div>
                             <div class="form-group mb-3">
-                                <label for="purchase_type_id">Purchase Type</label>
+                                <label for="purchase_type_id">{{ __('product.purchase_type') }}</label> <span style="color: red;">*</span>
                                 <select class="form-control" id="purchase_type_id" name="purchase_type_id" required>
                                     <option value="">Select Purchase Type</option>
                                     @foreach ($purchaseTypes as $type)
@@ -63,7 +63,7 @@
                                 </select>
                             </div>
                             <div class="form-group mb-3">
-                                <label for="description">Description</label>
+                                <label for="description">{{ __('product.description') }}</label>
                                 <textarea class="form-control" id="description" name="description" rows="3">{{ old('description', $product->description) }}</textarea>
                             </div>
                             <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> {{ __('buttons.update') }}</button>
