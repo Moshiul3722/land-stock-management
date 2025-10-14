@@ -1,51 +1,73 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="container">
-    <div class="row justify-content-center">
-        <div class="col-md-8">
-            <div class="card">
-                <div class="card-header">Edit Product Category</div>
+    <section class="content-header">
+        <div class="container-fluid">
+            <div class="row mb-2">
+                <div class="col-sm-6">
+                    <h1>{{ __('category.title_edit') }}</h1>
+                </div>
+                <div class="col-sm-6">
+                    <ol class="breadcrumb float-sm-right">
+                        <li class="breadcrumb-item">
+                            <a href={{ route('home') }}>{{ __('breadcrumb.home') }}</a>
+                        </li>
+                        <li class="breadcrumb-item">
+                            <a href={{ route('categories.index') }}>{{ __('breadcrumb.list') }}</a>
+                        </li>
+                        <li class="breadcrumb-item active">
+                            <a href='#'>{{ __('breadcrumb.edit') }}</a>
+                        </li>
+                    </ol>
+                </div>
+            </div>
+        </div>
+    </section>
+    <div class="content">
+        <div class="row">
+            <div class="col-sm-12">
+                <div class="card card-primary">
+                    <div class="card-header">
+                        <h3 class="card-title">{{ __('category.title_edit') }}</h3>
+                    </div>
 
-                <div class="card-body">
-                    @if (session('error'))
-                        <div class="alert alert-danger" role="alert">
-                            {{ session('error') }}
-                        </div>
-                    @endif
+                    <div class="card-body">
+                        <form action="{{ route('categories.update', $category) }}" method="POST">
+                            @csrf
+                            @method('PUT')
+                            <div class="form-group">
+                                <label for="name">{{ __('category.table_name') }} <span
+                                        style="color: red;">*</span></label>
+                                <input type="text" class="form-control @error('name') is-invalid @enderror"
+                                    id="name" name="name" value="{{ old('name', $category->name) }}" required>
+                                @error('name')
+                                    <span class="invalid-feedback" role="alert">
+                                        <strong>{{ $message }}</strong>
+                                    </span>
+                                @enderror
+                            </div>
 
-                    <form action="{{ route('categories.update', $category) }}" method="POST">
-                        @csrf
-                        @method('PUT')
-
-                        <div class="form-group">
-                            <label for="name">Category Name</label>
-                            <input type="text" class="form-control @error('name') is-invalid @enderror" id="name" name="name" value="{{ old('name', $category->name) }}" required>
-                            @error('name')
-                                <span class="invalid-feedback" role="alert">
-                                    <strong>{{ $message }}</strong>
-                                </span>
-                            @enderror
-                        </div>
-
-                        <div class="form-group mt-3">
-                            <label for="description">Description</label>
-                            <textarea class="form-control @error('description') is-invalid @enderror" id="description" name="description" rows="3">{{ old('description', $category->description) }}</textarea>
-                             @error('description')
-                                <span class="invalid-feedback" role="alert">
-                                    <strong>{{ $message }}</strong>
-                                </span>
-                            @enderror
-                        </div>
-
-                        <div class="form-group mt-4">
-                            <button type="submit" class="btn btn-primary">Update</button>
-                            <a href="{{ route('categories.index') }}" class="btn btn-secondary">Cancel</a>
-                        </div>
-                    </form>
+                            <div class="form-group mt-3">
+                                <label for="description">{{ __('category.description') }}</label>
+                                <textarea class="form-control @error('description') is-invalid @enderror" id="description" name="description"
+                                    rows="3">{{ old('description', $category->description) }}</textarea>
+                                @error('description')
+                                    <span class="invalid-feedback" role="alert">
+                                        <strong>{{ $message }}</strong>
+                                    </span>
+                                @enderror
+                            </div>
+                            <div class="form-group mt-4">
+                                <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i>
+                                    {{ __('buttons.update') }}</button>
+                                <a href="{{ route('categories.index') }}" class="btn btn-secondary"><i
+                                        class="fas fa-ban"></i>
+                                    {{ __('buttons.cancel') }}</a>
+                            </div>
+                        </form>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
-</div>
 @endsection

@@ -8,6 +8,8 @@ return [
     'table_name' => 'Name of the Product Category',
     'action' => 'Action',
     'title_create' => 'Create New Product Category',
+    'title_edit' => 'Edit Product Category Information',
+
     'description' => 'Description of the Product Category',
 
 ];
