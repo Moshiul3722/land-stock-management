@@ -10,4 +10,6 @@ return [
     'back_to_list' => 'Previous Step',
     'load' => 'Load',
     'add_more_row' => 'Add More Row',
+    'cancel' => 'Cancel',
+
 ];
