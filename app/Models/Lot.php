@@ -26,7 +26,9 @@ class Lot extends Model
     protected $fillable = [
         'lot_number',
         'purchase_date',
+        'entry_date',
         'status',
+        'remarks',
     ];
 
     /**

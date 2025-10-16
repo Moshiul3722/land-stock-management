@@ -15,6 +15,8 @@ return new class extends Migration
             $table->id();
             $table->string('lot_number')->unique();
             $table->date('purchase_date')->nullable();
+            $table->date('entry_date')->nullable();
+            $table->string('remarks')->nullable();
             $table->string('status')->default('pending');
             $table->timestamps();
             $table->softDeletes();
