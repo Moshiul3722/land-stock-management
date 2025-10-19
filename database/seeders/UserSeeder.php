@@ -71,5 +71,41 @@ class UserSeeder extends Seeder
             'updated_by' => '1',
             'password' => Hash::make('admin'),
         ]);
+
+        // Admin User
+        User::updateOrCreate(['email' => 'admin@land.com'], [
+            'name' => 'Admin',
+            'name_bn' => 'অ্যাডমিন',
+            'role_id' => 2,
+            'password' => Hash::make('password'),
+            'created_by' => 1
+        ]);
+
+        // Store Admin User
+        User::updateOrCreate(['email' => 'storeadmin@land.com'], [
+            'name' => 'Store Admin',
+            'name_bn' => 'স্টোর অ্যাডমিন',
+            'role_id' => 3,
+            'password' => Hash::make('password'),
+            'created_by' => 1
+        ]);
+
+        // Store Keeper User
+        User::updateOrCreate(['email' => 'storekeeper@land.com'], [
+            'name' => 'Store Keeper',
+            'name_bn' => 'স্টোর কিপার',
+            'role_id' => 4,
+            'password' => Hash::make('password'),
+            'created_by' => 1
+        ]);
+
+        // Inventory User
+        User::updateOrCreate(['email' => 'user@land.com'], [
+            'name' => 'User',
+            'name_bn' => 'ব্যবহারকারী',
+            'role_id' => 5,
+            'password' => Hash::make('password'),
+            'created_by' => 1
+        ]);
     }
 }

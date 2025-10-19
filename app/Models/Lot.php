@@ -31,15 +31,15 @@ class Lot extends Model
         'remarks',
     ];
 
-    /**
+/**
      * The attributes that should be cast.
      *
      * @var array<string, string>
      */
     protected $casts = [
         'purchase_date' => 'date',
+        'entry_date' => 'date',
     ];
-
     /**
      * Get the details for the lot.
      */

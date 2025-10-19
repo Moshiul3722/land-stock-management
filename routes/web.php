@@ -90,6 +90,7 @@ Route::middleware(['auth', 'permission'])->group(function () {
     // Product & Category Management Routes
     Route::resource('categories', CategoryController::class);
     Route::resource('products', ProductController::class);
+    Route::get('/products/by-category/{categoryId}', [App\Http\Controllers\ProductController::class, 'getByCategory'])->name('products.by_category');
 
     // Lot Resources
     Route::resource('lots', LotController::class);

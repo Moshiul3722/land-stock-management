@@ -3,7 +3,18 @@
 @section('content')
     <section class="content-header">
         <div class="container-fluid">
-            {{-- Breadcrumbs --}}
+            <div class="row mb-2">
+                <div class="col-sm-6">
+                    <h1>{{ __('lot.edit_title') }}</h1>
+                </div>
+                <div class="col-sm-6">
+                    <ol class="breadcrumb float-sm-right">
+                        <li class="breadcrumb-item"><a href={{ route('home') }}>{{ __('breadcrumb.home') }}</a></li>
+                        <li class="breadcrumb-item"><a href={{ route('lots.index') }}>{{ __('breadcrumb.list') }}</a></li>
+                        <li class="breadcrumb-item active">{{ __('breadcrumb.edit') }}</li>
+                    </ol>
+                </div>
+            </div>
         </div>
     </section>
     <div class="content">
@@ -44,6 +55,7 @@
                             <table class="table table-bordered">
                                 <thead>
                                     <tr>
+                                        <th>{{ __('lot.table_category') }}</th>
                                         <th>{{ __('lot.table_product') }}</th>
                                         <th>{{ __('lot.table_quantity') }}</th>
                                         <th>{{ __('lot.table_unit_price') }}</th>
@@ -55,14 +67,21 @@
                                     @foreach ($lot->lotDetails as $index => $detail)
                                         <tr id="R{{ $index }}">
                                             <td>
-                                                <select class="form-control"
-                                                    name="details[{{ $index }}][product_id]" required>
-                                                    <option value="">Select Product</option>
-                                                    @foreach ($products as $product)
-                                                        <option value="{{ $product->id }}"
-                                                            {{ $detail->product_id == $product->id ? 'selected' : '' }}>
-                                                            {{ $product->name }}</option>
+                                                <select class="form-control category-select" required>
+                                                    <option value="">Select Category</option>
+                                                    @foreach ($categories as $category)
+                                                        <option value="{{ $category->id }}"
+                                                            {{ optional($detail->product)->category_id == $category->id ? 'selected' : '' }}>
+                                                            {{ $category->name }}
+                                                        </option>
                                                     @endforeach
+                                                </select>
+                                            </td>
+                                            <td>
+                                                <select class="form-control product-select"
+                                                    name="details[{{ $index }}][product_id]"
+                                                    data-selected-product-id="{{ $detail->product_id }}" required disabled>
+                                                    <option value="">Select Category First</option>
                                                 </select>
                                             </td>
                                             <td>
@@ -100,34 +119,83 @@
 @push('js')
     <script>
         $(document).ready(function() {
-            let rowIdx = {{ $lot->lotDetails->count() }}; // Start index from existing rows
+            let rowIdx = {{ $lot->lotDetails->count() }};
+
+            // ADD NEW ROW
             $('#add-row').on('click', function() {
                 $('#lot-details-body').append(`
-             <tr id="R${++rowIdx}">
+            <tr id="R${++rowIdx}">
                 <td>
-                    <select class="form-control" name="details[${rowIdx}][product_id]" required>
-                        <option value="">Select Product</option>
-                        @foreach ($products as $product)
-                            <option value="{{ $product->id }}">{{ $product->name }}</option>
+                    <select class="form-control category-select" required>
+                        <option value="">Select Category</option>
+                        @foreach ($categories as $category)
+                            <option value="{{ $category->id }}">{{ $category->name }}</option>
                         @endforeach
                     </select>
                 </td>
                 <td>
-                    <input type="number" class="form-control" name="details[${rowIdx}][quantity]" min="1" required>
+                    <select class="form-control product-select" name="details[${rowIdx}][product_id]" required disabled>
+                        <option value="">Select Product</option>
+                    </select>
                 </td>
-                <td>
-                    <input type="number" class="form-control" name="details[${rowIdx}][unit_price]" step="0.01" min="0">
-                </td>
-                <td class="text-center">
-                    <button type="button" class="btn btn-danger btn-sm remove-row"><i class="fa fa-trash"></i></button>
-                </td>
+                <td><input type="number" class="form-control" name="details[${rowIdx}][quantity]" min="1" required></td>
+                <td><input type="number" class="form-control" name="details[${rowIdx}][unit_price]" step="0.01" min="0"></td>
+                <td class="text-center"><button type="button" class="btn btn-danger btn-sm remove-row"><i class="fa fa-trash"></i></button></td>
             </tr>
         `);
             });
 
-            // Remove row
+            // REMOVE ROW
             $('#lot-details-body').on('click', '.remove-row', function() {
                 $(this).closest('tr').remove();
+            });
+
+            // Function to load products for a given category select element
+            function loadProductsForCategory(categorySelectElement) {
+                const categoryId = $(categorySelectElement).val();
+                const productSelect = $(categorySelectElement).closest('tr').find('.product-select');
+                const selectedProductId = productSelect.data('selected-product-id') || '';
+                const urlTemplate = "{{ route('products.by_category', ['categoryId' => ':id']) }}";
+
+                productSelect.prop('disabled', true).html('<option value="">Loading...</option>');
+
+                if (!categoryId) {
+                    productSelect.html('<option value="">Select Category First</option>');
+                    return;
+                }
+
+                const finalUrl = urlTemplate.replace(':id', categoryId);
+
+                $.ajax({
+                    url: finalUrl,
+                    type: 'GET',
+                    success: function(products) {
+                        let options = '<option value="">Select Product</option>';
+                        products.forEach(function(product) {
+                            const isSelected = product.id == selectedProductId ? 'selected' :
+                            '';
+                            options +=
+                                `<option value="${product.id}" ${isSelected}>${product.name}</option>`;
+                        });
+                        productSelect.html(options).prop('disabled', false);
+                    },
+                    error: function() {
+                        toastr.error('Failed to load products.');
+                        productSelect.html('<option value="">Error</option>');
+                    }
+                });
+            }
+
+            // LOAD PRODUCTS ON CATEGORY CHANGE (for any row)
+            $('#lot-details-body').on('change', '.category-select', function() {
+                // Clear the data attribute so it doesn't pre-select an old product if the category is changed again
+                $(this).closest('tr').find('.product-select').data('selected-product-id', '');
+                loadProductsForCategory(this);
+            });
+
+            // INITIAL LOAD FOR EXISTING ROWS
+            $('.category-select').each(function() {
+                loadProductsForCategory(this);
             });
         });
     </script>

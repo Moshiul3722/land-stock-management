@@ -30,6 +30,8 @@ class DatabaseSeeder extends Seeder
             YearSeeder::class,
             PurchaseTypeSeeder::class,
             CategorySeeder::class,
+            ApprovalEntitySeeder::class,
+            ApprovalProcessSeeder::class,
         ]);
     }
 }

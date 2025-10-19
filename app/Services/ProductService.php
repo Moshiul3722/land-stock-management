@@ -145,4 +145,15 @@ class ProductService
     {
         return $this->productRepository->count();
     }
+
+    /**
+     * Get all products belonging to a specific category.
+     *
+     * @param int $categoryId
+     * @return \Illuminate\Database\Eloquent\Collection
+     */
+    public function findByCategoryId($categoryId)
+    {
+        return $this->productRepository->findBy('category_id', $categoryId);
+    }
 }

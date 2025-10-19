@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Lot;
 use App\Services\LotService;
+use App\Services\ProductCategoryService;
 use App\Services\ProductService;
 use Exception;
 use Illuminate\Http\Request;
@@ -13,11 +14,13 @@ class LotController extends Controller
 {
     protected $lotService;
     protected $productService;
+    protected $productCategoryService;
 
-    public function __construct(LotService $lotService, ProductService $productService)
+    public function __construct(LotService $lotService, ProductService $productService, ProductCategoryService $productCategoryService)
     {
         $this->lotService = $lotService;
         $this->productService = $productService;
+        $this->productCategoryService = $productCategoryService;
     }
 
     /**
@@ -34,8 +37,8 @@ class LotController extends Controller
      */
     public function create()
     {
-        $products = $this->productService->fetchAll();
-        return view('lot.create', compact('products'));
+        $categories = $this->productCategoryService->fetchAll();
+        return view('lot.create', compact('categories'));
     }
 
     /**
@@ -67,9 +70,9 @@ class LotController extends Controller
      */
     public function edit(Lot $lot)
     {
-        $products = $this->productService->fetchAll();
-        $lot->load('lotDetails.product');
-        return view('lot.edit', compact('lot', 'products'));
+        $categories = $this->productCategoryService->fetchAll();
+        $lot->load('lotDetails.product.category');
+        return view('lot.edit', compact('lot', 'categories'));
     }
 
     /**

@@ -120,4 +120,20 @@ class ProductController extends Controller
             return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
         }
     }
+
+    /**
+     * Get products by category for AJAX requests.
+     *
+     * @param \Illuminate\Http\Request $request
+     * @param int $categoryId
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function getByCategory(Request $request, $categoryId)
+    {
+        if ($request->ajax()) {
+            $products = $this->productService->findByCategoryId($categoryId);
+            return response()->json($products);
+        }
+        abort(403, 'This action is unauthorized.');
+    }
 }
