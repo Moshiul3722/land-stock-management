@@ -55,4 +55,12 @@ class Requisition extends Model
     {
         return $this->hasMany(RequisitionItem::class, 'requisition_id');
     }
+
+    /**
+     * Get all of the requisition's approval details.
+     */
+    public function approvalDetails(): HasMany
+    {
+        return $this->hasMany(ApprovalDetail::class, 'requistion_id');
+    }
 }
