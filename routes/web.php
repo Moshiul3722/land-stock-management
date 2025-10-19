@@ -6,6 +6,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\HomeController;
+use App\Http\Controllers\LotController;
 use App\Http\Controllers\ProductController;
 
 /*
@@ -89,4 +90,7 @@ Route::middleware(['auth', 'permission'])->group(function () {
     // Product & Category Management Routes
     Route::resource('categories', CategoryController::class);
     Route::resource('products', ProductController::class);
+
+    // Lot Resources
+    Route::resource('lots', LotController::class);
 });
