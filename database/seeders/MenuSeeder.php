@@ -137,7 +137,7 @@ class MenuSeeder extends Seeder
             'created_by' => 1,
             'updated_by' => 1
         ]);
-        
+
         // Id = 10
         CnfMenu::create([
             'submodule_id' => 4,
@@ -151,7 +151,7 @@ class MenuSeeder extends Seeder
             'created_by' => 1,
             'updated_by' => 1
         ]);
-        
+
         // Id = 11
         CnfMenu::create([
             'submodule_id' => 4,
@@ -160,6 +160,34 @@ class MenuSeeder extends Seeder
             'controller' => 'User',
             'action' => 'View',
             'route' => 'products.index',
+            'is_menu' => 1,
+            'is_active' => 1,
+            'created_by' => 1,
+            'updated_by' => 1
+        ]);
+
+        // Id = 12
+        CnfMenu::create([
+            'submodule_id' => 5,
+            'menu_name_en' => 'View Lot',
+            'menu_name_bn' => 'তালিকা দেখুন',
+            'controller' => 'Lot',
+            'action' => 'View',
+            'route' => 'lots.index',
+            'is_menu' => 1,
+            'is_active' => 1,
+            'created_by' => 1,
+            'updated_by' => 1
+        ]);
+
+        // Id = 13
+        CnfMenu::create([
+            'submodule_id' => 5,
+            'menu_name_en' => 'Create Lot',
+            'menu_name_bn' => 'তৈরি দেখুন',
+            'controller' => 'Lot',
+            'action' => 'View',
+            'route' => 'lots.create',
             'is_menu' => 1,
             'is_active' => 1,
             'created_by' => 1,

@@ -28,6 +28,8 @@ class DatabaseSeeder extends Seeder
             MenuSeeder::class,
             PermissionSeeder::class,
             YearSeeder::class,
+            PurchaseTypeSeeder::class,
+            CategorySeeder::class,
         ]);
     }
 }
