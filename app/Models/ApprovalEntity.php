@@ -4,6 +4,8 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class ApprovalEntity extends Model
@@ -26,4 +28,9 @@ class ApprovalEntity extends Model
         'name',
         'description',
     ];
+
+    public function processes(): HasMany
+    {
+        return $this->hasMany(ApprovalProcess::class, 'approval_entity_id')->orderBy('serial');
+    }
 }

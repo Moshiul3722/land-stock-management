@@ -47,4 +47,12 @@ class Lot extends Model
     {
         return $this->hasMany(LotDetail::class, 'lot_id');
     }
+
+    /**
+     * Get all of the lot's approval details.
+     */
+    public function approvalDetails(): HasMany
+    {
+        return $this->hasMany(ApprovalDetail::class, 'lot_id');
+    }
 }

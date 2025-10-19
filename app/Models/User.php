@@ -4,6 +4,8 @@ namespace App\Models;
 
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
@@ -56,8 +58,9 @@ class User extends Authenticatable
     {
         return $this->hasOne(CnfRole::class, 'created_by');
     }
-    public function district(): \Illuminate\Database\Eloquent\Relations\BelongsTo
+
+    public function approvalDetails(): HasMany
     {
-        return $this->belongsTo(\App\Models\Districts::class, 'district_id');
+        return $this->hasMany(ApprovalDetail::class, 'to_user_id');
     }
 }
