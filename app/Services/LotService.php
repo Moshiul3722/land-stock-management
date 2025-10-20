@@ -56,7 +56,7 @@ class LotService
      * @return \App\Models\Lot
      * @throws \Exception
      */
-    public function store(array $data)
+    public function store(array $data, string $action = 'submit')
     {
         $validator = Validator::make($data, [
             'lot_number' => 'required|string|max:255|unique:lots',
@@ -72,29 +72,35 @@ class LotService
             throw new InvalidArgumentException($validator->errors()->first());
         }
 
-        return DB::transaction(function () use ($data) {
+        return DB::transaction(function () use ($data, $action) {
             try {
-                // 1. Create the main Lot record
+                $status = ($action === 'save_draft') ? 'draft' : 'pending';
+
+                // 1. Create the main Lot record with the correct status
                 $lot = $this->lotRepository->create([
                     'lot_number' => $data['lot_number'],
                     'entry_date' => $data['entry_date'],
                     'remarks' => $data['remarks'],
-                    'status' => 'pending', // Initial status
+                    'status' => $status,
                 ]);
 
                 // 2. Create the LotDetail records
-                foreach ($data['details'] as $item) {
-                    $item['lot_id'] = $lot->id;
-                    $this->lotDetailRepository->create($item);
+                if (!empty($data['details'])) {
+                    foreach ($data['details'] as $item) {
+                        $item['lot_id'] = $lot->id;
+                        $this->lotDetailRepository->create($item);
+                    }
                 }
 
-                // 3. Submit the newly created lot to the approval workflow
-                $this->approvalService->submitForApproval($lot, 'Lot Approval');
+                // 3. ONLY submit to the workflow if the action is 'submit'
+                if ($action === 'submit') {
+                    $this->approvalService->submitForApproval($lot, 'Lot Approval');
+                }
 
                 return $lot;
             } catch (Exception $e) {
                 Log::error($e->getMessage());
-                throw new InvalidArgumentException('Unable to create lot: ' . $e->getMessage());
+                throw new InvalidArgumentException('Unable to process lot: ' . $e->getMessage());
             }
         });
     }
@@ -104,10 +110,11 @@ class LotService
      *
      * @param array $data
      * @param int $id
+     * @param string $action ('save_draft' or 'submit')
      * @return \App\Models\Lot
      * @throws \Exception
      */
-    public function update(array $data, $id)
+    public function update(array $data, int $id, string $action = 'submit')
     {
         $validator = Validator::make($data, [
             'lot_number' => 'required|string|max:255|unique:lots,lot_number,' . $id,
@@ -123,28 +130,42 @@ class LotService
             throw new InvalidArgumentException($validator->errors()->first());
         }
 
-        return DB::transaction(function () use ($data, $id) {
+        $lot = $this->lotRepository->find($id);
+
+        if ($lot->status !== 'draft') {
+            throw new InvalidArgumentException('This lot cannot be edited as it is already in the approval process.');
+        }
+
+        return DB::transaction(function () use ($data, $lot, $action) {
             try {
-                // Update the main Lot record
-                $lot = $this->lotRepository->update([
+                $status = ($action === 'save_draft') ? 'draft' : 'pending';
+
+                // 1. Update the main Lot record
+                $updatedLot = $this->lotRepository->update([
                     'lot_number' => $data['lot_number'],
                     'entry_date' => $data['entry_date'],
                     'remarks' => $data['remarks'],
-                ], $id);
+                    'status' => $status,
+                ], $lot->id);
 
-                // Delete old details to replace them
-                $lot->lotDetails()->delete();
+                // 2. Delete old details to replace them
+                $updatedLot->lotDetails()->delete();
 
-                // Create the new LotDetail records
+                // 3. Create the new LotDetail records
                 foreach ($data['details'] as $item) {
-                    $item['lot_id'] = $lot->id;
+                    $item['lot_id'] = $updatedLot->id;
                     $this->lotDetailRepository->create($item);
                 }
 
-                return $lot;
+                // 4. ONLY submit to the workflow if the action is 'submit'
+                if ($action === 'submit') {
+                    $this->approvalService->submitForApproval($updatedLot, 'Lot Approval');
+                }
+
+                return $updatedLot;
             } catch (Exception $e) {
                 Log::error($e->getMessage());
-                throw new InvalidArgumentException('Unable to update lot');
+                throw new InvalidArgumentException('Unable to update lot: ' . $e->getMessage());
             }
         });
     }

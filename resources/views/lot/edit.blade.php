@@ -104,10 +104,15 @@
                             </table>
                         </div>
                         <div class="card-footer">
-                            <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i>
-                                {{ __('buttons.update') }}</button>
-                            <a href="{{ route('lots.index') }}" class="btn btn-secondary"><i class="fas fa-ban"></i>
-                                {{ __('buttons.cancel') }}</a>
+                            <button type="submit" name="action" value="save_draft" class="btn btn-secondary">
+                                <i class="fas fa-save"></i> {{ __('buttons.save_draft') }}
+                            </button>
+                            <button type="submit" name="action" value="submit" class="btn btn-primary">
+                                <i class="fas fa-paper-plane"></i> {{ __('buttons.submit_for_approval') }}
+                            </button>
+                            <a href="{{ route('lots.index') }}" class="btn btn-default float-end">
+                                <i class="fas fa-ban"></i> {{ __('buttons.cancel') }}
+                            </a>
                         </div>
                     </form>
                 </div>
@@ -173,7 +178,7 @@
                         let options = '<option value="">Select Product</option>';
                         products.forEach(function(product) {
                             const isSelected = product.id == selectedProductId ? 'selected' :
-                            '';
+                                '';
                             options +=
                                 `<option value="${product.id}" ${isSelected}>${product.name}</option>`;
                         });

@@ -47,8 +47,16 @@ class LotController extends Controller
     public function store(Request $request)
     {
         try {
-            $this->lotService->store($request->all());
-            return redirect()->route('lots.index')->with('success', 'Lot created and submitted for approval successfully.');
+            // Determine which button was clicked from its 'name' attribute
+            $action = $request->input('action', 'submit');
+
+            $this->lotService->store($request->all(), $action);
+
+            $message = ($action === 'save_draft')
+                ? 'Lot saved as draft successfully.'
+                : 'Lot created and submitted for approval successfully.';
+
+            return redirect()->route('lots.index')->with('success', $message);
         } catch (Exception $e) {
             Log::error($e->getMessage());
             return redirect()->back()->withInput()->with('error', $e->getMessage());
@@ -70,6 +78,10 @@ class LotController extends Controller
      */
     public function edit(Lot $lot)
     {
+        // Prevent editing if not in draft status
+        if ($lot->status !== 'draft') {
+            return redirect()->route('lots.show', $lot)->with('error', 'This lot cannot be edited.');
+        }
         $categories = $this->productCategoryService->fetchAll();
         $lot->load('lotDetails.product.category');
         return view('lot.edit', compact('lot', 'categories'));
