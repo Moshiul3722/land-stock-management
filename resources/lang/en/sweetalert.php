@@ -56,4 +56,8 @@ return [
     'toastr_error' => 'An error occured',
 
 
+    'submit_for_approval_title' => 'Submit for Approval?',
+
+    'submit_button' => 'Yes, Submit!',
+
 ];

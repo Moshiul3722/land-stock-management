@@ -93,8 +93,17 @@ class LotController extends Controller
     public function update(Request $request, Lot $lot)
     {
         try {
-            $this->lotService->update($request->all(), $lot->id);
-            return redirect()->route('lots.index')->with('success', 'Lot updated successfully.');
+            // Read the 'action' from the request input
+            $action = $request->input('action', 'submit');
+
+            // Pass the action to the service
+            $this->lotService->update($request->all(), $lot->id, $action);
+
+            $message = ($action === 'save_draft')
+                ? 'Lot draft updated successfully.'
+                : 'Lot submitted for approval successfully.';
+
+            return redirect()->route('lots.index')->with('success', $message);
         } catch (Exception $e) {
             Log::error($e->getMessage());
             return redirect()->back()->withInput()->with('error', $e->getMessage());

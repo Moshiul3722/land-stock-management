@@ -24,7 +24,8 @@
                     <div class="card-header">
                         <h3 class="card-title">{{ __('lot.edit_title') }}</h3>
                     </div>
-                    <form action="{{ route('lots.update', $lot) }}" method="POST">
+                    {{-- Add an ID to the form --}}
+                    <form id="lot-form" action="{{ route('lots.update', $lot) }}" method="POST">
                         @csrf
                         @method('PUT')
                         <div class="card-body">
@@ -104,10 +105,13 @@
                             </table>
                         </div>
                         <div class="card-footer">
-                            <button type="submit" name="action" value="save_draft" class="btn btn-secondary">
+                            {{-- Add IDs to the buttons --}}
+                            <button type="submit" id="save-draft-btn" name="action" value="save_draft"
+                                class="btn btn-secondary">
                                 <i class="fas fa-save"></i> {{ __('buttons.save_draft') }}
                             </button>
-                            <button type="submit" name="action" value="submit" class="btn btn-primary">
+                            <button type="submit" id="submit-approval-btn" name="action" value="submit"
+                                class="btn btn-primary">
                                 <i class="fas fa-paper-plane"></i> {{ __('buttons.submit_for_approval') }}
                             </button>
                             <a href="{{ route('lots.index') }}" class="btn btn-default float-end">
@@ -129,30 +133,77 @@
             // ADD NEW ROW
             $('#add-row').on('click', function() {
                 $('#lot-details-body').append(`
-            <tr id="R${++rowIdx}">
-                <td>
-                    <select class="form-control category-select" required>
-                        <option value="">Select Category</option>
-                        @foreach ($categories as $category)
-                            <option value="{{ $category->id }}">{{ $category->name }}</option>
-                        @endforeach
-                    </select>
-                </td>
-                <td>
-                    <select class="form-control product-select" name="details[${rowIdx}][product_id]" required disabled>
-                        <option value="">Select Product</option>
-                    </select>
-                </td>
-                <td><input type="number" class="form-control" name="details[${rowIdx}][quantity]" min="1" required></td>
-                <td><input type="number" class="form-control" name="details[${rowIdx}][unit_price]" step="0.01" min="0"></td>
-                <td class="text-center"><button type="button" class="btn btn-danger btn-sm remove-row"><i class="fa fa-trash"></i></button></td>
-            </tr>
-        `);
+                    <tr id="R${++rowIdx}">
+                        <td>
+                            <select class="form-control category-select" required>
+                                <option value="">Select Category</option>
+                                @foreach ($categories as $category)
+                                    <option value="{{ $category->id }}">{{ $category->name }}</option>
+                                @endforeach
+                            </select>
+                        </td>
+                        <td>
+                            <select class="form-control product-select" name="details[${rowIdx}][product_id]" required disabled>
+                                <option value="">Select Product</option>
+                            </select>
+                        </td>
+                        <td><input type="number" class="form-control" name="details[${rowIdx}][quantity]" min="1" required></td>
+                        <td><input type="number" class="form-control" name="details[${rowIdx}][unit_price]" step="0.01" min="0"></td>
+                        <td class="text-center"><button type="button" class="btn btn-danger btn-sm remove-row"><i class="fa fa-trash"></i></button></td>
+                    </tr>
+                `);
             });
 
-            // REMOVE ROW
-            $('#lot-details-body').on('click', '.remove-row', function() {
-                $(this).closest('tr').remove();
+            // Confirmation for removing a row
+            $('#lot-details-body').on('click', '.remove-row', function(e) {
+                e.preventDefault();
+                var rowToRemove = $(this).closest('tr');
+                Swal.fire({
+                    title: "{{ __('sweetalert.confirmation') }}",
+                    text: "{{ __('sweetalert.delete_revert_text') }}",
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#d33',
+                    cancelButtonColor: '#3085d6',
+                    cancelButtonText: "{{ __('sweetalert.cancel') }}",
+                    confirmButtonText: "{{ __('sweetalert.delete_notice') }}"
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        rowToRemove.remove();
+                    }
+                });
+            });
+
+            // HANDLE SAVE DRAFT SUBMISSION
+            $('#save-draft-btn').on('click', function(e) {
+                e.preventDefault();
+                var form = $('#lot-form');
+                // Append the correct action and submit
+                form.append('<input type="hidden" name="action" value="save_draft" />');
+                form.submit();
+            });
+
+            // CONFIRMATION FOR SUBMITTING FOR APPROVAL
+            $('#submit-approval-btn').on('click', function(e) {
+                e.preventDefault(); // Prevent the form from submitting immediately
+                var form = $('#lot-form');
+
+                Swal.fire({
+                    title: "{{ __('sweetalert.submit_for_approval_title') }}",
+                    text: "{{ __('product.lot_sa_submit_notice_text') }}",
+                    icon: 'info',
+                    showCancelButton: true,
+                    confirmButtonColor: '#3085d6',
+                    cancelButtonColor: '#d33',
+                    cancelButtonText: "{{ __('sweetalert.cancel') }}",
+                    confirmButtonText: "{{ __('sweetalert.submit_button') }}"
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        // Append the correct action and submit the form
+                        form.append('<input type="hidden" name="action" value="submit" />');
+                        form.submit();
+                    }
+                });
             });
 
             // Function to load products for a given category select element

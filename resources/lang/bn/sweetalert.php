@@ -57,5 +57,8 @@ return [
 
     'toastr_error' => 'কোনও সমস্যা হয়েছে',
 
+    'submit_for_approval_title' => 'অনুমোদনের জন্য জমা দিচ্ছেন?',
+    'submit_button' => 'হ্যা, জমা দিন!',
+
 
 ];

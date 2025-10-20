@@ -96,9 +96,55 @@
         `);
             });
 
-            // Remove row
-            $('#lot-details-body').on('click', '.remove-row', function() {
-                $(this).closest('tr').remove();
+            // Confirmation for removing a row
+            $('#lot-details-body').on('click', '.remove-row', function(e) {
+                e.preventDefault();
+                var rowToRemove = $(this).closest('tr');
+                Swal.fire({
+                    title: "{{ __('sweetalert.confirmation') }}",
+                    text: "{{ __('sweetalert.delete_revert_text') }}",
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#d33',
+                    cancelButtonColor: '#3085d6',
+                    cancelButtonText: "{{ __('sweetalert.cancel') }}",
+                    confirmButtonText: "{{ __('sweetalert.delete_notice') }}"
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        rowToRemove.remove();
+                    }
+                });
+            });
+
+            // Confirmation for submitting for approval
+            $('#submit-approval-btn').on('click', function(e) {
+                e.preventDefault(); // Prevent the form from submitting immediately
+                var form = $('#lot-form');
+
+                Swal.fire({
+                    title: 'Submit for Approval?',
+                    text: "Once submitted, this lot cannot be edited. Are you sure you want to proceed?",
+                    icon: 'info',
+                    showCancelButton: true,
+                    confirmButtonColor: '#3085d6',
+                    cancelButtonColor: '#d33',
+                    confirmButtonText: 'Yes, Submit it!'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        // Manually set the action value and submit the form
+                        form.append('<input type="hidden" name="action" value="submit" />');
+                        form.submit();
+                    }
+                });
+            });
+
+            // For the "Save as Draft" button, we can just let it submit normally without confirmation
+            // Or add a simpler confirmation if you wish.
+            $('#save-draft-btn').on('click', function(e) {
+                e.preventDefault();
+                var form = $('#lot-form');
+                form.append('<input type="hidden" name="action" value="save_draft" />');
+                form.submit();
             });
 
             // Load products on category change
