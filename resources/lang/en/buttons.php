@@ -11,5 +11,6 @@ return [
     'load' => 'Load',
     'add_more_row' => 'Add More Row',
     'cancel' => 'Cancel',
-
+    'save_draft' => 'Draft Save',
+    'submit_for_approval' => 'Submit for Approval',
 ];
