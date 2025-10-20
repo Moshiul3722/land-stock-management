@@ -184,7 +184,7 @@ class MenuSeeder extends Seeder
         CnfMenu::create([
             'submodule_id' => 5,
             'menu_name_en' => 'Create Lot',
-            'menu_name_bn' => 'তৈরি দেখুন',
+            'menu_name_bn' => 'তৈরি করুন',
             'controller' => 'Lot',
             'action' => 'View',
             'route' => 'lots.create',
