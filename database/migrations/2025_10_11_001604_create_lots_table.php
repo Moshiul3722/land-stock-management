@@ -17,7 +17,7 @@ return new class extends Migration
             $table->date('purchase_date')->nullable();
             $table->date('entry_date')->nullable();
             $table->string('remarks')->nullable();
-            $table->string('status')->default('pending');
+            $table->string('status')->default('draft');
             $table->timestamps();
             $table->softDeletes();
             $table->unsignedBigInteger('created_by')->nullable();
