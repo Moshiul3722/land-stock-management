@@ -26,10 +26,19 @@ class LotController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        $lots = $this->lotService->fetchAll();
-        return view('lot.index', compact('lots'));
+        // Define the possible statuses for the filter dropdown
+        $statuses = ['draft', 'pending', 'approved', 'rejected'];
+
+        // Handle AJAX requests for filtering
+        if ($request->ajax()) {
+            $statusFilter = $request->input('status');
+            $lots = $this->lotService->fetchAll($statusFilter);
+            return view('lot._lot_list', compact('lots')); // Return the partial view
+        }
+        // For initial page load, pass statuses to the view
+        return view('lot.index', compact('statuses'));
     }
 
     /**

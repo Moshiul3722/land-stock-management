@@ -17,7 +17,7 @@
             </div>
         </div>
     </section>
-    <div class="content">
+    {{-- <div class="content">
         <div class="row">
             <div class="col-sm-12">
                 <div class="card card-primary">
@@ -48,9 +48,8 @@
                                         <td>{{ $lot->lot_number }}</td>
                                         <td>{{ $lot->entry_date->format('d-M-Y') }}</td>
                                         <td>
-                                            {{-- Conditional Badge Classes --}}
                                             @php
-                                                $badgeClass = 'bg-info'; // Default
+                                                $badgeClass = 'bg-info';
                                                 if ($lot->status === 'draft') {
                                                     $badgeClass = 'bg-secondary';
                                                 } elseif ($lot->status === 'pending') {
@@ -66,7 +65,6 @@
                                         <td>
                                             <a href="{{ route('lots.show', $lot) }}" class="btn btn-info btn-sm"
                                                 title="View"><i class="fa fa-eye"></i></a>
-                                            {{-- Conditionally show edit/delete only for drafts --}}
                                             @if ($lot->status === 'draft')
                                                 <a href="{{ route('lots.edit', $lot) }}" class="btn btn-warning btn-sm"
                                                     title="Edit"><i class="fa fa-edit"></i></a>
@@ -80,6 +78,53 @@
                                 @endforeach
                             </tbody>
                         </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div> --}}
+    <div class="content">
+        <div class="row">
+            <div class="col-sm-12">
+                <div class="card card-primary">
+                    <div class="card-header">
+                        <h3 class="card-title">{{ __('menupermission.filter') }}</h3>
+                        {{-- Add button moved to the list card below --}}
+                    </div>
+                    <div class="card-body">
+                        <div class="form-group row">
+                            <label for="status_filter" class="col-sm-2 col-form-label">{{ __('lot.table_status') }}</label>
+                            <div class="col-sm-6">
+                                <select class="form-control" id="status_filter" name="status_filter">
+                                    <option value="">All</option>
+                                    @foreach ($statuses as $status)
+                                        <option value="{{ $status }}">{{ ucfirst($status) }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+                            <div class="col-sm-4">
+                                <button class="btn btn-primary" type="button" id="filter-btn">
+                                    <i class="fas fa-search"></i> {{ __('buttons.search') }}
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-12">
+                <div class="card card-primary">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h3 class="card-title">{{ __('lot.list_title') }}</h3>
+                        <a href="{{ route('lots.create') }}" class="btn btn-sm btn-success"
+                            title="{{ __('buttons.create') }}">
+                            <i class="fas fa-plus"></i>
+                        </a>
+                    </div>
+                    <div class="card-body" id="lot-list-container">
+                        {{-- Partial view will be loaded here --}}
                     </div>
                 </div>
             </div>

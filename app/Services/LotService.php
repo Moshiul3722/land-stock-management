@@ -28,14 +28,21 @@ class LotService
     }
 
     /**
-     * Get all lots.
+     * Get lots, optionally filtered by status, ordered by latest first.
      *
+     * @param string|null $statusFilter
      * @return \Illuminate\Database\Eloquent\Collection
      */
-    public function fetchAll()
+    public function fetchAll(?string $statusFilter = null)
     {
-        // Eager load details and products for efficiency in the list view
-        return $this->lotRepository->allQuery()->with('lotDetails.product')->orderBy('created_at', 'desc')->get();
+        $query = $this->lotRepository->allQuery()
+            ->with('lotDetails.product')
+            ->orderBy('created_at', 'desc');
+        // Apply the status filter if provided
+        if ($statusFilter) {
+            $query->where('status', $statusFilter);
+        }
+        return $query->get();
     }
 
     /**
