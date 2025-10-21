@@ -17,4 +17,7 @@ return [
     'table_product' => 'Product',
     'table_quantity' => 'Quantity',
     'table_unit_price' => 'Price',
+
+    'toastr_delete' => 'Lot has been deleted',
+
 ];

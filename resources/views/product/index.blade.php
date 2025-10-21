@@ -166,7 +166,7 @@
                             error: function(xhr) {
                                 $('#wait').hide();
                                 toastr.error(
-                                    "{{ __('sweetalert.toastr_delete') }}"
+                                    "{{ __('sweetalert.toastr_error') }}"
                                 );
                             }
                         });

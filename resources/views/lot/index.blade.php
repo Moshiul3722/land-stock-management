@@ -47,16 +47,34 @@
                                         <td>{{ $loop->iteration }}</td>
                                         <td>{{ $lot->lot_number }}</td>
                                         <td>{{ $lot->entry_date->format('d-M-Y') }}</td>
-                                        <td><span class="badge bg-info">{{ ucfirst($lot->status) }}</span></td>
+                                        <td>
+                                            {{-- Conditional Badge Classes --}}
+                                            @php
+                                                $badgeClass = 'bg-info'; // Default
+                                                if ($lot->status === 'draft') {
+                                                    $badgeClass = 'bg-secondary';
+                                                } elseif ($lot->status === 'pending') {
+                                                    $badgeClass = 'bg-warning text-dark';
+                                                } elseif ($lot->status === 'approved') {
+                                                    $badgeClass = 'bg-success';
+                                                } elseif ($lot->status === 'rejected') {
+                                                    $badgeClass = 'bg-danger';
+                                                }
+                                            @endphp
+                                            <span class="badge {{ $badgeClass }}">{{ ucfirst($lot->status) }}</span>
+                                        </td>
                                         <td>
                                             <a href="{{ route('lots.show', $lot) }}" class="btn btn-info btn-sm"
                                                 title="View"><i class="fa fa-eye"></i></a>
-                                            <a href="{{ route('lots.edit', $lot) }}" class="btn btn-warning btn-sm"
-                                                title="Edit"><i class="fa fa-edit"></i></a>
-                                            <button type="button" class="btn btn-danger btn-sm delete-btn"
-                                                data-id="{{ $lot->id }}" title="Delete">
-                                                <i class="fa fa-trash"></i>
-                                            </button>
+                                            {{-- Conditionally show edit/delete only for drafts --}}
+                                            @if ($lot->status === 'draft')
+                                                <a href="{{ route('lots.edit', $lot) }}" class="btn btn-warning btn-sm"
+                                                    title="Edit"><i class="fa fa-edit"></i></a>
+                                                <button type="button" class="btn btn-danger btn-sm delete-btn"
+                                                    data-id="{{ $lot->id }}" title="Delete">
+                                                    <i class="fa fa-trash"></i>
+                                                </button>
+                                            @endif
                                         </td>
                                     </tr>
                                 @endforeach
@@ -80,11 +98,14 @@
                 const finalUrl = deleteUrlTemplate.replace(':id', lotId);
 
                 Swal.fire({
-                    title: 'Are you sure?',
-                    text: "You won't be able to revert this!",
+                    title: "{{ __('sweetalert.confirmation') }}",
+                    text: "{{ __('sweetalert.delete_revert_text') }}",
                     icon: 'warning',
                     showCancelButton: true,
-                    confirmButtonText: 'Yes, delete it!'
+                    confirmButtonColor: '#3085d6',
+                    cancelButtonColor: '#d33',
+                    cancelButtonText: "{{ __('sweetalert.cancel') }}",
+                    confirmButtonText: "{{ __('sweetalert.delete_notice') }}"
                 }).then((result) => {
                     if (result.isConfirmed) {
                         $.ajax({
@@ -94,13 +115,20 @@
                                 _method: 'DELETE',
                                 _token: '{{ csrf_token() }}'
                             },
+                            beforeSend: function() {
+                                $('#wait').show();
+                            },
                             success: function(response) {
-                                toastr.success(response.message);
-                                location.reload(); // Reload page to reflect changes
+                                $('#wait').hide();
+                                toastr.success(
+                                    "{{ __('lot.toastr_delete') }}");
+                                location.reload();
                             },
                             error: function(xhr) {
+                                $('#wait').hide();
                                 toastr.error(
-                                    'An error occurred while deleting the lot.');
+                                    "{{ __('sweetalert.toastr_error') }}"
+                                );
                             }
                         });
                     }

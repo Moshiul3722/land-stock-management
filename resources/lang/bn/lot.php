@@ -17,4 +17,5 @@ return [
     'table_product' => 'প্রোডাক্ট',
     'table_quantity' => 'পরিমাণ',
     'table_unit_price' => 'মূল্য',
+    'toastr_delete' => 'লট মুছে ফেলা হয়েছে',
 ];
