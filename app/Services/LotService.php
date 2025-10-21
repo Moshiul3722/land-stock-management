@@ -35,7 +35,7 @@ class LotService
     public function fetchAll()
     {
         // Eager load details and products for efficiency in the list view
-        return $this->lotRepository->allQuery()->with('lotDetails.product')->get();
+        return $this->lotRepository->allQuery()->with('lotDetails.product')->orderBy('created_at', 'desc')->get();
     }
 
     /**
