@@ -1,90 +1,67 @@
-@extends('publiclayout')
+@extends('layouts.public')
 
 @section('content')
-    <style>
-        #map {
-            margin: 0 auto;
-            width: 960px;
-            height: 450px;
-        }
-        .custom-map-control-button {
-            background-color: #fff;
-            border: 0;
-            border-radius: 2px;
-            box-shadow: 0 1px 4px rgba(0,0,0,0.3);
-            margin: 10px;
-            padding: 0 0.5em;
-            text-align: center;
-            font-size: 16px;
-            font-family: Roboto, Arial, sans-serif;
-            cursor: pointer;
-        }
-    </style>
-    <section id="about" class="about section">
+    {{-- Hero Section --}}
+    <div class="hero-section text-center">
         <div class="container">
-            <img src="{{ asset('theme/assets/img/Master_3.gif') }}" style="width:100%;">
+            {{-- Content remains the same --}}
+            <h1 class="display-4 fw-bold">Ministry of Land</h1>
+            <h2 class="display-6">Inventory Management System</h2>
+            <p class="lead col-md-8 mx-auto mt-3">
+                Efficiently manage products, track stock, and streamline approvals for Ministry supplies.
+            </p>
+            @guest
+                <a href="{{ route('login') }}" class="btn btn-primary btn-lg mt-3">
+                    <i class="fas fa-sign-in-alt me-2"></i> Authorized Login
+                </a>
+            @else
+                 <a href="{{ route('home') }}" class="btn btn-primary btn-lg mt-3">
+                    <i class="fas fa-tachometer-alt me-2"></i> Go to Dashboard
+                </a>
+            @endguest
         </div>
-    </section>
+    </div>
 
-    <!-- /Why Us Section -->
-    <section id="why-us" class="section why-us light-background" data-builder="section">
-
-        <div class="container-fluid">
-
-            <div class="row gy-4">
-                <div id="map">
-
+    {{-- Features Section --}}
+    <div class="features-section"> {{-- Added class --}}
+        <div class="container">
+            <div class="row text-center g-4">
+                 {{-- Content remains the same --}}
+                <div class="col-md-4">
+                    <div class="feature-icon mb-3"><i class="fas fa-boxes-stacked"></i></div>
+                    <h4 class="fw-semibold mb-0">Organized Inventory</h4>
+                    <p class="text-muted">Easily manage product categories and details.</p>
+                </div>
+                <div class="col-md-4">
+                    <div class="feature-icon mb-3"><i class="fas fa-clipboard-check"></i></div>
+                    <h4 class="fw-semibold mb-0">Streamlined Approvals</h4>
+                    <p class="text-muted">Clear, defined workflows for stock entry (Lots).</p>
+                </div>
+                <div class="col-md-4">
+                    <div class="feature-icon mb-3"><i class="fas fa-chart-line"></i></div>
+                    <h4 class="fw-semibold mb-0">Real-time Tracking</h4>
+                    <p class="text-muted">Know your stock levels and approval statuses instantly.</p>
                 </div>
             </div>
-
         </div>
+    </div>
 
-    </section>
+    {{-- Benefits Section --}}
+    <div class="benefits-section"> {{-- Added class --}}
+        <div class="container">
+            <div class="row align-items-center">
+                 {{-- Content remains the same --}}
+                 <div class="col-md-7">
+                    <h3 class="fw-bold">Efficiency for the Ministry</h3>
+                    <p class="text-muted">
+                        This system, developed by UltraCore Creatives Ltd., aims to reduce manual work, minimize errors,
+                        and provide clear accountability in managing the Ministry's valuable resources. Access requires authorized credentials.
+                    </p>
+                </div>
+                <div class="col-md-5 text-center">
+                     <img src="{{ asset('img/inventory-management.jpg') }}" alt="Inventory Management Illustration" class="img-fluid" style="max-height: 250px;">
+                </div>
+            </div>
+        </div>
+    </div>
 @endsection
-@push('js')
-    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDz4YvJI8S9OrmSTayUxcZJSwOuoOPY0SY" async defer></script>
-    <script>
-        // Encode the Laravel collection to JSON and assign it to a JavaScript variable
-        var locations = @json($locations);
-
-        function initMap() {
-            var map = new google.maps.Map(document.getElementById('map'), {
-                zoom: 7,
-                center: new google.maps.LatLng(24.0964352, 90.2050421),
-                mapTypeId: google.maps.MapTypeId.ROADMAP
-            });
-
-            var infowindow = new google.maps.InfoWindow();
-
-            var marker, i;
-            var customIcon = '/img/final.gif';
-
-            for (i = 0; i < locations.length; i++) {
-                marker = new google.maps.Marker({
-                    position: new google.maps.LatLng(locations[i][1], locations[i][2]),
-                    map: map,
-                    icon: customIcon
-                });
-
-                google.maps.event.addListener(marker, 'click', (function(marker, i) {
-                    return function() {
-                        infowindow.setContent(locations[i][0]);
-                        infowindow.open(map, marker);
-                    }
-                })(marker, i));
-            }
-            // Create the custom button
-            var customButton = document.createElement('div');
-            customButton.innerHTML = 'View Full Map';
-            customButton.classList.add('custom-map-control-button');
-
-            // Add the button to the map
-            map.controls[google.maps.ControlPosition.TOP_CENTER].push(customButton);
-
-            // Add click event listener to the button
-            customButton.addEventListener('click', function() {
-                window.location.href = "{{ route('public.map') }}";
-            });
-        }
-    </script>
-@endpush

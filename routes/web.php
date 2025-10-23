@@ -23,7 +23,14 @@ use App\Http\Controllers\ProductController;
 
 Auth::routes();
 
-Route::get('/', [LoginController::class, 'showLoginForm'])->name('login');
+// Route::get('/', [LoginController::class, 'showLoginForm'])->name('login');
+Route::get('/', function () {
+    // If users are logged in, redirect to dashboard, otherwise show landing page
+    if (Auth::check()) {
+        return redirect()->route('home');
+    }
+    return view('welcome');
+})->name('landing');
 Route::get('/home', [HomeController::class, 'index'])->name('home');
 
 
