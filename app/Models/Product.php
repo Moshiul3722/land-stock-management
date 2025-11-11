@@ -27,6 +27,9 @@ class Product extends Model
         'name',
         'description',
         'category_id',
+        'created_by',
+        'updated_by',
+        'deleted_by',
     ];
 
     /**
