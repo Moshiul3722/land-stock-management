@@ -4,9 +4,19 @@
 <head>
     <meta charset="UTF-8">
     <title>{{ config('app.name') }}</title>
+    
     <meta content='width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no' name='viewport'>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
+    <!-- App Meta Tags (Private) -->
+    <meta name="author" content="UltraCore Creatives Ltd. for Ministry of Land">
+    <meta name="description" content="Inventory Management System for Ministry of Land.">
+    <meta name="robots" content="noindex, nofollow">
+    <meta name="theme-color" content="#343a40">
+    {{-- Favicon --}}
+    <link rel="icon" href="{{ asset('favicon.ico') }}" type="image/x-icon" />
 
     <!-- Font Awesome -->
     <link rel="stylesheet" href="{{ asset('css/all.min.css') }}" />
