@@ -9,6 +9,8 @@ return [
     'table_action' => 'Action',
     'list_title' => 'Lot List',
     'title' => 'Lot Management',
+    'purchase_type' => 'Product Purchase Type',
+    'add_title' => 'Create Lot',
 
     'lot_number' => 'Lot Number',
     'entry_date' => 'Entry Date',

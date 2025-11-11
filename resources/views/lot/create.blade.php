@@ -29,6 +29,19 @@
                                         value="{{ old('entry_date', date('Y-m-d')) }}" required>
                                 </div>
                                 <div class="form-group col-md-12">
+                                    <label for="purchase_type">{{ __('lot.purchase_type') }} <span
+                                            style="color: red;">*</span></label>
+                                    <select class="form-control js-example-basic-single custom-select" id="purchase_type"
+                                        name="purchase_type" required>
+                                        <option value="">Select Purchase Type</option>
+                                        @foreach ($purchaseTypes as $purchaseType)
+                                            <option value="{{ $purchaseType->id }}"
+                                                {{ old('purchase_type') == $purchaseType->id ? 'selected' : '' }}>
+                                                {{ $purchaseType->name }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                                <div class="form-group col-md-12">
                                     <label for="remarks">{{ __('lot.remarks') }}</label>
                                     <textarea class="form-control" id="remarks" name="remarks" rows="2">{{ old('remarks') }}</textarea>
                                 </div>
@@ -42,8 +55,7 @@
                                         <th>{{ __('lot.table_category') }}</th>
                                         <th>{{ __('lot.table_product') }}</th>
                                         <th>{{ __('lot.table_quantity') }}</th>
-                                        <th>{{ __('lot.table_unit_price') }}</th>
-                                        <th><button type="button" id="add-row" class="btn btn-success btn-sm"><i
+                                        <th class="text-center"><button type="button" id="add-row" class="btn btn-success btn-sm"><i
                                                     class="fa fa-plus"></i></button></th>
                                     </tr>
                                 </thead>
@@ -90,7 +102,6 @@
                     </select>
                 </td>
                 <td><input type="number" class="form-control" name="details[${rowIdx}][quantity]" min="1" required></td>
-                <td><input type="number" class="form-control" name="details[${rowIdx}][unit_price]" step="0.01" min="0"></td>
                 <td class="text-center"><button type="button" class="btn btn-danger btn-sm remove-row"><i class="fa fa-trash"></i></button></td>
             </tr>
         `);

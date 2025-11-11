@@ -9,6 +9,8 @@ return [
     'table_action' => 'অ্যাকশন',
     'list_title' => 'লটের তালিকা',
     'title' => 'লটের ব্যবস্থাপনা',
+    'purchase_type' => 'পণ্য ক্রয়ের ধরণ',
+    'add_title' => 'লট তৈরি করুন',
 
     'lot_number' => 'লট নম্বর',
     'entry_date' => 'এন্ট্রি তারিখ',
