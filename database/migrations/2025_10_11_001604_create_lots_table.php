@@ -16,6 +16,10 @@ return new class extends Migration
             $table->string('lot_number')->unique();
             $table->date('purchase_date')->nullable();
             $table->date('entry_date')->nullable();
+            $table->foreignId('product_purchase_type_id')
+                ->nullable()
+                ->constrained('product_purchase_types')
+                ->onDelete('set null');
             $table->string('remarks')->nullable();
             $table->string('status')->default('draft');
             $table->timestamps();

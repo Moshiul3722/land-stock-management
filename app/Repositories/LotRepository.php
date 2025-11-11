@@ -11,9 +11,10 @@ class LotRepository extends BaseRepository
         'id',
         'lot_number',
         'purchase_date',
+        'product_purchase_type_id',
         'entry_date',
         'status',
-        'remarks',
+        'remarks'
     ];
 
     public function getFieldsSearchable(): array

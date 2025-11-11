@@ -6,6 +6,7 @@ use App\Repositories\LotRepository;
 use App\Repositories\LotDetailRepository;
 use App\Services\ApprovalService;
 use Exception;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
@@ -67,6 +68,7 @@ class LotService
     {
         $validator = Validator::make($data, [
             'lot_number' => 'required|string|max:255|unique:lots',
+            'product_purchase_type_id' => 'required|exists:product_purchase_types,id',
             'entry_date' => 'required|date',
             'remarks' => 'nullable|string',
             'details' => 'required|array|min:1',
@@ -86,6 +88,7 @@ class LotService
                 // 1. Create the main Lot record with the correct status
                 $lot = $this->lotRepository->create([
                     'lot_number' => $data['lot_number'],
+                    'product_purchase_type_id' => $data['product_purchase_type_id'],
                     'entry_date' => $data['entry_date'],
                     'remarks' => $data['remarks'],
                     'status' => $status,

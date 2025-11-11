@@ -66,7 +66,6 @@ class LotController extends Controller
         try {
             // Determine which button was clicked from its 'name' attribute
             $action = $request->input('action', 'submit');
-
             $this->lotService->store($request->all(), $action);
 
             $message = ($action === 'save_draft')

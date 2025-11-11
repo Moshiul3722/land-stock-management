@@ -29,14 +29,14 @@
                                         value="{{ old('entry_date', date('Y-m-d')) }}" required>
                                 </div>
                                 <div class="form-group col-md-12">
-                                    <label for="purchase_type">{{ __('lot.purchase_type') }} <span
+                                    <label for="product_purchase_type_id">{{ __('lot.purchase_type') }} <span
                                             style="color: red;">*</span></label>
-                                    <select class="form-control js-example-basic-single custom-select" id="purchase_type"
-                                        name="purchase_type" required>
+                                    <select class="form-control js-example-basic-single custom-select" id="product_purchase_type_id"
+                                        name="product_purchase_type_id" required>
                                         <option value="">Select Purchase Type</option>
                                         @foreach ($purchaseTypes as $purchaseType)
                                             <option value="{{ $purchaseType->id }}"
-                                                {{ old('purchase_type') == $purchaseType->id ? 'selected' : '' }}>
+                                                {{ old('product_purchase_type_id') == $purchaseType->id ? 'selected' : '' }}>
                                                 {{ $purchaseType->name }}</option>
                                         @endforeach
                                     </select>
