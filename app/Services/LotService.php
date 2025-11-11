@@ -128,6 +128,7 @@ class LotService
     {
         $validator = Validator::make($data, [
             'lot_number' => 'required|string|max:255|unique:lots,lot_number,' . $id,
+            'product_purchase_type_id' => 'required|exists:product_purchase_types,id',
             'entry_date' => 'required|date',
             'remarks' => 'nullable|string',
             'details' => 'required|array|min:1',
@@ -153,6 +154,7 @@ class LotService
                 // 1. Update the main Lot record
                 $updatedLot = $this->lotRepository->update([
                     'lot_number' => $data['lot_number'],
+                    'product_purchase_type_id' => $data['product_purchase_type_id'],
                     'entry_date' => $data['entry_date'],
                     'remarks' => $data['remarks'],
                     'status' => $status,
