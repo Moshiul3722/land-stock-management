@@ -94,7 +94,7 @@
                         $('#products-table').DataTable({
                             "columnDefs": [{
                                     "width": "20%",
-                                    "targets": [2, 3]
+                                    "targets": [1, 2]
                                 },
                                 {
                                     "width": "10%",
@@ -107,7 +107,7 @@
                                 },
                                 {
                                     "width": "20%",
-                                    "targets": 4,
+                                    "targets": 3,
                                     "className": "text-center"
                                 }
                             ]

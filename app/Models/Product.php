@@ -27,7 +27,6 @@ class Product extends Model
         'name',
         'description',
         'category_id',
-        'purchase_type_id',
     ];
 
     /**
@@ -36,13 +35,5 @@ class Product extends Model
     public function category(): BelongsTo
     {
         return $this->belongsTo(ProductCategory::class, 'category_id');
-    }
-
-    /**
-     * Get the purchase type for the product.
-     */
-    public function purchaseType(): BelongsTo
-    {
-        return $this->belongsTo(ProductPurchaseType::class, 'purchase_type_id');
     }
 }

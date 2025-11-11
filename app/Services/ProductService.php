@@ -59,8 +59,7 @@ class ProductService
         $validator = Validator::make($data, [
             'name' => 'required|string|max:255|unique:products',
             'description' => 'nullable|string',
-            'category_id' => 'required|exists:product_categories,id',
-            'purchase_type_id' => 'required|exists:product_purchase_types,id',
+            'category_id' => 'required|exists:product_categories,id'
         ]);
 
         if ($validator->fails()) {
@@ -93,8 +92,7 @@ class ProductService
         $validator = Validator::make($data, [
             'name' => 'required|string|max:255|unique:products,name,' . $id,
             'description' => 'nullable|string',
-            'category_id' => 'required|exists:product_categories,id',
-            'purchase_type_id' => 'required|exists:product_purchase_types,id',
+            'category_id' => 'required|exists:product_categories,id'
         ]);
 
         if ($validator->fails()) {

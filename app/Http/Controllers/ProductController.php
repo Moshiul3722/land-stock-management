@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use App\Models\Product;
 use App\Services\ProductCategoryService;
-use App\Services\ProductPurchaseTypeService;
 use App\Services\ProductService;
 use Exception;
 use Illuminate\Http\Request;
@@ -14,16 +13,13 @@ class ProductController extends Controller
 {
     protected $productService;
     protected $productCategoryService;
-    protected $productPurchaseTypeService;
 
     public function __construct(
         ProductService $productService,
-        ProductCategoryService $productCategoryService,
-        ProductPurchaseTypeService $productPurchaseTypeService
+        ProductCategoryService $productCategoryService
     ) {
         $this->productService = $productService;
         $this->productCategoryService = $productCategoryService;
-        $this->productPurchaseTypeService = $productPurchaseTypeService;
     }
 
     /**
@@ -35,9 +31,9 @@ class ProductController extends Controller
         if ($request->ajax()) {
             $categoryId = $request->input('category_id');
             if ($categoryId) {
-                $products = Product::with(['category', 'purchaseType'])->where('category_id', $categoryId)->get();
+                $products = Product::with(['category'])->where('category_id', $categoryId)->get();
             } else {
-                $products = Product::with(['category', 'purchaseType'])->get();
+                $products = Product::with(['category'])->get();
             }
             return view('product._product_list', compact('products'));
         }
@@ -53,8 +49,7 @@ class ProductController extends Controller
     public function create()
     {
         $categories = $this->productCategoryService->fetchAll();
-        $purchaseTypes = $this->productPurchaseTypeService->fetchAll();
-        return view('product.create', compact('categories', 'purchaseTypes'));
+        return view('product.create', compact('categories'));
     }
 
     /**
@@ -77,7 +72,7 @@ class ProductController extends Controller
     public function show(Product $product)
     {
         // Load relationships for the single product
-        $product->load(['category', 'purchaseType']);
+        $product->load(['category']);
         return view('product.show', compact('product'));
     }
 
@@ -87,8 +82,7 @@ class ProductController extends Controller
     public function edit(Product $product)
     {
         $categories = $this->productCategoryService->fetchAll();
-        $purchaseTypes = $this->productPurchaseTypeService->fetchAll();
-        return view('product.edit', compact('product', 'categories', 'purchaseTypes'));
+        return view('product.edit', compact('product', 'categories'));
     }
 
     /**

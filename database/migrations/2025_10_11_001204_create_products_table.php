@@ -16,7 +16,6 @@ return new class extends Migration
             $table->string('name');
             $table->text('description')->nullable();
             $table->foreignId('category_id')->nullable()->constrained('product_categories')->onDelete('set null');
-            $table->foreignId('purchase_type_id')->nullable()->constrained('product_purchase_types')->onDelete('set null');
             $table->timestamps();
             $table->softDeletes();
             $table->unsignedBigInteger('created_by')->nullable();

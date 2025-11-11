@@ -40,10 +40,6 @@
                             <p>{{ $product->category->name ?? 'N/A' }}</p>
                         </div>
                         <div class="mb-3">
-                            <strong>{{ __('product.purchase_type') }}:</strong>
-                            <p>{{ $product->purchaseType->name ?? 'N/A' }}</p>
-                        </div>
-                        <div class="mb-3">
                             <strong>{{ __('product.description') }}:</strong>
                             <p>{{ $product->description ?? 'N/A' }}</p>
                         </div>

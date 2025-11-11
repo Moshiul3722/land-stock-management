@@ -13,7 +13,6 @@
                 <th>SL</th>
                 <th>Name</th>
                 <th>Category</th>
-                <th>Purchase Type</th>
                 <th>Action</th>
             </tr>
         </thead>
@@ -23,7 +22,6 @@
                     <td>{{ $loop->iteration }}</td>
                     <td>{{ $product->name }}</td>
                     <td>{{ $product->category->name ?? 'N/A' }}</td>
-                    <td>{{ $product->purchaseType->name ?? 'N/A' }}</td>
                     <td>
                         <a href="{{ route('products.show', $product) }}" class="btn btn-info btn-sm" title="View"><i
                                 class="fa fa-eye"></i></a>

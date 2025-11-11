@@ -54,19 +54,6 @@
                                 </select>
                             </div>
                             <div class="form-group mb-3">
-                                <label for="purchase_type_id">{{ __('product.purchase_type') }}</label> <span
-                                            style="color: red;">*</span>
-                                <select class="form-control js-example-basic-single custom-select" id="purchase_type_id" name="purchase_type_id" required>
-                                    <option value="">Select Purchase Type</option>
-                                    @foreach ($purchaseTypes as $type)
-                                        <option value="{{ $type->id }}"
-                                            {{ old('purchase_type_id') == $type->id ? 'selected' : '' }}>
-                                            {{ $type->name }}</option>
-                                    @endforeach
-                                </select>
-                            </div>
-
-                            <div class="form-group mb-3">
                                 <label for="description">{{ __('product.description') }}</label>
                                 <textarea class="form-control" id="description" name="description" rows="3">{{ old('description') }}</textarea>
                             </div>

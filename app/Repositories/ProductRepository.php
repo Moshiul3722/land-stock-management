@@ -12,7 +12,6 @@ class ProductRepository extends BaseRepository
         'name',
         'description',
         'category_id',
-        'purchase_type_id',
     ];
 
     public function getFieldsSearchable(): array
