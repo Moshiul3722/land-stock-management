@@ -37,7 +37,7 @@ class LotService
     public function fetchAll(?string $statusFilter = null)
     {
         $query = $this->lotRepository->allQuery()
-            ->with('lotDetails.product')
+            ->with(['lotDetails.product', 'purchaseType'])
             ->orderBy('created_at', 'desc');
         // Apply the status filter if provided
         if ($statusFilter) {
@@ -54,7 +54,7 @@ class LotService
      */
     public function findById($id)
     {
-        return $this->lotRepository->find($id)->load('lotDetails.product');
+        return $this->lotRepository->find($id)->load(['lotDetails.product', 'purchaseType']);
     }
 
     /**

@@ -35,9 +35,9 @@ class LotController extends Controller
      */
     public function index(Request $request)
     {
+
         // Define the possible statuses for the filter dropdown
         $statuses = ['draft', 'pending', 'approved', 'rejected'];
-
         // Handle AJAX requests for filtering
         if ($request->ajax()) {
             $statusFilter = $request->input('status');
@@ -99,8 +99,9 @@ class LotController extends Controller
             return redirect()->route('lots.show', $lot)->with('error', 'This lot cannot be edited.');
         }
         $categories = $this->productCategoryService->fetchAll();
+        $purchaseTypes = $this->productPurchaseTypeService->fetchAll();
         $lot->load('lotDetails.product.category');
-        return view('lot.edit', compact('lot', 'categories'));
+        return view('lot.edit', compact('lot', 'categories', 'purchaseTypes'));
     }
 
     /**

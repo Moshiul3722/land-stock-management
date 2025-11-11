@@ -11,6 +11,7 @@ return [
     'title' => 'Lot Management',
     'purchase_type' => 'Product Purchase Type',
     'add_title' => 'Create Lot',
+    'edit_title' => 'Edit Lot',
 
     'lot_number' => 'Lot Number',
     'entry_date' => 'Entry Date',

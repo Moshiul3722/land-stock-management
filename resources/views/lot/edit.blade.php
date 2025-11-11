@@ -43,6 +43,23 @@
                                     <input type="date" class="form-control" id="entry_date" name="entry_date"
                                         value="{{ old('entry_date', $lot->entry_date->format('Y-m-d')) }}" required>
                                 </div>
+
+                                {{-- ADDED THIS MISSING BLOCK --}}
+                                <div class="form-group col-md-12">
+                                    <label for="product_purchase_type_id">{{ __('lot.purchase_type') }} <span
+                                            style="color: red;">*</span></label>
+                                    <select class="form-control js-example-basic-single custom-select" id="product_purchase_type_id"
+                                        name="product_purchase_type_id" required>
+                                        <option value="">Select Purchase Type</option>
+                                        @foreach ($purchaseTypes as $type)
+                                            <option value="{{ $type->id }}"
+                                                {{ old('product_purchase_type_id', $lot->product_purchase_type_id) == $type->id ? 'selected' : '' }}>
+                                                {{ $type->name }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                                {{-- END OF MISSING BLOCK --}}
+
                                 <div class="form-group col-md-12">
                                     <label for="remarks">{{ __('lot.remarks') }}</label>
                                     <textarea class="form-control" id="remarks" name="remarks" rows="2">{{ old('remarks', $lot->remarks) }}</textarea>
@@ -59,8 +76,7 @@
                                         <th>{{ __('lot.table_category') }}</th>
                                         <th>{{ __('lot.table_product') }}</th>
                                         <th>{{ __('lot.table_quantity') }}</th>
-                                        <th>{{ __('lot.table_unit_price') }}</th>
-                                        <th><button type="button" id="add-row" class="btn btn-success btn-sm"><i
+                                        <th class="text-center"><button type="button" id="add-row" class="btn btn-success btn-sm"><i
                                                     class="fa fa-plus"></i></button></th>
                                     </tr>
                                 </thead>
@@ -89,11 +105,6 @@
                                                 <input type="number" class="form-control"
                                                     name="details[{{ $index }}][quantity]" min="1"
                                                     value="{{ $detail->quantity }}" required>
-                                            </td>
-                                            <td>
-                                                <input type="number" class="form-control"
-                                                    name="details[{{ $index }}][unit_price]" step="0.01"
-                                                    min="0" value="{{ $detail->unit_price }}">
                                             </td>
                                             <td class="text-center">
                                                 <button type="button" class="btn btn-danger btn-sm remove-row"><i
@@ -148,7 +159,6 @@
                             </select>
                         </td>
                         <td><input type="number" class="form-control" name="details[${rowIdx}][quantity]" min="1" required></td>
-                        <td><input type="number" class="form-control" name="details[${rowIdx}][unit_price]" step="0.01" min="0"></td>
                         <td class="text-center"><button type="button" class="btn btn-danger btn-sm remove-row"><i class="fa fa-trash"></i></button></td>
                     </tr>
                 `);

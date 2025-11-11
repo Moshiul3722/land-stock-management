@@ -17,72 +17,6 @@
             </div>
         </div>
     </section>
-    {{-- <div class="content">
-        <div class="row">
-            <div class="col-sm-12">
-                <div class="card card-primary">
-                    <div class="card-header">
-                        <div class="d-flex justify-content-between align-items-center">
-                            <h3 class="card-title">{{ __('lot.list_title') }}</h3>
-                            <a href="{{ route('lots.create') }}" class="btn btn-sm btn-success"
-                                title="{{ __('buttons.create') }}">
-                                <i class="fas fa-plus"></i>
-                            </a>
-                        </div>
-                    </div>
-                    <div class="card-body">
-                        <table id="lots-table" class="table table-bordered table-striped">
-                            <thead>
-                                <tr>
-                                    <th>{{ __('lot.table_sl') }}</th>
-                                    <th>{{ __('lot.table_lot_number') }}</th>
-                                    <th>{{ __('lot.table_entry_date') }}</th>
-                                    <th>{{ __('lot.table_status') }}</th>
-                                    <th>{{ __('lot.table_action') }}</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @foreach ($lots as $lot)
-                                    <tr>
-                                        <td>{{ $loop->iteration }}</td>
-                                        <td>{{ $lot->lot_number }}</td>
-                                        <td>{{ $lot->entry_date->format('d-M-Y') }}</td>
-                                        <td>
-                                            @php
-                                                $badgeClass = 'bg-info';
-                                                if ($lot->status === 'draft') {
-                                                    $badgeClass = 'bg-secondary';
-                                                } elseif ($lot->status === 'pending') {
-                                                    $badgeClass = 'bg-warning text-dark';
-                                                } elseif ($lot->status === 'approved') {
-                                                    $badgeClass = 'bg-success';
-                                                } elseif ($lot->status === 'rejected') {
-                                                    $badgeClass = 'bg-danger';
-                                                }
-                                            @endphp
-                                            <span class="badge {{ $badgeClass }}">{{ ucfirst($lot->status) }}</span>
-                                        </td>
-                                        <td>
-                                            <a href="{{ route('lots.show', $lot) }}" class="btn btn-info btn-sm"
-                                                title="View"><i class="fa fa-eye"></i></a>
-                                            @if ($lot->status === 'draft')
-                                                <a href="{{ route('lots.edit', $lot) }}" class="btn btn-warning btn-sm"
-                                                    title="Edit"><i class="fa fa-edit"></i></a>
-                                                <button type="button" class="btn btn-danger btn-sm delete-btn"
-                                                    data-id="{{ $lot->id }}" title="Delete">
-                                                    <i class="fa fa-trash"></i>
-                                                </button>
-                                            @endif
-                                        </td>
-                                    </tr>
-                                @endforeach
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div> --}}
     <div class="content">
         <div class="row">
             <div class="col-sm-12">
@@ -116,13 +50,16 @@
         <div class="row">
             <div class="col-md-12">
                 <div class="card card-primary">
-                    <div class="card-header d-flex justify-content-between align-items-center">
-                        <h3 class="card-title">{{ __('lot.list_title') }}</h3>
-                        <a href="{{ route('lots.create') }}" class="btn btn-sm btn-success"
-                            title="{{ __('buttons.create') }}">
-                            <i class="fas fa-plus"></i>
-                        </a>
+                    <div class="card-header">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <h3 class="card-title">{{ __('lot.list_title') }}</h3>
+                            <a href="{{ route('lots.create') }}" class="btn btn-sm btn-success ms-auto"
+                                title="{{ __('buttons.create') }}">
+                                <i class="fas fa-plus"></i>
+                            </a>
+                        </div>
                     </div>
+
                     <div class="card-body" id="lot-list-container">
                         {{-- Partial view will be loaded here --}}
                     </div>
@@ -135,9 +72,77 @@
 @push('js')
     <script>
         $(document).ready(function() {
-            $('#lots-table').DataTable();
+            // Function to load lots
+            function loadLots(status = '') {
+                const url = "{{ route('lots.index') }}";
+                $.ajax({
+                    url: url,
+                    type: 'GET',
+                    data: {
+                        status: status
+                    },
+                    beforeSend: function() {
+                        $('#wait').show();
+                    },
+                    success: function(response) {
+                        $('#wait').hide();
+                        $('#lot-list-container').html(response);
+                        $('#lots-table').DataTable({
+                            "columnDefs": [
+                                // SL
+                                {
+                                    "width": "10%",
+                                    "targets": 0,
+                                    "className": "text-center"
+                                },
+                                // Lot Number
+                                {
+                                    "width": "20%",
+                                    "targets": 1
+                                },
+                                // Purchase Type
+                                {
+                                    "width": "20%",
+                                    "targets": 2
+                                },
+                                // Entry Date
+                                {
+                                    "width": "20%",
+                                    "targets": 3
+                                },
+                                // Status
+                                {
+                                    "width": "10%",
+                                    "targets": 4,
+                                    "className": "text-center"
+                                },
+                                // Action
+                                {
+                                    "width": "20%",
+                                    "targets": 5,
+                                    "className": "text-center"
+                                }
+                            ]
+                        });
+                    },
+                    error: function(xhr) {
+                        $('#wait').hide();
+                        toastr.error('Failed to load lots.');
+                    }
+                });
+            }
 
-            $('#lots-table').on('click', '.delete-btn', function() {
+            // Initial load
+            loadLots();
+
+            // Filter button click event
+            $('#filter-btn').on('click', function() {
+                var status = $('#status_filter').val();
+                loadLots(status);
+            });
+
+            // Delete functionality using event delegation
+            $('#lot-list-container').on('click', '.delete-btn', function() {
                 var lotId = $(this).data('id');
                 const deleteUrlTemplate = "{{ route('lots.destroy', ['lot' => ':id']) }}";
                 const finalUrl = deleteUrlTemplate.replace(':id', lotId);
@@ -165,15 +170,13 @@
                             },
                             success: function(response) {
                                 $('#wait').hide();
-                                toastr.success(
-                                    "{{ __('lot.toastr_delete') }}");
-                                location.reload();
+                                toastr.success("{{ __('lot.toastr_delete') }}");
+                                // Reload the table with the current filter
+                                $('#filter-btn').click();
                             },
                             error: function(xhr) {
                                 $('#wait').hide();
-                                toastr.error(
-                                    "{{ __('sweetalert.toastr_error') }}"
-                                );
+                                toastr.error("{{ __('sweetalert.toastr_error') }}");
                             }
                         });
                     }
