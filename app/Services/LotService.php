@@ -7,6 +7,7 @@ use App\Repositories\LotDetailRepository;
 use App\Services\ApprovalService;
 use Exception;
 use Illuminate\Support\Facades\Auth;
+use App\Models\User;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
@@ -202,5 +203,24 @@ class LotService
         DB::commit();
 
         return $result;
+    }
+
+    /**
+     * Get all pending lot tasks for a specific user.
+     *
+     * @param User $user
+     * @return \Illuminate\Database\Eloquent\Collection
+     */
+    public function getPendingLotsForUser(User $user)
+    {
+        // 1. Get all pending tasks from the ApprovalService
+        $allPendingTasks = $this->approvalService->getPendingTasksForUser($user);
+
+        // 2. Filter the collection to get ONLY Lot requests
+        $pendingLotTasks = $allPendingTasks->filter(function ($task) {
+            return $task->lot_id !== null;
+        });
+
+        return $pendingLotTasks;
     }
 }

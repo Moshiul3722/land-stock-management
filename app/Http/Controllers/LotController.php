@@ -10,6 +10,7 @@ use App\Services\ProductService;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Auth;
 
 class LotController extends Controller
 {
@@ -22,7 +23,7 @@ class LotController extends Controller
         LotService $lotService,
         ProductService $productService,
         ProductCategoryService $productCategoryService,
-        ProductPurchaseTypeService $productPurchaseTypeService
+        ProductPurchaseTypeService $productPurchaseTypeService,
     ) {
         $this->lotService = $lotService;
         $this->productService = $productService;
@@ -139,5 +140,17 @@ class LotController extends Controller
             Log::error($e->getMessage());
             return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
         }
+    }
+
+
+    /**
+     * Display a listing of the resource.
+     * View the lot requests
+     */
+    public function entryIndex(Request $request)
+    {
+        $pendingLotTasks = $this->lotService->getPendingLotsForUser(Auth::user());
+
+        return view('lot.entry_index', compact('pendingLotTasks'));
     }
 }

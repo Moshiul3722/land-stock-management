@@ -193,5 +193,19 @@ class MenuSeeder extends Seeder
             'created_by' => 1,
             'updated_by' => 1
         ]);
+
+        // Id = 14
+        CnfMenu::create([
+            'submodule_id' => 5,
+            'menu_name_en' => 'Lot Requests',
+            'menu_name_bn' => 'লটের অনুরোধসমূহ',
+            'controller' => 'Lot',
+            'action' => 'View',
+            'route' => 'lots.entry.index',
+            'is_menu' => 1,
+            'is_active' => 1,
+            'created_by' => 1,
+            'updated_by' => 1
+        ]);
     }
 }

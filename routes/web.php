@@ -101,4 +101,5 @@ Route::middleware(['auth', 'permission'])->group(function () {
 
     // Lot Resources
     Route::resource('lots', LotController::class);
+    Route::get('/lots/entry/index', [LotController::class, 'entryIndex'])->name('lots.entry.index');
 });
