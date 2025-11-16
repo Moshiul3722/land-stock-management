@@ -27,7 +27,6 @@
                                 <tr>
                                     <th>{{ __('lot.table_product') }}</th>
                                     <th>{{ __('lot.table_quantity') }}</th>
-                                    <th>{{ __('lot.table_unit_price') }}</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -35,14 +34,13 @@
                                 <tr>
                                     <td>{{ $detail->product->name ?? 'N/A' }}</td>
                                     <td>{{ $detail->quantity }}</td>
-                                    <td>{{ number_format($detail->unit_price, 2) }}</td>
                                 </tr>
                                 @endforeach
                             </tbody>
                         </table>
                     </div>
                     <div class="card-footer">
-                        <a href="{{ route('lots.index') }}" class="btn btn-secondary"><i class="fas fa-arrow-left"></i> {{ __('buttons.back') }}</a>
+                        <a href="{{ route('lots.index') }}" class="btn btn-secondary"><i class="fas fa-arrow-left"></i> {{ __('buttons.back_to_list') }}</a>
                     </div>
                 </div>
             </div>
