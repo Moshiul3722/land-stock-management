@@ -149,8 +149,37 @@ class LotController extends Controller
      */
     public function entryIndex(Request $request)
     {
-        $pendingLotTasks = $this->lotService->getPendingLotsForUser(Auth::user());
+        // Get all lots that have a 'pending' status
+        $pendingLots = $this->lotService->getAllPendingLots();
 
-        return view('lot.entry_index', compact('pendingLotTasks'));
+        return view('lot.entry.index', compact('pendingLots'));
+    }
+    
+    /**
+     * Approve a pending lot.
+     */
+    public function approve(Request $request, Lot $lot)
+    {
+        try {
+            $this->lotService->approveLot($lot, $request->input('comments'));
+            return redirect()->route('lots.entry.index')->with('success', 'Lot approved successfully and items added to stock.');
+        } catch (Exception $e) {
+            Log::error($e->getMessage());
+            return redirect()->back()->with('error', $e->getMessage());
+        }
+    }
+
+    /**
+     * Reject a pending lot.
+     */
+    public function reject(Request $request, Lot $lot)
+    {
+        try {
+            $this->lotService->rejectLot($lot, $request->input('comments'));
+            return redirect()->route('lots.entry.index')->with('success', 'Lot rejected successfully.');
+        } catch (Exception $e) {
+            Log::error($e->getMessage());
+            return redirect()->back()->with('error', $e->getMessage());
+        }
     }
 }

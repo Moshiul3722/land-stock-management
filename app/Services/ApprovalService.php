@@ -7,6 +7,7 @@ use App\Models\ApprovalEntity;
 use App\Models\Lot;
 use App\Models\Requisition;
 use App\Models\User;
+use App\Repositories\StockRepository;
 use Exception;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Auth;
@@ -15,6 +16,12 @@ use InvalidArgumentException;
 
 class ApprovalService
 {
+    protected $stockRepository;
+
+    public function __construct(StockRepository $stockRepository)
+    {
+        $this->stockRepository = $stockRepository;
+    }
     /**
      * Kicks off the approval workflow for a given model instance.
      *
@@ -103,6 +110,11 @@ class ApprovalService
         } else {
             // No more steps, the process is complete
             $model->update(['status' => 'approved']);
+
+            // If the approved model is a Lot, add its items to the stock.
+            if ($model instanceof \App\Models\Lot) {
+                $this->addLotItemsToStock($model);
+            }
         }
     }
 
@@ -149,6 +161,9 @@ class ApprovalService
 
     /**
      * Get all pending tasks assigned to a specific user.
+     *
+     * @param User $user
+     * @return \Illuminate\Database\Eloquent\Collection
      */
     public function getPendingTasksForUser(User $user)
     {
@@ -165,26 +180,52 @@ class ApprovalService
             ->groupBy('requistion_id');
 
         return ApprovalDetail::query()
-            ->where('to_user_id', $user->id)
-            ->where('status', 'pending')
-            ->where(function ($query) use ($lotSubQuery, $reqSubQuery) {
-                // Join with subqueries to ensure we only get tasks at the current step
-                $query->leftJoinSub($lotSubQuery, 'lot_max', function ($join) {
-                    $join->on('approval_details.lot_id', '=', 'lot_max.lot_id');
-                })->where(function ($q) {
-                    $q->whereNull('approval_details.lot_id')
-                        ->orWhereColumn('approval_details.serial', '=', 'lot_max.max_serial');
-                });
-
-                $query->leftJoinSub($reqSubQuery, 'req_max', function ($join) {
-                    $join->on('approval_details.requistion_id', '=', 'req_max.requistion_id');
-                })->where(function ($q) {
-                    $q->whereNull('approval_details.requistion_id')
-                        ->orWhereColumn('approval_details.serial', '=', 'req_max.max_serial');
-                });
+            // 1. APPLY THE JOINS AT THE TOP LEVEL
+            ->leftJoinSub($lotSubQuery, 'lot_max', function ($join) {
+                $join->on('approval_details.lot_id', '=', 'lot_max.lot_id');
             })
+            ->leftJoinSub($reqSubQuery, 'req_max', function ($join) {
+                $join->on('approval_details.requistion_id', '=', 'req_max.requistion_id');
+            })
+
+            // 2. NOW, FILTER THE RESULTS
+            ->where('approval_details.to_user_id', $user->id)
+            ->where('approval_details.status', 'pending')
+
+            // 3. APPLY THE LOGIC TO FIND THE CURRENT STEP
+            ->where(function ($query) {
+                // The task is a Lot task AND its serial matches the max serial for that lot
+                $query->where(function ($q) {
+                    $q->whereNotNull('approval_details.lot_id')
+                        ->whereColumn('approval_details.serial', '=', 'lot_max.max_serial');
+                })
+                    // OR the task is a Requisition task AND its serial matches the max serial for that requisition
+                    ->orWhere(function ($q) {
+                        $q->whereNotNull('approval_details.requistion_id')
+                            ->whereColumn('approval_details.serial', '=', 'req_max.max_serial');
+                    });
+            })
+
             ->with(['lot', 'requisition', 'fromUser']) // Eager load relationships
-            ->select('approval_details.*') // Select only columns from the main table to avoid conflicts
+            ->select('approval_details.*') // Select only columns from the main table
             ->get();
+    }
+
+    /**
+     * Add all items from an approved lot to the stock table.
+     */
+    private function addLotItemsToStock(Lot $lot): void
+    {
+        $lot->load('lotDetails'); 
+
+        foreach ($lot->lotDetails as $detail) {
+            // Create a new stock record for each lot detail item
+            // This assumes your BaseRepository's create() method handles 'created_by'
+            $this->stockRepository->create([
+                'product_id' => $detail->product_id,
+                'quantity' => $detail->quantity,
+                'lot_id' => $lot->id
+            ]);
+        }
     }
 }

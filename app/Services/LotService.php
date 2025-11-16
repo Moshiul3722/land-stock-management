@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Models\Lot;
 use App\Repositories\LotRepository;
 use App\Repositories\LotDetailRepository;
 use App\Services\ApprovalService;
@@ -215,12 +216,66 @@ class LotService
     {
         // 1. Get all pending tasks from the ApprovalService
         $allPendingTasks = $this->approvalService->getPendingTasksForUser($user);
-
         // 2. Filter the collection to get ONLY Lot requests
         $pendingLotTasks = $allPendingTasks->filter(function ($task) {
             return $task->lot_id !== null;
         });
 
         return $pendingLotTasks;
+    }
+
+    /**
+     * Get all lots that are currently pending approval.
+     *
+     * @return \Illuminate\Database\Eloquent\Collection
+     */
+    public function getAllPendingLots()
+    {
+        // This is now a simple, direct query on the Lots table
+        // We eager load the relationships needed for the view
+        return $this->lotRepository->allQuery(
+            ['status' => 'pending'], // Filter by 'pending' status
+            null,
+            null
+        )->with(['purchaseType', 'approvalDetails.fromUser'])
+         ->orderBy('created_at', 'asc') // Show oldest first
+         ->get();
+    }
+
+    /**
+     * Approves a pending lot.
+     *
+     * @param Lot $lot
+     * @param string|null $comments
+     */
+    public function approveLot(Lot $lot, ?string $comments): void
+    {
+        // This business logic now lives in the service
+        $pendingTask = $lot->approvalDetails()
+                           ->where('status', 'pending')
+                           ->firstOrFail(); // Fails if no pending task
+
+        // Call the approval service with the specific task
+        $this->approvalService->approve($pendingTask, $comments);
+    }
+
+    /**
+     * Rejects a pending lot.
+     *
+     * @param Lot $lot
+     * @param string $comments
+     */
+    public function rejectLot(Lot $lot, string $comments): void
+    {
+        // This validation logic now lives in the service
+        if (empty($comments)) {
+            throw new InvalidArgumentException('Comments are required for rejection.');
+        }
+
+        $pendingTask = $lot->approvalDetails()
+                           ->where('status', 'pending')
+                           ->firstOrFail();
+
+        $this->approvalService->reject($pendingTask, $comments);
     }
 }

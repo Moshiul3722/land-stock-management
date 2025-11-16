@@ -102,4 +102,6 @@ Route::middleware(['auth', 'permission'])->group(function () {
     // Lot Resources
     Route::resource('lots', LotController::class);
     Route::get('/lots/entry/index', [LotController::class, 'entryIndex'])->name('lots.entry.index');
+    Route::post('/lots/{lot}/approve', [App\Http\Controllers\LotController::class, 'approve'])->name('lots.approve');
+    Route::post('/lots/{lot}/reject', [App\Http\Controllers\LotController::class, 'reject'])->name('lots.reject');
 });

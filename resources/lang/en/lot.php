@@ -13,6 +13,8 @@ return [
     'add_title' => 'Create Lot',
     'edit_title' => 'Edit Lot',
     'details_title' => 'Lot Details',
+    'table_submitted_by' => 'Submitted By',
+    
 
     'lot_number' => 'Lot Number',
     'entry_date' => 'Entry Date',

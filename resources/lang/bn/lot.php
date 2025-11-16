@@ -13,6 +13,7 @@ return [
     'add_title' => 'লট তৈরি করুন',
     'edit_title' => 'লটের তথ্য হালনাগাদ করুন',
     'details_title' => 'লটের বিস্তারিত তথ্য',
+    'table_submitted_by' => 'এন্ট্রি করেছেন',
 
     'lot_number' => 'লট নম্বর',
     'entry_date' => 'এন্ট্রি তারিখ',
