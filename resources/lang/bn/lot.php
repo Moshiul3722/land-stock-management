@@ -12,6 +12,7 @@ return [
     'purchase_type' => 'পণ্য ক্রয়ের ধরণ',
     'add_title' => 'লট তৈরি করুন',
     'edit_title' => 'লটের তথ্য হালনাগাদ করুন',
+    'details_title' => 'লটের বিস্তারিত তথ্য',
 
     'lot_number' => 'লট নম্বর',
     'entry_date' => 'এন্ট্রি তারিখ',
