@@ -32,6 +32,7 @@ class DatabaseSeeder extends Seeder
             CategorySeeder::class,
             ApprovalEntitySeeder::class,
             ApprovalProcessSeeder::class,
+            TestSeeder::class,
         ]);
     }
 }
