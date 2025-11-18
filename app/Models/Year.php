@@ -31,9 +31,4 @@ class Year extends Model
         'deleted_at' => 'nullable',
         'deleted_by' => 'nullable'
     ];
-
-    public function smADetails(): \Illuminate\Database\Eloquent\Relations\HasMany
-    {
-        return $this->hasMany(\App\Models\SmADetail::class, 'year_id');
-    }
 }

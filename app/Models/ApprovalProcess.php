@@ -29,6 +29,9 @@ class ApprovalProcess extends Model
         'serial',
         'is_approver',
         'is_processor',
+        'created_by',
+        'updated_by',
+        'deleted_by',
     ];
 
     /**

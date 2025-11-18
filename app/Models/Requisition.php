@@ -29,6 +29,9 @@ class Requisition extends Model
         'requisition_date',
         'status',
         'current_serial',
+        'created_by',
+        'updated_by',
+        'deleted_by',
     ];
 
     /**

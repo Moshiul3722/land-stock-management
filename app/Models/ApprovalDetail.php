@@ -32,6 +32,9 @@ class ApprovalDetail extends Model
         'serial',
         'status',
         'comments',
+        'created_by',
+        'updated_by',
+        'deleted_by',
     ];
 
     /**

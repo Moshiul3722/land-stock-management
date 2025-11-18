@@ -28,6 +28,9 @@ class LotDetail extends Model
         'product_id',
         'quantity',
         'unit_price',
+        'created_by',
+        'updated_by',
+        'deleted_by',
     ];
 
     /**

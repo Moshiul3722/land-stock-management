@@ -27,6 +27,9 @@ class Stock extends Model
         'product_id',
         'quantity',
         'lot_id',
+        'created_by',
+        'updated_by',
+        'deleted_by',
     ];
 
     /**
