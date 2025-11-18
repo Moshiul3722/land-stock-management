@@ -8,6 +8,7 @@ use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\LotController;
 use App\Http\Controllers\ProductController;
+use App\Http\Controllers\StockController;
 
 /*
 |--------------------------------------------------------------------------
@@ -104,4 +105,8 @@ Route::middleware(['auth', 'permission'])->group(function () {
     Route::get('/lots/entry/index', [LotController::class, 'entryIndex'])->name('lots.entry.index');
     Route::post('/lots/{lot}/approve', [App\Http\Controllers\LotController::class, 'approve'])->name('lots.approve');
     Route::post('/lots/{lot}/reject', [App\Http\Controllers\LotController::class, 'reject'])->name('lots.reject');
+
+    // Stock Resources
+    Route::get('/stock', [StockController::class, 'index'])->name('stock.index');
+    Route::get('/stock/show/{product}', [StockController::class, 'show'])->name('stock.show');
 });

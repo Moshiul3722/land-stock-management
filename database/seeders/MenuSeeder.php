@@ -207,5 +207,19 @@ class MenuSeeder extends Seeder
             'created_by' => 1,
             'updated_by' => 1
         ]);
+
+        // Id = 15
+        CnfMenu::create([
+            'submodule_id' => 6,
+            'menu_name_en' => 'View Product Stock List',
+            'menu_name_bn' => 'প্রোডাক্ট স্টক তালিকা',
+            'controller' => 'Stock',
+            'action' => 'View',
+            'route' => 'stock.index',
+            'is_menu' => 1,
+            'is_active' => 1,
+            'created_by' => 1,
+            'updated_by' => 1
+        ]);
     }
 }
