@@ -77,5 +77,16 @@ class SubModuleSeeder extends Seeder
             'created_by' => 1,
             'updated_by' => 1
         ]);
+
+        // Id = 7
+        CnfSubmodule::create([
+            'submodule_name_en' => 'Requisition Management',
+            'submodule_name_bn' => 'রিকুইজিশন  ব্যবস্থাপনা',
+            'module_id' => 4,
+            'is_active' => 1,
+            'is_null' => 0,
+            'created_by' => 1,
+            'updated_by' => 1
+        ]);
     }
 }

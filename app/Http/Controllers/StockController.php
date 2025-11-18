@@ -57,4 +57,30 @@ class StockController extends Controller
 
         return view('stock.show', compact('product', 'stockDetails'));
     }
+
+    /**
+     * Get the available stock for a single product.
+     */
+    public function checkProductStatus(Product $product)
+    {
+        $stockSummary = $this->stockService->getAggregatedStockList(['product_id' => $product->id]);
+
+        $totalQuantity = $stockSummary->first()->total_quantity ?? 0;
+
+        if ($totalQuantity > 0) {
+            return response()->json([
+                'status' => 'Available',
+                'status_bn' => 'মজুদ আছে',
+                'class' => 'badge bg-success',
+                'quantity' => $totalQuantity
+            ]);
+        }
+
+        return response()->json([
+            'status' => 'Not Available',
+            'status_bn' => 'মজুদ নেই',
+            'class' => 'badge bg-danger',
+            'quantity' => 0
+        ]);
+    }
 }

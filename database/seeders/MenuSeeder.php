@@ -221,5 +221,47 @@ class MenuSeeder extends Seeder
             'created_by' => 1,
             'updated_by' => 1
         ]);
+
+        // Id = 16
+        CnfMenu::create([
+            'submodule_id' => 7,
+            'menu_name_en' => 'Create Requisition',
+            'menu_name_bn' => 'রিকুইজিশন তৈরি করুন',
+            'controller' => 'requisition',
+            'action' => 'View',
+            'route' => 'requisitions.create',
+            'is_menu' => 1,
+            'is_active' => 1,
+            'created_by' => 1,
+            'updated_by' => 1
+        ]);
+
+        // Id = 17
+        CnfMenu::create([
+            'submodule_id' => 7,
+            'menu_name_en' => 'View Requisition List',
+            'menu_name_bn' => 'রিকুইজিশন তালিকা',
+            'controller' => 'requisition',
+            'action' => 'View',
+            'route' => 'requisitions.index',
+            'is_menu' => 1,
+            'is_active' => 1,
+            'created_by' => 1,
+            'updated_by' => 1
+        ]);
+
+        // Id = 18
+        CnfMenu::create([
+            'submodule_id' => 7,
+            'menu_name_en' => 'Requisition Request List',
+            'menu_name_bn' => 'রিকুইজিশন অনুরোধের তালিকা',
+            'controller' => 'requisition',
+            'action' => 'View',
+            'route' => 'requisitions.pending',
+            'is_menu' => 1,
+            'is_active' => 1,
+            'created_by' => 1,
+            'updated_by' => 1
+        ]);
     }
 }

@@ -9,6 +9,7 @@ use App\Http\Controllers\HomeController;
 use App\Http\Controllers\LotController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\StockController;
+use App\Http\Controllers\RequisitionController;
 
 /*
 |--------------------------------------------------------------------------
@@ -109,4 +110,11 @@ Route::middleware(['auth', 'permission'])->group(function () {
     // Stock Resources
     Route::get('/stock', [StockController::class, 'index'])->name('stock.index');
     Route::get('/stock/show/{product}', [StockController::class, 'show'])->name('stock.show');
+    Route::get('/stock/check-status/{product}', [StockController::class, 'checkProductStatus'])->name('stock.check_status');
+
+    // Requisition Resources
+    Route::get('/requisitions/pending', [RequisitionController::class, 'pending'])->name('requisitions.pending');
+    Route::post('/requisitions/{requisition}/approve', [RequisitionController::class, 'approve'])->name('requisitions.approve');
+    Route::post('/requisitions/{requisition}/reject', [RequisitionController::class, 'reject'])->name('requisitions.reject');
+    Route::resource('requisitions', RequisitionController::class);
 });

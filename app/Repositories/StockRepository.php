@@ -57,6 +57,11 @@ class StockRepository extends BaseRepository
                   ->where('lots.product_purchase_type_id', $filters['purchase_type_id']);
         }
 
+        // Apply product filter
+        if (!empty($filters['product_id'])) {
+            $query->where('products.id', $filters['product_id']);
+        }
+
         return $query->get();
     }
 }

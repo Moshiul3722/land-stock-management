@@ -38,5 +38,14 @@ class ModuleSeeder extends Seeder
             'created_by' => 1,
             'updated_by' => 1
         ]);
+
+        // Id = 4
+        CnfModule::create([
+            'module_name_en' => 'Requisition',
+            'module_name_bn' => 'রিকুইজিশন',
+            'is_active' => 1,
+            'created_by' => 1,
+            'updated_by' => 1
+        ]);
     }
 }
