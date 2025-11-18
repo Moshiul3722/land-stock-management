@@ -4,6 +4,7 @@ namespace App\Repositories;
 
 use App\Models\Stock;
 use App\Repositories\BaseRepository;
+use Illuminate\Support\Facades\DB;
 
 class StockRepository extends BaseRepository
 {
