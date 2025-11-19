@@ -117,4 +117,7 @@ Route::middleware(['auth', 'permission'])->group(function () {
     Route::post('/requisitions/{requisition}/approve', [RequisitionController::class, 'approve'])->name('requisitions.approve');
     Route::post('/requisitions/{requisition}/reject', [RequisitionController::class, 'reject'])->name('requisitions.reject');
     Route::resource('requisitions', RequisitionController::class);
+
+    Route::get('/requisitions/{requisition}/details', [App\Http\Controllers\RequisitionController::class, 'getDetails'])->name('requisitions.get_details');
+Route::post('/requisitions/{requisition}/update-items', [App\Http\Controllers\RequisitionController::class, 'updateItems'])->name('requisitions.update_items');
 });

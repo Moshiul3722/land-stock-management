@@ -9,18 +9,25 @@
         </tr>
     </thead>
     <tbody>
-        @foreach($requisitions as $req)
+        @foreach ($requisitions as $req)
             <tr>
                 <td class="text-center">{{ $loop->iteration }}</td>
                 <td>{{ $req->requisition_date->format('d-M-Y') }}</td>
                 <td class="text-center">{{ $req->items->count() }}</td>
                 <td class="text-center">
-                    <span class="badge bg-{{ $req->status == 'approved' ? 'success' : ($req->status == 'rejected' ? 'danger' : 'warning') }}">
+                    <span
+                        class="badge bg-{{ $req->status == 'approved' ? 'success' : ($req->status == 'rejected' ? 'danger' : 'warning') }}">
                         {{ ucfirst($req->status) }}
                     </span>
                 </td>
                 <td class="text-center">
-                    <a href="{{ route('requisitions.show', $req) }}" class="btn btn-info btn-sm"><i class="fa fa-eye"></i></a>
+                    <a href="{{ route('requisitions.show', $req) }}" class="btn btn-info btn-sm"><i
+                            class="fa fa-eye"></i></a>
+
+                    @if ($req->status === 'draft')
+                        <a href="{{ route('requisitions.edit', $req) }}" class="btn btn-warning btn-sm"
+                            title="Edit"><i class="fa fa-edit"></i></a>
+                    @endif
                 </td>
             </tr>
         @endforeach

@@ -164,28 +164,81 @@ class RequisitionService
     }
 
     /**
-     * Placeholder for updating a draft requisition.
-     *
-     * @param array $data
-     * @param int $id
-     * @param string $action
-     * @return \App\Models\Requisition
+     * Validate and update an existing draft requisition.
      */
     public function update(array $data, int $id, string $action = 'submit')
     {
-        // This logic will be nearly identical to the LotService update method.
-        // It should check if the status is 'draft', then update, delete/re-create items,
-        // and finally call submitForApproval if $action is 'submit'.
+        $this->validateRequisition($data, $action);
 
-        // Placeholder implementation
         $requisition = $this->requisitionRepository->find($id);
         if ($requisition->status !== 'draft') {
-            throw new InvalidArgumentException('This requisition is already in process and cannot be edited.');
+            throw new InvalidArgumentException('This requisition cannot be edited as it is already in process.');
         }
 
-        // Add full update logic here...
+        return DB::transaction(function () use ($data, $requisition, $action) {
+            try {
+                $status = ($action === 'save_draft') ? 'draft' : 'pending';
 
-        return $requisition;
+                $this->requisitionRepository->update([
+                    'requisition_date' => $data['requisition_date'],
+                    'remarks' => $data['remarks'],
+                    'status' => $status,
+                ], $requisition->id);
+
+                // Delete old items and recreate
+                $requisition->items()->delete();
+                $this->saveItems($requisition->id, $data['details']);
+
+                if ($action === 'submit') {
+                    $this->approvalService->submitForApproval($requisition, 'Requisition Approval');
+                }
+
+                return $requisition;
+            } catch (Exception $e) {
+                Log::error($e->getMessage());
+                throw new InvalidArgumentException('Unable to update requisition: ' . $e->getMessage());
+            }
+        });
+    }
+
+    // Shared validation logic
+    private function validateRequisition(array $data, string $action)
+    {
+        $validator = Validator::make($data, [
+            'requisition_date' => 'required|date',
+            'remarks' => 'nullable|string',
+            'details' => 'required|array|min:1',
+            'details.*.product_id' => 'required|exists:products,id',
+            'details.*.quantity' => 'required|integer|min:1',
+            // 'status' field in details is for UI only, we check stock manually below
+        ]);
+
+        if ($validator->fails()) {
+            throw new InvalidArgumentException($validator->errors()->first());
+        }
+
+        if ($action === 'submit') {
+            foreach ($data['details'] as $item) {
+                $stockSummary = $this->stockService->getAggregatedStockList(['product_id' => $item['product_id']]);
+                $available = $stockSummary->first()->total_quantity ?? 0;
+
+                if ($available <= 0) { // Simple check: available vs 0. Or use $available < $item['quantity'] if you want strict checking
+                    $productName = \App\Models\Product::find($item['product_id'])->name ?? 'Item';
+                    throw new InvalidArgumentException("Cannot submit: '$productName' is out of stock.");
+                }
+            }
+        }
+    }
+
+    private function saveItems($requisitionId, array $items)
+    {
+        foreach ($items as $item) {
+            $this->itemRepository->create([
+                'requisition_id' => $requisitionId,
+                'product_id' => $item['product_id'],
+                'quantity' => $item['quantity'],
+            ]);
+        }
     }
 
     /**
