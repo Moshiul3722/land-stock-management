@@ -61,7 +61,6 @@ class RequisitionController extends Controller
         }
     }
 
-    // Add show, destroy methods later
     public function index(Request $request)
     {
         $statuses = ['draft', 'pending', 'approved', 'rejected', 'processed'];
@@ -183,6 +182,20 @@ class RequisitionController extends Controller
             'formatted_date' => $requisition->requisition_date->format('d M, Y'),
             'timeline' => $timeline
         ]);
+    }
+
+    /**
+     * Remove the specified resource from storage.
+     */
+    public function destroy(Requisition $requisition)
+    {
+        try {
+            $this->requisitionService->destroy($requisition->id);
+            return response()->json(['success' => true, 'message' => 'Requisition deleted successfully.']);
+        } catch (Exception $e) {
+            Log::error($e->getMessage());
+            return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
+        }
     }
 
     /**

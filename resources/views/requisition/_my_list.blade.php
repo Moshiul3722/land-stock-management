@@ -21,12 +21,22 @@
                     </span>
                 </td>
                 <td class="text-center">
-                    <a href="{{ route('requisitions.show', $req) }}" class="btn btn-info btn-sm"><i
-                            class="fa fa-eye"></i></a>
+                    <button type="button" class="btn btn-info btn-sm view-req-btn"
+                        data-url="{{ route('requisitions.get_details', $req->id) }}" title="View Details">
+                        <i class="fa fa-eye"></i>
+                    </button>
 
                     @if ($req->status === 'draft')
-                        <a href="{{ route('requisitions.edit', $req) }}" class="btn btn-warning btn-sm"
-                            title="Edit"><i class="fa fa-edit"></i></a>
+                        {{-- Edit Button --}}
+                        <a href="{{ route('requisitions.edit', $req) }}" class="btn btn-warning btn-sm" title="Edit">
+                            <i class="fa fa-edit"></i>
+                        </a>
+
+                        {{-- Delete Button --}}
+                        <button type="button" class="btn btn-danger btn-sm delete-req-btn"
+                            data-id="{{ $req->id }}" title="Delete">
+                            <i class="fa fa-trash"></i>
+                        </button>
                     @endif
                 </td>
             </tr>
