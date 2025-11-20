@@ -54,7 +54,7 @@ class UserSeeder extends Seeder
         User::create([
             'name' => 'Super Admin-1',
             'name_bn' => 'সুপার অ্যাডমিন-১',
-            'email' => 'admin1@land.com',
+            'email' => 'superadmin1@land.com',
             'role_id' => '1',
             'created_by' => '1',
             'updated_by' => '1',
@@ -65,7 +65,7 @@ class UserSeeder extends Seeder
         User::create([
             'name' => 'Super Admin-2',
             'name_bn' => 'সুপার অ্যাডমিন-২',
-            'email' => 'admin2@land.com',
+            'email' => 'superadmin2@land.com',
             'role_id' => '1',
             'created_by' => '1',
             'updated_by' => '1',
@@ -73,36 +73,87 @@ class UserSeeder extends Seeder
         ]);
 
         // Admin User
-        User::updateOrCreate(['email' => 'admin@land.com'], [
-            'name' => 'Admin',
-            'name_bn' => 'অ্যাডমিন',
+        User::updateOrCreate(['email' => 'admin1@land.com'], [
+            'name' => 'Admin-1',
+            'name_bn' => 'অ্যাডমিন-১',
             'role_id' => 2,
+            'password' => Hash::make('admin'),
+            'created_by' => 1
+        ]);
+
+        // Admin User
+        User::updateOrCreate(['email' => 'admin2@land.com'], [
+            'name' => 'Admin-2',
+            'name_bn' => 'অ্যাডমিন-২',
+            'role_id' => 2,
+            'password' => Hash::make('admin'),
+            'created_by' => 1
+        ]);
+
+        // Store Admin User - 1
+        User::updateOrCreate(['email' => 'storeadmin1@land.com'], [
+            'name' => 'Store Admin-1',
+            'name_bn' => 'স্টোর অ্যাডমিন-১',
+            'role_id' => 3,
             'password' => Hash::make('password'),
             'created_by' => 1
         ]);
 
-        // Store Admin User
-        User::updateOrCreate(['email' => 'storeadmin@land.com'], [
-            'name' => 'Store Admin',
-            'name_bn' => 'স্টোর অ্যাডমিন',
+        // Store Admin User - 2
+        User::updateOrCreate(['email' => 'storeadmin2@land.com'], [
+            'name' => 'Store Admin-2',
+            'name_bn' => 'স্টোর অ্যাডমিন-২',
             'role_id' => 3,
             'password' => Hash::make('password'),
             'created_by' => 1
         ]);
 
         // Store Keeper User
-        User::updateOrCreate(['email' => 'storekeeper@land.com'], [
-            'name' => 'Store Keeper',
-            'name_bn' => 'স্টোর কিপার',
+        User::updateOrCreate(['email' => 'storekeeper1@land.com'], [
+            'name' => 'Store Keeper-1',
+            'name_bn' => 'স্টোর কিপার-১',
+            'role_id' => 4,
+            'password' => Hash::make('password'),
+            'created_by' => 1
+        ]);
+
+        // Store Keeper User
+        User::updateOrCreate(['email' => 'storekeeper2@land.com'], [
+            'name' => 'Store Keeper-2',
+            'name_bn' => 'স্টোর কিপার-২',
             'role_id' => 4,
             'password' => Hash::make('password'),
             'created_by' => 1
         ]);
 
         // Inventory User
-        User::updateOrCreate(['email' => 'user@land.com'], [
-            'name' => 'User',
-            'name_bn' => 'ব্যবহারকারী',
+        User::updateOrCreate(['email' => 'user1@land.com'], [
+            'name' => 'User-1',
+            'name_bn' => 'ব্যবহারকারী-১',
+            'role_id' => 5,
+            'password' => Hash::make('password'),
+            'created_by' => 1
+        ]);
+        // Inventory User
+        User::updateOrCreate(['email' => 'user2@land.com'], [
+            'name' => 'User-2',
+            'name_bn' => 'ব্যবহারকারী-২',
+            'role_id' => 5,
+            'password' => Hash::make('password'),
+            'created_by' => 1
+        ]);
+        // Inventory User
+        User::updateOrCreate(['email' => 'user3@land.com'], [
+            'name' => 'User-3',
+            'name_bn' => 'ব্যবহারকারী-৩',
+            'role_id' => 5,
+            'password' => Hash::make('password'),
+            'created_by' => 1
+        ]);
+        // Inventory User
+        User::updateOrCreate(['email' => 'user4@land.com'], [
+            'name' => 'User-4',
+            'name_bn' => 'ব্যবহারকারী-৪',
             'role_id' => 5,
             'password' => Hash::make('password'),
             'created_by' => 1
