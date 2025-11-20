@@ -17,6 +17,9 @@ class ApprovalDetailRepository extends BaseRepository
         'serial',
         'status',
         'comments',
+        'created_by',
+        'updated_by',
+        'deleted_by',
     ];
 
     public function getFieldsSearchable(): array
