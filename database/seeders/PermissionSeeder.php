@@ -554,5 +554,45 @@ class PermissionSeeder extends Seeder
                 'updated_by' => 1
             ],
         );
+
+        // Id = 55
+        CnfPermission::create(
+            [
+                'role_id' => 1,
+                'menu_id' => 15,
+                'created_by' => 1,
+                'updated_by' => 1
+            ],
+        );
+
+        // Id = 56
+        CnfPermission::create(
+            [
+                'role_id' => 1,
+                'menu_id' => 16,
+                'created_by' => 1,
+                'updated_by' => 1
+            ],
+        );
+
+        // Id = 57
+        CnfPermission::create(
+            [
+                'role_id' => 1,
+                'menu_id' => 17,
+                'created_by' => 1,
+                'updated_by' => 1
+            ],
+        );
+
+        // Id = 58
+        CnfPermission::create(
+            [
+                'role_id' => 1,
+                'menu_id' => 18,
+                'created_by' => 1,
+                'updated_by' => 1
+            ],
+        );
     }
 }
