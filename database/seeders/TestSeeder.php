@@ -25,6 +25,48 @@ class TestSeeder extends Seeder
             'updated_by' => 1
         ]);
         Product::create([
+            'name' => 'Black Gel Pen',
+            'category_id' => 1,
+            'created_by' => 1,
+            'updated_by' => 1
+        ]);
+        Product::create([
+            'name' => 'Blue Gel Pen',
+            'category_id' => 1,
+            'created_by' => 1,
+            'updated_by' => 1
+        ]);
+        Product::create([
+            'name' => 'Black Marker Pen',
+            'category_id' => 1,
+            'created_by' => 1,
+            'updated_by' => 1
+        ]);
+        Product::create([
+            'name' => 'Blue Marker Pen',
+            'category_id' => 1,
+            'created_by' => 1,
+            'updated_by' => 1
+        ]);
+        Product::create([
+            'name' => '2B Pencil',
+            'category_id' => 1,
+            'created_by' => 1,
+            'updated_by' => 1
+        ]);
+        Product::create([
+            'name' => 'HB Pencil',
+            'category_id' => 1,
+            'created_by' => 1,
+            'updated_by' => 1
+        ]);
+        Product::create([
+            'name' => '6B Pencil',
+            'category_id' => 1,
+            'created_by' => 1,
+            'updated_by' => 1
+        ]);
+        Product::create([
             'name' => 'A4 Paper',
             'category_id' => 1,
             'created_by' => 1,
