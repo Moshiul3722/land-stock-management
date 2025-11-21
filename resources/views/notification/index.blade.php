@@ -43,7 +43,7 @@
                                                     @if(!$notification->is_read)
                                                         <a href="{{ route('notifications.read', $notification->id) }}"><i class="fas fa-circle text-primary text-xs"></i></a>
                                                     @else
-                                                        <i class="far fa-circle text-muted text-xs"></i>
+                                                        <i class="fa fa-circle text-muted text-xs"></i>
                                                     @endif
                                                 </td>
                                                 <td class="mailbox-name">
@@ -59,7 +59,7 @@
                                         @empty
                                             <tr>
                                                 <td colspan="4" class="text-center py-4 text-muted">
-                                                    <i class="far fa-bell-slash fa-2x mb-2"></i><br>
+                                                    <i class="fa fa-bell-slash fa-2x mb-2"></i><br>
                                                     No notifications found.
                                                 </td>
                                             </tr>
