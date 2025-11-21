@@ -2,63 +2,107 @@
 
 @section('styles')
     <style>
-        /* Timeline CSS */
-        .timeline {
-            border-left: 2px solid #dee2e6;
-            margin-left: 10px;
-            padding-left: 20px;
+        /* Clean Vertical Timeline */
+        .timeline-container {
             position: relative;
+            padding: 20px 0;
         }
 
-        .timeline-item {
-            margin-bottom: 20px;
-            position: relative;
-        }
-
-        .timeline-item::before {
+        /* The Vertical Line */
+        .timeline-container::before {
             content: '';
-            width: 12px;
-            height: 12px;
-            background: #fff;
-            border: 2px solid #007bff;
-            border-radius: 50%;
             position: absolute;
-            left: -27px;
-            top: 5px;
+            top: 0;
+            bottom: 0;
+            left: 15px;
+            /* Align with dots */
+            width: 2px;
+            background: #e9ecef;
+            z-index: 0;
         }
 
-        .timeline-item.approved::before {
-            border-color: #28a745;
-            background: #28a745;
+        .timeline-entry {
+            position: relative;
+            margin-bottom: 25px;
+            padding-left: 45px;
+            /* Space for dot */
+            z-index: 1;
         }
 
-        .timeline-item.rejected::before {
-            border-color: #dc3545;
-            background: #dc3545;
+        /* The Dot (0) */
+        .timeline-icon {
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            text-align: center;
+            line-height: 32px;
+            color: #fff;
+            font-size: 14px;
+            border: 2px solid #fff;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
         }
 
-        .timeline-item.pending::before {
-            border-color: #ffc107;
-            background: #ffc107;
+        /* Colors */
+        .icon-primary {
+            background-color: #007bff;
+        }
+
+        .icon-success {
+            background-color: #28a745;
+        }
+
+        .icon-danger {
+            background-color: #dc3545;
+        }
+
+        .icon-warning {
+            background-color: #ffc107;
+            color: #1f2d3d;
+        }
+
+        /* Content Styling */
+        .timeline-content {
+            background: #fff;
+            border: 1px solid #e9ecef;
+            border-radius: 4px;
+            padding: 10px 15px;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
         }
 
         .timeline-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 5px;
+        }
+
+        .timeline-user {
             font-weight: bold;
-            font-size: 0.9rem;
+            font-size: 1rem;
+            color: #333;
+        }
+
+        .timeline-role {
+            font-size: 0.85rem;
+            color: #6c757d;
+            font-style: italic;
         }
 
         .timeline-date {
             font-size: 0.8rem;
-            color: #6c757d;
+            color: #adb5bd;
         }
 
         .timeline-comment {
-            background: #f8f9fa;
-            padding: 8px;
-            border-radius: 4px;
-            margin-top: 5px;
+            margin-top: 8px;
+            background-color: #f8f9fa;
+            border-left: 3px solid #007bff;
+            padding: 8px 12px;
             font-size: 0.9rem;
-            font-style: italic;
+            color: #555;
         }
     </style>
 @endsection
@@ -98,7 +142,6 @@
                                 <td>{{ $task->requisition->requisition_date->format('d-M-Y') }}</td>
                                 <td class="text-center">{{ $task->requisition->items->count() }}</td>
                                 <td class="text-center">
-                                    {{-- OPEN MODAL BUTTON --}}
                                     <button class="btn btn-info btn-sm view-action-btn"
                                         data-id="{{ $task->requisition->id }}"
                                         data-url="{{ route('requisitions.get_details', $task->requisition->id) }}">
@@ -116,7 +159,7 @@
     {{-- ACTION MODAL --}}
     <div class="modal fade" id="actionModal" tabindex="-1" role="dialog" aria-labelledby="actionModalLabel"
         aria-hidden="true">
-        <div class="modal-dialog modal-xl" role="document"> {{-- Large Modal --}}
+        <div class="modal-dialog modal-xl" role="document">
             <div class="modal-content">
                 <div class="modal-header bg-primary text-white">
                     <h5 class="modal-title" id="actionModalLabel">Requisition Details</h5>
@@ -128,7 +171,7 @@
                 <div class="modal-body">
                     <div class="row">
                         {{-- LEFT COLUMN: Details & Items --}}
-                        <div class="col-md-8 border-right">
+                        <div class="col-md-7 border-right">
                             <div class="row mb-3">
                                 <div class="col-md-6">
                                     <strong>Requested By:</strong> <span id="modal-requestor"></span>
@@ -166,9 +209,9 @@
                         </div>
 
                         {{-- RIGHT COLUMN: Timeline --}}
-                        <div class="col-md-4">
+                        <div class="col-md-5">
                             <h6 class="font-weight-bold text-primary mb-3">Approval Timeline</h6>
-                            <div id="modal-timeline" class="timeline">
+                            <div id="modal-timeline" class="timeline-container">
                                 {{-- Timeline loaded via AJAX --}}
                             </div>
                         </div>
@@ -210,7 +253,9 @@
                 $('#modal-date').text('');
                 $('#modal-items-body').html(
                     '<tr><td colspan="3" class="text-center">Loading items...</td></tr>');
-                $('#modal-timeline').html('Loading history...');
+                $('#modal-timeline').html(
+                    '<div class="text-center p-3"><i class="fas fa-spinner fa-spin"></i> Loading...</div>'
+                    );
                 $('#action-comments').val('');
 
                 // Show Modal
@@ -233,7 +278,7 @@
                                 <td>${item.product.name}</td>
                                 <td>${item.product.category.name}</td>
                                 <td>
-                                    <input type="number" class="form-control form-control-sm item-qty-input"
+                                    <input type="number" class="form-control form-control-sm item-qty-input" 
                                            data-id="${item.id}" value="${item.quantity}" min="1">
                                 </td>
                             </tr>
@@ -243,21 +288,24 @@
 
                         // Populate Timeline
                         let timelineHtml = '';
-                        res.timeline.forEach(log => {
-                            let statusClass = '';
-                            if (log.status === 'approved') statusClass = 'approved';
-                            if (log.status === 'rejected') statusClass = 'rejected';
-                            if (log.status === 'pending') statusClass = 'pending';
-
-                            let commentHtml = log.comments ?
-                                `<div class="timeline-comment">"${log.comments}"</div>` :
+                        res.timeline.forEach(item => {
+                            let commentHtml = item.comments ?
+                                `<div class="timeline-comment">"${item.comments}"</div>` :
                                 '';
 
                             timelineHtml += `
-                            <div class="timeline-item ${statusClass}">
-                                <div class="timeline-header">${log.user} <small>(${log.status})</small></div>
-                                <div class="timeline-date">${log.date}</div>
-                                ${commentHtml}
+                            <div class="timeline-entry">
+                                <div class="timeline-icon icon-${item.color}">
+                                    <i class="fas ${item.icon}"></i>
+                                </div>
+                                <div class="timeline-content">
+                                    <div class="timeline-header">
+                                        <span class="timeline-user">${item.user}</span>, Date & Time - 
+                                        <span class="timeline-date">${item.date}</span>
+                                    </div>
+                                    <div class="timeline-role">${item.role} - ${item.title}</div>
+                                    ${commentHtml}
+                                </div>
                             </div>
                         `;
                         });

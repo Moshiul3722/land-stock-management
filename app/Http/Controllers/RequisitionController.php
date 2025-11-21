@@ -155,26 +155,72 @@ class RequisitionController extends Controller
      */
     public function getDetails(Requisition $requisition)
     {
-        // Load relationships
         $requisition->load([
             'items.product.category',
             'requestedBy',
-            'approvalDetails.fromUser.role', // Added .role to ensure role name loads
-            'approvalDetails.toUser',
+            'approvalDetails.fromUser.role',
+            'approvalDetails.toUser.role', // Load role for pending users
             'approvalDetails.approvalEntity'
         ]);
 
-        // Format the timeline data for easier JS consumption
-        $timeline = $requisition->approvalDetails->map(function ($detail) {
-            return [
-                'status' => $detail->status,
-                'user' => $detail->fromUser->name ?? 'System',
-                'role' => $detail->fromUser->role->role_name_en ?? '',
-                'date' => $detail->created_at->format('d M, Y h:i A'),
-                'comments' => $detail->comments,
-                'serial' => $detail->serial
-            ];
-        });
+        // 1. Start with the Initiator
+        $timeline = collect([
+            [
+                'status' => 'initiated',
+                'title' => 'Request Initiated',
+                'user' => $requisition->requestedBy->name ?? 'Unknown',
+                'role' => 'Requestor',
+                'date' => $requisition->created_at->format('d M, Y h:i A'),
+                'comments' => '',
+                'icon' => 'fa-user',
+                'color' => 'primary'
+            ]
+        ]);
+
+        // 2. Group Approval Details by Serial (Step) to handle the "Only the actor" logic
+        $groupedDetails = $requisition->approvalDetails
+            ->where('status', '!=', 'superceded') // Filter out irrelevant old tasks
+            ->sortBy('serial')
+            ->groupBy('serial');
+
+        foreach ($groupedDetails as $serial => $details) {
+            // Check if anyone has acted in this step
+            $actor = $details->first(function ($d) {
+                return in_array($d->status, ['approved', 'rejected', 'processed']);
+            });
+
+            if ($actor) {
+                // IF ACTED: Show ONLY the person who acted
+                $timeline->push([
+                    'status' => $actor->status,
+                    'title' => ucfirst($actor->status), // Approved/Rejected
+                    'user' => $actor->fromUser->name ?? 'System',
+                    'role' => $actor->fromUser->role->role_name_en ?? '',
+                    'date' => $actor->updated_at->format('d M, Y h:i A'),
+                    'comments' => $actor->comments,
+                    'icon' => $actor->status == 'rejected' ? 'fa-times' : 'fa-check',
+                    'color' => $actor->status == 'rejected' ? 'danger' : 'success'
+                ]);
+            } else {
+                // IF PENDING: Show all potential approvers
+                $pendingUsers = $details->map(function ($d) {
+                    return $d->toUser->name ?? 'Unknown';
+                })->join(', ');
+
+                $roleName = $details->first()->toUser->role->role_name_en ?? 'Approver';
+
+                $timeline->push([
+                    'status' => 'pending',
+                    'title' => 'Pending Approval',
+                    'user' => 'Waiting for: ' . $pendingUsers,
+                    'role' => $roleName,
+                    'date' => $details->first()->created_at->format('d M, Y h:i A'),
+                    'comments' => '',
+                    'icon' => 'fa-clock',
+                    'color' => 'warning'
+                ]);
+            }
+        }
 
         return response()->json([
             'requisition' => $requisition,
