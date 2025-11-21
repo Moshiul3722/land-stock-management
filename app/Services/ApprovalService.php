@@ -156,7 +156,7 @@ class ApprovalService
         } elseif ($model instanceof Requisition) {
             $attributes['requistion_id'] = $model->id;
             $text = "Approval Pending for Requisition #" . $model->id;
-            $url = route('requisitions.show', $model->id);
+            $url = route('requisitions.pending');
         }
 
         ApprovalDetail::create($attributes);
@@ -188,7 +188,7 @@ class ApprovalService
         } elseif ($model instanceof Requisition) {
             $requestorId = $model->requested_by_user_id;
             $text = "Your Requisition #" . $model->id . " has been REJECTED.";
-            $url = route('requisitions.show', $model->id);
+            $url = route('requisitions.pending');
         }
 
         if ($requestorId) {
@@ -217,7 +217,7 @@ class ApprovalService
         } elseif ($model instanceof Requisition) {
             $requestorId = $model->requested_by_user_id;
             $text = "Your Requisition #" . $model->id . " has been fully APPROVED/PROCESSED.";
-            $url = route('requisitions.show', $model->id);
+            $url = route('requisitions.pending');
         }
 
         if ($requestorId) {

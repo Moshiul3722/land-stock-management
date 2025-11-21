@@ -88,5 +88,16 @@ class SubModuleSeeder extends Seeder
             'created_by' => 1,
             'updated_by' => 1
         ]);
+
+        // Id = 8
+        CnfSubmodule::create([
+            'submodule_name_en' => 'My Products',
+            'submodule_name_bn' => 'আমার প্রোডাক্ট',
+            'module_id' => 4,
+            'is_active' => 1,
+            'is_null' => 0,
+            'created_by' => 1,
+            'updated_by' => 1
+        ]);
     }
 }
