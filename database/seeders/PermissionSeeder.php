@@ -594,5 +594,15 @@ class PermissionSeeder extends Seeder
                 'updated_by' => 1
             ],
         );
+
+        // Id = 59
+        CnfPermission::create(
+            [
+                'role_id' => 4,
+                'menu_id' => 18,
+                'created_by' => 1,
+                'updated_by' => 1
+            ],
+        );
     }
 }

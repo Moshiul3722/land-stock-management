@@ -7,6 +7,8 @@ use App\Models\ApprovalEntity;
 use App\Models\Lot;
 use App\Models\Requisition;
 use App\Models\User;
+use App\Models\Stock;
+use App\Models\IssuedItem;
 use App\Repositories\StockRepository;
 use Exception;
 use Illuminate\Database\Eloquent\Model;
@@ -112,8 +114,12 @@ class ApprovalService
             $model->update(['status' => 'approved']);
 
             // If the approved model is a Lot, add its items to the stock.
-            if ($model instanceof \App\Models\Lot) {
+            if ($model instanceof Lot) {
+                // STOCK IN: Add items to stock
                 $this->addLotItemsToStock($model);
+            } elseif ($model instanceof Requisition) {
+                // STOCK OUT: Deduct items using FIFO
+                $this->deductRequisitionItemsFromStock($model);
             }
         }
     }
@@ -212,11 +218,11 @@ class ApprovalService
     }
 
     /**
-     * Add all items from an approved lot to the stock table.
+     * STOCK IN: Add all items from an approved lot to the stock table.
      */
     private function addLotItemsToStock(Lot $lot): void
     {
-        $lot->load('lotDetails'); 
+        $lot->load('lotDetails');
 
         foreach ($lot->lotDetails as $detail) {
             // Create a new stock record for each lot detail item
@@ -226,6 +232,74 @@ class ApprovalService
                 'quantity' => $detail->quantity,
                 'lot_id' => $lot->id
             ]);
+        }
+    }
+
+    /**
+     * STOCK OUT: Deduct items from stock using FIFO logic.
+     * This creates negative stock entries linked to specific lots.
+     */
+    private function deductRequisitionItemsFromStock(Requisition $requisition): void
+    {
+        $requisition->load('items');
+
+        foreach ($requisition->items as $item) {
+            $this->consumeStockFifo($item->product_id, $item->quantity, $requisition);
+        }
+    }
+
+    /**
+     * Helper to consume stock for a single product using FIFO.
+     */
+    private function consumeStockFifo($productId, $quantityNeeded, Requisition $requisition)
+    {
+        // 1. Find all Lots that have stock for this product, ordered by oldest entry date first (FIFO)
+        // We group by lot_id and sum the quantity to find the CURRENT balance of that lot.
+        $lotBalances = Stock::query()
+            ->join('lots', 'stocks.lot_id', '=', 'lots.id')
+            ->where('stocks.product_id', $productId)
+            ->whereNull('stocks.deleted_at')
+            ->select('stocks.lot_id', 'lots.entry_date', DB::raw('SUM(stocks.quantity) as balance'))
+            ->groupBy('stocks.lot_id', 'lots.entry_date')
+            ->having('balance', '>', 0)
+            ->orderBy('lots.entry_date', 'asc')
+            ->get();
+
+
+        $remainingToDeduct = $quantityNeeded;
+
+        foreach ($lotBalances as $lotData) {
+            if ($remainingToDeduct <= 0) break;
+
+            $amountToTake = min($remainingToDeduct, $lotData->balance);
+
+            // A. WAREHOUSE UPDATE: Create NEGATIVE stock entry (Reduces Warehouse Stock)
+            $this->stockRepository->create([
+                'product_id' => $productId,
+                'quantity' => -($amountToTake),
+                'lot_id' => $lotData->lot_id
+            ]);
+
+            // B. USER UPDATE: Create ISSUED ITEM entry (Increases User's Asset List)
+            IssuedItem::create([
+                'user_id' => $requisition->requested_by_user_id, // Mr. X
+                'requisition_id' => $requisition->id,
+                'product_id' => $productId, // Product Z
+                'lot_id' => $lotData->lot_id, // The specific Lot
+                'quantity' => $amountToTake, // Quantity Y (from this specific lot)
+                'issued_date' => now(),
+                'created_by' => Auth::id(),
+                'updated_by' => Auth::id(),
+            ]);
+
+            $remainingToDeduct -= $amountToTake;
+        }
+
+        // Optional: Safety check
+        if ($remainingToDeduct > 0) {
+            // This implies a data race condition occurred where stock disappeared during approval.
+            // You might want to log this or throw an exception.
+            throw new Exception("Insufficient stock to fulfill requisition for Product ID: $productId");
         }
     }
 }
