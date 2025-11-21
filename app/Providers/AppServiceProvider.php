@@ -3,11 +3,12 @@
 namespace App\Providers;
 
 use Illuminate\Support\ServiceProvider;
-use View;
-use App\Models\CnfMenu;
+use Illuminate\Support\Facades\View;
 use App\Models\CnfPermission;
 use Illuminate\Support\Facades\Request;
 use Illuminate\Support\Facades\Auth;
+use App\Services\NotificationService;
+use Illuminate\Support\Facades\App;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -41,6 +42,17 @@ class AppServiceProvider extends ServiceProvider
             // Process the permissions data here and pass it to the view
             $menuItems = $this->processMenuItems($permissions);
             $view->with('menuItems', $menuItems);
+        });
+
+        View::composer('layouts.app', function ($view) {
+            if (Auth::check()) {
+                $service = App::make(NotificationService::class);
+                $view->with('unreadCount', $service->getUnreadCount(Auth::id()));
+                $view->with('recentNotifications', $service->getRecentUnread(Auth::id(), 5)); // Limit 5
+            } else {
+                $view->with('unreadCount', 0);
+                $view->with('recentNotifications', collect([]));
+            }
         });
     }
 

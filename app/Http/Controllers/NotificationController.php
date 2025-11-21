@@ -2,13 +2,11 @@
 
 namespace App\Http\Controllers;
 
-use user;
-use NotificationService;
+use App\Services\NotificationService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use App\Http\Controllers\AppBaseController;
 
-class NotificationController extends AppBaseController
+class NotificationController extends Controller
 {
     protected $notificationService;
 
@@ -17,42 +15,37 @@ class NotificationController extends AppBaseController
         $this->notificationService = $notificationService;
     }
 
-    public function getUnreadNotifications(Request $request)
+    /**
+     * Display the list of all notifications.
+     */
+    public function index()
     {
-        $userTo = $request->input('user_to');
-        $unreadNotifications = $this->notificationService->GetUnread($userTo);
-        return response()->json($unreadNotifications);
+        $notifications = $this->notificationService->getAllForUserPaginated(Auth::id());
+        return view('notification.index', compact('notifications'));
     }
 
-    public function markAllAsRead(Request $request)
+    /**
+     * Mark a single notification as read and redirect.
+     */
+    public function markAsRead($id)
     {
-        $userTo = $request->input('user_to');
-        $markAllAsRead = $this->notificationService->MarkAllAsRead($userTo);
-        return response()->json(['message' => 'All notifications marked as read']);
-    }
-
-    public function viewAllNotifications(Request $request)
-    {
-        $userTo = $request->input('user_to');
-        $allNotifications = $this->notificationService->ViewAll($userTo);
-        return response()->json($allNotifications);
-    }
-
-    public function sendNotification(Request $request)
-    {
-        if (Auth::check()) {
-            $userFrom = Auth::user()->id;
-        } else {
-            return response()->json(['message' => 'No authenticated user found'], 401);
-        }
-    
-        $userTo = $request->input('user_to');
-        $currentRoute = $request->route();
-        $url = url()->current();
-        $notificationText = $request->input('notification_text');
+        $this->notificationService->markAsRead($id);
         
-        $detailsEntityId = $this->notificationService->SendNotification($userFrom, $userTo, $url, $notificationText);
-    
-        return response()->json(['notification_id' => $detailsEntityId]);
+        // If there is a URL associated with the notification, redirect to it
+        $notification = \App\Models\Notification::find($id);
+        if ($notification && $notification->url) {
+            return redirect($notification->url);
+        }
+
+        return redirect()->back()->with('success', 'Notification marked as read.');
+    }
+
+    /**
+     * Mark all notifications as read.
+     */
+    public function markAllRead()
+    {
+        $this->notificationService->markAllAsReadForUser(Auth::id());
+        return redirect()->back()->with('success', 'All notifications marked as read.');
     }
 }

@@ -90,6 +90,9 @@ class ApprovalService
                 $this->advanceWorkflow($model, $entity->name, $pendingTask->serial);
             } else {
                 $model->update(['status' => 'rejected']);
+
+                // 4. NOTIFY REQUESTOR ON REJECTION
+                $this->notifyRequestorOfRejection($model);
             }
         });
     }
@@ -124,6 +127,8 @@ class ApprovalService
                 // STOCK OUT: Deduct items using FIFO
                 $this->deductRequisitionItemsFromStock($model);
             }
+            // NOTIFY REQUESTOR ON APPROVAL
+            $this->notifyRequestorOfApproval($model);
         }
     }
 
@@ -141,15 +146,90 @@ class ApprovalService
             'comments' => $comments,
         ];
 
+        $text = "New Approval Task";
+        $url = "#";
+
         if ($model instanceof Lot) {
             $attributes['lot_id'] = $model->id;
+            $text = "Approval Pending for Lot #" . $model->lot_number;
+            $url = route('lots.show', $model->id);
         } elseif ($model instanceof Requisition) {
             $attributes['requistion_id'] = $model->id;
+            $text = "Approval Pending for Requisition #" . $model->id;
+            $url = route('requisitions.show', $model->id);
         }
 
         ApprovalDetail::create($attributes);
+
+        // 5. NOTIFY APPROVER (Only if there is a specific target user and it is a pending task)
+        if ($toId && $status === 'pending') {
+            $this->notificationService->createNotification(
+                $toId,          // To User (The Approver)
+                $text,          // Notification Text
+                $url,           // Link to view the item
+                $fromId         // From User (The person who triggered this step)
+            );
+        }
     }
 
+    /**
+     * Helper to notify the original requestor if their request was rejected.
+     */
+    private function notifyRequestorOfRejection(Model $model)
+    {
+        $requestorId = null;
+        $text = "";
+        $url = "#";
+
+        if ($model instanceof Lot) {
+            $requestorId = $model->created_by;
+            $text = "Your Lot #" . $model->lot_number . " has been REJECTED.";
+            $url = route('lots.show', $model->id);
+        } elseif ($model instanceof Requisition) {
+            $requestorId = $model->requested_by_user_id;
+            $text = "Your Requisition #" . $model->id . " has been REJECTED.";
+            $url = route('requisitions.show', $model->id);
+        }
+
+        if ($requestorId) {
+            $this->notificationService->createNotification(
+                $requestorId,
+                $text,
+                $url,
+                Auth::id() // Rejected by current user
+            );
+        }
+    }
+
+    /**
+     * Helper to notify the original requestor upon final approval.
+     */
+    private function notifyRequestorOfApproval(Model $model)
+    {
+        $requestorId = null;
+        $text = "";
+        $url = "#";
+
+        if ($model instanceof Lot) {
+            $requestorId = $model->created_by;
+            $text = "Your Lot #" . $model->lot_number . " has been fully APPROVED.";
+            $url = route('lots.show', $model->id);
+        } elseif ($model instanceof Requisition) {
+            $requestorId = $model->requested_by_user_id;
+            $text = "Your Requisition #" . $model->id . " has been fully APPROVED/PROCESSED.";
+            $url = route('requisitions.show', $model->id);
+        }
+
+        if ($requestorId) {
+            $this->notificationService->createNotification(
+                $requestorId,
+                $text,
+                $url,
+                Auth::id() // The final approver
+            );
+        }
+    }
+    
     /**
      * Marks other pending tasks at the same level as 'superceded'.
      */
@@ -279,7 +359,7 @@ class ApprovalService
             // A. WAREHOUSE UPDATE: Create NEGATIVE stock entry (Reduces Warehouse Stock)
             $this->stockRepository->create([
                 'product_id' => $productId,
-                'quantity' => -($amountToTake),
+                'quantity' => - ($amountToTake),
                 'lot_id' => $lotData->lot_id
             ]);
 

@@ -89,12 +89,9 @@ Route::middleware(['auth', 'permission'])->group(function () {
     Route::get('change-language/{locale}', 'App\Http\Controllers\LocalizationController@changeLanguage')->name('change.language');
 
     //NotificationService
-    Route::prefix('notifications')->group(function () {
-        Route::get('unread', [NotificationController::class, 'getUnreadNotifications']);
-        Route::put('mark-as-read', [NotificationController::class, 'markAllAsRead']);
-        Route::get('all', [NotificationController::class, 'viewAllNotifications']);
-        Route::post('send', [NotificationController::class, 'sendNotification']);
-    });
+    Route::get('/notifications', [NotificationController::class, 'index'])->name('notifications.index');
+    Route::get('/notifications/{id}/read', [NotificationController::class, 'markAsRead'])->name('notifications.read');
+    Route::post('/notifications/read-all', [NotificationController::class, 'markAllRead'])->name('notifications.read_all');
 
     // Product & Category Management Routes
     Route::resource('categories', CategoryController::class);
@@ -119,5 +116,5 @@ Route::middleware(['auth', 'permission'])->group(function () {
     Route::resource('requisitions', RequisitionController::class);
 
     Route::get('/requisitions/{requisition}/details', [App\Http\Controllers\RequisitionController::class, 'getDetails'])->name('requisitions.get_details');
-Route::post('/requisitions/{requisition}/update-items', [App\Http\Controllers\RequisitionController::class, 'updateItems'])->name('requisitions.update_items');
+    Route::post('/requisitions/{requisition}/update-items', [App\Http\Controllers\RequisitionController::class, 'updateItems'])->name('requisitions.update_items');
 });

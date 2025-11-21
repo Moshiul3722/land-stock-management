@@ -85,4 +85,24 @@ class NotificationService
             ->limit($limit)
             ->get();
     }
+
+    /**
+     * Get all notifications for a user (paginated).
+     */
+    public function getAllForUserPaginated($userId, $perPage = 10)
+    {
+        return $this->notificationRepository->model()::where('user_to_id', $userId)
+            ->orderBy('created_at', 'desc')
+            ->paginate($perPage);
+    }
+
+    /**
+     * Mark all notifications as read for a user.
+     */
+    public function markAllAsReadForUser($userId)
+    {
+        return $this->notificationRepository->model()::where('user_to_id', $userId)
+            ->where('is_read', false)
+            ->update(['is_read' => true, 'read_at' => now()]);
+    }
 }
