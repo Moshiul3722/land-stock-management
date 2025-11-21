@@ -15,14 +15,17 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use InvalidArgumentException;
+use App\Services\NotificationService;
 
 class ApprovalService
 {
     protected $stockRepository;
+    protected $notificationService;
 
-    public function __construct(StockRepository $stockRepository)
+    public function __construct(StockRepository $stockRepository, NotificationService $notificationService)
     {
         $this->stockRepository = $stockRepository;
+        $this->notificationService = $notificationService;
     }
     /**
      * Kicks off the approval workflow for a given model instance.

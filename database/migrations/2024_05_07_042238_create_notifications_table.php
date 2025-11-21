@@ -12,13 +12,18 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('notifications', function (Blueprint $table) {
-            $table->bigIncrements('id');
-            $table->string('notification')->nullable();
-            $table->unsignedBigInteger('to_user')->nullable();
-            $table->unsignedBigInteger('from_user')->nullable();
+            $table->id();
+            $table->foreignId('user_from_id')->nullable()->constrained('users')->onDelete('set null');
+            $table->foreignId('user_to_id')->constrained('users')->onDelete('cascade');
+            $table->text('notification_text');
             $table->string('url')->nullable();
-            $table->tinyInteger('is_viewed')->default(0)->nullable();
-            $table->timestamp('created_at')->useCurrent()->nullable();
+            $table->boolean('is_read')->default(false);
+            $table->timestamp('read_at')->nullable();
+            $table->timestamps();
+            $table->softDeletes();
+            $table->unsignedBigInteger('created_by')->nullable();
+            $table->unsignedBigInteger('updated_by')->nullable();
+            $table->unsignedBigInteger('deleted_by')->nullable();
         });
     }
 

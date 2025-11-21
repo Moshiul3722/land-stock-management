@@ -1,53 +1,88 @@
 <?php
 
-use Illuminate\Support\Facades\DB;
+namespace App\Services;
+
+use App\Repositories\NotificationRepository;
+use Exception;
+use Illuminate\Support\Facades\Log;
 
 class NotificationService
 {
-    public $userTo;
-    public $userFrom;
-    public $notification;
-    public $isViewed;
-    public $url;
-    public $notificationText;
+    protected $notificationRepository;
 
-    public function GetUnread($userTo)
+    public function __construct(NotificationRepository $notificationRepository)
     {
-        $this->userTo = $userTo;
-        $this->isViewed = '0';
-
-        $unreadNotifications = DB::select('SELECT * FROM notifications WHERE to_user = ? AND is_viewed = ? ORDER BY created_at DESC', [$this->userTo, $this->isViewed]);
-        return $unreadNotifications;
+        $this->notificationRepository = $notificationRepository;
     }
 
-    public function MarkAllAsRead($userTo)
+    /**
+     * Create a new notification.
+     *
+     * @param int $toUserId
+     * @param string $text
+     * @param string|null $url
+     * @param int|null $fromUserId
+     * @return \App\Models\Notification|null
+     */
+    public function createNotification($toUserId, $text, $url = null, $fromUserId = null)
     {
-        $this->userTo = $userTo;
-        $markAllAsRead = DB::update('UPDATE notifications SET is_viewed = ? WHERE to_user = ?', ['1', $this->userTo]);
-        return $markAllAsRead;
+        try {
+            return $this->notificationRepository->create([
+                'user_to_id' => $toUserId,
+                'user_from_id' => $fromUserId,
+                'notification_text' => $text,
+                'url' => $url,
+                'is_read' => false,
+            ]);
+        } catch (Exception $e) {
+            Log::error("Failed to create notification: " . $e->getMessage());
+            return null;
+        }
     }
 
-    public function ViewAll($userTo)
+    /**
+     * Mark a notification as read.
+     *
+     * @param int $notificationId
+     * @return bool
+     */
+    public function markAsRead($notificationId)
     {
-        $this->userTo = $userTo;
-        $allNotifications = DB::select('SELECT * FROM notifications WHERE to_user = ? ORDER BY created_at DESC', [$this->userTo]);
-        return $allNotifications;
+        try {
+            $notification = $this->notificationRepository->find($notificationId);
+            if ($notification) {
+                $this->notificationRepository->update([
+                    'is_read' => true,
+                    'read_at' => now(),
+                ], $notificationId);
+                return true;
+            }
+            return false;
+        } catch (Exception $e) {
+            Log::error("Failed to mark notification as read: " . $e->getMessage());
+            return false;
+        }
     }
 
-    public function SendNotification($userFrom, $userTo, $url, $notificationText)
+    /**
+     * Get unread notifications count for a user.
+     * * @param int $userId
+     * @return int
+     */
+    public function getUnreadCount($userId)
     {
-        $this->userTo = $userTo;
-        $this->userFrom = $userFrom;
-        $this->url = $url;
-        $this->notificationText = $notificationText;
-
-        $detailsEntityId = DB::table('notifications')->insertGetId([
-            'notification' => $this->notificationText,
-            'to_user' => $this->userTo,
-            'from_user' => $this->userFrom,
-            'url' => $this->url
-        ]);
-
-        return $detailsEntityId;
+        return $this->notificationRepository->getUnreadForUser($userId)->count();
+    }
+    
+    /**
+     * Get recent unread notifications for display in navbar.
+     */
+    public function getRecentUnread($userId, $limit = 5)
+    {
+        return $this->notificationRepository->model()::where('user_to_id', $userId)
+            ->where('is_read', false)
+            ->orderBy('created_at', 'desc')
+            ->limit($limit)
+            ->get();
     }
 }
