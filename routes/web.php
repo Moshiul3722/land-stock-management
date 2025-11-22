@@ -11,6 +11,7 @@ use App\Http\Controllers\ProductController;
 use App\Http\Controllers\StockController;
 use App\Http\Controllers\RequisitionController;
 use App\Http\Controllers\IssuedItemController;
+use App\Http\Controllers\ProfileController;
 
 /*
 |--------------------------------------------------------------------------
@@ -120,4 +121,9 @@ Route::middleware(['auth', 'permission'])->group(function () {
 
     // Issued Items Routes
     Route::get('/my-items', [IssuedItemController::class, 'index'])->name('issued_items.index');
+
+    // Profile Routes
+    Route::get('/profile', [ProfileController::class, 'index'])->name('profile.index');
+    Route::post('/profile/update', [ProfileController::class, 'update'])->name('profile.update');
+    Route::post('/profile/password', [ProfileController::class, 'updatePassword'])->name('profile.password');
 });

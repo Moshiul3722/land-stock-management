@@ -27,6 +27,7 @@ class User extends Authenticatable
         'usertype_id',
         'district_id',
         'password',
+        'profile_photo_path',
         'created_by',
         'updated_by',
         'deleted_by',
