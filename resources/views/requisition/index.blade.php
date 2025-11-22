@@ -1,66 +1,134 @@
 @extends('layouts.app')
+
 @section('page_css')
     <style>
         /* Timeline CSS */
-        .timeline {
-            border-left: 2px solid #dee2e6;
-            margin-left: 10px;
-            padding-left: 20px;
+        .timeline-container {
             position: relative;
+            padding: 10px 0;
         }
 
-        .timeline-item {
-            margin-bottom: 20px;
-            position: relative;
-        }
-
-        .timeline-item::before {
+        .timeline-container::before {
             content: '';
-            width: 12px;
-            height: 12px;
-            background: #fff;
-            border: 2px solid #007bff;
-            border-radius: 50%;
             position: absolute;
-            left: -27px;
-            top: 5px;
+            top: 15px;
+            bottom: 0;
+            left: 15px;
+            /* Center line through numbers */
+            width: 2px;
+            background: #e9ecef;
+            z-index: 0;
         }
 
-        .timeline-item.approved::before {
-            border-color: #28a745;
-            background: #28a745;
+        .timeline-entry {
+            position: relative;
+            margin-bottom: 25px;
+            padding-left: 50px;
+            /* Space for number */
+            z-index: 1;
         }
 
-        .timeline-item.rejected::before {
-            border-color: #dc3545;
-            background: #dc3545;
+        /* Numbered Circle */
+        .timeline-number {
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            text-align: center;
+            line-height: 28px;
+            /* Center text vertically */
+            font-weight: bold;
+            font-size: 14px;
+            color: #fff;
+            border: 2px solid #fff;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
+            z-index: 2;
         }
 
-        .timeline-item.pending::before {
-            border-color: #ffc107;
-            background: #ffc107;
+        /* Colors for Timeline Steps */
+        .bg-primary {
+            background-color: #007bff !important;
+        }
+
+        .bg-success {
+            background-color: #28a745 !important;
+        }
+
+        .bg-danger {
+            background-color: #dc3545 !important;
+        }
+
+        .bg-warning {
+            background-color: #ffc107 !important;
+            color: #333 !important;
+        }
+
+        /* Content Box */
+        .timeline-content {
+            background: #fff;
+            border: 1px solid #dee2e6;
+            border-radius: 6px;
+            padding: 12px 15px;
+            position: relative;
+        }
+
+        /* Little arrow pointing to number */
+        .timeline-content::after {
+            content: '';
+            position: absolute;
+            top: 10px;
+            left: -6px;
+            width: 10px;
+            height: 10px;
+            background: #fff;
+            border-left: 1px solid #dee2e6;
+            border-bottom: 1px solid #dee2e6;
+            transform: rotate(45deg);
         }
 
         .timeline-header {
-            font-weight: bold;
-            font-size: 0.9rem;
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 4px;
         }
 
-        .timeline-date {
+        .user-name {
+            font-weight: bold;
+            font-size: 1rem;
+            color: #343a40;
+        }
+
+        .action-date {
             font-size: 0.8rem;
-            color: #6c757d;
+            color: #868e96;
+        }
+
+        .role-badge {
+            display: inline-block;
+            padding: 2px 6px;
+            font-size: 0.75rem;
+            border-radius: 4px;
+            background: #f1f3f5;
+            color: #495057;
+            margin-bottom: 6px;
         }
 
         .timeline-comment {
-            background: #f8f9fa;
-            padding: 8px;
-            border-radius: 4px;
-            margin-top: 5px;
+            margin-top: 8px;
+            background-color: #f8f9fa;
+            /* Light grey background */
+            border-left: 4px solid #17a2b8;
+            /* Info color accent */
+            padding: 8px 12px;
             font-size: 0.9rem;
-            font-style: italic;
+            color: #495057;
+            border-radius: 0 4px 4px 0;
         }
     </style>
 @endsection
+
 @section('content')
     <section class="content-header">
         <div class="container-fluid">
@@ -126,10 +194,10 @@
 
     {{-- DETAILS MODAL --}}
     <div class="modal fade" id="detailsModal" tabindex="-1" role="dialog" aria-hidden="true">
-        <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-dialog modal-xl" role="document"> {{-- Extra Large Modal --}}
             <div class="modal-content">
                 <div class="modal-header bg-info text-white">
-                    <h5 class="modal-title">Requisition Details</h5>
+                    <h5 class="modal-title">Requisition Details & History</h5>
                     <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close"
                         onclick="$('#detailsModal').modal('hide')">
                         <span aria-hidden="true">&times;</span>
@@ -149,16 +217,19 @@
                                     <tr>
                                         <th>Product</th>
                                         <th>Category</th>
-                                        <th>Qty</th>
+                                        <th class="text-center">Qty</th>
                                     </tr>
                                 </thead>
                                 <tbody id="modal-items-body"></tbody>
                             </table>
                         </div>
+
                         {{-- Right: Timeline --}}
                         <div class="col-md-5">
-                            <h6 class="font-weight-bold text-info mb-3">Status History</h6>
-                            <div id="modal-timeline" class="timeline"></div>
+                            <h6 class="font-weight-bold text-info mb-3 pl-2">Approval History</h6>
+                            <div class="timeline-container" id="modal-timeline">
+                                {{-- Timeline loaded via JS --}}
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -174,6 +245,7 @@
 @push('js')
     <script>
         $(document).ready(function() {
+            // 1. Load List Logic
             function loadRequisitions() {
                 $.ajax({
                     url: "{{ route('requisitions.index') }}",
@@ -204,14 +276,14 @@
                 loadRequisitions();
             });
 
-            // --- VIEW (MODAL) LOGIC ---
+            // 2. VIEW (MODAL) LOGIC
             $(document).on('click', '.view-req-btn', function() {
                 let url = $(this).data('url');
 
                 // Reset Modal
                 $('#modal-requestor').text('Loading...');
                 $('#modal-items-body').html('');
-                $('#modal-timeline').html('');
+                $('#modal-timeline').html('<div class="text-center p-3">Loading history...</div>');
                 $('#detailsModal').modal('show');
 
                 $.ajax({
@@ -229,34 +301,52 @@
                         });
                         $('#modal-items-body').html(itemsHtml);
 
-                        // Timeline
+                        // Timeline (Using the new Numbered Style)
                         let timelineHtml = '';
-                        res.timeline.forEach(log => {
-                            let statusClass = log.status === 'approved' ? 'approved' : (
-                                log.status === 'rejected' ? 'rejected' : 'pending');
-                            let commentHtml = log.comments ?
-                                `<div class="timeline-comment">"${log.comments}"</div>` :
-                                '';
+                        res.timeline.forEach(item => {
+                            // Determine badge color based on status
+                            let bgClass = 'bg-' + item.color;
+                            // (Assuming your controller sends 'primary', 'success', 'danger', 'warning' in item.color)
+
+                            let commentHtml = '';
+                            if (item.comments) {
+                                commentHtml =
+                                    `<div class="timeline-comment">"${item.comments}"</div>`;
+                            }
+
                             timelineHtml += `
-                            <div class="timeline-item ${statusClass}">
-                                <div class="timeline-header">${log.user} <small>(${log.status})</small></div>
-                                <div class="timeline-date">${log.date}</div>
-                                ${commentHtml}
-                            </div>`;
+                                <div class="timeline-entry">
+                                    <div class="timeline-number ${bgClass}">
+                                        ${item.step}
+                                    </div>
+                                    <div class="timeline-content">
+                                        <div class="timeline-header">
+                                            <span class="user-name">${item.user}</span>
+                                            <span class="action-date">${item.date}</span>
+                                        </div>
+                                        <span class="role-badge">${item.role}</span> 
+                                        <span class="text-${item.color} font-weight-bold small ml-1">(${item.title})</span>
+                                        ${commentHtml}
+                                    </div>
+                                </div>
+                            `;
                         });
                         $('#modal-timeline').html(timelineHtml);
+                    },
+                    error: function() {
+                        toastr.error("Failed to fetch details");
                     }
                 });
             });
 
-            // --- DELETE LOGIC ---
+            // 3. DELETE LOGIC
             $(document).on('click', '.delete-req-btn', function() {
                 let id = $(this).data('id');
                 let url = "{{ route('requisitions.destroy', ':id') }}".replace(':id', id);
 
                 Swal.fire({
                     title: 'Are you sure?',
-                    text: "You won't be able to revert this!",
+                    text: "This draft will be permanently deleted.",
                     icon: 'warning',
                     showCancelButton: true,
                     confirmButtonColor: '#d33',

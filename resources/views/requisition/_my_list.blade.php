@@ -5,7 +5,7 @@
             <th>Requisition Date</th>
             <th>Items Count</th>
             <th>{{ __('lot.table_status') }}</th>
-            <th>{{ __('lot.table_action') }}</th>
+            <th width="150" class="text-center">{{ __('lot.table_action') }}</th>
         </tr>
     </thead>
     <tbody>
