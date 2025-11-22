@@ -112,7 +112,7 @@ class RequisitionService
             'details.*.quantity' => 'required|integer|min:1',
             'details.*.status' => 'required|string', // Hidden field for stock status
         ]);
-        dd($data);
+
         if ($validator->fails()) {
             throw new InvalidArgumentException($validator->errors()->first());
         }
@@ -135,10 +135,10 @@ class RequisitionService
                 // 1. Create the main Requisition record
                 $requisition = $this->requisitionRepository->create([
                     'requisition_date' => $data['requisition_date'],
-                    'requested_by_user_id' => Auth::id(),
-                    'remarks' => $data['remarks'],
+                    'remarks' => $data['remarks'], // Keeping this on the main record is good practice for quick access
                     'status' => $status,
                     'current_serial' => 1,
+                    'requested_by_user_id' => Auth::id(),
                 ]);
 
                 // 2. Create the RequisitionItem records
@@ -152,7 +152,12 @@ class RequisitionService
 
                 // 3. ONLY submit to the workflow if the action is 'submit'
                 if ($action === 'submit') {
-                    $this->approvalService->submitForApproval($requisition, 'Requisition Approval');
+                    // CHANGE IS HERE: Pass the remarks as the 3rd argument
+                    $this->approvalService->submitForApproval(
+                        $requisition,
+                        'Requisition Approval',
+                        $data['remarks'] ?? null
+                    );
                 }
 
                 return $requisition;

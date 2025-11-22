@@ -32,12 +32,13 @@ class ApprovalService
      *
      * @param Model $model The model instance (Lot or Requisition)
      * @param string $entityName The name of the process (e.g., "Lot Approval")
+     * @param string|null $comments Optional comments from the submitter.
      */
-    public function submitForApproval(Model $model, string $entityName): void
+    public function submitForApproval(Model $model, string $entityName, ?string $comments = null): void
     {
-        DB::transaction(function () use ($model, $entityName) {
+        DB::transaction(function () use ($model, $entityName, $comments) {
             // Start the workflow from the beginning (before serial 1)
-            $this->advanceWorkflow($model, $entityName, 0);
+            $this->advanceWorkflow($model, $entityName, 0, $comments);
         });
     }
 
@@ -79,7 +80,7 @@ class ApprovalService
             }
             $entity = $pendingTask->approvalEntity;
 
-            // 1. Log the user's action (approved/rejected)
+            // 1. Log the user's action (approved/rejected) with their comments
             $this->createEvent($model, $entity->id, $pendingTask->serial, $status, Auth::id(), null, $comments);
 
             // 2. Mark other pending tasks at this level as superceded
@@ -99,8 +100,9 @@ class ApprovalService
 
     /**
      * Finds and advances the workflow to the next step based on the rules.
+     * Also accepts optional comments $initComments for the initial submission.
      */
-    private function advanceWorkflow(Model $model, string $entityName, int $currentSerial): void
+    private function advanceWorkflow(Model $model, string $entityName, int $currentSerial, ?string $initComments = null): void
     {
         $entity = ApprovalEntity::where('name', $entityName)->firstOrFail();
         $nextStep = $entity->processes()->where('serial', $currentSerial + 1)->first();
@@ -112,7 +114,8 @@ class ApprovalService
             }
 
             foreach ($nextApprovers as $approver) {
-                $this->createEvent($model, $entity->id, $nextStep->serial, 'pending', Auth::id(), $approver->id);
+                $commentsToSave = ($currentSerial === 0) ? $initComments : null;
+                $this->createEvent($model, $entity->id, $nextStep->serial, 'pending', Auth::id(), $approver->id, $commentsToSave);
             }
             $model->update(['current_serial' => $nextStep->serial]);
         } else {
@@ -229,7 +232,7 @@ class ApprovalService
             );
         }
     }
-    
+
     /**
      * Marks other pending tasks at the same level as 'superceded'.
      */

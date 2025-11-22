@@ -160,26 +160,32 @@ class RequisitionController extends Controller
             'requestedBy',
             'approvalDetails.fromUser.role',
             'approvalDetails.toUser.role',
-            'approvalDetails.approvalEntity'
         ]);
 
-        // 1. Start with the Initiator (Step 0)
-        $timeline = collect([
-            [
-                'step' => 0, // Step Number
-                'status' => 'initiated',
-                'title' => 'Request Initiated',
-                'user' => $requisition->requestedBy->name ?? 'Unknown',
-                'role' => 'Requestor',
-                'date' => $requisition->created_at->format('d M, Y h:i A'),
-                'comments' => $requisition->remarks, // Show requisition remarks here
-                'color' => 'primary'
-            ]
+        $timeline = collect([]);
+
+        // 1. Reconstruct "Step 0" (Initiated) logic
+        // We grab the very first log entry (lowest ID) to find the initiation details
+        $firstLog = $requisition->approvalDetails->sortBy('id')->first();
+
+        // Use the remarks from the main table, or fallback to the comment in the first log
+        $initiationComments = $requisition->remarks ?? ($firstLog ? $firstLog->comments : '');
+
+        $timeline->push([
+            'step' => 0,
+            'status' => 'Initiated',
+            'title' => 'Request Initiated',
+            'user' => $requisition->requestedBy->name ?? 'Unknown',
+            'role' => 'Requestor',
+            'date' => $requisition->created_at->format('d M, Y h:i A'),
+            'comments' => $initiationComments,
+            'color' => 'primary',
+            'status_raw' => 'initiated'
         ]);
 
-        // 2. Group Approval Details by Serial (Step)
+        // 2. Process Actual Workflow Steps
         $groupedDetails = $requisition->approvalDetails
-            ->where('status', '!=', 'superceded') // Filter out irrelevant old tasks
+            ->where('status', '!=', 'superceded')
             ->sortBy('serial')
             ->groupBy('serial');
 
@@ -190,38 +196,40 @@ class RequisitionController extends Controller
             });
 
             if ($actor) {
-                // IF ACTED: Show ONLY the person who acted
+                // ACTED: Show the person who took action
                 $timeline->push([
-                    'step' => $serial, // Use Serial as Step Number
-                    'status' => $actor->status,
+                    'step' => $serial,
+                    'status' => ucfirst($actor->status),
                     'title' => ucfirst($actor->status),
                     'user' => $actor->fromUser->name ?? 'System',
-                    'role' => $actor->fromUser->role->role_name_en ?? '',
+                    'role' => $actor->fromUser->role->role_name_en ?? 'Approver',
                     'date' => $actor->updated_at->format('d M, Y h:i A'),
-                    'comments' => $actor->comments, // Ensure this is passed
-                    'color' => $actor->status == 'rejected' ? 'danger' : 'success'
+                    'comments' => $actor->comments,
+                    'color' => $actor->status == 'rejected' ? 'danger' : 'success',
+                    'status_raw' => $actor->status
                 ]);
             } else {
-                // IF PENDING: Show who we are waiting for
+                // PENDING: Show who we are waiting for
                 $pendingUsers = $details->map(function ($d) {
                     return $d->toUser->name ?? 'Unknown';
-                })->join(', ');
+                })->unique()->join(', ');
 
                 $roleName = $details->first()->toUser->role->role_name_en ?? 'Approver';
 
                 $timeline->push([
-                    'step' => $serial, // Use Serial as Step Number
-                    'status' => 'pending',
+                    'step' => $serial,
+                    'status' => 'Pending',
                     'title' => 'Pending Approval',
                     'user' => 'Waiting for: ' . $pendingUsers,
                     'role' => $roleName,
                     'date' => $details->first()->created_at->format('d M, Y h:i A'),
-                    'comments' => '', // Pending usually has no comments yet
-                    'color' => 'warning'
+                    'comments' => '', // Pending steps don't have comments yet
+                    'color' => 'warning',
+                    'status_raw' => 'pending'
                 ]);
             }
         }
-        dd($timeline);
+
         return response()->json([
             'requisition' => $requisition,
             'requestor' => $requisition->requestedBy->name,
