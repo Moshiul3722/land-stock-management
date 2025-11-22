@@ -112,7 +112,7 @@ class RequisitionService
             'details.*.quantity' => 'required|integer|min:1',
             'details.*.status' => 'required|string', // Hidden field for stock status
         ]);
-
+        dd($data);
         if ($validator->fails()) {
             throw new InvalidArgumentException($validator->errors()->first());
         }

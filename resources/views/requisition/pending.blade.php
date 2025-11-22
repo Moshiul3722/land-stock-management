@@ -2,20 +2,19 @@
 
 @section('styles')
     <style>
-        /* Clean Vertical Timeline */
+        /* Timeline CSS */
         .timeline-container {
             position: relative;
-            padding: 20px 0;
+            padding: 10px 0;
         }
 
-        /* The Vertical Line */
         .timeline-container::before {
             content: '';
             position: absolute;
-            top: 0;
+            top: 15px;
             bottom: 0;
             left: 15px;
-            /* Align with dots */
+            /* Center line through numbers */
             width: 2px;
             background: #e9ecef;
             z-index: 0;
@@ -24,13 +23,13 @@
         .timeline-entry {
             position: relative;
             margin-bottom: 25px;
-            padding-left: 45px;
-            /* Space for dot */
+            padding-left: 50px;
+            /* Space for number */
             z-index: 1;
         }
 
-        /* The Dot (0) */
-        .timeline-icon {
+        /* Numbered Circle */
+        .timeline-number {
             position: absolute;
             left: 0;
             top: 0;
@@ -38,71 +37,101 @@
             height: 32px;
             border-radius: 50%;
             text-align: center;
-            line-height: 32px;
-            color: #fff;
+            line-height: 28px;
+            /* Center text vertically */
+            font-weight: bold;
             font-size: 14px;
+            color: #fff;
             border: 2px solid #fff;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
+            z-index: 2;
         }
 
         /* Colors */
-        .icon-primary {
-            background-color: #007bff;
+        .bg-primary {
+            background-color: #007bff !important;
         }
 
-        .icon-success {
-            background-color: #28a745;
+        .bg-success {
+            background-color: #28a745 !important;
         }
 
-        .icon-danger {
-            background-color: #dc3545;
+        .bg-danger {
+            background-color: #dc3545 !important;
         }
 
-        .icon-warning {
-            background-color: #ffc107;
-            color: #1f2d3d;
+        .bg-warning {
+            background-color: #ffc107 !important;
+            color: #333 !important;
         }
 
-        /* Content Styling */
+        /* Content Box */
         .timeline-content {
             background: #fff;
-            border: 1px solid #e9ecef;
-            border-radius: 4px;
-            padding: 10px 15px;
-            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+            border: 1px solid #dee2e6;
+            border-radius: 6px;
+            padding: 12px 15px;
+            position: relative;
+        }
+
+        /* Little arrow pointing to number */
+        .timeline-content::after {
+            content: '';
+            position: absolute;
+            top: 10px;
+            left: -6px;
+            width: 10px;
+            height: 10px;
+            background: #fff;
+            border-left: 1px solid #dee2e6;
+            border-bottom: 1px solid #dee2e6;
+            transform: rotate(45deg);
         }
 
         .timeline-header {
             display: flex;
             justify-content: space-between;
-            align-items: center;
-            margin-bottom: 5px;
+            margin-bottom: 4px;
         }
 
-        .timeline-user {
+        .user-name {
             font-weight: bold;
             font-size: 1rem;
-            color: #333;
+            color: #343a40;
         }
 
-        .timeline-role {
-            font-size: 0.85rem;
-            color: #6c757d;
-            font-style: italic;
-        }
-
-        .timeline-date {
+        .action-date {
             font-size: 0.8rem;
-            color: #adb5bd;
+            color: #868e96;
+        }
+
+        .role-badge {
+            display: inline-block;
+            padding: 2px 6px;
+            font-size: 0.75rem;
+            border-radius: 4px;
+            background: #f1f3f5;
+            color: #495057;
+            margin-bottom: 6px;
         }
 
         .timeline-comment {
             margin-top: 8px;
             background-color: #f8f9fa;
-            border-left: 3px solid #007bff;
+            /* Light grey background */
+            border-left: 4px solid #17a2b8;
+            /* Info color accent */
             padding: 8px 12px;
             font-size: 0.9rem;
-            color: #555;
+            color: #495057;
+            border-radius: 0 4px 4px 0;
+        }
+
+        .timeline-comment strong {
+            display: block;
+            font-size: 0.75rem;
+            color: #17a2b8;
+            margin-bottom: 2px;
         }
     </style>
 @endsection
@@ -113,6 +142,12 @@
             <div class="row mb-2">
                 <div class="col-sm-6">
                     <h1>{{ __('requisition.pending_title') }}</h1>
+                </div>
+                <div class="col-sm-6">
+                    <ol class="breadcrumb float-sm-right">
+                        <li class="breadcrumb-item"><a href="{{ route('home') }}">{{ __('breadcrumb.home') }}</a></li>
+                        <li class="breadcrumb-item active">{{ __('requisition.pending_title') }}</li>
+                    </ol>
                 </div>
             </div>
         </div>
@@ -157,12 +192,11 @@
     </div>
 
     {{-- ACTION MODAL --}}
-    <div class="modal fade" id="actionModal" tabindex="-1" role="dialog" aria-labelledby="actionModalLabel"
-        aria-hidden="true">
+    <div class="modal fade" id="actionModal" tabindex="-1" role="dialog" aria-hidden="true">
         <div class="modal-dialog modal-xl" role="document">
             <div class="modal-content">
                 <div class="modal-header bg-primary text-white">
-                    <h5 class="modal-title" id="actionModalLabel">Requisition Details</h5>
+                    <h5 class="modal-title">Requisition Details & Timeline</h5>
                     <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close"
                         onclick="$('#actionModal').modal('hide')">
                         <span aria-hidden="true">&times;</span>
@@ -170,18 +204,14 @@
                 </div>
                 <div class="modal-body">
                     <div class="row">
-                        {{-- LEFT COLUMN: Details & Items --}}
+                        {{-- LEFT: Details --}}
                         <div class="col-md-7 border-right">
                             <div class="row mb-3">
-                                <div class="col-md-6">
-                                    <strong>Requested By:</strong> <span id="modal-requestor"></span>
+                                <div class="col-md-6"><strong>Requested By:</strong> <span id="modal-requestor"></span>
                                 </div>
-                                <div class="col-md-6 text-right">
-                                    <strong>Date:</strong> <span id="modal-date"></span>
-                                </div>
+                                <div class="col-md-6 text-right"><strong>Date:</strong> <span id="modal-date"></span></div>
                             </div>
-
-                            <h6 class="font-weight-bold text-primary">Requested Items</h6>
+                            <h6 class="font-weight-bold text-primary">Items</h6>
                             <form id="items-form">
                                 <table class="table table-sm table-bordered">
                                     <thead class="bg-light">
@@ -191,47 +221,39 @@
                                             <th width="150">Quantity</th>
                                         </tr>
                                     </thead>
-                                    <tbody id="modal-items-body">
-                                        {{-- Items loaded via AJAX --}}
-                                    </tbody>
+                                    <tbody id="modal-items-body"></tbody>
                                 </table>
                                 <div class="text-right mb-3">
-                                    <button type="button" id="btn-update-qty" class="btn btn-warning btn-sm">
-                                        <i class="fas fa-save"></i> Save Quantity Changes
-                                    </button>
+                                    <button type="button" id="btn-update-qty" class="btn btn-warning btn-sm"><i
+                                            class="fas fa-save"></i> Save Qty</button>
                                 </div>
                             </form>
-
                             <div class="form-group mt-4">
-                                <label for="action-comments">Your Remarks / Comments (Required for Rejection)</label>
-                                <textarea class="form-control" id="action-comments" rows="3" placeholder="Enter comments here..."></textarea>
+                                <label>Your Comments (Required for Rejection)</label>
+                                <textarea class="form-control" id="action-comments" rows="3" placeholder="Enter comments..."></textarea>
                             </div>
                         </div>
 
-                        {{-- RIGHT COLUMN: Timeline --}}
+                        {{-- RIGHT: Timeline --}}
                         <div class="col-md-5">
-                            <h6 class="font-weight-bold text-primary mb-3">Approval Timeline</h6>
-                            <div id="modal-timeline" class="timeline-container">
-                                {{-- Timeline loaded via AJAX --}}
-                            </div>
+                            <h6 class="font-weight-bold text-primary mb-3 ml-2">Approval History</h6>
+                            <div id="modal-timeline" class="timeline-container"></div>
                         </div>
                     </div>
                 </div>
                 <div class="modal-footer bg-light">
                     <button type="button" class="btn btn-secondary" data-dismiss="modal"
                         onclick="$('#actionModal').modal('hide')">Close</button>
-                    <button type="button" class="btn btn-danger" id="btn-reject">
-                        <i class="fas fa-times"></i> Reject
-                    </button>
-                    <button type="button" class="btn btn-success" id="btn-approve">
-                        <i class="fas fa-check"></i> Approve
-                    </button>
+                    <button type="button" class="btn btn-danger" id="btn-reject"><i class="fas fa-times"></i>
+                        Reject</button>
+                    <button type="button" class="btn btn-success" id="btn-approve"><i class="fas fa-check"></i>
+                        Approve</button>
                 </div>
             </div>
         </div>
     </div>
 
-    {{-- Hidden Forms for Submission --}}
+    {{-- Hidden Forms --}}
     <form id="approve-form" method="POST" style="display:none;">@csrf</form>
     <form id="reject-form" method="POST" style="display:none;">@csrf</form>
 @endsection
@@ -240,71 +262,59 @@
     <script>
         $(document).ready(function() {
             $('#pending-req-table').DataTable();
-
             let currentRequisitionId = null;
 
-            // 1. OPEN MODAL & FETCH DATA
             $('.view-action-btn').click(function() {
                 let url = $(this).data('url');
                 currentRequisitionId = $(this).data('id');
 
-                // Clear previous data
-                $('#modal-requestor').text('Loading...');
-                $('#modal-date').text('');
-                $('#modal-items-body').html(
-                    '<tr><td colspan="3" class="text-center">Loading items...</td></tr>');
-                $('#modal-timeline').html(
-                    '<div class="text-center p-3"><i class="fas fa-spinner fa-spin"></i> Loading...</div>'
-                    );
-                $('#action-comments').val('');
-
-                // Show Modal
                 $('#actionModal').modal('show');
+                $('#modal-timeline').html('<div class="text-center p-3">Loading...</div>');
 
-                // Ajax Call
                 $.ajax({
                     url: url,
                     type: 'GET',
                     success: function(res) {
-                        // Populate Header
                         $('#modal-requestor').text(res.requestor);
                         $('#modal-date').text(res.formatted_date);
 
                         // Populate Items
                         let itemsHtml = '';
                         res.requisition.items.forEach(item => {
-                            itemsHtml += `
-                            <tr>
-                                <td>${item.product.name}</td>
-                                <td>${item.product.category.name}</td>
-                                <td>
-                                    <input type="number" class="form-control form-control-sm item-qty-input" 
-                                           data-id="${item.id}" value="${item.quantity}" min="1">
-                                </td>
-                            </tr>
-                        `;
+                            itemsHtml +=
+                                `<tr><td>${item.product.name}</td><td>${item.product.category.name}</td><td><input type="number" class="form-control form-control-sm item-qty-input" data-id="${item.id}" value="${item.quantity}" min="1"></td></tr>`;
                         });
                         $('#modal-items-body').html(itemsHtml);
 
                         // Populate Timeline
                         let timelineHtml = '';
                         res.timeline.forEach(item => {
-                            let commentHtml = item.comments ?
-                                `<div class="timeline-comment">"${item.comments}"</div>` :
-                                '';
+                            let commentBlock = '';
+                            if (item.comments) {
+                                commentBlock = `
+                                <div class="timeline-comment">
+                                    <strong>Comments:</strong>
+                                    ${item.comments}
+                                </div>`;
+                            }
+
+                            // Use 'item.step' for the number inside the circle
+                            // Assign background color class based on item.color (primary, success, danger, warning)
+                            let bgClass = 'bg-' + item.color;
 
                             timelineHtml += `
                             <div class="timeline-entry">
-                                <div class="timeline-icon icon-${item.color}">
-                                    <i class="fas ${item.icon}"></i>
+                                <div class="timeline-number ${bgClass}">
+                                    ${item.step}
                                 </div>
                                 <div class="timeline-content">
                                     <div class="timeline-header">
-                                        <span class="timeline-user">${item.user}</span>, Date & Time - 
-                                        <span class="timeline-date">${item.date}</span>
+                                        <span class="user-name">${item.user}</span>
+                                        <span class="action-date">${item.date}</span>
                                     </div>
-                                    <div class="timeline-role">${item.role} - ${item.title}</div>
-                                    ${commentHtml}
+                                    <span class="role-badge">${item.role}</span>
+                                    <span class="text-${item.color} font-weight-bold small ml-1">(${item.title})</span>
+                                    ${commentBlock}
                                 </div>
                             </div>
                         `;
@@ -317,16 +327,14 @@
                 });
             });
 
-            // 2. HANDLE UPDATE QUANTITY
+            // Action Button Logic
             $('#btn-update-qty').click(function() {
                 let items = {};
                 $('.item-qty-input').each(function() {
                     items[$(this).data('id')] = $(this).val();
                 });
-
                 let url = "{{ route('requisitions.update_items', ':id') }}".replace(':id',
                     currentRequisitionId);
-
                 $.ajax({
                     url: url,
                     type: 'POST',
@@ -338,28 +346,24 @@
                         toastr.success(res.message);
                     },
                     error: function() {
-                        toastr.error("Failed to update quantities");
+                        toastr.error("Failed to update");
                     }
                 });
             });
 
-            // 3. HANDLE APPROVE
             $('#btn-approve').click(function() {
                 let url = "{{ route('requisitions.approve', ':id') }}".replace(':id',
                 currentRequisitionId);
                 let comments = $('#action-comments').val();
-
                 Swal.fire({
-                    title: 'Approve Requisition?',
-                    text: "Are you sure you want to approve this?",
+                    title: 'Approve?',
                     icon: 'success',
                     showCancelButton: true,
-                    confirmButtonText: 'Yes, Approve'
-                }).then((result) => {
-                    if (result.isConfirmed) {
+                    confirmButtonText: 'Yes'
+                }).then((res) => {
+                    if (res.isConfirmed) {
                         let form = $('#approve-form');
                         form.attr('action', url);
-                        // Add comments input dynamically
                         form.html(
                         `@csrf <input type="hidden" name="comments" value="${comments}">`);
                         form.submit();
@@ -367,26 +371,21 @@
                 });
             });
 
-            // 4. HANDLE REJECT
             $('#btn-reject').click(function() {
                 let url = "{{ route('requisitions.reject', ':id') }}".replace(':id', currentRequisitionId);
                 let comments = $('#action-comments').val();
-
                 if (!comments) {
-                    toastr.error("Please enter comments to reject.");
-                    $('#action-comments').focus();
+                    toastr.error("Comments required");
                     return;
                 }
-
                 Swal.fire({
-                    title: 'Reject Requisition?',
-                    text: "This will stop the workflow.",
+                    title: 'Reject?',
                     icon: 'warning',
                     showCancelButton: true,
                     confirmButtonColor: '#d33',
-                    confirmButtonText: 'Yes, Reject'
-                }).then((result) => {
-                    if (result.isConfirmed) {
+                    confirmButtonText: 'Yes'
+                }).then((res) => {
+                    if (res.isConfirmed) {
                         let form = $('#reject-form');
                         form.attr('action', url);
                         form.html(

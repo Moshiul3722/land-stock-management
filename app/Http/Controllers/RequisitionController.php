@@ -159,32 +159,32 @@ class RequisitionController extends Controller
             'items.product.category',
             'requestedBy',
             'approvalDetails.fromUser.role',
-            'approvalDetails.toUser.role', // Load role for pending users
+            'approvalDetails.toUser.role',
             'approvalDetails.approvalEntity'
         ]);
 
-        // 1. Start with the Initiator
+        // 1. Start with the Initiator (Step 0)
         $timeline = collect([
             [
+                'step' => 0, // Step Number
                 'status' => 'initiated',
                 'title' => 'Request Initiated',
                 'user' => $requisition->requestedBy->name ?? 'Unknown',
                 'role' => 'Requestor',
                 'date' => $requisition->created_at->format('d M, Y h:i A'),
-                'comments' => '',
-                'icon' => 'fa-user',
+                'comments' => $requisition->remarks, // Show requisition remarks here
                 'color' => 'primary'
             ]
         ]);
 
-        // 2. Group Approval Details by Serial (Step) to handle the "Only the actor" logic
+        // 2. Group Approval Details by Serial (Step)
         $groupedDetails = $requisition->approvalDetails
             ->where('status', '!=', 'superceded') // Filter out irrelevant old tasks
             ->sortBy('serial')
             ->groupBy('serial');
 
         foreach ($groupedDetails as $serial => $details) {
-            // Check if anyone has acted in this step
+            // Check if anyone has acted (approved/rejected/processed)
             $actor = $details->first(function ($d) {
                 return in_array($d->status, ['approved', 'rejected', 'processed']);
             });
@@ -192,17 +192,17 @@ class RequisitionController extends Controller
             if ($actor) {
                 // IF ACTED: Show ONLY the person who acted
                 $timeline->push([
+                    'step' => $serial, // Use Serial as Step Number
                     'status' => $actor->status,
-                    'title' => ucfirst($actor->status), // Approved/Rejected
+                    'title' => ucfirst($actor->status),
                     'user' => $actor->fromUser->name ?? 'System',
                     'role' => $actor->fromUser->role->role_name_en ?? '',
                     'date' => $actor->updated_at->format('d M, Y h:i A'),
-                    'comments' => $actor->comments,
-                    'icon' => $actor->status == 'rejected' ? 'fa-times' : 'fa-check',
+                    'comments' => $actor->comments, // Ensure this is passed
                     'color' => $actor->status == 'rejected' ? 'danger' : 'success'
                 ]);
             } else {
-                // IF PENDING: Show all potential approvers
+                // IF PENDING: Show who we are waiting for
                 $pendingUsers = $details->map(function ($d) {
                     return $d->toUser->name ?? 'Unknown';
                 })->join(', ');
@@ -210,18 +210,18 @@ class RequisitionController extends Controller
                 $roleName = $details->first()->toUser->role->role_name_en ?? 'Approver';
 
                 $timeline->push([
+                    'step' => $serial, // Use Serial as Step Number
                     'status' => 'pending',
                     'title' => 'Pending Approval',
                     'user' => 'Waiting for: ' . $pendingUsers,
                     'role' => $roleName,
                     'date' => $details->first()->created_at->format('d M, Y h:i A'),
-                    'comments' => '',
-                    'icon' => 'fa-clock',
+                    'comments' => '', // Pending usually has no comments yet
                     'color' => 'warning'
                 ]);
             }
         }
-
+        dd($timeline);
         return response()->json([
             'requisition' => $requisition,
             'requestor' => $requisition->requestedBy->name,
