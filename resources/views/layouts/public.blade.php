@@ -75,7 +75,7 @@
             {{-- Navbar content remains the same --}}
              <div class="container">
                 <a class="navbar-brand" href="{{ url('/') }}">
-                    <img src="/img/bd_logo.png" alt="Ministry of Land" height="30" class="me-2">
+                    <img src='{{ asset("/img/bd-logo.png") }}' alt="Ministry of Land" height="30" class="me-2">
                     {{ config('app.name', 'Inventory Management') }}
                 </a>
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="{{ __('Toggle navigation') }}">
