@@ -12,6 +12,7 @@ use App\Http\Controllers\StockController;
 use App\Http\Controllers\RequisitionController;
 use App\Http\Controllers\IssuedItemController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\ReportController;
 
 /*
 |--------------------------------------------------------------------------
@@ -126,4 +127,9 @@ Route::middleware(['auth', 'permission'])->group(function () {
     Route::get('/profile', [ProfileController::class, 'index'])->name('profile.index');
     Route::post('/profile/update', [ProfileController::class, 'update'])->name('profile.update');
     Route::post('/profile/password', [ProfileController::class, 'updatePassword'])->name('profile.password');
+
+    // Reports Routes
+    Route::prefix('reports')->name('reports.')->group(function () {
+        Route::get('/stock/current', [ReportController::class, 'currentStock'])->name('stock.current');
+    });
 });

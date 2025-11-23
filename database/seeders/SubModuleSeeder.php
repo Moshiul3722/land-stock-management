@@ -99,5 +99,16 @@ class SubModuleSeeder extends Seeder
             'created_by' => 1,
             'updated_by' => 1
         ]);
+
+        // Id = 9
+        CnfSubmodule::create([
+            'submodule_name_en' => 'Reports',
+            'submodule_name_bn' => 'প্রতিবেদন',
+            'module_id' => 4,
+            'is_active' => 1,
+            'is_null' => 0,
+            'created_by' => 1,
+            'updated_by' => 1
+        ]);
     }
 }

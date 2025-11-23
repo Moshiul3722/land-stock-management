@@ -47,5 +47,14 @@ class ModuleSeeder extends Seeder
             'created_by' => 1,
             'updated_by' => 1
         ]);
+
+        // Id = 5
+        CnfModule::create([
+            'module_name_en' => 'Reports',
+            'module_name_bn' => 'প্রতিবেদন',
+            'is_active' => 1,
+            'created_by' => 1,
+            'updated_by' => 1
+        ]);
     }
 }

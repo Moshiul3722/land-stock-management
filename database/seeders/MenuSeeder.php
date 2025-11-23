@@ -277,5 +277,19 @@ class MenuSeeder extends Seeder
             'created_by' => 1,
             'updated_by' => 1
         ]);
+
+        // Id = 20
+        CnfMenu::create([
+            'submodule_id' => 9,
+            'menu_name_en' => 'Stock Report',
+            'menu_name_bn' => 'স্টক রিপোর্ট',
+            'controller' => 'requisition',
+            'action' => 'View',
+            'route' => 'issued_items.index',
+            'is_menu' => 1,
+            'is_active' => 1,
+            'created_by' => 1,
+            'updated_by' => 1
+        ]);
     }
 }
