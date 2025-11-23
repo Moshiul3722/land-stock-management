@@ -131,5 +131,6 @@ Route::middleware(['auth', 'permission'])->group(function () {
     // Reports Routes
     Route::prefix('reports')->name('reports.')->group(function () {
         Route::get('/stock/current', [ReportController::class, 'currentStock'])->name('stock.current');
+        Route::get('/consumption', [ReportController::class, 'consumption'])->name('consumption');
     });
 });
