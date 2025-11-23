@@ -283,9 +283,23 @@ class MenuSeeder extends Seeder
             'submodule_id' => 9,
             'menu_name_en' => 'Stock Report',
             'menu_name_bn' => 'স্টক রিপোর্ট',
-            'controller' => 'requisition',
+            'controller' => 'report',
             'action' => 'View',
-            'route' => 'issued_items.index',
+            'route' => 'stock.current',
+            'is_menu' => 1,
+            'is_active' => 1,
+            'created_by' => 1,
+            'updated_by' => 1
+        ]);
+
+        // Id = 21
+        CnfMenu::create([
+            'submodule_id' => 9,
+            'menu_name_en' => 'Consumption Report',
+            'menu_name_bn' => 'রিকুইজিশন রিপোর্ট',
+            'controller' => 'report',
+            'action' => 'View',
+            'route' => 'consumption',
             'is_menu' => 1,
             'is_active' => 1,
             'created_by' => 1,
