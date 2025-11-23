@@ -694,7 +694,7 @@ class PermissionSeeder extends Seeder
         CnfPermission::create(
             [
                 'role_id' => 3,
-                'menu_id' => 21,
+                'menu_id' => 20,
                 'created_by' => 1,
                 'updated_by' => 1
             ],
