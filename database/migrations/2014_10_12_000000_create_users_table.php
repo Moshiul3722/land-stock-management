@@ -20,12 +20,12 @@ class CreateUsersTable extends Migration
             $table->string('email')->unique();
             $table->unsignedBigInteger('is_active')->nullable()->default(1);
             $table->timestamp('email_verified_at')->nullable();
+
+            $table->unsignedBigInteger('role_id');
             $table->foreignId('department_id')
                 ->nullable()
-                ->after('role_id')
                 ->constrained('departments')
                 ->onDelete('set null');
-            $table->unsignedBigInteger('role_id');
             $table->unsignedBigInteger('created_by')->nullable();
             $table->unsignedBigInteger('updated_by')->nullable();
             $table->unsignedBigInteger('deleted_by')->nullable();

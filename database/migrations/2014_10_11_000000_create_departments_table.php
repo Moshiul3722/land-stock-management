@@ -11,6 +11,7 @@ return new class extends Migration
         Schema::create('departments', function (Blueprint $table) {
             $table->id();
             $table->string('name'); // e.g., IT, Admin, Law
+            $table->string('name_bn')->nullable(); // e.g., IT, Admin, Law
             $table->string('code')->nullable(); // e.g., IT-01
             $table->timestamps();
             $table->softDeletes();
