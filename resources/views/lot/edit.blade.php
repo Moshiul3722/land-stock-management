@@ -48,7 +48,7 @@
                                 <div class="form-group col-md-12">
                                     <label for="product_purchase_type_id">{{ __('lot.purchase_type') }} <span
                                             style="color: red;">*</span></label>
-                                    <select class="form-control js-example-basic-single custom-select" id="product_purchase_type_id"
+                                    <select class="form-control select2 custom-select" id="product_purchase_type_id"
                                         name="product_purchase_type_id" required>
                                         <option value="">Select Purchase Type</option>
                                         @foreach ($purchaseTypes as $type)

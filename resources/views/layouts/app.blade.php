@@ -58,12 +58,11 @@
     <!-- For Wait Loader & Custom CSS -->
     <link rel="stylesheet" href="{{ asset('css/land.css') }}" />
     <!-- Select2 -->
-    {{-- <link href="{{ asset('css/select2npm.min.css') }}" rel="stylesheet" />
+    {{-- <link href="{{ asset('css/select2npm.min.css') }}" rel="stylesheet" /> --}}
 
 
 
 
-    <script src="{{ asset('js/select2.min.js') }}"></script> --}}
     <style>
         .select2-container--default .select2-selection--single {
             border: 1px solid #ced4da;
@@ -313,7 +312,9 @@
 
     <script src="{{ asset('js/bootstrap4-toggle.min.js') }}"></script>
 
-    <script src="{{ asset('js/select2.ajax.min.js') }}"></script>
+    <script src="{{ asset('js/select2.min.js') }}"></script> 
+
+    {{-- <script src="{{ asset('js/select2.ajax.min.js') }}"></script> --}}
 
     <script src="{{ asset('js/bootstrapSwitch.min.js') }}"></script>
     <!-- JQuery UI 1.13.2 -->
@@ -371,12 +372,13 @@
         var emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
         // Select2
-        $('.js-example-basic-single').select2({
-            placeholder: 'Select an option'
-        });
+        // $('.js-example-basic-single').select2({
+        //     placeholder: 'Select an option'
+        // });
 
         $(document).ready(function() {
-            $('.js-example-basic-multiple').select2();
+            // $('.js-example-basic-multiple').select2();
+            $('.select2').select2();
             $('#languageToggle').change(function() {
                 var locale = $(this).prop('checked') ? 'en' : 'bn';
                 var url = "{{ route('change.language', ['locale' => ':locale']) }}";
@@ -392,23 +394,6 @@
             "progressBar": true,
             "positionClass": "toast-top-right",
         };
-
-        // Check for session messages and display them
-        @if (Session::has('success'))
-            toastr.success("{{ Session::get('success') }}");
-        @endif
-
-        @if (Session::has('error'))
-            toastr.error("{{ Session::get('error') }}");
-        @endif
-
-        @if (Session::has('info'))
-            toastr.info("{{ Session::get('info') }}");
-        @endif
-
-        @if (Session::has('warning'))
-            toastr.warning("{{ Session::get('warning') }}");
-        @endif
     </script>
 
     <script src="{{ asset('js/sweetalert2@11.js') }}"></script>

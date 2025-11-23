@@ -31,7 +31,7 @@
                                 <div class="form-group col-md-12">
                                     <label for="product_purchase_type_id">{{ __('lot.purchase_type') }} <span
                                             style="color: red;">*</span></label>
-                                    <select class="form-control js-example-basic-single custom-select" id="product_purchase_type_id"
+                                    <select class="form-control select2 custom-select" id="product_purchase_type_id"
                                         name="product_purchase_type_id" required>
                                         <option value="">Select Purchase Type</option>
                                         @foreach ($purchaseTypes as $purchaseType)
@@ -89,7 +89,7 @@
                 $('#lot-details-body').append(`
             <tr id="R${++rowIdx}">
                 <td>
-                    <select class="form-control category-select" required>
+                    <select class="form-control select2 category-select" required>
                         <option value="">Select Category</option>
                         @foreach ($categories as $category)
                             <option value="{{ $category->id }}">{{ $category->name }}</option>
@@ -97,7 +97,7 @@
                     </select>
                 </td>
                 <td>
-                    <select class="form-control product-select" name="details[${rowIdx}][product_id]" required disabled>
+                    <select class="form-control select2 product-select" name="details[${rowIdx}][product_id]" required disabled>
                         <option value="">Select Product</option>
                     </select>
                 </td>
