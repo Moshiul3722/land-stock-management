@@ -14,7 +14,8 @@ return [
     'edit_title' => 'Edit Lot',
     'details_title' => 'Lot Details',
     'table_submitted_by' => 'Submitted By',
-    
+    'pending_title' => 'Pending Lot List',
+    'pending_list' => 'Pending Lot List',
 
     'lot_number' => 'Lot Number',
     'entry_date' => 'Entry Date',

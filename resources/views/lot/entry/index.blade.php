@@ -10,7 +10,7 @@
                 <div class="col-sm-6">
                     <ol class="breadcrumb float-sm-right">
                         <li class="breadcrumb-item"><a href={{ route('home') }}>{{ __('breadcrumb.home') }}</a></li>
-                        <li class="breadcrumb-item active">{{ __('lot.pending_title') }}</li>
+                        <li class="breadcrumb-item active">{{ __('breadcrumb.list') }}</li>
                     </ol>
                 </div>
             </div>

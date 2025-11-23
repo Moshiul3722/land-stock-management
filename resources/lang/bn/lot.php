@@ -14,6 +14,8 @@ return [
     'edit_title' => 'লটের তথ্য হালনাগাদ করুন',
     'details_title' => 'লটের বিস্তারিত তথ্য',
     'table_submitted_by' => 'এন্ট্রি করেছেন',
+    'pending_title' => 'লট এন্ট্রির অনুরোধের তালিকা',
+    'pending_list' => 'লট এন্ট্রির অনুরোধের তালিকা',
 
     'lot_number' => 'লট নম্বর',
     'entry_date' => 'এন্ট্রি তারিখ',
