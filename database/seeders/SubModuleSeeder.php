@@ -93,7 +93,7 @@ class SubModuleSeeder extends Seeder
         CnfSubmodule::create([
             'submodule_name_en' => 'My Products',
             'submodule_name_bn' => 'আমার প্রোডাক্ট',
-            'module_id' => 5,
+            'module_id' => 4,
             'is_active' => 1,
             'is_null' => 0,
             'created_by' => 1,
