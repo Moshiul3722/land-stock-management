@@ -4,6 +4,7 @@ namespace App\Repositories;
 
 use App\Models\IssuedItem;
 use App\Repositories\BaseRepository;
+use Illuminate\Support\Facades\DB;
 
 class IssuedItemRepository extends BaseRepository
 {
@@ -42,5 +43,61 @@ class IssuedItemRepository extends BaseRepository
             ])
             ->orderBy('issued_date', 'desc')
             ->get();
+    }
+
+    /**
+     * Get aggregated consumption report with filters.
+     * * @param array $filters
+     * @return \Illuminate\Support\Collection
+     */
+    public function getConsumptionReport(array $filters = [])
+    {
+        $query = IssuedItem::query()
+            // Join Products & Categories
+            ->join('products', 'issued_items.product_id', '=', 'products.id')
+            ->join('product_categories', 'products.category_id', '=', 'product_categories.id')
+
+            // Join Lots & Purchase Types
+            ->join('lots', 'issued_items.lot_id', '=', 'lots.id')
+            ->join('product_purchase_types', 'lots.product_purchase_type_id', '=', 'product_purchase_types.id')
+
+            // Join Users & Departments
+            ->join('users', 'issued_items.user_id', '=', 'users.id')
+            ->leftJoin('departments', 'users.department_id', '=', 'departments.id')
+
+            ->select(
+                'products.name as product_name',
+                'product_categories.name as category_name',
+                'product_purchase_types.name as purchase_type_name',
+                'departments.name as department_name',
+                DB::raw('SUM(issued_items.quantity) as total_quantity'),
+                DB::raw('COUNT(issued_items.id) as requisition_count')
+            )
+            ->groupBy(
+                'products.id',
+                'products.name',
+                'product_categories.name',
+                'product_purchase_types.name',
+                'departments.name'
+            );
+
+        // Apply Filters
+        if (!empty($filters['category_id'])) {
+            $query->where('products.category_id', $filters['category_id']);
+        }
+        if (!empty($filters['product_id'])) {
+            $query->where('issued_items.product_id', $filters['product_id']);
+        }
+        if (!empty($filters['purchase_type_id'])) {
+            $query->where('lots.product_purchase_type_id', $filters['purchase_type_id']);
+        }
+        if (!empty($filters['department_id'])) {
+            $query->where('users.department_id', $filters['department_id']);
+        }
+        if (!empty($filters['start_date']) && !empty($filters['end_date'])) {
+            $query->whereBetween('issued_items.issued_date', [$filters['start_date'], $filters['end_date']]);
+        }
+
+        return $query->get();
     }
 }
