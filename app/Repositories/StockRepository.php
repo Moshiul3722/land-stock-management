@@ -36,15 +36,26 @@ class StockRepository extends BaseRepository
         $query = Stock::query()
             ->join('products', 'stocks.product_id', '=', 'products.id')
             ->join('product_categories', 'products.category_id', '=', 'product_categories.id')
+            // Join Lots and Purchase Types to allow grouping
+            ->leftJoin('lots', 'stocks.lot_id', '=', 'lots.id')
+            ->leftJoin('product_purchase_types', 'lots.product_purchase_type_id', '=', 'product_purchase_types.id')
+
             ->select(
                 'products.id as product_id',
                 'products.name as product_name',
                 'product_categories.name as category_name',
+                'product_purchase_types.name as purchase_type_name',
                 DB::raw('SUM(stocks.quantity) as total_quantity')
             )
             ->whereNull('stocks.deleted_at')
-            // We NO LONGER group by purchase type, only by product.
-            ->groupBy('products.id', 'products.name', 'product_categories.name');
+            // Group by Product AND Purchase Type
+            ->groupBy(
+                'products.id', 
+                'products.name', 
+                'product_categories.name',
+                'product_purchase_types.id',
+                'product_purchase_types.name'
+            );
 
         // Apply category filter
         if (!empty($filters['category_id'])) {
@@ -54,7 +65,7 @@ class StockRepository extends BaseRepository
         // Apply purchase type filter (conditionally add the join)
         if (!empty($filters['purchase_type_id'])) {
             $query->join('lots', 'stocks.lot_id', '=', 'lots.id')
-                  ->where('lots.product_purchase_type_id', $filters['purchase_type_id']);
+                ->where('lots.product_purchase_type_id', $filters['purchase_type_id']);
         }
 
         // Apply product filter

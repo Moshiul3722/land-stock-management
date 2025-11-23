@@ -10,7 +10,7 @@
                 <div class="col-sm-6">
                     <ol class="breadcrumb float-sm-right">
                         <li class="breadcrumb-item"><a href={{ route('home') }}>{{ __('breadcrumb.home') }}</a></li>
-                        <li class="breadcrumb-item active">{{ __('stock.current_stock_title') }}</li>
+                        <li class="breadcrumb-item active">{{ __('breadcrumb.list') }}</li>
                     </ol>
                 </div>
             </div>
@@ -65,15 +65,14 @@
             </div>
         </div>
 
-        <div class="row">
-            <div class="col-md-12">
-                <div class="card card-outline card-success">
-                    <div class="card-header">
-                        <h3 class="card-title">Report Results</h3>
-                    </div>
-                    <div class="card-body" id="stock-list-container">
-                        {{-- Partial view loaded here --}}
-                    </div>
+        <div class="col-md-12">
+            <div class="card card-outline card-success">
+                <div class="card-header">
+                    <h3 class="card-title">Report Results</h3>
+                </div>
+                <div class="card-body" id="stock-list-container">
+                    {{-- Partial view loaded here --}}
+
                 </div>
             </div>
         </div>
@@ -85,7 +84,6 @@
         $(document).ready(function() {
             // 1. Load Stock Logic
             function loadStock() {
-                // UPDATED ROUTE NAME
                 $.ajax({
                     url: "{{ route('reports.stock.current') }}",
                     type: 'GET',
@@ -103,9 +101,49 @@
 
                         // Initialize DataTable with Excel Button
                         $('#current-stock-table').DataTable({
-                            dom: 'Bfrtip',
-                            buttons: [
-                                'copy', 'csv', 'excel', 'pdf', 'print'
+                            dom: "<'row'<'col-md-6'B><'col-md-6 text-right'f>>" +
+                                 "<'row'<'col-sm-12'tr>>" +
+                                 "<'row'<'col-sm-12 col-md-5'i><'col-sm-12 col-md-7'p>>",
+                            lengthChange: false,
+                            autoWidth: false,
+                            buttons: [{
+                                    // --- EXCEL CONFIGURATION ---
+                                    extend: 'excelHtml5',
+                                    text: '<i class="fas fa-file-excel"></i> Excel',
+                                    title: 'Ministry of Land - Inventory Management System',
+                                    messageTop: 'Current Stock Report | Generated on: ' +
+                                        new Date().toLocaleString(), // Subtitle
+                                    exportOptions: {
+                                        columns: ':visible' // Only export visible columns
+                                    },
+                                    customize: function(xlsx) {
+                                        // Optional: Make the title row bold and larger
+                                        var sheet = xlsx.xl.worksheets['sheet1.xml'];
+                                        $('row:first c', sheet).attr('s',
+                                            '51'); // Apply a preset bold style
+                                    }
+                                },
+                                {
+                                    // --- PRINT CONFIGURATION (WITH LOGO) ---
+                                    extend: 'print',
+                                    text: '<i class="fas fa-print"></i> Print',
+                                    title: '', // Remove default title to use our custom HTML below
+                                    messageTop: `
+                                        <div style="text-align: center; margin-bottom: 20px;">
+                                            <img src="{{ asset('theme/assets/img/gov.png') }}" style="height: 80px; margin-bottom: 10px;">
+                                            <h2 style="margin:0;">Ministry of Land</h2>
+                                            <h4 style="margin:5px 0;">Inventory Management System</h4>
+                                            <p style="margin:0;">Current Stock Report | Generated: ${new Date().toLocaleDateString()}</p>
+                                        </div>
+                                    `,
+                                    customize: function(win) {
+                                        $(win.document.body).css('font-size', '10pt');
+                                        $(win.document.body).find('table')
+                                            .addClass('compact')
+                                            .css('font-size', 'inherit');
+                                    }
+                                },
+
                             ],
                             "columnDefs": [{
                                     "width": "10%",

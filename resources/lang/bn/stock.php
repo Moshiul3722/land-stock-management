@@ -7,6 +7,7 @@ return [
     'product_name' => 'পণ্য',
     'details_by_lot' => 'লট অনুযায়ী স্টকের বিবরণ',
     'total_available' => 'মোট:',
+    'current_stock_title' => 'স্টক রিপোর্ট',
 
     // Table Headers
     'table_sl' => 'ক্রম',

@@ -1,4 +1,4 @@
-<table id="current-stock-table" class="table table-bordered table-striped table-hover">
+<table id="current-stock-table" class="table table-bordered table-striped table-hover" style="width:100%;">
     <thead>
         <tr>
             <th>{{ __('stock.table_sl') }}</th>
@@ -9,6 +9,7 @@
         </tr>
     </thead>
     <tbody>
+
         @foreach ($stockSummary as $item)
             <tr>
                 <td class="text-center">{{ $loop->iteration }}</td>

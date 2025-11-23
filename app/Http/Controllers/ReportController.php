@@ -36,7 +36,6 @@ class ReportController extends Controller
         if ($request->ajax()) {
             $filters = $request->only(['category_id', 'product_id', 'purchase_type_id']);
             $stockSummary = $this->stockService->getAggregatedStockList($filters);
-
             // Return the partial view from the new location
             return view('reports.stock._list', compact('stockSummary'));
         }
@@ -68,7 +67,6 @@ class ReportController extends Controller
 
             // Fetch consumption data from IssuedItemRepository
             $reportData = $this->issuedItemRepository->getConsumptionReport($filters);
-
             return view('reports.consumption._list', compact('reportData'));
         }
 

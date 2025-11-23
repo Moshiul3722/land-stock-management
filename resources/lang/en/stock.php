@@ -7,6 +7,7 @@ return [
     'product_name' => 'Product',
     'details_by_lot' => 'Stock Details by Lot',
     'total_available' => 'Total Available Stock:',
+    'current_stock_title' => 'Stock Report',
 
     // Table Headers
     'table_sl' => 'SL',
