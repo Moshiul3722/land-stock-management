@@ -215,9 +215,14 @@
                             {{-- Items Table --}}
                             <div class="d-flex justify-content-between align-items-center mb-2">
                                 <h6 class="font-weight-bold text-primary mb-0">Items & Stock Check</h6>
-                                <button type="button" id="btn-update-qty" class="btn btn-warning btn-sm shadow-sm">
-                                    <i class="fas fa-save"></i> Update Quantities
-                                </button>
+                                {{-- 
+                                    Only show "Update Quantities" button if user is NOT a Store Keeper (Role ID 4).
+                                --}}
+                                @if (Auth::user()->role_id != 4)
+                                    <button type="button" id="btn-update-qty" class="btn btn-warning btn-sm shadow-sm">
+                                        <i class="fas fa-save"></i> Update Quantities
+                                    </button>
+                                @endif
                             </div>
 
                             <form id="items-form">
@@ -250,10 +255,18 @@
                 <div class="modal-footer bg-light">
                     <button type="button" class="btn btn-secondary" data-dismiss="modal"
                         onclick="$('#actionModal').modal('hide')">Close</button>
-                    <button type="button" class="btn btn-danger" id="btn-reject"><i class="fas fa-times"></i>
-                        Reject</button>
-                    <button type="button" class="btn btn-success" id="btn-approve"><i class="fas fa-check"></i>
-                        Approve</button>
+                    @if (Auth::user()->role_id != 4)
+                        <button type="button" class="btn btn-danger" id="btn-reject"><i class="fas fa-times"></i>
+                            Reject</button>
+                    @endif
+                    @if (Auth::user()->role_id != 4)
+                        <button type="button" class="btn btn-success" id="btn-approve"><i class="fas fa-check"></i>
+                            Approve</button>
+                    @else
+                        <button type="button" class="btn btn-success" id="btn-approve"><i class="fas fa-check"></i>
+                            Acknowledge</button>
+                    @endif
+
                 </div>
             </div>
         </div>
@@ -269,6 +282,9 @@
         $(document).ready(function() {
             $('#pending-req-table').DataTable();
             let currentRequisitionId = null;
+
+            // Check if user is Store Keeper
+            const isStoreKeeper = {{ Auth::user()->role_id == 4 ? 'true' : 'false' }};
 
             // 1. View & Load Data
             $('.view-action-btn').click(function() {
@@ -303,6 +319,11 @@
                                     'text-success font-weight-bold' :
                                     'text-danger font-weight-bold';
                             }
+                            // Disable input if Store Keeper
+                            let disabledAttr = isStoreKeeper ? 'disabled' : '';
+                            let inputClass = isStoreKeeper ?
+                                'form-control-plaintext text-center font-weight-bold' :
+                                'form-control form-control-sm item-qty-input text-center';
 
                             itemsHtml += `
                             <tr>
@@ -390,7 +411,7 @@
             // 3. Approve Logic
             $('#btn-approve').click(function() {
                 let url = "{{ route('requisitions.approve', ':id') }}".replace(':id',
-                currentRequisitionId);
+                    currentRequisitionId);
                 let comments = $('#action-comments').val();
                 Swal.fire({
                     title: 'Approve?',
@@ -402,7 +423,7 @@
                         let form = $('#approve-form');
                         form.attr('action', url);
                         form.html(
-                        `@csrf <input type="hidden" name="comments" value="${comments}">`);
+                            `@csrf <input type="hidden" name="comments" value="${comments}">`);
                         form.submit();
                     }
                 });
@@ -427,7 +448,7 @@
                         let form = $('#reject-form');
                         form.attr('action', url);
                         form.html(
-                        `@csrf <input type="hidden" name="comments" value="${comments}">`);
+                            `@csrf <input type="hidden" name="comments" value="${comments}">`);
                         form.submit();
                     }
                 });
