@@ -5,6 +5,8 @@ return [
     'edit_title' => 'Edit Requisition',
     'create_title' => 'Create Requisition',
     'my_title' => 'My Requisitions',
+    'pending_title' => 'List of Pending Requisitions for Approval',
+    'requestor_name' => 'Requestor Name',
     'select_product' => 'Select Product',
     'list_title' => 'List of Products for Requisition',
     'start_date' => 'Start Date',

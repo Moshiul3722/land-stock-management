@@ -146,7 +146,7 @@
                 <div class="col-sm-6">
                     <ol class="breadcrumb float-sm-right">
                         <li class="breadcrumb-item"><a href="{{ route('home') }}">{{ __('breadcrumb.home') }}</a></li>
-                        <li class="breadcrumb-item active">{{ __('requisition.pending_title') }}</li>
+                        <li class="breadcrumb-item active">{{ __('breadcrumb.list') }}</li>
                     </ol>
                 </div>
             </div>
@@ -156,17 +156,17 @@
     <div class="content">
         <div class="card card-primary">
             <div class="card-header">
-                <h3 class="card-title">{{ __('requisition.pending_list') }}</h3>
+                <h3 class="card-title">{{ __('requisition.pending_title') }}</h3>
             </div>
             <div class="card-body">
                 <table id="pending-req-table" class="table table-bordered table-striped">
                     <thead>
                         <tr>
                             <th>{{ __('lot.table_sl') }}</th>
-                            <th>Requestor</th>
-                            <th>Date</th>
-                            <th>Total Items</th>
-                            <th>Action</th>
+                            <th>{{ __('requisition.requestor_name') }}</th>
+                            <th>{{ __('requisition.requisition_date') }}</th>
+                            <th>{{ __('requisition.items_count') }}</th>
+                            <th>{{ __('commontable.action') }}</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -312,10 +312,10 @@
                                     ${currentStock}
                                 </td>
                                 <td>
-                                    <input type="number" 
-                                           class="form-control form-control-sm item-qty-input text-center" 
-                                           data-id="${item.id}" 
-                                           value="${item.quantity}" 
+                                    <input type="number"
+                                           class="form-control form-control-sm item-qty-input text-center"
+                                           data-id="${item.id}"
+                                           value="${item.quantity}"
                                            min="1">
                                 </td>
                             </tr>`;
@@ -337,7 +337,7 @@
                                         <span class="user-name">${item.user}</span>
                                         <span class="action-date">${item.date}</span>
                                     </div>
-                                    <span class="role-badge">${item.role}</span> 
+                                    <span class="role-badge">${item.role}</span>
                                     <span class="text-${item.color} font-weight-bold small ml-1">(${item.title})</span>
                                     ${commentHtml}
                                 </div>
