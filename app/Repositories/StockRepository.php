@@ -64,8 +64,7 @@ class StockRepository extends BaseRepository
 
         // Apply purchase type filter (conditionally add the join)
         if (!empty($filters['purchase_type_id'])) {
-            $query->join('lots', 'stocks.lot_id', '=', 'lots.id')
-                ->where('lots.product_purchase_type_id', $filters['purchase_type_id']);
+            $query->where('lots.product_purchase_type_id', $filters['purchase_type_id']);
         }
 
         // Apply product filter
