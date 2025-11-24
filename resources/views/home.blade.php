@@ -73,7 +73,7 @@
                 </div>
             </div>
 
-            <div class="col-lg-4 col-6">
+            {{-- <div class="col-lg-4 col-6">
                 <!-- small box -->
                 <div class="small-box bg-secondary">
                     <div class="inner">
@@ -85,7 +85,7 @@
                     </div>
                     <a href="#" class="small-box-footer">More info <i class="fas fa-arrow-circle-right"></i></a>
                 </div>
-            </div>
+            </div> --}}
         </div>
         <!-- Bar chart row -->
         <div class="row">
