@@ -124,20 +124,19 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
         $(function() {
+            // --- 1. BAR CHART (Monthly) ---
+            // Get data passed from the controller
+            var barData = @json($barChartData); 
             var ctx = document.getElementById('divisionBarChart').getContext('2d');
             var barChart1 = new Chart(ctx, {
                 type: 'bar',
                 data: {
-                    labels: ['July', 'August', 'September', 'October'],
+                    labels: barData.labels,
                     datasets: [{
-                        label: 'Requisition Submitted',
-                        data: [150, 80, 320, 240],
-                        backgroundColor: ['rgba(60,141,188,0.9)', 'rgba(60,141,188,0.8)',
-                            'rgba(60,141,188,0.7)', 'rgba(60,141,188,0.6)'
-                        ],
-                        borderColor: ['rgba(60,141,188,1)', 'rgba(60,141,188,1)',
-                            'rgba(60,141,188,1)', 'rgba(60,141,188,1)'
-                        ],
+                        label: 'Requisitions',
+                        data: barData.data, // Dynamic Data (Counts)
+                        backgroundColor: 'rgba(60,141,188,0.9)',
+                        borderColor: 'rgba(60,141,188,0.8)',
                         borderWidth: 1
                     }]
                 },
@@ -145,48 +144,40 @@
                     responsive: true,
                     maintainAspectRatio: false,
                     scales: {
-                        y: {
-                            beginAtZero: true
+                        y: { 
+                            beginAtZero: true,
+                            ticks: { stepSize: 1 } // Ensure integers for counts
                         }
+                    },
+                    plugins: {
+                        legend: { display: false }
                     }
                 }
             });
-        });
-    </script>
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            var ctx = document.getElementById('pieChart').getContext('2d');
-            var pieChart = new Chart(ctx, {
+
+            // --- 2. PIE CHART (Departments) ---
+            // Get data passed from the controller
+            var pieData = @json($pieChartData);
+            
+            // Generate dynamic colors based on data length
+            var colors = [
+                '#f56954', '#00a65a', '#f39c12', '#00c0ef', '#3c8dbc', '#d2d6de', 
+                '#8e44ad', '#34495e', '#16a085', '#e67e22'
+            ];
+
+            var ctxPie = document.getElementById('pieChart').getContext('2d');
+            var pieChart = new Chart(ctxPie, {
                 type: 'doughnut',
                 data: {
-                    labels: ['IT', 'Admin',
-                        'Development', 'Law', 'Field Admin',
-                        'Acquisition & Khash Land'
-                    ],
+                    labels: pieData.labels, // Dynamic Labels (Departments)
                     datasets: [{
-                        data: [30, 30, 21, 1, 5, 10],
-                        backgroundColor: [
-                            'rgba(255, 99, 132, 0.6)',
-                            'rgba(54, 162, 235, 0.6)',
-                            'rgba(255, 206, 86, 0.6)',
-                            'rgba(75, 192, 192, 0.6)',
-                            'rgba(153, 102, 255, 0.6)',
-                            'rgba(255, 159, 64, 0.6)'
-                        ],
-                        borderColor: [
-                            'rgba(255, 99, 132, 1)',
-                            'rgba(54, 162, 235, 1)',
-                            'rgba(255, 206, 86, 1)',
-                            'rgba(75, 192, 192, 1)',
-                            'rgba(153, 102, 255, 1)',
-                            'rgba(255, 159, 64, 1)'
-                        ],
-                        borderWidth: 1
+                        data: pieData.data, // Dynamic Data (Counts)
+                        backgroundColor: colors.slice(0, pieData.data.length),
                     }]
                 },
                 options: {
                     responsive: true,
-                    maintainAspectRatio: false
+                    maintainAspectRatio: false,
                 }
             });
         });

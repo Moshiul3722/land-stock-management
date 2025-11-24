@@ -301,4 +301,19 @@ class RequisitionService
 
         $this->approvalService->reject($pendingTask, $comments);
     }
+
+    /**
+     * Get the total number of processed requisitions.
+     * (Required for DashboardService)
+     */
+    public function getProcessedCount(): int
+    {
+        // We check for 'processed' status, or 'approved' if you consider approved as final.
+        // Based on our previous logic, the final status set by the Store Keeper is 'approved' (or 'processed' if you changed it).
+        // Let's check for both to be safe or just 'approved' if that's the final state in your DB.
+        // Assuming 'approved' is the final state for now based on ApprovalService code.
+        
+        return $this->requisitionRepository->countByStatus('processed'); 
+        // If you explicitly used 'processed' in your database for the final step, change 'approved' to 'processed'.
+    }
 }
