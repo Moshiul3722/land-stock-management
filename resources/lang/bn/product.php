@@ -10,6 +10,11 @@ return [
     'purchase_type' => 'ক্রয়ের ধরণ',
     'description' => 'প্রোডাক্টের বিস্তারিত',
     'edit_product_title' => 'প্রোডাক্টের তথ্য হালনাগাদ',
+    'department' => 'বিভাগ',
+    'generate_report' => 'প্রতিবেদন তৈরি করুন',
+    'report_data' => 'প্রতিবেদনের তথ্য',
+    'issued_count' => 'মোট ইস্যুকৃত পরিমাণ',
+
 
     'filter' => 'ফিল্টার',
     'role' => 'রোল',

@@ -10,6 +10,10 @@ return [
     'purchase_type' => 'Product Purchase Type',
     'description' => 'Description of the Product',
     'edit_product_title' => 'Edit Product Details',
+    'department' => 'Department',
+    'generate_report' => 'Generate Report',
+    'report_data' => 'Report Data',
+    'issued_count' => 'Total Issued Count',
 
 
     'filter' => 'ফিল্টার',

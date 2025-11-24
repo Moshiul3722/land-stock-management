@@ -143,7 +143,6 @@
                                             .css('font-size', 'inherit');
                                     }
                                 },
-
                             ],
                             "columnDefs": [{
                                     "width": "10%",
