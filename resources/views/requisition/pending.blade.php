@@ -205,29 +205,35 @@
                 <div class="modal-body">
                     <div class="row">
                         {{-- LEFT: Details --}}
-                        <div class="col-md-7 border-right">
+                        <div class="col-md-8 border-right">
                             <div class="row mb-3">
                                 <div class="col-md-6"><strong>Requested By:</strong> <span id="modal-requestor"></span>
                                 </div>
                                 <div class="col-md-6 text-right"><strong>Date:</strong> <span id="modal-date"></span></div>
                             </div>
-                            <h6 class="font-weight-bold text-primary">Items</h6>
+
+                            {{-- Items Table --}}
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <h6 class="font-weight-bold text-primary mb-0">Items & Stock Check</h6>
+                                <button type="button" id="btn-update-qty" class="btn btn-warning btn-sm shadow-sm">
+                                    <i class="fas fa-save"></i> Update Quantities
+                                </button>
+                            </div>
+
                             <form id="items-form">
-                                <table class="table table-sm table-bordered">
-                                    <thead class="bg-light">
+                                <table class="table table-sm table-bordered table-hover">
+                                    <thead class="bg-light text-center">
                                         <tr>
                                             <th>Product</th>
                                             <th>Category</th>
-                                            <th width="150">Quantity</th>
+                                            <th>Current Stock</th>
+                                            <th width="120">Req. Qty</th>
                                         </tr>
                                     </thead>
                                     <tbody id="modal-items-body"></tbody>
                                 </table>
-                                <div class="text-right mb-3">
-                                    <button type="button" id="btn-update-qty" class="btn btn-warning btn-sm"><i
-                                            class="fas fa-save"></i> Save Qty</button>
-                                </div>
                             </form>
+
                             <div class="form-group mt-4">
                                 <label>Your Comments (Required for Rejection)</label>
                                 <textarea class="form-control" id="action-comments" rows="3" placeholder="Enter comments..."></textarea>
@@ -235,7 +241,7 @@
                         </div>
 
                         {{-- RIGHT: Timeline --}}
-                        <div class="col-md-5">
+                        <div class="col-md-4">
                             <h6 class="font-weight-bold text-primary mb-3 ml-2">Approval History</h6>
                             <div id="modal-timeline" class="timeline-container"></div>
                         </div>
@@ -264,12 +270,17 @@
             $('#pending-req-table').DataTable();
             let currentRequisitionId = null;
 
+            // 1. View & Load Data
             $('.view-action-btn').click(function() {
                 let url = $(this).data('url');
                 currentRequisitionId = $(this).data('id');
 
                 $('#actionModal').modal('show');
                 $('#modal-timeline').html('<div class="text-center p-3">Loading...</div>');
+
+                // Reset items table
+                $('#modal-items-body').html(
+                    '<tr><td colspan="4" class="text-center">Loading items...</td></tr>');
 
                 $.ajax({
                     url: url,
@@ -278,46 +289,59 @@
                         $('#modal-requestor').text(res.requestor);
                         $('#modal-date').text(res.formatted_date);
 
-                        // Populate Items
+                        // Populate Items with Stock Info
                         let itemsHtml = '';
                         res.requisition.items.forEach(item => {
-                            itemsHtml +=
-                                `<tr><td>${item.product.name}</td><td>${item.product.category.name}</td><td><input type="number" class="form-control form-control-sm item-qty-input" data-id="${item.id}" value="${item.quantity}" min="1"></td></tr>`;
+                            // Determine color for stock status
+                            // Check if item.current_stock is defined, default to 0 if not
+                            let currentStock = item.current_stock !== undefined ? item
+                                .current_stock : 'N/A';
+                            let stockClass = 'text-dark';
+
+                            if (currentStock !== 'N/A') {
+                                stockClass = currentStock >= item.quantity ?
+                                    'text-success font-weight-bold' :
+                                    'text-danger font-weight-bold';
+                            }
+
+                            itemsHtml += `
+                            <tr>
+                                <td>${item.product.name}</td>
+                                <td>${item.product.category.name}</td>
+                                <td class="text-center ${stockClass}">
+                                    ${currentStock}
+                                </td>
+                                <td>
+                                    <input type="number" 
+                                           class="form-control form-control-sm item-qty-input text-center" 
+                                           data-id="${item.id}" 
+                                           value="${item.quantity}" 
+                                           min="1">
+                                </td>
+                            </tr>`;
                         });
                         $('#modal-items-body').html(itemsHtml);
 
-                        // Populate Timeline
+                        // Populate Timeline (Your existing timeline logic)
                         let timelineHtml = '';
                         res.timeline.forEach(item => {
-                            let commentBlock = '';
-                            if (item.comments) {
-                                commentBlock = `
-                                <div class="timeline-comment">
-                                    <strong>Comments:</strong>
-                                    ${item.comments}
-                                </div>`;
-                            }
-
-                            // Use 'item.step' for the number inside the circle
-                            // Assign background color class based on item.color (primary, success, danger, warning)
-                            let bgClass = 'bg-' + item.color;
-
+                            let bgClass = 'bg-' + (item.color || 'secondary');
+                            let commentHtml = item.comments ?
+                                `<div class="timeline-comment">"${item.comments}"</div>` :
+                                '';
                             timelineHtml += `
                             <div class="timeline-entry">
-                                <div class="timeline-number ${bgClass}">
-                                    ${item.step}
-                                </div>
+                                <div class="timeline-number ${bgClass}">${item.step}</div>
                                 <div class="timeline-content">
                                     <div class="timeline-header">
                                         <span class="user-name">${item.user}</span>
                                         <span class="action-date">${item.date}</span>
                                     </div>
-                                    <span class="role-badge">${item.role}</span>
+                                    <span class="role-badge">${item.role}</span> 
                                     <span class="text-${item.color} font-weight-bold small ml-1">(${item.title})</span>
-                                    ${commentBlock}
+                                    ${commentHtml}
                                 </div>
-                            </div>
-                        `;
+                            </div>`;
                         });
                         $('#modal-timeline').html(timelineHtml);
                     },
@@ -327,30 +351,43 @@
                 });
             });
 
-            // Action Button Logic
+            // 2. Update Quantity Logic
             $('#btn-update-qty').click(function() {
-                let items = {};
+                // Gather data from inputs
+                let itemsData = {};
                 $('.item-qty-input').each(function() {
-                    items[$(this).data('id')] = $(this).val();
+                    itemsData[$(this).data('id')] = $(this).val();
                 });
+
                 let url = "{{ route('requisitions.update_items', ':id') }}".replace(':id',
                     currentRequisitionId);
+
+                // Show simple loading state
+                let btn = $(this);
+                let originalText = btn.html();
+                btn.html('<i class="fas fa-spinner fa-spin"></i> Saving...').prop('disabled', true);
+
                 $.ajax({
                     url: url,
                     type: 'POST',
                     data: {
                         _token: "{{ csrf_token() }}",
-                        items: items
+                        items: itemsData
                     },
                     success: function(res) {
                         toastr.success(res.message);
+                        // Optional: Refresh the modal data to update stock warnings logic if implemented frontend side
                     },
-                    error: function() {
-                        toastr.error("Failed to update");
+                    error: function(err) {
+                        toastr.error("Failed to update quantities");
+                    },
+                    complete: function() {
+                        btn.html(originalText).prop('disabled', false);
                     }
                 });
             });
 
+            // 3. Approve Logic
             $('#btn-approve').click(function() {
                 let url = "{{ route('requisitions.approve', ':id') }}".replace(':id',
                 currentRequisitionId);
@@ -371,6 +408,7 @@
                 });
             });
 
+            // 4. Reject Logic
             $('#btn-reject').click(function() {
                 let url = "{{ route('requisitions.reject', ':id') }}".replace(':id', currentRequisitionId);
                 let comments = $('#action-comments').val();

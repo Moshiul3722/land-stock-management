@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Log;
 use App\Models\Requisition;
 use App\Services\StockService;
 use Illuminate\Support\Facades\Auth;
+use App\Models\RequisitionItem;
 
 class RequisitionController extends Controller
 {
@@ -162,6 +163,12 @@ class RequisitionController extends Controller
             'approvalDetails.toUser.role',
         ]);
 
+        foreach ($requisition->items as $item) {
+            // Get aggregated stock for this specific product
+            $stockSummary = $this->stockService->getAggregatedStockList(['product_id' => $item->product_id]);
+            $item->current_stock = $stockSummary->first()->total_quantity ?? 0;
+        }
+
         $timeline = collect([]);
 
         // 1. Reconstruct "Step 0" (Initiated) logic
@@ -257,11 +264,21 @@ class RequisitionController extends Controller
      */
     public function updateItems(Request $request, Requisition $requisition)
     {
-        // Logic to loop through items and update quantities
-        // This is called when "Save Changes" is clicked in the modal
-        foreach ($request->input('items', []) as $itemId => $quantity) {
-            $requisition->items()->where('id', $itemId)->update(['quantity' => $quantity]);
+        try {
+            $items = $request->input('items', []);
+
+            foreach ($items as $itemId => $quantity) {
+                // Validate logic (optional): Ensure quantity is > 0
+                if ($quantity > 0) {
+                    RequisitionItem::where('id', $itemId)
+                        ->where('requisition_id', $requisition->id) // Security check
+                        ->update(['quantity' => $quantity]);
+                }
+            }
+
+            return response()->json(['success' => true, 'message' => 'Quantities updated successfully.']);
+        } catch (Exception $e) {
+            return response()->json(['success' => false, 'message' => 'Update failed: ' . $e->getMessage()], 500);
         }
-        return response()->json(['success' => true, 'message' => 'Quantities updated.']);
     }
 }
