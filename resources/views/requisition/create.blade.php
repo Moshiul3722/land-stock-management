@@ -10,7 +10,7 @@
                 <div class="col-sm-6">
                     <ol class="breadcrumb float-sm-right">
                         <li class="breadcrumb-item"><a href={{ route('home') }}>{{ __('breadcrumb.home') }}</a></li>
-                        <li class="breadcrumb-item active">{{ __('requisition.create_title') }}</li>
+                        <li class="breadcrumb-item active">{{ __('breadcrumb.create') }}</li>
                     </ol>
                 </div>
             </div>
@@ -28,7 +28,7 @@
                         <div class="row">
                             <div class="form-group col-md-5">
                                 <label for="category_filter">{{ __('category.title') }}</label>
-                                <select class="form-control" id="category_filter">
+                                <select class="form-control select2" id="category_filter">
                                     <option value="">Select Category</option>
                                     @foreach ($categories as $category)
                                         <option value="{{ $category->id }}">{{ $category->name }}</option>
@@ -37,7 +37,7 @@
                             </div>
                             <div class="form-group col-md-5">
                                 <label for="product_filter">{{ __('product.title') }}</label>
-                                <select class="form-control" id="product_filter" disabled>
+                                <select class="form-control select2" id="product_filter" disabled>
                                     <option value="">Select Category First</option>
                                 </select>
                             </div>
@@ -182,7 +182,7 @@ $(document).ready(function() {
 
         // Check 1: Ensure table is not empty
         if (requisitionTable.rows().count() === 0) {
-            toastr.error('You must add at least one product to the requisition.');
+            toastr.error("{{ __('requisition.toastr_must_add_one') }}");
             return false;
         }
 
@@ -196,21 +196,22 @@ $(document).ready(function() {
             });
 
             if (hasUnavailable) {
-                toastr.error('Cannot submit. One or more items are not available in stock. Please remove them or save as draft.');
+                toastr.error("{{ __('requisition.toastr_cannot_submit') }}");
                 return false;
             }
         }
 
         // If all checks pass, show confirmation
-        var title = (action === 'save-draft-btn') ? 'Save as Draft?' : 'Submit for Approval?';
-        var text = (action === 'save-draft-btn') ? 'This requisition will be saved as a draft.' : 'This requisition will be submitted and locked for editing. Are you sure?';
+        var title = (action === 'save-draft-btn') ? '{{ __("requisition.sweetalert_draft_save_title") }}' : '{{ __("requisition.sweetalert_save_title") }}';
+        var text = (action === 'save-draft-btn') ? '{{ __("requisition.sweetalert_draft_save_text") }}' : '{{ __("requisition.sweetalert_save_text") }}';
 
         Swal.fire({
             title: title,
             text: text,
             icon: 'info',
             showCancelButton: true,
-            confirmButtonText: 'Yes, proceed!'
+            confirmButtonText: '{{ __("requisition.sweetalert_confirm_button") }}',
+            cancelButtonText: '{{ __("requisition.sweetalert_cancel_button") }}',
         }).then((result) => {
             if (result.isConfirmed) {
                 // Add the action to the form and submit

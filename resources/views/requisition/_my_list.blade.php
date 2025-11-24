@@ -2,8 +2,8 @@
     <thead>
         <tr>
             <th>{{ __('lot.table_sl') }}</th>
-            <th>Requisition Date</th>
-            <th>Items Count</th>
+            <th>{{ __('requisition.requisition_date') }}</th>
+            <th>{{ __('requisition.items_count') }}</th>
             <th>{{ __('lot.table_status') }}</th>
             <th width="150" class="text-center">{{ __('lot.table_action') }}</th>
         </tr>

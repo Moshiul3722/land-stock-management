@@ -139,7 +139,7 @@
                 <div class="col-sm-6">
                     <ol class="breadcrumb float-sm-right">
                         <li class="breadcrumb-item"><a href="{{ route('home') }}">{{ __('breadcrumb.home') }}</a></li>
-                        <li class="breadcrumb-item active">{{ __('requisition.my_title') }}</li>
+                        <li class="breadcrumb-item active">{{ __('breadcrumb.list') }}</li>
                     </ol>
                 </div>
             </div>
@@ -181,10 +181,12 @@
 
         {{-- List Card --}}
         <div class="card card-primary">
-            <div class="card-header d-flex justify-content-between align-items-center">
-                <h3 class="card-title">{{ __('requisition.list_title') }}</h3>
-                <a href="{{ route('requisitions.create') }}" class="btn btn-sm btn-success ms-auto"><i
-                        class="fas fa-plus"></i></a>
+            <div class="card-header">
+                <div class="d-flex justify-content-between align-items-center">
+                    <h3 class="card-title">{{ __('requisition.list_title') }}</h3>
+                    <a href="{{ route('requisitions.create') }}" class="btn btn-sm btn-success ms-auto"><i
+                            class="fas fa-plus"></i></a>
+                </div>
             </div>
             <div class="card-body" id="requisition-list-container">
                 {{-- Partial view loads here --}}
