@@ -12,6 +12,8 @@ class StockRepository extends BaseRepository
         'id',
         'product_id',
         'quantity',
+        'brand',
+        'specification',
         'lot_id',
     ];
 
@@ -50,8 +52,8 @@ class StockRepository extends BaseRepository
             ->whereNull('stocks.deleted_at')
             // Group by Product AND Purchase Type
             ->groupBy(
-                'products.id', 
-                'products.name', 
+                'products.id',
+                'products.name',
                 'product_categories.name',
                 'product_purchase_types.id',
                 'product_purchase_types.name'

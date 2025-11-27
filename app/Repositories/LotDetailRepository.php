@@ -10,6 +10,8 @@ class LotDetailRepository extends BaseRepository
     protected $fieldSearchable = [
         'id',
         'lot_id',
+        'brand',
+        'specification',
         'product_id',
         'quantity',
         'unit_price',
