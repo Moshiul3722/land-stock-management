@@ -10,6 +10,8 @@ return [
     'list_title' => 'Lot List',
     'title' => 'Lot Management',
     'purchase_type' => 'Product Purchase Type',
+    'brand' => 'Brand',
+    'specification' => 'Specification',
     'add_title' => 'Create Lot',
     'edit_title' => 'Edit Lot',
     'details_title' => 'Lot Details',

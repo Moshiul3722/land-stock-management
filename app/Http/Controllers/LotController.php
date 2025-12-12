@@ -182,4 +182,17 @@ class LotController extends Controller
             return redirect()->back()->with('error', $e->getMessage());
         }
     }
+
+    /**
+     * Search for existing brands or specifications for autocomplete.
+     */
+    public function autocomplete(Request $request)
+    {
+        $results = $this->lotService->getAutocompleteSuggestions(
+            $request->input('term'),
+            $request->input('type')
+        );
+
+        return response()->json($results);
+    }
 }

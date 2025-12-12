@@ -2,7 +2,20 @@
 
 @section('content')
     <section class="content-header">
-        {{-- ... your breadcrumbs ... --}}
+        <div class="container-fluid">
+            <div class="row mb-2">
+                <div class="col-sm-6">
+                    <h1>{{ __('lot.add_title') }}</h1>
+                </div>
+                <div class="col-sm-6">
+                    <ol class="breadcrumb float-sm-right">
+                        <li class="breadcrumb-item"><a href={{ route('home') }}>{{ __('breadcrumb.home') }}</a></li>
+                        <li class="breadcrumb-item"><a href={{ route('lots.index') }}>{{ __('breadcrumb.list') }}</a></li>
+                        <li class="breadcrumb-item active">{{ __('breadcrumb.create') }}</li>
+                    </ol>
+                </div>
+            </div>
+        </div>
     </section>
     <div class="content">
         <div class="row">
@@ -11,7 +24,7 @@
                     <div class="card-header">
                         <h3 class="card-title">{{ __('lot.add_title') }}</h3>
                     </div>
-                    <form action="{{ route('lots.store') }}" method="POST">
+                    <form id="lot-form" action="{{ route('lots.store') }}" method="POST">
                         @csrf
                         <div class="card-body">
                             {{-- Lot Master Information --}}
@@ -52,11 +65,13 @@
                             <table class="table table-bordered">
                                 <thead>
                                     <tr>
-                                        <th>{{ __('lot.table_category') }}</th>
-                                        <th>{{ __('lot.table_product') }}</th>
-                                        <th>{{ __('lot.table_quantity') }}</th>
-                                        <th class="text-center"><button type="button" id="add-row" class="btn btn-success btn-sm"><i
-                                                    class="fa fa-plus"></i></button></th>
+                                        <th width="25%">{{ __('lot.table_category') }}</th>
+                                        <th width="25%">{{ __('lot.table_product') }}</th>
+                                        <th width="20%">{{ __('lot.brand') }}</th>
+                                        <th width="20%">{{ __('lot.specification') }}</th>
+                                        <th width="10%">{{ __('lot.table_quantity') }}</th>
+                                        <th class="text-center"><button type="button" id="add-row"
+                                                class="btn btn-success btn-sm"><i class="fa fa-plus"></i></button></th>
                                     </tr>
                                 </thead>
                                 <tbody id="lot-details-body">
@@ -85,29 +100,71 @@
     <script>
         $(document).ready(function() {
             let rowIdx = 0;
+
+            // --- 1. Autocomplete Initialization Function ---
+            function initAutocomplete(row) {
+                // Brand Autocomplete
+                row.find('.autocomplete-brand').autocomplete({
+                    source: function(request, response) {
+                        $.getJSON("{{ route('lots.autocomplete') }}", {
+                            term: request.term,
+                            type: 'brand'
+                        }, response);
+                    },
+                    minLength: 1 // Start searching after 1 char
+                });
+
+                // Specification Autocomplete
+                row.find('.autocomplete-spec').autocomplete({
+                    source: function(request, response) {
+                        $.getJSON("{{ route('lots.autocomplete') }}", {
+                            term: request.term,
+                            type: 'specification'
+                        }, response);
+                    },
+                    minLength: 1
+                });
+            }
+
+
+            // --- 2. Add Row Functionality ---
             $('#add-row').on('click', function() {
-                $('#lot-details-body').append(`
-            <tr id="R${++rowIdx}">
-                <td>
-                    <select class="form-control select2 category-select" required>
-                        <option value="">Select Category</option>
-                        @foreach ($categories as $category)
-                            <option value="{{ $category->id }}">{{ $category->name }}</option>
-                        @endforeach
-                    </select>
-                </td>
-                <td>
-                    <select class="form-control select2 product-select" name="details[${rowIdx}][product_id]" required disabled>
-                        <option value="">Select Product</option>
-                    </select>
-                </td>
-                <td><input type="number" class="form-control" name="details[${rowIdx}][quantity]" min="1" required></td>
-                <td class="text-center"><button type="button" class="btn btn-danger btn-sm remove-row"><i class="fa fa-trash"></i></button></td>
-            </tr>
-        `);
+                rowIdx++;
+                let newRowHtml = `
+                    <tr id="R${rowIdx}">
+                        <td>
+                            <select class="form-control category-select" required>
+                                <option value="">Select Category</option>
+                                @foreach ($categories as $category)
+                                    <option value="{{ $category->id }}">{{ $category->name }}</option>
+                                @endforeach
+                            </select>
+                        </td>
+                        <td>
+                            <select class="form-control product-select" name="details[${rowIdx}][product_id]" required disabled>
+                                <option value="">Select Product</option>
+                            </select>
+                        </td>
+                        <td>
+                            <input type="text" class="form-control autocomplete-brand" name="details[${rowIdx}][brand]" placeholder="Brand">
+                        </td>
+                        <td>
+                            <input type="text" class="form-control autocomplete-spec" name="details[${rowIdx}][specification]" placeholder="Specification">
+                        </td>
+                        <td><input type="number" class="form-control" name="details[${rowIdx}][quantity]" min="1" required></td>
+                        <td class="text-center"><button type="button" class="btn btn-danger btn-sm remove-row"><i class="fa fa-trash"></i></button></td>
+                    </tr>
+                `;
+
+                let newRow = $(newRowHtml);
+                $('#lot-details-body').append(newRow);
+                
+
+                // Initialize autocomplete on the newly added inputs
+                initAutocomplete(newRow);
             });
 
-            // Confirmation for removing a row
+            // --- 3. Remove Row ---
             $('#lot-details-body').on('click', '.remove-row', function(e) {
                 e.preventDefault();
                 var rowToRemove = $(this).closest('tr');
@@ -118,8 +175,7 @@
                     showCancelButton: true,
                     confirmButtonColor: '#d33',
                     cancelButtonColor: '#3085d6',
-                    cancelButtonText: "{{ __('sweetalert.cancel') }}",
-                    confirmButtonText: "{{ __('sweetalert.delete_notice') }}"
+                    confirmButtonText: 'Yes, remove it!'
                 }).then((result) => {
                     if (result.isConfirmed) {
                         rowToRemove.remove();
@@ -127,7 +183,8 @@
                 });
             });
 
-            // Confirmation for submitting for approval
+
+            // --- 4. Form Submissions (Draft vs Approval) ---
             $('#submit-approval-btn').on('click', function(e) {
                 e.preventDefault(); // Prevent the form from submitting immediately
                 var form = $('#lot-form');
@@ -158,6 +215,7 @@
                 form.submit();
             });
 
+            // --- 5. Dependent Dropdowns ---
             // Load products on category change
             $('#lot-details-body').on('change', '.category-select', function() {
                 const categoryId = $(this).val();

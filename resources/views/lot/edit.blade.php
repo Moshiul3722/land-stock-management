@@ -44,7 +44,6 @@
                                         value="{{ old('entry_date', $lot->entry_date->format('Y-m-d')) }}" required>
                                 </div>
 
-                                {{-- ADDED THIS MISSING BLOCK --}}
                                 <div class="form-group col-md-12">
                                     <label for="product_purchase_type_id">{{ __('lot.purchase_type') }} <span
                                             style="color: red;">*</span></label>
@@ -58,7 +57,6 @@
                                         @endforeach
                                     </select>
                                 </div>
-                                {{-- END OF MISSING BLOCK --}}
 
                                 <div class="form-group col-md-12">
                                     <label for="remarks">{{ __('lot.remarks') }}</label>
@@ -73,11 +71,13 @@
                             <table class="table table-bordered">
                                 <thead>
                                     <tr>
-                                        <th>{{ __('lot.table_category') }}</th>
-                                        <th>{{ __('lot.table_product') }}</th>
-                                        <th>{{ __('lot.table_quantity') }}</th>
-                                        <th class="text-center"><button type="button" id="add-row" class="btn btn-success btn-sm"><i
-                                                    class="fa fa-plus"></i></button></th>
+                                        <th width="25%">{{ __('lot.table_category') }}</th>
+                                        <th width="25%">{{ __('lot.table_product') }}</th>
+                                        <th width="20%">{{ __('lot.brand') }}</th>
+                                        <th width="20%">{{ __('lot.specification') }}</th>
+                                        <th width="10%">{{ __('lot.table_quantity') }}</th>
+                                        <th class="text-center"><button type="button" id="add-row"
+                                                class="btn btn-success btn-sm"><i class="fa fa-plus"></i></button></th>
                                     </tr>
                                 </thead>
                                 <tbody id="lot-details-body">
@@ -100,6 +100,16 @@
                                                     data-selected-product-id="{{ $detail->product_id }}" required disabled>
                                                     <option value="">Select Category First</option>
                                                 </select>
+                                            </td>
+                                            <td>
+                                                <input type="text" class="form-control autocomplete-brand"
+                                                    name="details[{{ $index }}][brand]"
+                                                    value="{{ $detail->brand }}" placeholder="Brand">
+                                            </td>
+                                            <td>
+                                                <input type="text" class="form-control autocomplete-spec"
+                                                    name="details[{{ $index }}][specification]"
+                                                    value="{{ $detail->specification }}" placeholder="Specification">
                                             </td>
                                             <td>
                                                 <input type="number" class="form-control"
@@ -140,11 +150,40 @@
     <script>
         $(document).ready(function() {
             let rowIdx = {{ $lot->lotDetails->count() }};
+            // --- 1. Autocomplete Initialization ---
+            function initAutocomplete(row) {
+                row.find('.autocomplete-brand').autocomplete({
+                    source: function(request, response) {
+                        $.getJSON("{{ route('lots.autocomplete') }}", {
+                            term: request.term,
+                            type: 'brand'
+                        }, response);
+                    },
+                    minLength: 1
+                });
 
+                row.find('.autocomplete-spec').autocomplete({
+                    source: function(request, response) {
+                        $.getJSON("{{ route('lots.autocomplete') }}", {
+                            term: request.term,
+                            type: 'specification'
+                        }, response);
+                    },
+                    minLength: 1
+                });
+            }
+
+            // Initialize autocomplete for existing rows
+            $('tr[id^="R"]').each(function() {
+                initAutocomplete($(this));
+            });
+
+            // --- 2. Add New Row ---
             // ADD NEW ROW
             $('#add-row').on('click', function() {
-                $('#lot-details-body').append(`
-                    <tr id="R${++rowIdx}">
+                rowIdx++;
+                let newRowHtml = `
+                    <tr id="R${rowIdx}">
                         <td>
                             <select class="form-control category-select" required>
                                 <option value="">Select Category</option>
@@ -158,12 +197,23 @@
                                 <option value="">Select Product</option>
                             </select>
                         </td>
+                        <td>
+                            <input type="text" class="form-control autocomplete-brand" name="details[${rowIdx}][brand]" placeholder="Brand">
+                        </td>
+                        <td>
+                            <input type="text" class="form-control autocomplete-spec" name="details[${rowIdx}][specification]" placeholder="Specification">
+                        </td>
                         <td><input type="number" class="form-control" name="details[${rowIdx}][quantity]" min="1" required></td>
                         <td class="text-center"><button type="button" class="btn btn-danger btn-sm remove-row"><i class="fa fa-trash"></i></button></td>
                     </tr>
-                `);
+                `;
+
+                let newRow = $(newRowHtml);
+                $('#lot-details-body').append(newRow);
+                initAutocomplete(newRow);
             });
 
+            // --- 3. Remove Row ---
             // Confirmation for removing a row
             $('#lot-details-body').on('click', '.remove-row', function(e) {
                 e.preventDefault();
@@ -184,19 +234,67 @@
                 });
             });
 
-            // HANDLE SAVE DRAFT SUBMISSION
+            // --- 4. HELPER: Prepare and Submit Form ---
+            function prepareFormAndSubmit(actionValue) {
+                var form = $('#lot-form');
+
+                if (!form[0].checkValidity()) {
+                    form[0].reportValidity();
+                    return;
+                }
+
+                form.find('.product-select').prop('disabled', false);
+                form.find('input[name="action"]').remove();
+                form.append('<input type="hidden" name="action" value="' + actionValue + '" />');
+
+                form.submit();
+            }
+
+            // // HANDLE SAVE DRAFT SUBMISSION
+            // $('#save-draft-btn').on('click', function(e) {
+            //     e.preventDefault();
+            //     var form = $('#lot-form');
+            //     // Append the correct action and submit
+            //     form.append('<input type="hidden" name="action" value="save_draft" />');
+            //     form.submit();
+            // });
+
+            // // CONFIRMATION FOR SUBMITTING FOR APPROVAL
+            // $('#submit-approval-btn').on('click', function(e) {
+            //     e.preventDefault(); // Prevent the form from submitting immediately
+            //     var form = $('#lot-form');
+
+            //     Swal.fire({
+            //         title: "{{ __('sweetalert.submit_for_approval_title') }}",
+            //         text: "{{ __('product.lot_sa_submit_notice_text') }}",
+            //         icon: 'info',
+            //         showCancelButton: true,
+            //         confirmButtonColor: '#3085d6',
+            //         cancelButtonColor: '#d33',
+            //         cancelButtonText: "{{ __('sweetalert.cancel') }}",
+            //         confirmButtonText: "{{ __('sweetalert.submit_button') }}"
+            //     }).then((result) => {
+            //         if (result.isConfirmed) {
+            //             // Append the correct action and submit the form
+            //             form.append('<input type="hidden" name="action" value="submit" />');
+            //             form.submit();
+            //         }
+            //     });
+            // });
+            // --- 5. Button Handlers ---
             $('#save-draft-btn').on('click', function(e) {
                 e.preventDefault();
-                var form = $('#lot-form');
-                // Append the correct action and submit
-                form.append('<input type="hidden" name="action" value="save_draft" />');
-                form.submit();
+                prepareFormAndSubmit('save_draft');
             });
 
-            // CONFIRMATION FOR SUBMITTING FOR APPROVAL
             $('#submit-approval-btn').on('click', function(e) {
-                e.preventDefault(); // Prevent the form from submitting immediately
+                e.preventDefault();
                 var form = $('#lot-form');
+
+                if (!form[0].checkValidity()) {
+                    form[0].reportValidity();
+                    return;
+                }
 
                 Swal.fire({
                     title: "{{ __('sweetalert.submit_for_approval_title') }}",
@@ -209,13 +307,12 @@
                     confirmButtonText: "{{ __('sweetalert.submit_button') }}"
                 }).then((result) => {
                     if (result.isConfirmed) {
-                        // Append the correct action and submit the form
-                        form.append('<input type="hidden" name="action" value="submit" />');
-                        form.submit();
+                        prepareFormAndSubmit('submit');
                     }
                 });
             });
 
+            // --- 6. Dependent Dropdowns ---
             // Function to load products for a given category select element
             function loadProductsForCategory(categorySelectElement) {
                 const categoryId = $(categorySelectElement).val();

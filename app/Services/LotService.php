@@ -238,8 +238,8 @@ class LotService
             null,
             null
         )->with(['purchaseType', 'approvalDetails.fromUser'])
-         ->orderBy('created_at', 'asc') // Show oldest first
-         ->get();
+            ->orderBy('created_at', 'asc') // Show oldest first
+            ->get();
     }
 
     /**
@@ -252,8 +252,8 @@ class LotService
     {
         // This business logic now lives in the service
         $pendingTask = $lot->approvalDetails()
-                           ->where('status', 'pending')
-                           ->firstOrFail(); // Fails if no pending task
+            ->where('status', 'pending')
+            ->firstOrFail(); // Fails if no pending task
 
         // Call the approval service with the specific task
         $this->approvalService->approve($pendingTask, $comments);
@@ -273,9 +273,34 @@ class LotService
         }
 
         $pendingTask = $lot->approvalDetails()
-                           ->where('status', 'pending')
-                           ->firstOrFail();
+            ->where('status', 'pending')
+            ->firstOrFail();
 
         $this->approvalService->reject($pendingTask, $comments);
+    }
+
+    /**
+     * Search for existing brands or specifications for autocomplete.
+     *
+     * @param string|null $term
+     * @param string|null $type
+     * @return \Illuminate\Support\Collection|array
+     */
+    public function getAutocompleteSuggestions(?string $term, ?string $type)
+    {
+        // Basic validation of the type to prevent SQL injection or errors
+        if (!in_array($type, ['brand', 'specification'])) {
+            return [];
+        }
+
+        // Search in lot_details to find previously used brands/specs
+        // Using DB facade here is efficient for simple distinct queries
+        return DB::table('lot_details')
+            ->where($type, 'LIKE', '%' . $term . '%')
+            ->whereNotNull($type)
+            ->distinct()
+            ->orderBy($type)
+            ->limit(10)
+            ->pluck($type);
     }
 }

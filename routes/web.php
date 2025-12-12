@@ -102,6 +102,7 @@ Route::middleware(['auth', 'permission'])->group(function () {
     Route::get('/products/by-category/{categoryId}', [App\Http\Controllers\ProductController::class, 'getByCategory'])->name('products.by_category');
 
     // Lot Resources
+    Route::get('/lots/autocomplete', [LotController::class, 'autocomplete'])->name('lots.autocomplete');
     Route::resource('lots', LotController::class);
     Route::get('/lots/entry/index', [LotController::class, 'entryIndex'])->name('lots.entry.index');
     Route::post('/lots/{lot}/approve', [App\Http\Controllers\LotController::class, 'approve'])->name('lots.approve');
