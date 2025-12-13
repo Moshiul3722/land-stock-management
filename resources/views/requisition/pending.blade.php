@@ -220,7 +220,7 @@
                                 --}}
                                 @if (Auth::user()->role_id != 4)
                                     <button type="button" id="btn-update-qty" class="btn btn-warning btn-sm shadow-sm">
-                                        <i class="fas fa-save"></i> Update Quantities
+                                        <i class="fas fa-save"></i> Save Assignments & Qty
                                     </button>
                                 @endif
                             </div>
@@ -231,8 +231,8 @@
                                         <tr>
                                             <th>Product</th>
                                             <th>Category</th>
-                                            <th>Current Stock</th>
-                                            <th width="120">Req. Qty</th>
+                                            <th width="35%">Assigned Lot (Brand/Spec)</th>
+                                            <th width="100">Req. Qty</th>
                                         </tr>
                                     </thead>
                                     <tbody id="modal-items-body"></tbody>
@@ -283,8 +283,10 @@
             $('#pending-req-table').DataTable();
             let currentRequisitionId = null;
 
-            // Check if user is Store Keeper
-            const isStoreKeeper = {{ Auth::user()->role_id == 4 ? 'true' : 'false' }};
+            // --- DEFINING ROLES ---
+            const userRoleId = {{ Auth::user()->role_id }};
+            const isStoreAdmin = (userRoleId == 3);
+            const isStoreKeeper = (userRoleId == 4);
 
             // 1. View & Load Data
             $('.view-action-btn').click(function() {
@@ -308,40 +310,78 @@
                         // Populate Items with Stock Info
                         let itemsHtml = '';
                         res.requisition.items.forEach(item => {
-                            // Determine color for stock status
-                            // Check if item.current_stock is defined, default to 0 if not
-                            let currentStock = item.current_stock !== undefined ? item
-                                .current_stock : 'N/A';
-                            let stockClass = 'text-dark';
 
-                            if (currentStock !== 'N/A') {
-                                stockClass = currentStock >= item.quantity ?
-                                    'text-success font-weight-bold' :
-                                    'text-danger font-weight-bold';
+                            // --- Logic for Lot Assignment Dropdown ---
+                            let assignmentHtml =
+                                '<span class="text-muted small font-italic">Pending Assignment</span>';
+
+
+                            if (isStoreAdmin) {
+                                // Store Admin: Can EDIT/ASSIGN Lots
+                                let options =
+                                    '<option value="">-- Select Brand/Spec --</option>';
+
+                                if (item.available_lots && item.available_lots.length >
+                                    0) {
+                                    item.available_lots.forEach(lot => {
+                                        let selected = (item.lot_id == lot.id) ?
+                                            'selected' : '';
+                                        let label =
+                                            `${lot.brand || 'N/A'} - ${lot.specification || 'N/A'} (Qty: ${lot.quantity})`;
+                                        options +=
+                                            `<option value="${lot.id}" ${selected}>${label}</option>`;
+                                    });
+                                    assignmentHtml =
+                                        `<select class="form-control form-control-sm item-lot-select" data-id="${item.id}">${options}</select>`;
+                                } else {
+                                    assignmentHtml =
+                                        '<span class="text-danger small font-weight-bold">Stock Unavailable</span>';
+                                }
+                            } else if (item.lot_id) {
+                                // Store Keeper / Others: READ ONLY assignment
+                                // We need to find the name of the assigned lot from the available list or pre-loaded data
+                                let assignedLotLabel = "Assigned";
+                                if (item.available_lots) {
+                                    let foundLot = item.available_lots.find(l => l.id ==
+                                        item.lot_id);
+                                    if (foundLot) {
+                                        assignedLotLabel =
+                                            `${foundLot.brand || 'N/A'} - ${foundLot.specification || 'N/A'}`;
+                                    }
+                                }
+                                assignmentHtml =
+                                    `<span class="text-success small font-weight-bold"><i class="fas fa-check"></i> ${assignedLotLabel}</span>`;
+                            } else {
+                                // Store Keeper viewing unassigned item (Should not happen if flow is correct)
+                                assignmentHtml =
+                                    '<span class="text-danger small font-weight-bold">Not Assigned</span>';
                             }
-                            // Disable input if Store Keeper
-                            let disabledAttr = isStoreKeeper ? 'disabled' : '';
-                            let inputClass = isStoreKeeper ?
-                                'form-control-plaintext text-center font-weight-bold' :
-                                'form-control form-control-sm item-qty-input text-center';
+
+                            // Store Admin can edit Quantity, Store Keeper CANNOT.
+                            let disabledAttr = isStoreAdmin ? '' : 'disabled';
+                            let inputClass = isStoreAdmin ?
+                                'form-control form-control-sm item-qty-input text-center' :
+                                'form-control-plaintext text-center font-weight-bold';
+
 
                             itemsHtml += `
                             <tr>
                                 <td>${item.product.name}</td>
                                 <td>${item.product.category.name}</td>
-                                <td class="text-center ${stockClass}">
-                                    ${currentStock}
-                                </td>
+                                <td>${assignmentHtml}</td>
                                 <td>
-                                    <input type="number"
-                                           class="form-control form-control-sm item-qty-input text-center"
-                                           data-id="${item.id}"
-                                           value="${item.quantity}"
-                                           min="1">
+                                    <input type="number" 
+                                           class="${inputClass}" 
+                                           data-id="${item.id}" 
+                                           value="${item.quantity}" 
+                                           min="1"
+                                           ${disabledAttr}>
                                 </td>
                             </tr>`;
                         });
                         $('#modal-items-body').html(itemsHtml);
+
+
 
                         // Populate Timeline (Your existing timeline logic)
                         let timelineHtml = '';
@@ -372,20 +412,26 @@
                 });
             });
 
-            // 2. Update Quantity Logic
+            // 2. Update Quantity & Assignment Logic (Only active for Store Admin)
             $('#btn-update-qty').click(function() {
-                // Gather data from inputs
                 let itemsData = {};
+
+                // Loop through inputs to gather Quantity AND Lot ID
                 $('.item-qty-input').each(function() {
-                    itemsData[$(this).data('id')] = $(this).val();
+                    let id = $(this).data('id');
+                    let lotSelect = $(`.item-lot-select[data-id="${id}"]`);
+
+                    itemsData[id] = {
+                        quantity: $(this).val(),
+                        lot_id: lotSelect.length ? lotSelect.val() :
+                            null // Capture selected Lot ID
+                    };
                 });
 
                 let url = "{{ route('requisitions.update_items', ':id') }}".replace(':id',
                     currentRequisitionId);
 
-                // Show simple loading state
                 let btn = $(this);
-                let originalText = btn.html();
                 btn.html('<i class="fas fa-spinner fa-spin"></i> Saving...').prop('disabled', true);
 
                 $.ajax({
@@ -393,17 +439,18 @@
                     type: 'POST',
                     data: {
                         _token: "{{ csrf_token() }}",
-                        items: itemsData
+                        items: itemsData // Sending structured data
                     },
                     success: function(res) {
                         toastr.success(res.message);
-                        // Optional: Refresh the modal data to update stock warnings logic if implemented frontend side
                     },
                     error: function(err) {
-                        toastr.error("Failed to update quantities");
+                        toastr.error(
+                            "Failed to update. Make sure required fields are selected.");
                     },
                     complete: function() {
-                        btn.html(originalText).prop('disabled', false);
+                        btn.html('<i class="fas fa-save"></i> Save Assignments & Qty').prop(
+                            'disabled', false);
                     }
                 });
             });
@@ -411,19 +458,22 @@
             // 3. Approve Logic
             $('#btn-approve').click(function() {
                 let url = "{{ route('requisitions.approve', ':id') }}".replace(':id',
-                    currentRequisitionId);
+                currentRequisitionId);
                 let comments = $('#action-comments').val();
+
+                let actionText = isStoreKeeper ? 'Process & Complete' : 'Approve';
+
                 Swal.fire({
-                    title: 'Approve?',
+                    title: actionText + '?',
                     icon: 'success',
                     showCancelButton: true,
-                    confirmButtonText: 'Yes'
+                    confirmButtonText: 'Yes, ' + actionText
                 }).then((res) => {
                     if (res.isConfirmed) {
                         let form = $('#approve-form');
                         form.attr('action', url);
                         form.html(
-                            `@csrf <input type="hidden" name="comments" value="${comments}">`);
+                        `@csrf <input type="hidden" name="comments" value="${comments}">`);
                         form.submit();
                     }
                 });
@@ -448,7 +498,7 @@
                         let form = $('#reject-form');
                         form.attr('action', url);
                         form.html(
-                            `@csrf <input type="hidden" name="comments" value="${comments}">`);
+                        `@csrf <input type="hidden" name="comments" value="${comments}">`);
                         form.submit();
                     }
                 });

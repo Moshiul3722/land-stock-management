@@ -316,7 +316,9 @@ class ApprovalService
             $this->stockRepository->create([
                 'product_id' => $detail->product_id,
                 'quantity' => $detail->quantity,
-                'lot_id' => $lot->id
+                'lot_id' => $lot->id,
+                'brand' => $detail->brand,
+                'specification' => $detail->specification
             ]);
         }
     }
@@ -330,62 +332,121 @@ class ApprovalService
         $requisition->load('items');
 
         foreach ($requisition->items as $item) {
-            $this->consumeStockFifo($item->product_id, $item->quantity, $requisition);
+            // $this->consumeStockFifo($item->product_id, $item->quantity, $requisition);
+            // New update -> Store Admin can now select specific lot for each item
+            $this->consumeStock($item->product_id, $item->quantity, $requisition, $item->lot_id);
         }
     }
 
     /**
      * Helper to consume stock for a single product using FIFO.
      */
-    private function consumeStockFifo($productId, $quantityNeeded, Requisition $requisition)
+    // private function consumeStockFifo($productId, $quantityNeeded, Requisition $requisition)
+    // {
+    //     // 1. Find all Lots that have stock for this product, ordered by oldest entry date first (FIFO)
+    //     // We group by lot_id and sum the quantity to find the CURRENT balance of that lot.
+    //     $lotBalances = Stock::query()
+    //         ->join('lots', 'stocks.lot_id', '=', 'lots.id')
+    //         ->where('stocks.product_id', $productId)
+    //         ->whereNull('stocks.deleted_at')
+    //         ->select('stocks.lot_id', 'lots.entry_date', DB::raw('SUM(stocks.quantity) as balance'))
+    //         ->groupBy('stocks.lot_id', 'lots.entry_date')
+    //         ->having('balance', '>', 0)
+    //         ->orderBy('lots.entry_date', 'asc')
+    //         ->get();
+
+
+    //     $remainingToDeduct = $quantityNeeded;
+
+    //     foreach ($lotBalances as $lotData) {
+    //         if ($remainingToDeduct <= 0) break;
+
+    //         $amountToTake = min($remainingToDeduct, $lotData->balance);
+
+    //         // A. WAREHOUSE UPDATE: Create NEGATIVE stock entry (Reduces Warehouse Stock)
+    //         $this->stockRepository->create([
+    //             'product_id' => $productId,
+    //             'quantity' => - ($amountToTake),
+    //             'lot_id' => $lotData->lot_id
+    //         ]);
+
+    //         // B. USER UPDATE: Create ISSUED ITEM entry (Increases User's Asset List)
+    //         IssuedItem::create([
+    //             'user_id' => $requisition->requested_by_user_id, // Mr. X
+    //             'requisition_id' => $requisition->id,
+    //             'product_id' => $productId, // Product Z
+    //             'lot_id' => $lotData->lot_id, // The specific Lot
+    //             'quantity' => $amountToTake, // Quantity Y (from this specific lot)
+    //             'issued_date' => now(),
+    //             'created_by' => Auth::id(),
+    //             'updated_by' => Auth::id(),
+    //         ]);
+
+    //         $remainingToDeduct -= $amountToTake;
+    //     }
+
+    //     // Optional: Safety check
+    //     if ($remainingToDeduct > 0) {
+    //         // This implies a data race condition occurred where stock disappeared during approval.
+    //         // You might want to log this or throw an exception.
+    //         throw new Exception("Insufficient stock to fulfill requisition for Product ID: $productId");
+    //     }
+    // }
+
+    /**
+     * Helper to consume stock from a specific Lot.
+     */
+    // 
+    private function consumeStock($productId, $quantityNeeded, Requisition $requisition, $assignedLotId)
     {
-        // 1. Find all Lots that have stock for this product, ordered by oldest entry date first (FIFO)
-        // We group by lot_id and sum the quantity to find the CURRENT balance of that lot.
-        $lotBalances = Stock::query()
-            ->join('lots', 'stocks.lot_id', '=', 'lots.id')
-            ->where('stocks.product_id', $productId)
-            ->whereNull('stocks.deleted_at')
-            ->select('stocks.lot_id', 'lots.entry_date', DB::raw('SUM(stocks.quantity) as balance'))
-            ->groupBy('stocks.lot_id', 'lots.entry_date')
-            ->having('balance', '>', 0)
-            ->orderBy('lots.entry_date', 'asc')
-            ->get();
-
-
-        $remainingToDeduct = $quantityNeeded;
-
-        foreach ($lotBalances as $lotData) {
-            if ($remainingToDeduct <= 0) break;
-
-            $amountToTake = min($remainingToDeduct, $lotData->balance);
-
-            // A. WAREHOUSE UPDATE: Create NEGATIVE stock entry (Reduces Warehouse Stock)
-            $this->stockRepository->create([
-                'product_id' => $productId,
-                'quantity' => - ($amountToTake),
-                'lot_id' => $lotData->lot_id
-            ]);
-
-            // B. USER UPDATE: Create ISSUED ITEM entry (Increases User's Asset List)
-            IssuedItem::create([
-                'user_id' => $requisition->requested_by_user_id, // Mr. X
-                'requisition_id' => $requisition->id,
-                'product_id' => $productId, // Product Z
-                'lot_id' => $lotData->lot_id, // The specific Lot
-                'quantity' => $amountToTake, // Quantity Y (from this specific lot)
-                'issued_date' => now(),
-                'created_by' => Auth::id(),
-                'updated_by' => Auth::id(),
-            ]);
-
-            $remainingToDeduct -= $amountToTake;
+        if (!$assignedLotId) {
+            // If Store Admin didn't assign a lot, we cannot proceed securely.
+            // In a real app, you might fall back to FIFO, but per requirement 2, assignment is manual.
+            $productName = \App\Models\Product::find($productId)->name ?? 'Item';
+            throw new Exception("Product '{$productName}' has no assigned Brand/Spec (Lot). Store Admin must assign stock before completion.");
         }
 
-        // Optional: Safety check
-        if ($remainingToDeduct > 0) {
-            // This implies a data race condition occurred where stock disappeared during approval.
-            // You might want to log this or throw an exception.
-            throw new Exception("Insufficient stock to fulfill requisition for Product ID: $productId");
+        // 1. Get Current Balance of the Assigned Lot
+        // We use the StockRepository query style or direct DB query to get current balance
+        $currentBalance = Stock::where('product_id', $productId)
+            ->where('lot_id', $assignedLotId)
+            ->whereNull('deleted_at')
+            ->sum('quantity');
+
+        if ($currentBalance < $quantityNeeded) {
+            $productName = \App\Models\Product::find($productId)->name ?? 'Item';
+            throw new Exception("Insufficient stock in the selected Lot for '{$productName}'. Available: {$currentBalance}, Requested: {$quantityNeeded}.");
         }
+
+        // 2. Fetch Brand/Spec from the Source (Lot Details)
+        // This ensures the negative entry matches the original entry details
+        // WAREHOUSE UPDATE: Create NEGATIVE stock entry linked to this Lot
+
+        $lotDetail = \App\Models\LotDetail::where('lot_id', $assignedLotId)
+            ->where('product_id', $productId)
+            ->first();
+
+        $brand = $lotDetail ? $lotDetail->brand : null;
+        $spec = $lotDetail ? $lotDetail->specification : null;
+
+        $this->stockRepository->create([
+            'product_id' => $productId,
+            'quantity' => - ($quantityNeeded),
+            'lot_id' => $assignedLotId,
+            'brand' => $brand,
+            'specification' => $spec
+        ]);
+
+        // 3. USER UPDATE: Record Issuance
+        IssuedItem::create([
+            'user_id' => $requisition->requested_by_user_id,
+            'requisition_id' => $requisition->id,
+            'product_id' => $productId,
+            'lot_id' => $assignedLotId,
+            'quantity' => $quantityNeeded,
+            'issued_date' => now(),
+            'created_by' => Auth::id(),
+            'updated_by' => Auth::id(),
+        ]);
     }
 }

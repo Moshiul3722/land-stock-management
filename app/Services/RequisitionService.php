@@ -110,7 +110,7 @@ class RequisitionService
             'details' => 'required|array|min:1',
             'details.*.product_id' => 'required|exists:products,id',
             'details.*.quantity' => 'required|integer|min:1',
-            'details.*.status' => 'required|string', // Hidden field for stock status
+            // 'details.*.status' => 'required|string',
         ]);
 
         if ($validator->fails()) {
@@ -118,15 +118,20 @@ class RequisitionService
         }
 
         // CRITICAL RULE: Check stock availability BEFORE submitting
-        if ($action === 'submit') {
-            foreach ($data['details'] as $item) {
-                if ($item['status'] === 'Not Available') {
-                    // Find the product name for a clearer error message
-                    $productName = \App\Models\Product::find($item['product_id'])->name ?? 'Item';
-                    throw new InvalidArgumentException("Cannot submit: '$productName' is not available in stock. Please remove it or save as draft.");
-                }
-            }
-        }
+        // if ($action === 'submit') {
+        //     foreach ($data['details'] as $item) {
+        //         if ($item['status'] === 'Not Available') {
+        //             // Find the product name for a clearer error message
+        //             $productName = \App\Models\Product::find($item['product_id'])->name ?? 'Item';
+        //             throw new InvalidArgumentException("Cannot submit: '$productName' is not available in stock. Please remove it or save as draft.");
+        //         }
+        //     }
+        // }
+        /**
+         * According to the meeting held on 27-Nov-2025, the stock availability check
+         * has been revised. We will not check the 'status' field from the UI directly and
+         * also not from the backend.
+         */
 
         return DB::transaction(function () use ($data, $action) {
             try {
@@ -215,7 +220,6 @@ class RequisitionService
             'details' => 'required|array|min:1',
             'details.*.product_id' => 'required|exists:products,id',
             'details.*.quantity' => 'required|integer|min:1',
-            // 'status' field in details is for UI only, we check stock manually below
         ]);
 
         if ($validator->fails()) {

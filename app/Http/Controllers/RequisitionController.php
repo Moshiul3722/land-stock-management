@@ -11,6 +11,7 @@ use App\Models\Requisition;
 use App\Services\StockService;
 use Illuminate\Support\Facades\Auth;
 use App\Models\RequisitionItem;
+use Illuminate\Support\Facades\DB;
 
 class RequisitionController extends Controller
 {
@@ -55,7 +56,7 @@ class RequisitionController extends Controller
                 ? 'Requisition saved as draft successfully.'
                 : 'Requisition submitted for approval successfully.';
 
-            return redirect()->route('requisitions.index')->with('success', $message); // Assuming index exists
+            return redirect()->route('requisitions.index')->with('success', $message);
         } catch (Exception $e) {
             Log::error($e->getMessage());
             return redirect()->back()->withInput()->with('error', $e->getMessage());
@@ -154,6 +155,102 @@ class RequisitionController extends Controller
     /**
      * Get requisition details for the modal (AJAX).
      */
+    // OLD
+    // public function getDetails(Requisition $requisition)
+    // {
+    //     $requisition->load([
+    //         'items.product.category',
+    //         'requestedBy',
+    //         'approvalDetails.fromUser.role',
+    //         'approvalDetails.toUser.role',
+    //         'approvalDetails.approvalEntity'
+    //     ]);
+
+    //     // 1. Fetch available lots (Brand/Spec) for each item
+    //     foreach ($requisition->items as $item) {
+    //         // Get aggregated stock for this specific product
+    //         $stockSummary = $this->stockService->getAggregatedStockList(['product_id' => $item->product_id]);
+    //         $item->current_stock = $stockSummary->first()->total_quantity ?? 0;
+    //     }
+
+    //     $timeline = collect([]);
+
+    //     // 1. Reconstruct "Step 0" (Initiated) logic
+    //     // We grab the very first log entry (lowest ID) to find the initiation details
+    //     $firstLog = $requisition->approvalDetails->sortBy('id')->first();
+
+    //     // Use the remarks from the main table, or fallback to the comment in the first log
+    //     $initiationComments = $requisition->remarks ?? ($firstLog ? $firstLog->comments : '');
+
+    //     $timeline->push([
+    //         'step' => 0,
+    //         'status' => 'Initiated',
+    //         'title' => 'Request Initiated',
+    //         'user' => $requisition->requestedBy->name ?? 'Unknown',
+    //         'role' => 'Requestor',
+    //         'date' => $requisition->created_at->format('d M, Y h:i A'),
+    //         'comments' => $initiationComments,
+    //         'color' => 'primary',
+    //         'status_raw' => 'initiated'
+    //     ]);
+
+    //     // 2. Process Actual Workflow Steps
+    //     $groupedDetails = $requisition->approvalDetails
+    //         ->where('status', '!=', 'superceded')
+    //         ->sortBy('serial')
+    //         ->groupBy('serial');
+
+    //     foreach ($groupedDetails as $serial => $details) {
+    //         // Check if anyone has acted (approved/rejected/processed)
+    //         $actor = $details->first(function ($d) {
+    //             return in_array($d->status, ['approved', 'rejected', 'processed']);
+    //         });
+
+    //         if ($actor) {
+    //             // ACTED: Show the person who took action
+    //             $timeline->push([
+    //                 'step' => $serial,
+    //                 'status' => ucfirst($actor->status),
+    //                 'title' => ucfirst($actor->status),
+    //                 'user' => $actor->fromUser->name ?? 'System',
+    //                 'role' => $actor->fromUser->role->role_name_en ?? 'Approver',
+    //                 'date' => $actor->updated_at->format('d M, Y h:i A'),
+    //                 'comments' => $actor->comments,
+    //                 'color' => $actor->status == 'rejected' ? 'danger' : 'success',
+    //                 'status_raw' => $actor->status
+    //             ]);
+    //         } else {
+    //             // PENDING: Show who we are waiting for
+    //             $pendingUsers = $details->map(function ($d) {
+    //                 return $d->toUser->name ?? 'Unknown';
+    //             })->unique()->join(', ');
+
+    //             $roleName = $details->first()->toUser->role->role_name_en ?? 'Approver';
+
+    //             $timeline->push([
+    //                 'step' => $serial,
+    //                 'status' => 'Pending',
+    //                 'title' => 'Pending Approval',
+    //                 'user' => 'Waiting for: ' . $pendingUsers,
+    //                 'role' => $roleName,
+    //                 'date' => $details->first()->created_at->format('d M, Y h:i A'),
+    //                 'comments' => '', // Pending steps don't have comments yet
+    //                 'color' => 'warning',
+    //                 'status_raw' => 'pending'
+    //             ]);
+    //         }
+    //     }
+
+    //     return response()->json([
+    //         'requisition' => $requisition,
+    //         'requestor' => $requisition->requestedBy->name,
+    //         'formatted_date' => $requisition->requisition_date->format('d M, Y'),
+    //         'timeline' => $timeline
+    //     ]);
+    // }
+    /**
+     * Get requisition details for the modal (AJAX).
+     */
     public function getDetails(Requisition $requisition)
     {
         $requisition->load([
@@ -161,21 +258,32 @@ class RequisitionController extends Controller
             'requestedBy',
             'approvalDetails.fromUser.role',
             'approvalDetails.toUser.role',
+            'approvalDetails.approvalEntity'
         ]);
 
+        // 1. Fetch available lots (Brand/Spec) for each item
+        // Replaces the old 'current_stock' calculation
         foreach ($requisition->items as $item) {
-            // Get aggregated stock for this specific product
-            $stockSummary = $this->stockService->getAggregatedStockList(['product_id' => $item->product_id]);
-            $item->current_stock = $stockSummary->first()->total_quantity ?? 0;
+            $item->available_lots = DB::table('stocks')
+                ->join('lots', 'stocks.lot_id', '=', 'lots.id')
+                ->where('stocks.product_id', $item->product_id)
+                ->whereNull('stocks.deleted_at')
+                ->where('stocks.quantity', '>', 0) // Only show lots that have stock
+                ->select(
+                    'lots.id',
+                    'lots.lot_number',
+                    'stocks.brand',
+                    'stocks.specification',
+                    'stocks.quantity'
+                )
+                ->get();
         }
 
+        // 2. Timeline Logic
         $timeline = collect([]);
 
-        // 1. Reconstruct "Step 0" (Initiated) logic
-        // We grab the very first log entry (lowest ID) to find the initiation details
+        // Reconstruct "Step 0" (Initiated) logic
         $firstLog = $requisition->approvalDetails->sortBy('id')->first();
-
-        // Use the remarks from the main table, or fallback to the comment in the first log
         $initiationComments = $requisition->remarks ?? ($firstLog ? $firstLog->comments : '');
 
         $timeline->push([
@@ -190,20 +298,18 @@ class RequisitionController extends Controller
             'status_raw' => 'initiated'
         ]);
 
-        // 2. Process Actual Workflow Steps
+        // Process Actual Workflow Steps
         $groupedDetails = $requisition->approvalDetails
             ->where('status', '!=', 'superceded')
             ->sortBy('serial')
             ->groupBy('serial');
 
         foreach ($groupedDetails as $serial => $details) {
-            // Check if anyone has acted (approved/rejected/processed)
             $actor = $details->first(function ($d) {
                 return in_array($d->status, ['approved', 'rejected', 'processed']);
             });
 
             if ($actor) {
-                // ACTED: Show the person who took action
                 $timeline->push([
                     'step' => $serial,
                     'status' => ucfirst($actor->status),
@@ -216,7 +322,6 @@ class RequisitionController extends Controller
                     'status_raw' => $actor->status
                 ]);
             } else {
-                // PENDING: Show who we are waiting for
                 $pendingUsers = $details->map(function ($d) {
                     return $d->toUser->name ?? 'Unknown';
                 })->unique()->join(', ');
@@ -230,7 +335,7 @@ class RequisitionController extends Controller
                     'user' => 'Waiting for: ' . $pendingUsers,
                     'role' => $roleName,
                     'date' => $details->first()->created_at->format('d M, Y h:i A'),
-                    'comments' => '', // Pending steps don't have comments yet
+                    'comments' => '',
                     'color' => 'warning',
                     'status_raw' => 'pending'
                 ]);
@@ -245,6 +350,41 @@ class RequisitionController extends Controller
         ]);
     }
 
+    /**
+     * Update item quantities AND assigned lots.
+     */
+    public function updateItems(Request $request, Requisition $requisition)
+    {
+        try {
+            // items is an array where key is itemId and value is an array of properties
+            // Example: items[101] = { quantity: 5, lot_id: 12 }
+            $items = $request->input('items', []);
+
+            foreach ($items as $itemId => $data) {
+                // Validate existence and relationship security
+                $reqItem = RequisitionItem::where('id', $itemId)
+                    ->where('requisition_id', $requisition->id)
+                    ->first();
+
+                if ($reqItem) {
+                    // 1. Handle Quantity
+                    $qty = isset($data['quantity']) && $data['quantity'] > 0 ? $data['quantity'] : $reqItem->quantity;
+
+                    // 2. Handle Lot ID (Sanitize empty strings to NULL)
+                    $lotId = !empty($data['lot_id']) ? $data['lot_id'] : null;
+
+                    $reqItem->update([
+                        'quantity' => $qty,
+                        'lot_id' => $lotId
+                    ]);
+                }
+            }
+            return response()->json(['success' => true, 'message' => 'Requisition updated successfully.']);
+        } catch (Exception $e) {
+            Log::error($e->getMessage());
+            return response()->json(['success' => false, 'message' => 'Update failed: ' . $e->getMessage()], 500);
+        }
+    }
     /**
      * Remove the specified resource from storage.
      */
@@ -262,23 +402,24 @@ class RequisitionController extends Controller
     /**
      * Update items (quantities) logic.
      */
-    public function updateItems(Request $request, Requisition $requisition)
-    {
-        try {
-            $items = $request->input('items', []);
+    // OLD
+    // public function updateItems(Request $request, Requisition $requisition)
+    // {
+    //     try {
+    //         $items = $request->input('items', []);
 
-            foreach ($items as $itemId => $quantity) {
-                // Validate logic (optional): Ensure quantity is > 0
-                if ($quantity > 0) {
-                    RequisitionItem::where('id', $itemId)
-                        ->where('requisition_id', $requisition->id) // Security check
-                        ->update(['quantity' => $quantity]);
-                }
-            }
+    //         foreach ($items as $itemId => $quantity) {
+    //             // Validate logic (optional): Ensure quantity is > 0
+    //             if ($quantity > 0) {
+    //                 RequisitionItem::where('id', $itemId)
+    //                     ->where('requisition_id', $requisition->id) // Security check
+    //                     ->update(['quantity' => $quantity]);
+    //             }
+    //         }
 
-            return response()->json(['success' => true, 'message' => 'Quantities updated successfully.']);
-        } catch (Exception $e) {
-            return response()->json(['success' => false, 'message' => 'Update failed: ' . $e->getMessage()], 500);
-        }
-    }
+    //         return response()->json(['success' => true, 'message' => 'Quantities updated successfully.']);
+    //     } catch (Exception $e) {
+    //         return response()->json(['success' => false, 'message' => 'Update failed: ' . $e->getMessage()], 500);
+    //     }
+    // }
 }
