@@ -172,6 +172,34 @@
                                     }
                                 },
                             ],
+                            "columnDefs": [{
+                                    "width": "5%",
+                                    "targets": 0,
+                                    "className": "text-center"
+                                }, // SL
+                                {
+                                    "width": "15%",
+                                    "targets": 1
+                                }, // Category
+                                {
+                                    "width": "25%",
+                                    "targets": 2
+                                }, // Product
+                                {
+                                    "width": "25%",
+                                    "targets": 3
+                                }, // Brand & Spec (NEW)
+                                {
+                                    "width": "20%",
+                                    "targets": 4,
+                                    "className": "text-center"
+                                }, // Purchase Type
+                                {
+                                    "width": "10%",
+                                    "targets": 5,
+                                    "className": "text-center font-weight-bold"
+                                } // Quantity
+                            ],
                             "pageLength": 25
                         });
                     },

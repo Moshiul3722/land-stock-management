@@ -47,6 +47,8 @@ class StockRepository extends BaseRepository
                 'products.name as product_name',
                 'product_categories.name as category_name',
                 'product_purchase_types.name as purchase_type_name',
+                'stocks.brand',
+                'stocks.specification',
                 DB::raw('SUM(stocks.quantity) as total_quantity')
             )
             ->whereNull('stocks.deleted_at')
@@ -56,7 +58,9 @@ class StockRepository extends BaseRepository
                 'products.name',
                 'product_categories.name',
                 'product_purchase_types.id',
-                'product_purchase_types.name'
+                'product_purchase_types.name',
+                'stocks.brand',
+                'stocks.specification'
             );
 
         // Apply category filter

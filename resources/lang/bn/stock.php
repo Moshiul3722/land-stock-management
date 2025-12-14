@@ -8,6 +8,8 @@ return [
     'details_by_lot' => 'লট অনুযায়ী স্টকের বিবরণ',
     'total_available' => 'মোট:',
     'current_stock_title' => 'স্টক রিপোর্ট',
+    'brand_spec' => 'ব্র্যান্ড ও স্পেসিফিকেশন',
+
 
     // Table Headers
     'table_sl' => 'ক্রম',

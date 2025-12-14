@@ -5,6 +5,7 @@
             <th>{{ __('product.department') }}</th>
             <th>{{ __('product.cateogory') }}</th>
             <th>{{ __('stock.table_product') }}</th>
+            <th>{{ __('stock.brand_spec') }}</th>
             <th>{{ __('product.purchase_type') }}</th>
             <th class="text-right">{{ __('product.issued_count') }}</th>
         </tr>
@@ -17,6 +18,10 @@
                 <td>{{ $row->category_name }}</td>
                 <td>
                     {{ $row->product_name }}
+                </td>
+                <td>
+                    {{ $row->brand ?? 'N/A' }} <br>
+                    <small class="text-muted">{{ $row->specification }}</small>
                 </td>
                 <td><span class="badge bg-info">{{ $row->purchase_type_name ?? 'N/A' }}</span></td>
                 <td class="text-right font-weight-bold text-danger">{{ $row->total_quantity }}</td>

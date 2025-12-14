@@ -61,6 +61,12 @@ class IssuedItemRepository extends BaseRepository
             ->join('lots', 'issued_items.lot_id', '=', 'lots.id')
             ->join('product_purchase_types', 'lots.product_purchase_type_id', '=', 'product_purchase_types.id')
 
+            // JOIN lot_details to get the Brand/Spec of the issued item
+            ->join('lot_details', function ($join) {
+                $join->on('issued_items.lot_id', '=', 'lot_details.lot_id')
+                    ->on('issued_items.product_id', '=', 'lot_details.product_id');
+            })
+
             // Join Users & Departments
             ->join('users', 'issued_items.user_id', '=', 'users.id')
             ->leftJoin('departments', 'users.department_id', '=', 'departments.id')
@@ -70,6 +76,8 @@ class IssuedItemRepository extends BaseRepository
                 'product_categories.name as category_name',
                 'product_purchase_types.name as purchase_type_name',
                 'departments.name as department_name',
+                'lot_details.brand',
+                'lot_details.specification',
                 DB::raw('SUM(issued_items.quantity) as total_quantity'),
                 DB::raw('COUNT(issued_items.id) as requisition_count')
             )
@@ -78,7 +86,9 @@ class IssuedItemRepository extends BaseRepository
                 'products.name',
                 'product_categories.name',
                 'product_purchase_types.name',
-                'departments.name'
+                'departments.name',
+                'lot_details.brand',
+                'lot_details.specification'
             );
 
         // Apply Filters

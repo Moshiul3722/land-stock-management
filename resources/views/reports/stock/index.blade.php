@@ -102,8 +102,8 @@
                         // Initialize DataTable with Excel Button
                         $('#current-stock-table').DataTable({
                             dom: "<'row'<'col-md-6'B><'col-md-6 text-right'f>>" +
-                                 "<'row'<'col-sm-12'tr>>" +
-                                 "<'row'<'col-sm-12 col-md-5'i><'col-sm-12 col-md-7'p>>",
+                                "<'row'<'col-sm-12'tr>>" +
+                                "<'row'<'col-sm-12 col-md-5'i><'col-sm-12 col-md-7'p>>",
                             lengthChange: false,
                             autoWidth: false,
                             buttons: [{
@@ -145,27 +145,32 @@
                                 },
                             ],
                             "columnDefs": [{
-                                    "width": "10%",
+                                    "width": "5%",
                                     "targets": 0,
                                     "className": "text-center"
-                                },
+                                }, // SL
                                 {
-                                    "width": "20%",
+                                    "width": "15%",
                                     "targets": 1
-                                },
+                                }, // Category
                                 {
-                                    "width": "30%",
+                                    "width": "25%",
                                     "targets": 2
-                                },
+                                }, // Product
                                 {
                                     "width": "25%",
                                     "targets": 3
-                                },
+                                }, // Brand & Spec (NEW)
                                 {
-                                    "width": "15%",
+                                    "width": "20%",
                                     "targets": 4,
+                                    "className": "text-center"
+                                }, // Purchase Type
+                                {
+                                    "width": "10%",
+                                    "targets": 5,
                                     "className": "text-center font-weight-bold"
-                                }
+                                } // Quantity
                             ]
                         });
                     },

@@ -8,6 +8,7 @@ return [
     'details_by_lot' => 'Stock Details by Lot',
     'total_available' => 'Total Available Stock:',
     'current_stock_title' => 'Stock Report',
+    'brand_spec' => 'Brancd & Specification',
 
     // Table Headers
     'table_sl' => 'SL',
