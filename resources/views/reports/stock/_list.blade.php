@@ -32,7 +32,7 @@
     </tbody>
     <tfoot>
         <tr class="bg-light font-weight-bold">
-            <td colspan="4" class="text-right">Total Quantity in View:</td>
+            <td colspan="5" class="text-right">Total Quantity in View:</td>
             <td class="text-center">{{ $stockSummary->sum('total_quantity') }}</td>
         </tr>
     </tfoot>

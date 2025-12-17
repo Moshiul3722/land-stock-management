@@ -30,7 +30,7 @@
     </tbody>
     <tfoot>
         <tr class="bg-light font-weight-bold">
-            <td colspan="5" class="text-right">Grand Total:</td>
+            <td colspan="6" class="text-right">Grand Total:</td>
             <td class="text-right">{{ $reportData->sum('total_quantity') }}</td>
         </tr>
     </tfoot>
