@@ -178,7 +178,19 @@ class RequisitionService
      */
     public function update(array $data, int $id, string $action = 'submit')
     {
-        $this->validateRequisition($data, $action);
+        // $this->validateRequisition($data, $action);
+
+        $validator = Validator::make($data, [
+            'requisition_date' => 'required|date',
+            'remarks' => 'nullable|string',
+            'details' => 'required|array|min:1',
+            'details.*.product_id' => 'required|exists:products,id',
+            'details.*.quantity' => 'required|integer|min:1',
+        ]);
+
+        if ($validator->fails()) {
+            throw new InvalidArgumentException($validator->errors()->first());
+        }
 
         $requisition = $this->requisitionRepository->find($id);
         if ($requisition->status !== 'draft') {
@@ -316,8 +328,8 @@ class RequisitionService
         // Based on our previous logic, the final status set by the Store Keeper is 'approved' (or 'processed' if you changed it).
         // Let's check for both to be safe or just 'approved' if that's the final state in your DB.
         // Assuming 'approved' is the final state for now based on ApprovalService code.
-        
-        return $this->requisitionRepository->countByStatus('processed'); 
+
+        return $this->requisitionRepository->countByStatus('processed');
         // If you explicitly used 'processed' in your database for the final step, change 'approved' to 'processed'.
     }
 }

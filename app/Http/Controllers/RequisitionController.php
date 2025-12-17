@@ -379,7 +379,10 @@ class RequisitionController extends Controller
                     ]);
                 }
             }
-            return response()->json(['success' => true, 'message' => 'Requisition updated successfully.']);
+            return redirect()
+                ->route('requisitions.index')
+                ->with('success', 'Requisition updated successfully.');
+            // return response()->json(['success' => true, 'message' => 'Requisition updated successfully.']);
         } catch (Exception $e) {
             Log::error($e->getMessage());
             return response()->json(['success' => false, 'message' => 'Update failed: ' . $e->getMessage()], 500);
