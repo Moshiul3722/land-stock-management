@@ -47,7 +47,7 @@ class AuthGate
                 // Ensure optional parameters are handled correctly
                 $pattern = str_replace(['?}', '})'], ')?', $pattern);
 
-                if (preg_match('~^' . $pattern . '$~', $referrerRoutePath)) {
+                if (preg_match('~^' . $pattern . '$~', $referrerRoutePath) && $referrerRoutePath != 'home') {
                     return $next($request);
                 }
             }
