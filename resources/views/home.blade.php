@@ -3,7 +3,7 @@
 @section('content')
     <div class="container-fluid">
         <div class="row">
-            <div class="col-lg-4 col-6">
+            {{-- <div class="col-lg-4 col-6">
                 <!-- small box -->
                 <div class="small-box bg-warning">
                     <div class="inner">
@@ -13,9 +13,8 @@
                     <div class="icon">
                         <i class="fas fa-desktop"></i>
                     </div>
-                    <a href="#" class="small-box-footer">More info <i class="fas fa-arrow-circle-right"></i></a>
                 </div>
-            </div>
+            </div> --}}
 
             <div class="col-lg-4 col-6">
                 <!-- small box -->
@@ -27,7 +26,6 @@
                     <div class="icon">
                         <i class="fas fa-users"></i>
                     </div>
-                    <a href="{{ route('users.index') }}" class="small-box-footer">More info <i class="fas fa-arrow-circle-right"></i></a>
                 </div>
             </div>
 
@@ -41,7 +39,6 @@
                     <div class="icon">
                         <i class="fas fa-user-tie"></i>
                     </div>
-                    <a href="{{ route('cnfRoles.index') }}" class="small-box-footer">More info <i class="fas fa-arrow-circle-right"></i></a>
                 </div>
             </div>
 
@@ -55,7 +52,6 @@
                     <div class="icon">
                         <i class="fas fa-chart-line"></i>
                     </div>
-                    <a href="{{ route('categories.index') }}" class="small-box-footer">More info <i class="fas fa-arrow-circle-right"></i></a>
                 </div>
             </div>
 
@@ -69,7 +65,6 @@
                     <div class="icon">
                         <i class="fas fa-users-cog"></i>
                     </div>
-                    <a href="{{ route('products.index') }}" class="small-box-footer">More info <i class="fas fa-arrow-circle-right"></i></a>
                 </div>
             </div>
 
@@ -126,7 +121,7 @@
         $(function() {
             // --- 1. BAR CHART (Monthly) ---
             // Get data passed from the controller
-            var barData = @json($barChartData); 
+            var barData = @json($barChartData);
             var ctx = document.getElementById('divisionBarChart').getContext('2d');
             var barChart1 = new Chart(ctx, {
                 type: 'bar',
@@ -144,7 +139,7 @@
                     responsive: true,
                     maintainAspectRatio: false,
                     scales: {
-                        y: { 
+                        y: {
                             beginAtZero: true,
                             ticks: { stepSize: 1 } // Ensure integers for counts
                         }
@@ -158,10 +153,10 @@
             // --- 2. PIE CHART (Departments) ---
             // Get data passed from the controller
             var pieData = @json($pieChartData);
-            
+
             // Generate dynamic colors based on data length
             var colors = [
-                '#f56954', '#00a65a', '#f39c12', '#00c0ef', '#3c8dbc', '#d2d6de', 
+                '#f56954', '#00a65a', '#f39c12', '#00c0ef', '#3c8dbc', '#d2d6de',
                 '#8e44ad', '#34495e', '#16a085', '#e67e22'
             ];
 
