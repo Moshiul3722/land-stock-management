@@ -3,7 +3,7 @@
 return [
 
     'table_sl' => 'ক্রমিক নং',
-    'table_lot_number' => 'লট নম্বর',
+    'table_lot_number' => 'লট নম্বর/স্মারক নম্বর',
     'table_entry_date' => 'এন্ট্রি তারিখ',
     'table_status' => 'স্ট্যাটাস',
     'table_action' => 'অ্যাকশন',
@@ -19,7 +19,7 @@ return [
     'pending_title' => 'লট এন্ট্রির অনুরোধের তালিকা',
     'pending_list' => 'লট এন্ট্রির অনুরোধের তালিকা',
 
-    'lot_number' => 'লট নম্বর',
+    'lot_number' => 'লট নম্বর/স্মারক নম্বর',
     'entry_date' => 'এন্ট্রি তারিখ',
     'remarks' => 'মন্তব্য',
     'table_category' => 'প্রোডাক্ট ক্যাটাগরি',

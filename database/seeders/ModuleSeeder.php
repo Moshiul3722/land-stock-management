@@ -24,7 +24,7 @@ class ModuleSeeder extends Seeder
         // Id = 2
         CnfModule::create([
             'module_name_en' => 'Product Setup',
-            'module_name_bn' => 'প্রোডাক্ট সেটাপ',
+            'module_name_bn' => 'প্রোডাক্ট সেটআপ',
             'is_active' => 1,
             'created_by' => 1,
             'updated_by' => 1
