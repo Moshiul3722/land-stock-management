@@ -215,7 +215,7 @@
                             {{-- Items Table --}}
                             <div class="d-flex justify-content-between align-items-center mb-2">
                                 <h6 class="font-weight-bold text-primary mb-0">Items & Stock Check</h6>
-                                {{-- 
+                                {{--
                                     Only show "Update Quantities" button if user is NOT a Store Keeper (Role ID 4).
                                 --}}
                                 @if (Auth::user()->role_id != 4)
@@ -370,10 +370,10 @@
                                 <td>${item.product.category.name}</td>
                                 <td>${assignmentHtml}</td>
                                 <td>
-                                    <input type="number" 
-                                           class="${inputClass}" 
-                                           data-id="${item.id}" 
-                                           value="${item.quantity}" 
+                                    <input type="number"
+                                           class="${inputClass}"
+                                           data-id="${item.id}"
+                                           value="${item.quantity}"
                                            min="1"
                                            ${disabledAttr}>
                                 </td>
@@ -381,7 +381,7 @@
                         });
                         $('#modal-items-body').html(itemsHtml);
 
-
+                        evaluateApproveButton(res.requisition.items);
 
                         // Populate Timeline (Your existing timeline logic)
                         let timelineHtml = '';
@@ -443,6 +443,7 @@
                     },
                     success: function(res) {
                         toastr.success(res.message);
+                        evaluateApproveButtonFromUI();
                     },
                     error: function(err) {
                         toastr.error(
@@ -458,7 +459,7 @@
             // 3. Approve Logic
             $('#btn-approve').click(function() {
                 let url = "{{ route('requisitions.approve', ':id') }}".replace(':id',
-                currentRequisitionId);
+                    currentRequisitionId);
                 let comments = $('#action-comments').val();
 
                 let actionText = isStoreKeeper ? 'Process & Complete' : 'Approve';
@@ -473,7 +474,7 @@
                         let form = $('#approve-form');
                         form.attr('action', url);
                         form.html(
-                        `@csrf <input type="hidden" name="comments" value="${comments}">`);
+                            `@csrf <input type="hidden" name="comments" value="${comments}">`);
                         form.submit();
                     }
                 });
@@ -498,11 +499,78 @@
                         let form = $('#reject-form');
                         form.attr('action', url);
                         form.html(
-                        `@csrf <input type="hidden" name="comments" value="${comments}">`);
+                            `@csrf <input type="hidden" name="comments" value="${comments}">`);
                         form.submit();
                     }
                 });
             });
+
+            // 5 check if the product lot is assigned before approving (for Store Admin)
+            function evaluateApproveButton(items) {
+                let hasUnavailable = false;
+                let hasUnassigned = false;
+
+                items.forEach(item => {
+                    // 1️⃣ Stock unavailable
+                    if (!item.available_lots || item.available_lots.length === 0) {
+                        hasUnavailable = true;
+                    }
+
+                    // 2️⃣ Lot not assigned
+                    if (!item.lot_id) {
+                        hasUnassigned = true;
+                    }
+                });
+
+                const approveBtn = $('#btn-approve');
+
+                if (hasUnavailable || hasUnassigned) {
+                    // approveBtn.prop('disabled', true).hide();
+                    approveBtn
+                        .prop('disabled', true)
+                        .attr('title', 'All items must have stock and assigned brand/spec')
+                        .show();
+                } else {
+                    approveBtn.prop('disabled', false).show();
+                }
+            }
+
+            function evaluateApproveButtonFromUI() {
+                let hasUnavailable = false;
+                let hasUnassigned = false;
+
+                $('#modal-items-body tr').each(function() {
+                    // Stock unavailable text
+                    if ($(this).find('.text-danger:contains("Stock Unavailable")').length) {
+                        hasUnavailable = true;
+                    }
+
+                    // Lot dropdown exists but no selection
+                    let lotSelect = $(this).find('.item-lot-select');
+                    if (lotSelect.length && !lotSelect.val()) {
+                        hasUnassigned = true;
+                    }
+
+                    // Read-only "Not Assigned" (for non-admin edge cases)
+                    if ($(this).find('.text-danger:contains("Not Assigned")').length) {
+                        hasUnassigned = true;
+                    }
+                });
+
+                const approveBtn = $('#btn-approve');
+
+                if (hasUnavailable || hasUnassigned) {
+                    approveBtn
+                        .prop('disabled', true)
+                        .attr('title', 'All items must have stock and assigned brand/spec')
+                        .show();
+                } else {
+                    approveBtn.prop('disabled', false).removeAttr('title').show();
+                }
+            }
+        });
+        $(document).on('change', '.item-lot-select', function() {
+            evaluateApproveButtonFromUI();
         });
     </script>
 @endpush

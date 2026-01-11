@@ -55,7 +55,7 @@
         {{-- Requisition List Card --}}
         <div class="row">
             <div class="col-md-12">
-                <form id="requisition-form" action="{{ route('requisitions.update', $requisition) }}" method="POST">
+                <form id="requisition-form" action="{{ route('requisitions.update', $requisition) }}" method="POST"  onsubmit="console.log('HTML submit fired')">
                     @csrf
                     @method('PUT')
                     <div class="card card-primary">
@@ -75,7 +75,6 @@
                                     <tr>
                                         <th>{{ __('stock.table_category') }}</th>
                                         <th>{{ __('stock.table_product') }}</th>
-                                        <th>{{ __('requisition.stock_status') }}</th>
                                         <th>{{ __('requisition.required_amount') }}</th>
                                         <th>{{ __('stock.table_action') }}</th>
                                     </tr>
@@ -89,13 +88,6 @@
                                                 {{ $item->product->name }}
                                                 <input type="hidden" name="details[{{ $index }}][product_id]"
                                                     value="{{ $item->product_id }}">
-                                            </td>
-                                            <td>
-                                                {{-- Stock status calculated in Controller --}}
-                                                <span
-                                                    class="{{ $item->stock_status_class }} stock-status">{{ $item->stock_status_label }}</span>
-                                                <input type="hidden" name="details[{{ $index }}][status]"
-                                                    value="{{ $item->stock_status_label }}">
                                             </td>
                                             <td>
                                                 <input type="number" class="form-control"
@@ -196,8 +188,6 @@
                             categoryName,
                             productName +
                             `<input type="hidden" name="details[${rowCounter}][product_id]" value="${productId}">`,
-                            `<span class="${response.class} stock-status">${response.status}</span>` +
-                            `<input type="hidden" name="details[${rowCounter}][status]" value="${response.status}">`,
                             `<input type="number" class="form-control" name="details[${rowCounter}][quantity]" min="1" required>`,
                             `<button type="button" class="btn btn-danger btn-sm remove-row"><i class="fa fa-trash"></i></button>`
                         ]).draw(false);
@@ -239,7 +229,8 @@
                 var title = (action === 'save-draft-btn') ? 'Update Draft?' : 'Submit for Approval?';
                 var text = (action === 'save-draft-btn') ? 'Your changes will be saved.' :
                     'This requisition will be submitted and locked. Are you sure?';
-
+                // console.log('Active element:', document.activeElement);
+                // console.log('Action:', action);
                 Swal.fire({
                     title: title,
                     text: text,
@@ -252,6 +243,8 @@
                         $(this).append(
                             `<input type="hidden" name="action" value="${actionValue}" />`);
                         this.submit();
+                        // $('#requisition-form')[0].submit();
+                        // console.log('Form ready to be submitted with action:', actionValue);
                     }
                 });
             });
