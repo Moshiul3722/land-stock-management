@@ -27,6 +27,7 @@ class RequisitionItem extends Model
         'requisition_id',
         'product_id',
         'quantity',
+        'original_quantity',
         'lot_id',
         'created_by',
         'updated_by',

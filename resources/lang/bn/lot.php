@@ -23,6 +23,7 @@ return [
     'entry_date' => 'এন্ট্রি তারিখ',
     'remarks' => 'মন্তব্য',
     'table_category' => 'প্রোডাক্ট ক্যাটাগরি',
+    'table_sub_category' => 'প্রোডাক্ট সাব-ক্যাটাগরি',
     'table_product' => 'প্রোডাক্ট',
     'table_quantity' => 'পরিমাণ',
     'table_unit_price' => 'মূল্য',

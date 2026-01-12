@@ -10,6 +10,8 @@
                 <div class="col-sm-6">
                     <ol class="breadcrumb float-sm-right">
                         <li class="breadcrumb-item"><a href={{ route('home') }}>{{ __('breadcrumb.home') }}</a></li>
+                        <li class="breadcrumb-item"><a
+                                href={{ route('requisitions.index') }}>{{ __('requisition.list_title') }}</a></li>
                         <li class="breadcrumb-item active">{{ __('breadcrumb.edit') }}</li>
                     </ol>
                 </div>
@@ -26,7 +28,7 @@
                     </div>
                     <div class="card-body">
                         <div class="row">
-                            <div class="form-group col-md-5">
+                            <div class="form-group col-md-4">
                                 <label for="category_filter">{{ __('category.title') }}</label>
                                 <select class="form-control select2" id="category_filter">
                                     <option value="">Select Category</option>
@@ -35,7 +37,13 @@
                                     @endforeach
                                 </select>
                             </div>
-                            <div class="form-group col-md-5">
+                            <div class="form-group col-md-4">
+                                <label for="sub_category_filter">Sub Category</label>
+                                <select class="form-control select2" id="sub_category_filter" disabled>
+                                    <option value="">Select Sub Category</option>
+                                </select>
+                            </div>
+                            <div class="form-group col-md-4">
                                 <label for="product_filter">{{ __('product.title') }}</label>
                                 <select class="form-control select2" id="product_filter" disabled>
                                     <option value="">Select Category First</option>
@@ -55,7 +63,7 @@
         {{-- Requisition List Card --}}
         <div class="row">
             <div class="col-md-12">
-                <form id="requisition-form" action="{{ route('requisitions.update', $requisition) }}" method="POST"  onsubmit="console.log('HTML submit fired')">
+                <form id="requisition-form" action="{{ route('requisitions.update', $requisition) }}" method="POST">
                     @csrf
                     @method('PUT')
                     <div class="card card-primary">
@@ -74,9 +82,10 @@
                                 <thead>
                                     <tr>
                                         <th>{{ __('stock.table_category') }}</th>
+                                        <th>Sub Category</th> {{-- New Column --}}
                                         <th>{{ __('stock.table_product') }}</th>
-                                        <th>{{ __('requisition.required_amount') }}</th>
-                                        <th>{{ __('stock.table_action') }}</th>
+                                        <th width="15%">{{ __('requisition.required_amount') }}</th>
+                                        <th width="10%">{{ __('stock.table_action') }}</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -84,6 +93,8 @@
                                     @foreach ($requisition->items as $index => $item)
                                         <tr>
                                             <td>{{ $item->product->category->name }}</td>
+                                            <td>{{ optional($item->product->subCategory)->name ?? 'N/A' }}</td>
+                                            {{-- New Column Data --}}
                                             <td>
                                                 {{ $item->product->name }}
                                                 <input type="hidden" name="details[{{ $index }}][product_id]"
@@ -94,7 +105,7 @@
                                                     name="details[{{ $index }}][quantity]" min="1"
                                                     value="{{ $item->quantity }}" required>
                                             </td>
-                                            <td>
+                                            <td class="text-center">
                                                 <button type="button" class="btn btn-danger btn-sm remove-row"><i
                                                         class="fa fa-trash"></i></button>
                                             </td>
@@ -135,29 +146,55 @@
             // We need a counter higher than existing items to avoid index collision
             var rowCounter = {{ $requisition->items->count() + 1 }};
 
-            // 1. Dependent Dropdown Logic
+            // --- Dependent Dropdown Logic ---
+
+            // 1. Category Change
             $('#category_filter').on('change', function() {
                 const categoryId = $(this).val();
+                const subCategorySelect = $('#sub_category_filter');
                 const productSelect = $('#product_filter');
-                const urlTemplate = "{{ route('products.by_category', ['categoryId' => ':id']) }}";
-                const finalUrl = urlTemplate.replace(':id', categoryId);
 
-                productSelect.prop('disabled', true).html('<option value="">Loading...</option>');
+                // Reset Sub Category & Product
+                subCategorySelect.html('<option value="">Select Sub Category</option>').prop('disabled',
+                    true);
+                productSelect.html('<option value="">Select Product</option>').prop('disabled', true);
+
                 if (!categoryId) {
                     productSelect.html('<option value="">Select Category First</option>');
                     return;
                 }
 
+                // A. Fetch Sub Categories
                 $.ajax({
-                    url: finalUrl,
+                    url: "{{ route('get.sub_categories', ':id') }}".replace(':id', categoryId),
+                    type: 'GET',
+                    success: function(data) {
+                        if (data.length > 0) {
+                            $.each(data, function(key, value) {
+                                subCategorySelect.append('<option value="' + value.id +
+                                    '">' + value.name + '</option>');
+                            });
+                            subCategorySelect.prop('disabled', false);
+                        } else {
+                            subCategorySelect.append(
+                                '<option value="">No Sub Categories</option>');
+                        }
+                    }
+                });
+
+                // B. Fetch Products (By Category)
+                const url = "{{ route('products.by_category', ['categoryId' => ':id']) }}".replace(':id',
+                    categoryId);
+
+                $.ajax({
+                    url: url,
                     type: 'GET',
                     success: function(products) {
-                        let options = '<option value="">Select Product</option>';
-                        products.forEach(function(product) {
-                            options +=
-                                `<option value="${product.id}">${product.name}</option>`;
+                        $.each(products, function(key, value) {
+                            productSelect.append('<option value="' + value.id + '">' +
+                                value.name + '</option>');
                         });
-                        productSelect.html(options).prop('disabled', false);
+                        productSelect.prop('disabled', false);
                     },
                     error: function() {
                         toastr.error('Failed to load products.');
@@ -165,10 +202,60 @@
                 });
             });
 
-            // 2. "Add to List" Button Logic
+            // 2. Sub Category Change
+            $('#sub_category_filter').on('change', function() {
+                const subCategoryId = $(this).val();
+                const productSelect = $('#product_filter');
+
+                // Reset Product Dropdown
+                productSelect.empty().append('<option value="">Select Product</option>').prop('disabled',
+                    true);
+
+                // If cleared, revert to loading all products by category
+                if (!subCategoryId) {
+                    let categoryId = $('#category_filter').val();
+                    if (categoryId) {
+                        const url = "{{ route('products.by_category', ['categoryId' => ':id']) }}".replace(
+                            ':id', categoryId);
+                        $.ajax({
+                            url: url,
+                            type: 'GET',
+                            success: function(products) {
+                                $.each(products, function(key, value) {
+                                    productSelect.append('<option value="' + value.id +
+                                        '">' + value.name + '</option>');
+                                });
+                                productSelect.prop('disabled', false);
+                            }
+                        });
+                    }
+                    return;
+                }
+
+                // Fetch Products (By Sub Category)
+                const url = "{{ route('products.by_sub_category', ':id') }}".replace(':id', subCategoryId);
+
+                $.ajax({
+                    url: url,
+                    type: 'GET',
+                    success: function(products) {
+                        $.each(products, function(key, value) {
+                            productSelect.append('<option value="' + value.id + '">' +
+                                value.name + '</option>');
+                        });
+                        productSelect.prop('disabled', false);
+                    },
+                    error: function() {
+                        toastr.error('Failed to load products.');
+                    }
+                });
+            });
+
+            // 3. "Add to List" Button Logic
             $('#add-to-list-btn').on('click', function() {
                 const productSelect = $('#product_filter');
                 const productId = productSelect.val();
+
                 if (!productId) {
                     toastr.error('Please select a product first.');
                     return;
@@ -176,75 +263,63 @@
 
                 const productName = productSelect.find('option:selected').text();
                 const categoryName = $('#category_filter').find('option:selected').text();
-                const stockCheckUrl = "{{ route('stock.check_status', ['product' => ':id']) }}".replace(
-                    ':id', productId);
 
-                $.ajax({
-                    url: stockCheckUrl,
-                    type: 'GET',
-                    success: function(response) {
-                        rowCounter++;
-                        requisitionTable.row.add([
-                            categoryName,
-                            productName +
-                            `<input type="hidden" name="details[${rowCounter}][product_id]" value="${productId}">`,
-                            `<input type="number" class="form-control" name="details[${rowCounter}][quantity]" min="1" required>`,
-                            `<button type="button" class="btn btn-danger btn-sm remove-row"><i class="fa fa-trash"></i></button>`
-                        ]).draw(false);
-                    },
-                    error: function() {
-                        toastr.error('Failed to check stock status.');
-                    }
-                });
+                // Handle Sub Category Name display
+                let subCategoryName = $('#sub_category_filter').find('option:selected').text();
+                if ($('#sub_category_filter').val() == "" || $('#sub_category_filter').prop('disabled')) {
+                    subCategoryName = "N/A";
+                }
+
+                rowCounter++;
+
+                requisitionTable.row.add([
+                    categoryName,
+                    subCategoryName, // Added Sub Cat column data
+                    productName +
+                    `<input type="hidden" name="details[${rowCounter}][product_id]" value="${productId}">`,
+                    `<input type="number" class="form-control" name="details[${rowCounter}][quantity]" min="1" value="1" required>`,
+                    `<button type="button" class="btn btn-danger btn-sm remove-row"><i class="fa fa-trash"></i></button>`
+                ]).draw(false);
             });
 
-            // 3. Delete Row Logic
+            // 4. Delete Row Logic
             $('#requisition-table tbody').on('click', '.remove-row', function() {
                 requisitionTable.row($(this).parents('tr')).remove().draw(false);
             });
 
-            // 4. Form Submission Logic
+            // 5. Form Submission Logic
             $('#requisition-form').on('submit', function(e) {
-                var action = $(document.activeElement).attr('id'); // Get the ID of the button clicked
+                var action = $(document.activeElement).attr('id');
                 e.preventDefault();
 
                 if (requisitionTable.rows().count() === 0) {
-                    toastr.error('You must add at least one product.');
+                    toastr.error("{{ __('requisition.toastr_must_add_one') }}");
                     return false;
                 }
 
-                if (action === 'submit-approval-btn') {
-                    var hasUnavailable = false;
-                    $('#requisition-table .stock-status').each(function() {
-                        if ($(this).text() === 'Not Available') {
-                            hasUnavailable = true;
-                        }
-                    });
-                    if (hasUnavailable) {
-                        toastr.error('Cannot submit. One or more items are not available.');
-                        return false;
-                    }
-                }
+                var title = (action === 'save-draft-btn') ?
+                    '{{ __('requisition.sweetalert_draft_save_title') }}' :
+                    '{{ __('requisition.sweetalert_save_title') }}';
+                var text = (action === 'save-draft-btn') ?
+                    '{{ __('requisition.sweetalert_draft_save_text') }}' :
+                    '{{ __('requisition.sweetalert_save_text') }}';
 
-                var title = (action === 'save-draft-btn') ? 'Update Draft?' : 'Submit for Approval?';
-                var text = (action === 'save-draft-btn') ? 'Your changes will be saved.' :
-                    'This requisition will be submitted and locked. Are you sure?';
-                // console.log('Active element:', document.activeElement);
-                // console.log('Action:', action);
                 Swal.fire({
                     title: title,
                     text: text,
                     icon: 'info',
                     showCancelButton: true,
-                    confirmButtonText: 'Yes, proceed!'
+                    confirmButtonText: '{{ __('requisition.sweetalert_confirm_button') }}',
+                    cancelButtonText: '{{ __('requisition.sweetalert_cancel_button') }}',
                 }).then((result) => {
                     if (result.isConfirmed) {
+                        var form = $('#requisition-form');
                         var actionValue = (action === 'save-draft-btn') ? 'save_draft' : 'submit';
-                        $(this).append(
-                            `<input type="hidden" name="action" value="${actionValue}" />`);
-                        this.submit();
-                        // $('#requisition-form')[0].submit();
-                        // console.log('Form ready to be submitted with action:', actionValue);
+
+                        form.find('input[name="action"]').remove();
+                        form.append(`<input type="hidden" name="action" value="${actionValue}" />`);
+
+                        form[0].submit();
                     }
                 });
             });

@@ -98,6 +98,12 @@ Route::middleware(['auth', 'permission'])->group(function () {
 
     // Product & Category Management Routes
     Route::resource('categories', CategoryController::class);
+    Route::get('/subcategories', [CategoryController::class, 'subcategoryIndex'])->name('subcategories.index');
+    Route::get('/subcategories/create', [CategoryController::class, 'subcategoryCreate'])->name('subcategories.create');
+    Route::post('/subcategories/store', [CategoryController::class, 'subcategoryStore'])->name('subcategories.store');
+    Route::post('/subcategories/edit/{id}', [CategoryController::class, 'subcategoryStore'])->name('subcategories.edit');
+    Route::post('/subcategories/delete/{id}', [CategoryController::class, 'subcategoryStore'])->name('subcategories.destroy');
+
     Route::resource('products', ProductController::class);
     Route::get('/products/by-category/{categoryId}', [App\Http\Controllers\ProductController::class, 'getByCategory'])->name('products.by_category');
 
@@ -134,4 +140,7 @@ Route::middleware(['auth', 'permission'])->group(function () {
         Route::get('/stock/current', [ReportController::class, 'currentStock'])->name('stock.current');
         Route::get('/consumption', [ReportController::class, 'consumption'])->name('consumption');
     });
+    Route::get('/get-sub-categories/{categoryId}', [CategoryController::class, 'getSubCategories'])->name('get.sub_categories');
+    Route::get('/get-products-by-sub-category/{subCategoryId}', [App\Http\Controllers\LotController::class, 'getBySubCategory'])->name('products.by_sub_category');
+
 });

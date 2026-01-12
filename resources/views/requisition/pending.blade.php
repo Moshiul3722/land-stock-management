@@ -143,12 +143,6 @@
                 <div class="col-sm-6">
                     <h1>{{ __('requisition.pending_title') }}</h1>
                 </div>
-                <div class="col-sm-6">
-                    <ol class="breadcrumb float-sm-right">
-                        <li class="breadcrumb-item"><a href="{{ route('home') }}">{{ __('breadcrumb.home') }}</a></li>
-                        <li class="breadcrumb-item active">{{ __('breadcrumb.list') }}</li>
-                    </ol>
-                </div>
             </div>
         </div>
     </section>
@@ -156,17 +150,17 @@
     <div class="content">
         <div class="card card-primary">
             <div class="card-header">
-                <h3 class="card-title">{{ __('requisition.pending_title') }}</h3>
+                <h3 class="card-title">{{ __('requisition.pending_list') }}</h3>
             </div>
             <div class="card-body">
                 <table id="pending-req-table" class="table table-bordered table-striped">
                     <thead>
                         <tr>
                             <th>{{ __('lot.table_sl') }}</th>
-                            <th>{{ __('requisition.requestor_name') }}</th>
-                            <th>{{ __('requisition.requisition_date') }}</th>
-                            <th>{{ __('requisition.items_count') }}</th>
-                            <th>{{ __('commontable.action') }}</th>
+                            <th>Requestor</th>
+                            <th>Date</th>
+                            <th>Total Items</th>
+                            <th>Action</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -215,10 +209,11 @@
                             {{-- Items Table --}}
                             <div class="d-flex justify-content-between align-items-center mb-2">
                                 <h6 class="font-weight-bold text-primary mb-0">Items & Stock Check</h6>
-                                {{--
-                                    Only show "Update Quantities" button if user is NOT a Store Keeper (Role ID 4).
+
+                                {{-- 
+                                    Show "Update Quantities" button ONLY if user is Store Admin (Role ID 3).
                                 --}}
-                                @if (Auth::user()->role_id != 4)
+                                @if (Auth::user()->role_id == 3)
                                     <button type="button" id="btn-update-qty" class="btn btn-warning btn-sm shadow-sm">
                                         <i class="fas fa-save"></i> Save Assignments & Qty
                                     </button>
@@ -230,8 +225,9 @@
                                     <thead class="bg-light text-center">
                                         <tr>
                                             <th>Product</th>
-                                            <th>Category</th>
+                                            <th>Category / Sub Category</th>
                                             <th width="35%">Assigned Lot (Brand/Spec)</th>
+                                            <th width="80">Orig. Qty</th> {{-- New Column --}}
                                             <th width="100">Req. Qty</th>
                                         </tr>
                                     </thead>
@@ -255,18 +251,16 @@
                 <div class="modal-footer bg-light">
                     <button type="button" class="btn btn-secondary" data-dismiss="modal"
                         onclick="$('#actionModal').modal('hide')">Close</button>
+
+                    {{-- Hide Reject button if user is Store Keeper (Role ID 4) --}}
                     @if (Auth::user()->role_id != 4)
                         <button type="button" class="btn btn-danger" id="btn-reject"><i class="fas fa-times"></i>
                             Reject</button>
                     @endif
-                    @if (Auth::user()->role_id != 4)
-                        <button type="button" class="btn btn-success" id="btn-approve"><i class="fas fa-check"></i>
-                            Approve</button>
-                    @else
-                        <button type="button" class="btn btn-success" id="btn-approve"><i class="fas fa-check"></i>
-                            Acknowledge</button>
-                    @endif
 
+                    <button type="button" class="btn btn-success" id="btn-approve">
+                        <i class="fas fa-check"></i> {{ Auth::user()->role_id == 4 ? 'Process & Complete' : 'Approve' }}
+                    </button>
                 </div>
             </div>
         </div>
@@ -277,120 +271,102 @@
     <form id="reject-form" method="POST" style="display:none;">@csrf</form>
 @endsection
 
+{{-- ... existing code ... --}}
 @push('js')
-    <script>
-        $(document).ready(function() {
-            $('#pending-req-table').DataTable();
-            let currentRequisitionId = null;
+<script>
+    $(document).ready(function() {
+        $('#pending-req-table').DataTable();
+        let currentRequisitionId = null;
+        
+        // Roles: 3 = Store Admin (Assigns), 4 = Store Keeper (Fulfills)
+        const isStoreAdmin = {{ Auth::user()->role_id == 3 ? 'true' : 'false' }};
+        const isStoreKeeper = {{ Auth::user()->role_id == 4 ? 'true' : 'false' }};
 
-            // --- DEFINING ROLES ---
-            const userRoleId = {{ Auth::user()->role_id }};
-            const isStoreAdmin = (userRoleId == 3);
-            const isStoreKeeper = (userRoleId == 4);
+        // 1. View & Load Data
+        $('.view-action-btn').click(function() {
+            let url = $(this).data('url');
+            currentRequisitionId = $(this).data('id');
 
-            // 1. View & Load Data
-            $('.view-action-btn').click(function() {
-                let url = $(this).data('url');
-                currentRequisitionId = $(this).data('id');
+            $('#actionModal').modal('show');
+            $('#modal-timeline').html('<div class="text-center p-3">Loading...</div>');
+            
+            // Reset items table
+            $('#modal-items-body').html('<tr><td colspan="5" class="text-center">Loading items...</td></tr>');
 
-                $('#actionModal').modal('show');
-                $('#modal-timeline').html('<div class="text-center p-3">Loading...</div>');
+            $.ajax({
+                url: url,
+                type: 'GET',
+                success: function(res) {
+                    $('#modal-requestor').text(res.requestor);
+                    $('#modal-date').text(res.formatted_date);
 
-                // Reset items table
-                $('#modal-items-body').html(
-                    '<tr><td colspan="4" class="text-center">Loading items...</td></tr>');
-
-                $.ajax({
-                    url: url,
-                    type: 'GET',
-                    success: function(res) {
-                        $('#modal-requestor').text(res.requestor);
-                        $('#modal-date').text(res.formatted_date);
-
-                        // Populate Items with Stock Info
-                        let itemsHtml = '';
-                        res.requisition.items.forEach(item => {
-
-                            // --- Logic for Lot Assignment Dropdown ---
-                            let assignmentHtml =
-                                '<span class="text-muted small font-italic">Pending Assignment</span>';
-
-
-                            if (isStoreAdmin) {
-                                // Store Admin: Can EDIT/ASSIGN Lots
-                                let options =
-                                    '<option value="">-- Select Brand/Spec --</option>';
-
-                                if (item.available_lots && item.available_lots.length >
-                                    0) {
-                                    item.available_lots.forEach(lot => {
-                                        let selected = (item.lot_id == lot.id) ?
-                                            'selected' : '';
-                                        let label =
-                                            `${lot.brand || 'N/A'} - ${lot.specification || 'N/A'} (Qty: ${lot.quantity})`;
-                                        options +=
-                                            `<option value="${lot.id}" ${selected}>${label}</option>`;
-                                    });
-                                    assignmentHtml =
-                                        `<select class="form-control form-control-sm item-lot-select" data-id="${item.id}">${options}</select>`;
-                                } else {
-                                    assignmentHtml =
-                                        '<span class="text-danger small font-weight-bold">Stock Unavailable</span>';
-                                }
-                            } else if (item.lot_id) {
-                                // Store Keeper / Others: READ ONLY assignment
-                                // We need to find the name of the assigned lot from the available list or pre-loaded data
-                                let assignedLotLabel = "Assigned";
-                                if (item.available_lots) {
-                                    let foundLot = item.available_lots.find(l => l.id ==
-                                        item.lot_id);
-                                    if (foundLot) {
-                                        assignedLotLabel =
-                                            `${foundLot.brand || 'N/A'} - ${foundLot.specification || 'N/A'}`;
-                                    }
-                                }
-                                assignmentHtml =
-                                    `<span class="text-success small font-weight-bold"><i class="fas fa-check"></i> ${assignedLotLabel}</span>`;
+                    // Populate Items
+                    let itemsHtml = '';
+                    res.requisition.items.forEach(item => {
+                        
+                        // --- Logic for Lot Assignment Dropdown ---
+                        let assignmentHtml = '<span class="text-muted small font-italic">Pending Assignment</span>';
+                        
+                        if (isStoreAdmin) {
+                            // Store Admin: Dropdown to Assign
+                            let options = '<option value="">-- Select Brand/Spec --</option>';
+                            if (item.available_lots && item.available_lots.length > 0) {
+                                item.available_lots.forEach(lot => {
+                                    let selected = (item.lot_id == lot.id) ? 'selected' : '';
+                                    let label = `${lot.brand || 'N/A'} - ${lot.specification || 'N/A'} (Qty: ${lot.quantity})`;
+                                    options += `<option value="${lot.id}" ${selected}>${label}</option>`;
+                                });
+                                assignmentHtml = `<select class="form-control form-control-sm item-lot-select" data-id="${item.id}">${options}</select>`;
                             } else {
-                                // Store Keeper viewing unassigned item (Should not happen if flow is correct)
-                                assignmentHtml =
-                                    '<span class="text-danger small font-weight-bold">Not Assigned</span>';
+                                assignmentHtml = '<span class="text-danger small font-weight-bold stock-unavailable">Stock Unavailable</span>';
                             }
+                        } else if (item.lot_id) {
+                            // Store Keeper / Others: Read Only
+                            let foundLot = item.available_lots ? item.available_lots.find(l => l.id == item.lot_id) : null;
+                            let label = foundLot ? `${foundLot.brand || ''} ${foundLot.specification || ''}` : 'Assigned';
+                            assignmentHtml = `<span class="text-success small font-weight-bold"><i class="fas fa-check"></i> ${label}</span>`;
+                        } else {
+                            assignmentHtml = '<span class="text-danger small font-weight-bold">Not Assigned</span>';
+                        }
 
-                            // Store Admin can edit Quantity, Store Keeper CANNOT.
-                            let disabledAttr = isStoreAdmin ? '' : 'disabled';
-                            let inputClass = isStoreAdmin ?
-                                'form-control form-control-sm item-qty-input text-center' :
-                                'form-control-plaintext text-center font-weight-bold';
+                        let disabledAttr = isStoreAdmin ? '' : 'disabled';
+                        let inputClass = isStoreAdmin ? 'form-control form-control-sm item-qty-input text-center' : 'form-control-plaintext text-center font-weight-bold';
 
+                        // Sub Category Logic
+                        let subCatName = '';
+                        if(item.product.sub_category) subCatName = item.product.sub_category.name;
+                        else if(item.product.subCategory) subCatName = item.product.subCategory.name;
+                        
+                        let categoryDisplay = item.product.category.name;
+                        if(subCatName) categoryDisplay += `<br><small class="text-muted">${subCatName}</small>`;
 
-                            itemsHtml += `
+                        itemsHtml += `
                             <tr>
                                 <td>${item.product.name}</td>
-                                <td>${item.product.category.name}</td>
+                                <td>${categoryDisplay}</td>
                                 <td>${assignmentHtml}</td>
+                                <td class="text-center font-weight-bold text-muted">${item.original_quantity || item.quantity}</td>
                                 <td>
-                                    <input type="number"
-                                           class="${inputClass}"
-                                           data-id="${item.id}"
-                                           value="${item.quantity}"
+                                    <input type="number" 
+                                           class="${inputClass}" 
+                                           data-id="${item.id}" 
+                                           value="${item.quantity}" 
                                            min="1"
                                            ${disabledAttr}>
                                 </td>
                             </tr>`;
-                        });
-                        $('#modal-items-body').html(itemsHtml);
+                    });
+                    $('#modal-items-body').html(itemsHtml);
 
-                        evaluateApproveButton(res.requisition.items);
+                    // Check button state immediately after loading
+                    evaluateApproveButtonFromUI();
 
-                        // Populate Timeline (Your existing timeline logic)
-                        let timelineHtml = '';
-                        res.timeline.forEach(item => {
-                            let bgClass = 'bg-' + (item.color || 'secondary');
-                            let commentHtml = item.comments ?
-                                `<div class="timeline-comment">"${item.comments}"</div>` :
-                                '';
-                            timelineHtml += `
+                    // Populate Timeline
+                    let timelineHtml = '';
+                    res.timeline.forEach(item => {
+                        let bgClass = 'bg-' + (item.color || 'secondary');
+                        let commentHtml = item.comments ? `<div class="timeline-comment">"${item.comments}"</div>` : '';
+                        timelineHtml += `
                             <div class="timeline-entry">
                                 <div class="timeline-number ${bgClass}">${item.step}</div>
                                 <div class="timeline-content">
@@ -398,179 +374,119 @@
                                         <span class="user-name">${item.user}</span>
                                         <span class="action-date">${item.date}</span>
                                     </div>
-                                    <span class="role-badge">${item.role}</span>
+                                    <span class="role-badge">${item.role}</span> 
                                     <span class="text-${item.color} font-weight-bold small ml-1">(${item.title})</span>
                                     ${commentHtml}
                                 </div>
                             </div>`;
-                        });
-                        $('#modal-timeline').html(timelineHtml);
-                    },
-                    error: function() {
-                        toastr.error("Failed to load details");
-                    }
-                });
+                    });
+                    $('#modal-timeline').html(timelineHtml);
+                },
+                error: function() { toastr.error("Failed to load details"); }
             });
-
-            // 2. Update Quantity & Assignment Logic (Only active for Store Admin)
-            $('#btn-update-qty').click(function() {
-                let itemsData = {};
-
-                // Loop through inputs to gather Quantity AND Lot ID
-                $('.item-qty-input').each(function() {
-                    let id = $(this).data('id');
-                    let lotSelect = $(`.item-lot-select[data-id="${id}"]`);
-
-                    itemsData[id] = {
-                        quantity: $(this).val(),
-                        lot_id: lotSelect.length ? lotSelect.val() :
-                            null // Capture selected Lot ID
-                    };
-                });
-
-                let url = "{{ route('requisitions.update_items', ':id') }}".replace(':id',
-                    currentRequisitionId);
-
-                let btn = $(this);
-                btn.html('<i class="fas fa-spinner fa-spin"></i> Saving...').prop('disabled', true);
-
-                $.ajax({
-                    url: url,
-                    type: 'POST',
-                    data: {
-                        _token: "{{ csrf_token() }}",
-                        items: itemsData // Sending structured data
-                    },
-                    success: function(res) {
-                        toastr.success(res.message);
-                        evaluateApproveButtonFromUI();
-                    },
-                    error: function(err) {
-                        toastr.error(
-                            "Failed to update. Make sure required fields are selected.");
-                    },
-                    complete: function() {
-                        btn.html('<i class="fas fa-save"></i> Save Assignments & Qty').prop(
-                            'disabled', false);
-                    }
-                });
-            });
-
-            // 3. Approve Logic
-            $('#btn-approve').click(function() {
-                let url = "{{ route('requisitions.approve', ':id') }}".replace(':id',
-                    currentRequisitionId);
-                let comments = $('#action-comments').val();
-
-                let actionText = isStoreKeeper ? 'Process & Complete' : 'Approve';
-
-                Swal.fire({
-                    title: actionText + '?',
-                    icon: 'success',
-                    showCancelButton: true,
-                    confirmButtonText: 'Yes, ' + actionText
-                }).then((res) => {
-                    if (res.isConfirmed) {
-                        let form = $('#approve-form');
-                        form.attr('action', url);
-                        form.html(
-                            `@csrf <input type="hidden" name="comments" value="${comments}">`);
-                        form.submit();
-                    }
-                });
-            });
-
-            // 4. Reject Logic
-            $('#btn-reject').click(function() {
-                let url = "{{ route('requisitions.reject', ':id') }}".replace(':id', currentRequisitionId);
-                let comments = $('#action-comments').val();
-                if (!comments) {
-                    toastr.error("Comments required");
-                    return;
-                }
-                Swal.fire({
-                    title: 'Reject?',
-                    icon: 'warning',
-                    showCancelButton: true,
-                    confirmButtonColor: '#d33',
-                    confirmButtonText: 'Yes'
-                }).then((res) => {
-                    if (res.isConfirmed) {
-                        let form = $('#reject-form');
-                        form.attr('action', url);
-                        form.html(
-                            `@csrf <input type="hidden" name="comments" value="${comments}">`);
-                        form.submit();
-                    }
-                });
-            });
-
-            // 5 check if the product lot is assigned before approving (for Store Admin)
-            function evaluateApproveButton(items) {
-                let hasUnavailable = false;
-                let hasUnassigned = false;
-
-                items.forEach(item => {
-                    // 1️⃣ Stock unavailable
-                    if (!item.available_lots || item.available_lots.length === 0) {
-                        hasUnavailable = true;
-                    }
-
-                    // 2️⃣ Lot not assigned
-                    if (!item.lot_id) {
-                        hasUnassigned = true;
-                    }
-                });
-
-                const approveBtn = $('#btn-approve');
-
-                if (hasUnavailable || hasUnassigned) {
-                    // approveBtn.prop('disabled', true).hide();
-                    approveBtn
-                        .prop('disabled', true)
-                        .attr('title', 'All items must have stock and assigned brand/spec')
-                        .show();
-                } else {
-                    approveBtn.prop('disabled', false).show();
-                }
-            }
-
-            function evaluateApproveButtonFromUI() {
-                let hasUnavailable = false;
-                let hasUnassigned = false;
-
-                $('#modal-items-body tr').each(function() {
-                    // Stock unavailable text
-                    if ($(this).find('.text-danger:contains("Stock Unavailable")').length) {
-                        hasUnavailable = true;
-                    }
-
-                    // Lot dropdown exists but no selection
-                    let lotSelect = $(this).find('.item-lot-select');
-                    if (lotSelect.length && !lotSelect.val()) {
-                        hasUnassigned = true;
-                    }
-
-                    // Read-only "Not Assigned" (for non-admin edge cases)
-                    if ($(this).find('.text-danger:contains("Not Assigned")').length) {
-                        hasUnassigned = true;
-                    }
-                });
-
-                const approveBtn = $('#btn-approve');
-
-                if (hasUnavailable || hasUnassigned) {
-                    approveBtn
-                        .prop('disabled', true)
-                        .attr('title', 'All items must have stock and assigned brand/spec')
-                        .show();
-                } else {
-                    approveBtn.prop('disabled', false).removeAttr('title').show();
-                }
-            }
         });
+
+        // 2. Update Quantity & Assignment Logic (Store Admin Only)
+        $('#btn-update-qty').click(function() { 
+            let itemsData = {};
+            $('.item-qty-input').each(function() { 
+                let id = $(this).data('id');
+                let lotSelect = $(`.item-lot-select[data-id="${id}"]`);
+                itemsData[id] = {
+                    quantity: $(this).val(),
+                    lot_id: lotSelect.length ? lotSelect.val() : null 
+                };
+            });
+
+            let url = "{{ route('requisitions.update_items', ':id') }}".replace(':id', currentRequisitionId);
+            let btn = $(this);
+            btn.html('<i class="fas fa-spinner fa-spin"></i> Saving...').prop('disabled', true);
+
+            $.ajax({
+                url: url, 
+                type: 'POST', 
+                data: { _token: "{{ csrf_token() }}", items: itemsData },
+                success: function(res) { 
+                    toastr.success(res.message); 
+                    evaluateApproveButtonFromUI();
+                },
+                error: function(err) { toastr.error("Failed to update."); },
+                complete: function() { btn.html('<i class="fas fa-save"></i> Save Assignments & Qty').prop('disabled', false); }
+            });
+        });
+
+        // 3. Approve Logic
+        $('#btn-approve').click(function() { 
+            let url = "{{ route('requisitions.approve', ':id') }}".replace(':id', currentRequisitionId);
+            let comments = $('#action-comments').val();
+            let actionText = isStoreAdmin ? 'Approve' : 'Process & Complete';
+
+            // Validation for Store Admin: Must assign lots
+            if(isStoreAdmin && $('.item-lot-select').filter((_, el) => !$(el).val()).length > 0) {
+                 toastr.warning("Please assign a Brand/Spec to all items before approving.");
+                 return;
+            }
+
+            Swal.fire({
+                title: actionText + '?', icon: 'success', showCancelButton: true, confirmButtonText: 'Yes, ' + actionText
+            }).then((res) => {
+                if(res.isConfirmed) {
+                    let form = $('#approve-form');
+                    form.attr('action', url);
+                    form.html(`@csrf <input type="hidden" name="comments" value="${comments}">`);
+                    form.submit();
+                }
+            });
+        });
+
+        // 4. Reject Logic
+        $('#btn-reject').click(function() { 
+            let url = "{{ route('requisitions.reject', ':id') }}".replace(':id', currentRequisitionId);
+            let comments = $('#action-comments').val();
+            if(!comments) { toastr.error("Comments required"); return; }
+            Swal.fire({
+                title: 'Reject?', icon: 'warning', showCancelButton: true, confirmButtonColor: '#d33', confirmButtonText: 'Yes'
+            }).then((res) => {
+                if(res.isConfirmed) {
+                    let form = $('#reject-form');
+                    form.attr('action', url);
+                    form.html(`@csrf <input type="hidden" name="comments" value="${comments}">`);
+                    form.submit();
+                }
+            });
+        });
+
+        // Listener for dropdown changes to re-evaluate button state immediately
         $(document).on('change', '.item-lot-select', function() {
             evaluateApproveButtonFromUI();
         });
-    </script>
+
+        function evaluateApproveButtonFromUI() {
+            // Only Store Admin needs this check during the assignment phase
+            if (!isStoreAdmin) return;
+
+            let canApprove = true;
+
+            // 1. Check if any item has unavailable stock (text indicator)
+            if ($('.stock-unavailable').length > 0) {
+                canApprove = false;
+            }
+
+            // 2. Check if any dropdown is unselected
+            $('.item-lot-select').each(function() {
+                if (!$(this).val()) {
+                    canApprove = false;
+                    return false; // break loop
+                }
+            });
+
+            const btn = $('#btn-approve');
+            if (canApprove) {
+                btn.prop('disabled', false).attr('title', 'Ready to approve');
+            } else {
+                btn.prop('disabled', true).attr('title', 'Please assign stock to all items first');
+            }
+        }
+    });
+</script>
 @endpush

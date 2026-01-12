@@ -23,6 +23,7 @@ return [
     'entry_date' => 'Entry Date',
     'remarks' => 'Remarks',
     'table_category' => 'Product Category',
+    'table_sub_category' => 'Product Sub Category',
     'table_product' => 'Product',
     'table_quantity' => 'Quantity',
     'table_unit_price' => 'Price',

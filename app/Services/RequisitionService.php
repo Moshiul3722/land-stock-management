@@ -152,6 +152,7 @@ class RequisitionService
                         'requisition_id' => $requisition->id,
                         'product_id' => $item['product_id'],
                         'quantity' => $item['quantity'],
+                        'original_quantity' => $item['quantity'],
                     ]);
                 }
 
@@ -258,6 +259,8 @@ class RequisitionService
                 'requisition_id' => $requisitionId,
                 'product_id' => $item['product_id'],
                 'quantity' => $item['quantity'],
+                // Save the snapshot of the original request
+                'original_quantity' => $item['quantity'], 
             ]);
         }
     }

@@ -195,4 +195,16 @@ class LotController extends Controller
 
         return response()->json($results);
     }
+
+    /**
+     * Get products by sub-category for AJAX requests.
+     */
+    public function getBySubCategory(Request $request, $subCategoryId)
+    {
+        if ($request->ajax()) {
+            $products = \App\Models\Product::where('sub_category_id', $subCategoryId)->get();
+            return response()->json($products);
+        }
+        abort(403, 'This action is unauthorized.');
+    }
 }

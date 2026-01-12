@@ -12,6 +12,7 @@ class RequisitionItemRepository extends BaseRepository
         'requisition_id',
         'product_id',
         'quantity',
+        'original_quantity',
         'lot_id'
     ];
 

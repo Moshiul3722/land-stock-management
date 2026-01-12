@@ -15,7 +15,7 @@ class CategorySeeder extends Seeder
     {
         // Id = 1
         ProductCategory::create([
-            'name' => 'Stationary',
+            'name' => 'মনিহারি সামগ্রী',
             'description' => 'Pens, Pencils, Notebooks, and other stationary items',
             'created_by' => 1,
             'updated_by' => 1
@@ -23,17 +23,16 @@ class CategorySeeder extends Seeder
 
         // Id = 2
         ProductCategory::create([
-            'name' => 'Desk Organizers',
-            'description' => 'Desk organizers and related items',
+            'name' => 'কম্পিউটার সামগ্রী',
+            'description' => 'Computer related facilities and accessories',
             'created_by' => 1,
             'updated_by' => 1
         ]);
 
-
         // Id = 3
         ProductCategory::create([
-            'name' => 'Electronics',
-            'description' => 'Facilities related to electronic items',
+            'name' => 'আইসিটি সামগ্রী',
+            'description' => 'ICT related facilities and accessories',
             'created_by' => 1,
             'updated_by' => 1
         ]);

@@ -36,38 +36,44 @@
                             </div>
                         </div>
                     </div>
-                    <form>
-                        @csrf
-                        <div class="card-body">
-                            <div class="form-group row">
-                                <label for="role" class="col-sm-2 col-form-label">{{ __('category.title') }}
-                                    <span style="color: red;">*</span></label>
-                                <div class="col-sm-6">
-                                    <select class="js-example-basic-single custom-select form-control-border"
-                                        id="category_filter" name="category_filter">
-                                        <option value="0">All</option>
-                                        @foreach ($categories as $category)
-                                            <option value="{{ $category->id }}">{{ $category->name }}</option>
-                                        @endforeach
-                                    </select>
-                                </div>
-                                <div class="col-sm-4">
-                                    <button class="btn btn btn-primary" type="button" id="filter-btn" name="filter-btn"><i
-                                            class="fas fa-search"></i>
-                                        {{ __('buttons.search') }}</button>
-                                </div>
+                    <div class="card-body">
+                        <div class="row">
+                            {{-- Category Filter --}}
+                            <div class="col-md-4 form-group">
+                                <label for="category_filter">{{ __('category.title') }}</label>
+                                <select class="form-control js-example-basic-single custom-select" id="category_filter" name="category_filter">
+                                    <option value="">All Categories</option>
+                                    @foreach ($categories as $category)
+                                        <option value="{{ $category->id }}">{{ $category->name }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+
+                            {{-- Sub Category Filter (Dependent) --}}
+                            <div class="col-md-4 form-group">
+                                <label for="sub_category_filter">Sub Category</label>
+                                <select class="form-control js-example-basic-single custom-select" id="sub_category_filter" name="sub_category_filter" disabled>
+                                    <option value="">Select Category First</option>
+                                </select>
+                            </div>
+
+                            {{-- Search Button --}}
+                            <div class="col-md-4 form-group d-flex align-items-end">
+                                <button class="btn btn-primary w-100" type="button" id="filter-btn">
+                                    <i class="fas fa-search"></i> {{ __('buttons.search') }}
+                                </button>
                             </div>
                         </div>
-                    </form>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
     <div class="row">
         <div class="col-md-12">
-            <!-- Filters -->
-            <div class="card card-primary" id="product-list-container">
-
+            <!-- Product List Container -->
+            <div class="card card-primary card-outline" id="product-list-container">
+                {{-- Data loaded via AJAX --}}
             </div>
         </div>
     </div>
@@ -76,14 +82,18 @@
 @push('js')
     <script>
         $(document).ready(function() {
-            // Function to load products
-            function loadProducts(categoryId = '') {
+            // Initialize Select2
+            $('.js-example-basic-single').select2();
+
+            // 1. Function to load products
+            function loadProducts(categoryId = '', subCategoryId = '') {
                 const url = "{{ route('products.index') }}";
                 $.ajax({
                     url: url,
                     type: 'GET',
                     data: {
-                        category_id: categoryId
+                        category_id: categoryId,
+                        sub_category_id: subCategoryId
                     },
                     beforeSend: function() {
                         $('#wait').show();
@@ -92,25 +102,6 @@
                         $('#wait').hide();
                         $('#product-list-container').html(response);
                         $('#products-table').DataTable({
-                            "columnDefs": [{
-                                    "width": "20%",
-                                    "targets": [1, 2]
-                                },
-                                {
-                                    "width": "10%",
-                                    "targets": 0,
-                                    "className": "text-center"
-                                },
-                                {
-                                    "width": "30%",
-                                    "targets": 1
-                                },
-                                {
-                                    "width": "20%",
-                                    "targets": 3,
-                                    "className": "text-center"
-                                }
-                            ]
                         });
                     },
                     error: function(xhr) {
@@ -120,16 +111,51 @@
                 });
             }
 
-            // Initial load
+            // Initial load (All products)
             loadProducts();
 
-            // Filter button click event
+            // 2. Search Button Click
             $('#filter-btn').on('click', function() {
                 var categoryId = $('#category_filter').val();
-                loadProducts(categoryId);
+                var subCategoryId = $('#sub_category_filter').val();
+                loadProducts(categoryId, subCategoryId);
             });
 
-            // Delete functionality using event delegation
+            // 3. Dependent Dropdown Logic (Load Sub Categories)
+            $('#category_filter').on('change', function() {
+                var categoryId = $(this).val();
+                var subCategorySelect = $('#sub_category_filter');
+
+                // Reset
+                subCategorySelect.html('<option value="">All Sub Categories</option>').prop('disabled', true);
+
+                if (categoryId) {
+                    // Uses the route we defined earlier: get.sub_categories
+                    var url = "{{ route('get.sub_categories', ':id') }}";
+                    url = url.replace(':id', categoryId);
+
+                    $.ajax({
+                        url: url,
+                        type: "GET",
+                        dataType: "json",
+                        success: function(data) {
+                            if (data.length > 0) {
+                                $.each(data, function(key, value) {
+                                    subCategorySelect.append('<option value="' + value.id + '">' + value.name + '</option>');
+                                });
+                                subCategorySelect.prop('disabled', false);
+                            }
+                        },
+                        error: function() {
+                            console.log('Error fetching sub-categories');
+                        }
+                    });
+                } else {
+                     subCategorySelect.html('<option value="">Select Category First</option>');
+                }
+            });
+
+            // Delete functionality
             $('#product-list-container').on('click', '.delete-btn', function() {
                 var productId = $(this).data('id');
                 const deleteUrlTemplate = "{{ route('products.destroy', ['product' => ':id']) }}";
@@ -158,16 +184,13 @@
                             },
                             success: function(response) {
                                 $('#wait').hide();
-                                toastr.success(
-                                    "{{ __('product.toastr_delete') }}");
-                                // Reload the table with the current filter
+                                toastr.success("{{ __('product.toastr_delete') }}");
+                                // Reload with current filters
                                 $('#filter-btn').click();
                             },
                             error: function(xhr) {
                                 $('#wait').hide();
-                                toastr.error(
-                                    "{{ __('sweetalert.toastr_error') }}"
-                                );
+                                toastr.error("{{ __('sweetalert.toastr_error') }}");
                             }
                         });
                     }
