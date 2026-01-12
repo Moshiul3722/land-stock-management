@@ -142,5 +142,6 @@ Route::middleware(['auth', 'permission'])->group(function () {
     });
     Route::get('/get-sub-categories/{categoryId}', [CategoryController::class, 'getSubCategories'])->name('get.sub_categories');
     Route::get('/get-products-by-sub-category/{subCategoryId}', [App\Http\Controllers\LotController::class, 'getBySubCategory'])->name('products.by_sub_category');
-
+    // Requisition Print/Slip Route
+    Route::get('/requisitions/{requisition}/print', [App\Http\Controllers\RequisitionController::class, 'printSlip'])->name('requisitions.print');
 });

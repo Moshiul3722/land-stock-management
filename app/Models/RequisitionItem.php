@@ -49,4 +49,12 @@ class RequisitionItem extends Model
     {
         return $this->belongsTo(Product::class, 'product_id');
     }
+
+    /**
+     * Get the assigned lot for this requisition item.
+     */
+    public function lot(): BelongsTo
+    {
+        return $this->belongsTo(Lot::class, 'lot_id');
+    }
 }
