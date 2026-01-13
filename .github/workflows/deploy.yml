@@ -24,7 +24,7 @@ jobs:
           cd /home/texpdyjc/demo.ultracorecreatives.com
           set -e  # Exit immediately if any command fails
           git fetch https://${{ secrets.GH_TOKEN }}@github.com/ultracorecreatives/inv-land.git
-          git reset --hard origin/main
+          git reset --hard FETCH_HEAD
 
 
           # Install composer dependencies
