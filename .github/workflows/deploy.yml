@@ -22,8 +22,6 @@ jobs:
         port: ${{ secrets.SSH_PORT }}
         script: |
           cd /home/texpdyjc/demo.ultracorecreatives.com
-          git config --global user.email "aniksharif@gmail.com"
-          git config --global user.name "aniksharif"
           git pull https://${{ secrets.GH_TOKEN }}@github.com/ultracorecreatives/inv-land.git main
 
           # Install composer dependencies
