@@ -22,7 +22,10 @@ jobs:
         port: ${{ secrets.SSH_PORT }}
         script: |
           cd /home/texpdyjc/demo.ultracorecreatives.com
-          git pull https://${{ secrets.GH_TOKEN }}@github.com/ultracorecreatives/inv-land.git main
+          set -e  # Exit immediately if any command fails
+          git fetch https://${{ secrets.GH_TOKEN }}@github.com/ultracorecreatives/inv-land.git
+          git reset --hard origin/main
+
 
           # Install composer dependencies
           if command -v composer &> /dev/null; then
