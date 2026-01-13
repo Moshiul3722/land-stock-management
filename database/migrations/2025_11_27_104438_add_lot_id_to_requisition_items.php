@@ -12,6 +12,11 @@ return new class extends Migration
             // Allows Store Admin to assign a specific lot later
             $table->foreignId('lot_id')->nullable()->after('product_id')->constrained('lots')->onDelete('set null');
             $table->integer('original_quantity')->nullable()->after('quantity');
+            $table->foreignId('lot_detail_id')
+                ->nullable()
+                ->after('lot_id')
+                ->constrained('lot_details')
+                ->onDelete('set null');
         });
     }
 
@@ -21,6 +26,8 @@ return new class extends Migration
             $table->dropForeign(['lot_id']);
             $table->dropColumn('lot_id');
             $table->dropColumn('original_quantity');
+            $table->dropForeign(['lot_detail_id']);
+            $table->dropColumn('lot_detail_id');
         });
     }
 };

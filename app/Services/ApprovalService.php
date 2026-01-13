@@ -106,7 +106,6 @@ class ApprovalService
     {
         $entity = ApprovalEntity::where('name', $entityName)->firstOrFail();
         $nextStep = $entity->processes()->where('serial', $currentSerial + 1)->first();
-
         if ($nextStep) {
             $nextApprovers = User::where('role_id', $nextStep->role_id)->get();
             if ($nextApprovers->isEmpty()) {
@@ -334,7 +333,7 @@ class ApprovalService
         foreach ($requisition->items as $item) {
             // $this->consumeStockFifo($item->product_id, $item->quantity, $requisition);
             // New update -> Store Admin can now select specific lot for each item
-            $this->consumeStock($item->product_id, $item->quantity, $requisition, $item->lot_id);
+            $this->consumeStock($item->product_id, $item->quantity, $requisition, $item);
         }
     }
 
@@ -397,20 +396,74 @@ class ApprovalService
      * Helper to consume stock from a specific Lot.
      */
     // 
-    private function consumeStock($productId, $quantityNeeded, Requisition $requisition, $assignedLotId)
+    // private function consumeStock($productId, $quantityNeeded, Requisition $requisition, $assignedLotId)
+    // {
+    //     if (!$assignedLotId) {
+    //         // If Store Admin didn't assign a lot, we cannot proceed securely.
+    //         // In a real app, you might fall back to FIFO, but per requirement 2, assignment is manual.
+    //         $productName = \App\Models\Product::find($productId)->name ?? 'Item';
+    //         throw new Exception("Product '{$productName}' has no assigned Brand/Spec (Lot). Store Admin must assign stock before completion.");
+    //     }
+
+    //     // 1. Get Current Balance of the Assigned Lot
+    //     // We use the StockRepository query style or direct DB query to get current balance
+    //     $currentBalance = Stock::where('product_id', $productId)
+    //         ->where('lot_id', $assignedLotId)
+    //         ->whereNull('deleted_at')
+    //         ->sum('quantity');
+
+    //     if ($currentBalance < $quantityNeeded) {
+    //         $productName = \App\Models\Product::find($productId)->name ?? 'Item';
+    //         throw new Exception("Insufficient stock in the selected Lot for '{$productName}'. Available: {$currentBalance}, Requested: {$quantityNeeded}.");
+    //     }
+
+    //     // 2. Fetch Brand/Spec from the Source (Lot Details)
+    //     // This ensures the negative entry matches the original entry details
+    //     // WAREHOUSE UPDATE: Create NEGATIVE stock entry linked to this Lot
+
+    //     $lotDetail = \App\Models\LotDetail::where('lot_id', $assignedLotId)
+    //         ->where('product_id', $productId)
+    //         ->first();
+
+    //     $brand = $lotDetail ? $lotDetail->brand : null;
+    //     $spec = $lotDetail ? $lotDetail->specification : null;
+
+    //     $this->stockRepository->create([
+    //         'product_id' => $productId,
+    //         'quantity' => - ($quantityNeeded),
+    //         'lot_id' => $assignedLotId,
+    //         'brand' => $brand,
+    //         'specification' => $spec
+    //     ]);
+
+    //     // 3. USER UPDATE: Record Issuance
+    //     IssuedItem::create([
+    //         'user_id' => $requisition->requested_by_user_id,
+    //         'requisition_id' => $requisition->id,
+    //         'product_id' => $productId,
+    //         'lot_id' => $assignedLotId,
+    //         'quantity' => $quantityNeeded,
+    //         'issued_date' => now(),
+    //         'created_by' => Auth::id(),
+    //         'updated_by' => Auth::id(),
+    //     ]);
+    // }
+
+    private function consumeStock($productId, $quantityNeeded, Requisition $requisition, $reqItem)
     {
-        if (!$assignedLotId) {
-            // If Store Admin didn't assign a lot, we cannot proceed securely.
-            // In a real app, you might fall back to FIFO, but per requirement 2, assignment is manual.
+        // 1. Get the Specific Lot Detail assigned
+        $lotDetail = \App\Models\LotDetail::find($reqItem->lot_detail_id);
+
+        if (!$lotDetail) {
             $productName = \App\Models\Product::find($productId)->name ?? 'Item';
-            throw new Exception("Product '{$productName}' has no assigned Brand/Spec (Lot). Store Admin must assign stock before completion.");
+            throw new Exception("Product '{$productName}' has no assigned Brand/Spec (Lot Detail ID missing).");
         }
 
-        // 1. Get Current Balance of the Assigned Lot
-        // We use the StockRepository query style or direct DB query to get current balance
+        // 2. Check Balance in Stock (using the Brand/Spec from the Lot Detail)
         $currentBalance = Stock::where('product_id', $productId)
-            ->where('lot_id', $assignedLotId)
-            ->whereNull('deleted_at')
+            ->where('lot_id', $lotDetail->lot_id)
+            ->where('brand', $lotDetail->brand)
+            ->where('specification', $lotDetail->specification)
             ->sum('quantity');
 
         if ($currentBalance < $quantityNeeded) {
@@ -418,31 +471,21 @@ class ApprovalService
             throw new Exception("Insufficient stock in the selected Lot for '{$productName}'. Available: {$currentBalance}, Requested: {$quantityNeeded}.");
         }
 
-        // 2. Fetch Brand/Spec from the Source (Lot Details)
-        // This ensures the negative entry matches the original entry details
-        // WAREHOUSE UPDATE: Create NEGATIVE stock entry linked to this Lot
-
-        $lotDetail = \App\Models\LotDetail::where('lot_id', $assignedLotId)
-            ->where('product_id', $productId)
-            ->first();
-
-        $brand = $lotDetail ? $lotDetail->brand : null;
-        $spec = $lotDetail ? $lotDetail->specification : null;
-
+        // 3. Deduct
         $this->stockRepository->create([
             'product_id' => $productId,
             'quantity' => - ($quantityNeeded),
-            'lot_id' => $assignedLotId,
-            'brand' => $brand,
-            'specification' => $spec
+            'lot_id' => $lotDetail->lot_id,
+            'brand' => $lotDetail->brand,           // Taken from LotDetail
+            'specification' => $lotDetail->specification // Taken from LotDetail
         ]);
 
-        // 3. USER UPDATE: Record Issuance
         IssuedItem::create([
             'user_id' => $requisition->requested_by_user_id,
             'requisition_id' => $requisition->id,
             'product_id' => $productId,
-            'lot_id' => $assignedLotId,
+            'lot_id' => $lotDetail->lot_id,
+            'lot_detail_id' => $lotDetail->id,
             'quantity' => $quantityNeeded,
             'issued_date' => now(),
             'created_by' => Auth::id(),

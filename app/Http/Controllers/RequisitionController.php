@@ -266,12 +266,20 @@ class RequisitionController extends Controller
         foreach ($requisition->items as $item) {
             $item->available_lots = DB::table('stocks')
                 ->join('lots', 'stocks.lot_id', '=', 'lots.id')
+                ->join('lot_details', function ($join) {
+                    $join->on('stocks.lot_id', '=', 'lot_details.lot_id')
+                        ->on('stocks.product_id', '=', 'lot_details.product_id')
+                        // Ensure we match Brand/Spec exactly to get the right Detail ID
+                        ->whereColumn('stocks.brand', 'lot_details.brand')
+                        ->whereColumn('stocks.specification', 'lot_details.specification');
+                })
                 ->where('stocks.product_id', $item->product_id)
                 ->whereNull('stocks.deleted_at')
                 ->where('stocks.quantity', '>', 0) // Only show lots that have stock
                 ->select(
                     'lots.id',
                     'lots.lot_number',
+                    'lot_details.id as lot_detail_id',
                     'stocks.brand',
                     'stocks.specification',
                     'stocks.quantity'
@@ -366,17 +374,33 @@ class RequisitionController extends Controller
                     ->where('requisition_id', $requisition->id)
                     ->first();
 
+                // if ($reqItem) {
+                //     // 1. Handle Quantity
+                //     $qty = isset($data['quantity']) && $data['quantity'] > 0 ? $data['quantity'] : $reqItem->quantity;
+
+                //     // 2. Handle Lot ID (Sanitize empty strings to NULL)
+                //     $lotId = !empty($data['lot_id']) ? $data['lot_id'] : null;
+
+                //     $reqItem->update([
+                //         'quantity' => $qty,
+                //         'lot_id' => $lotId
+                //     ]);
+                // }
                 if ($reqItem) {
-                    // 1. Handle Quantity
-                    $qty = isset($data['quantity']) && $data['quantity'] > 0 ? $data['quantity'] : $reqItem->quantity;
+                    $updates = ['quantity' => $data['quantity']];
 
-                    // 2. Handle Lot ID (Sanitize empty strings to NULL)
-                    $lotId = !empty($data['lot_id']) ? $data['lot_id'] : null;
+                    // If Lot Detail ID is sent (Store Admin selected it)
+                    if (!empty($data['lot_detail_id'])) {
+                        $updates['lot_detail_id'] = $data['lot_detail_id'];
 
-                    $reqItem->update([
-                        'quantity' => $qty,
-                        'lot_id' => $lotId
-                    ]);
+                        // We can also auto-fill the main lot_id for convenience
+                        $lotDetail = \App\Models\LotDetail::find($data['lot_detail_id']);
+                        if ($lotDetail) {
+                            $updates['lot_id'] = $lotDetail->lot_id;
+                        }
+                    }
+
+                    $reqItem->update($updates);
                 }
             }
             return redirect()

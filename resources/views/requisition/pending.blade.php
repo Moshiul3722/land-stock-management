@@ -228,7 +228,9 @@
                             <div class="d-flex justify-content-between align-items-center mb-2">
                                 <h6 class="font-weight-bold text-primary mb-0">Items & Assignment</h6>
 
-                                {{-- Show Update Button Only for Store Admin (Role 3) --}}
+                                {{-- 
+                                    Update Button: Only for Store Admin (Role 3)
+                                --}}
                                 @if (Auth::user()->role_id == 3)
                                     <button type="button" id="btn-update-qty" class="btn btn-warning btn-sm shadow-sm">
                                         <i class="fas fa-save"></i> Save Assignments & Qty
@@ -273,12 +275,13 @@
                     <button type="button" class="btn btn-secondary" data-dismiss="modal"
                         onclick="$('#actionModal').modal('hide')">Close</button>
 
-                    {{-- Hide Reject button if user is Store Keeper (Role ID 4) --}}
+                    {{-- Reject Button: Hidden for Store Keeper (Role 4) --}}
                     @if (Auth::user()->role_id != 4)
                         <button type="button" class="btn btn-danger" id="btn-reject"><i class="fas fa-times"></i>
                             Reject</button>
                     @endif
 
+                    {{-- Approve/Process Button --}}
                     <button type="button" class="btn btn-success" id="btn-approve">
                         <i class="fas fa-check"></i> {{ Auth::user()->role_id == 4 ? 'Process & Complete' : 'Approve' }}
                     </button>
@@ -315,12 +318,10 @@
 @endsection
 
 @push('js')
-    <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
     <script>
         let html5QrcodeScanner = null;
 
         function onScanSuccess(decodedText, decodedResult) {
-            // console.log(`Code matched = ${decodedText}`, decodedResult);
             let cleanVal = decodedText.split('?')[0];
             let parts = cleanVal.split('/');
             let id = parts[parts.length - 1];
@@ -371,6 +372,7 @@
             });
             let currentRequisitionId = null;
 
+            // --- ROLE CHECKS ---
             const isStoreAdmin = {{ Auth::user()->role_id == 3 ? 'true' : 'false' }};
             const isStoreKeeper = {{ Auth::user()->role_id == 4 ? 'true' : 'false' }};
 
@@ -426,18 +428,20 @@
                                 '<span class="text-muted small font-italic">Pending Assignment</span>';
 
                             if (isStoreAdmin) {
-                                // Store Admin: Dropdown to Assign
+                                // Store Admin: Shows Editable Dropdown to Assign Lots
                                 let options =
                                     '<option value="">-- Select Brand/Spec --</option>';
                                 if (item.available_lots && item.available_lots.length >
                                     0) {
                                     item.available_lots.forEach(lot => {
-                                        let selected = (item.lot_id == lot.id) ?
+                                        // Use lot_detail_id as value
+                                        let selected = (item.lot_detail_id ==
+                                                lot.lot_detail_id) ?
                                             'selected' : '';
                                         let label =
                                             `${lot.brand || 'N/A'} - ${lot.specification || 'N/A'} (Qty: ${lot.quantity})`;
                                         options +=
-                                            `<option value="${lot.id}" ${selected}>${label}</option>`;
+                                            `<option value="${lot.lot_detail_id}" ${selected}>${label}</option>`;
                                     });
                                     assignmentHtml =
                                         `<select class="form-control form-control-sm item-lot-select" data-id="${item.id}">${options}</select>`;
@@ -445,20 +449,24 @@
                                     assignmentHtml =
                                         '<span class="text-danger small font-weight-bold stock-unavailable">Stock Unavailable</span>';
                                 }
-                            } else if (item.lot_id) {
-                                // Store Keeper / Others: Read Only
+                            } else if (item.lot_detail_id) {
+                                // Store Keeper / Others: Shows READ-ONLY Assigned Text
+                                // Find the details in available_lots array to display name
                                 let foundLot = item.available_lots ? item.available_lots
-                                    .find(l => l.id == item.lot_id) : null;
+                                    .find(l => l.lot_detail_id == item.lot_detail_id) :
+                                    null;
                                 let label = foundLot ?
                                     `${foundLot.brand || ''} ${foundLot.specification || ''}` :
                                     'Assigned';
                                 assignmentHtml =
                                     `<span class="text-success small font-weight-bold"><i class="fas fa-check"></i> ${label}</span>`;
                             } else {
+                                // Edge case: User is not admin, and no lot assigned yet
                                 assignmentHtml =
                                     '<span class="text-danger small font-weight-bold">Not Assigned</span>';
                             }
 
+                            // Input Logic: Store Admin = Editable, Others = Readonly
                             let disabledAttr = isStoreAdmin ? '' : 'disabled';
                             let inputClass = isStoreAdmin ?
                                 'form-control form-control-sm item-qty-input text-center' :
@@ -470,7 +478,6 @@
                                 .sub_category.name;
                             else if (item.product.subCategory) subCatName = item.product
                                 .subCategory.name;
-
                             let categoryDisplay = item.product.category.name;
                             if (subCatName) categoryDisplay +=
                                 `<br><small class="text-muted">${subCatName}</small>`;
@@ -496,6 +503,7 @@
                         // Evaluate button state immediately
                         evaluateApproveButtonFromUI();
 
+                        // Timeline
                         let timelineHtml = '';
                         res.timeline.forEach(item => {
                             let bgClass = 'bg-' + (item.color || 'secondary');
@@ -524,7 +532,7 @@
                 });
             });
 
-            // 2. Update Quantity (Store Admin)
+            // 2. Update Quantity (Store Admin Only)
             $('#btn-update-qty').click(function() {
                 let itemsData = {};
                 $('.item-qty-input').each(function() {
@@ -532,7 +540,8 @@
                     let lotSelect = $(`.item-lot-select[data-id="${id}"]`);
                     itemsData[id] = {
                         quantity: $(this).val(),
-                        lot_id: lotSelect.length ? lotSelect.val() : null
+                        // Store Admin sends lot_detail_id to save assignment
+                        lot_detail_id: lotSelect.length ? lotSelect.val() : null
                     };
                 });
                 let url = "{{ route('requisitions.update_items', ':id') }}".replace(':id',
@@ -564,10 +573,11 @@
             // 3. Approve
             $('#btn-approve').click(function() {
                 let url = "{{ route('requisitions.approve', ':id') }}".replace(':id',
-                    currentRequisitionId);
+                currentRequisitionId);
                 let comments = $('#action-comments').val();
                 let actionText = isStoreAdmin ? 'Approve' : 'Process & Complete';
 
+                // Validation for Store Admin: Must assign lots
                 if (isStoreAdmin && $('.item-lot-select').filter((_, el) => !$(el).val()).length > 0) {
                     toastr.warning("Please assign a Brand/Spec to all items before approving.");
                     return;
@@ -583,7 +593,7 @@
                         let form = $('#approve-form');
                         form.attr('action', url);
                         form.html(
-                            `@csrf <input type="hidden" name="comments" value="${comments}">`);
+                        `@csrf <input type="hidden" name="comments" value="${comments}">`);
                         form.submit();
                     }
                 });
@@ -608,34 +618,28 @@
                         let form = $('#reject-form');
                         form.attr('action', url);
                         form.html(
-                            `@csrf <input type="hidden" name="comments" value="${comments}">`);
+                        `@csrf <input type="hidden" name="comments" value="${comments}">`);
                         form.submit();
                     }
                 });
             });
 
-            // Re-evaluate button state on dropdown change
             $(document).on('change', '.item-lot-select', function() {
                 evaluateApproveButtonFromUI();
             });
 
             function evaluateApproveButtonFromUI() {
-                // Only Store Admin needs check
+                // Only Store Admin needs this check
                 if (!isStoreAdmin) return;
 
                 let canApprove = true;
-
-                // Check availability
                 if ($('.stock-unavailable').length > 0) canApprove = false;
-
-                // Check if dropdowns have values
                 $('.item-lot-select').each(function() {
                     if (!$(this).val()) {
                         canApprove = false;
                         return false;
                     }
                 });
-
                 const btn = $('#btn-approve');
                 if (canApprove) {
                     btn.prop('disabled', false).attr('title', 'Ready to approve');
