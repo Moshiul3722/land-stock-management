@@ -3,7 +3,7 @@ name: Deploy to cPanel
 on:
   push:
     branches:
-      - stage  # Triggers on push to stage branch
+      - main  # Triggers on push to stage branch
 
 jobs:
   deploy:
@@ -22,7 +22,7 @@ jobs:
         port: ${{ secrets.SSH_PORT }}
         script: |
           cd /home/texpdyjc/demo.ultracorecreatives.com
-          git pull https://${{ secrets.GH_TOKEN }}@github.com/ultracorecreatives/inv-land.git stage
+          git pull https://${{ secrets.GH_TOKEN }}@github.com/ultracorecreatives/inv-land.git main
 
           # Install composer dependencies
           if command -v composer &> /dev/null; then
