@@ -147,3 +147,4 @@ Route::middleware(['auth', 'permission'])->group(function () {
 
     Route::post('/requisitions/{requisition}/acknowledge', [App\Http\Controllers\RequisitionController::class, 'acknowledge'])->name('requisitions.acknowledge');
 });
+
