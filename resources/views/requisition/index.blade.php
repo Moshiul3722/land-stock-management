@@ -3,129 +3,24 @@
 @section('page_css')
     <style>
         /* Timeline CSS */
-        .timeline-container {
-            position: relative;
-            padding: 10px 0;
-        }
+        .timeline-container { position: relative; padding: 10px 0; }
+        .timeline-container::before { content: ''; position: absolute; top: 15px; bottom: 0; left: 15px; width: 2px; background: #e9ecef; z-index: 0; }
+        .timeline-entry { position: relative; margin-bottom: 25px; padding-left: 50px; z-index: 1; }
+        .timeline-number { position: absolute; left: 0; top: 0; width: 32px; height: 32px; border-radius: 50%; text-align: center; line-height: 28px; font-weight: bold; font-size: 14px; color: #fff; border: 2px solid #fff; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15); z-index: 2; }
+        
+        .bg-primary { background-color: #007bff !important; }
+        .bg-success { background-color: #28a745 !important; }
+        .bg-danger { background-color: #dc3545 !important; }
+        .bg-warning { background-color: #ffc107 !important; color: #333 !important; }
+        .bg-info    { background-color: #17a2b8 !important; } /* Delivered Color */
 
-        .timeline-container::before {
-            content: '';
-            position: absolute;
-            top: 15px;
-            bottom: 0;
-            left: 15px;
-            /* Center line through numbers */
-            width: 2px;
-            background: #e9ecef;
-            z-index: 0;
-        }
-
-        .timeline-entry {
-            position: relative;
-            margin-bottom: 25px;
-            padding-left: 50px;
-            /* Space for number */
-            z-index: 1;
-        }
-
-        /* Numbered Circle */
-        .timeline-number {
-            position: absolute;
-            left: 0;
-            top: 0;
-            width: 32px;
-            height: 32px;
-            border-radius: 50%;
-            text-align: center;
-            line-height: 28px;
-            /* Center text vertically */
-            font-weight: bold;
-            font-size: 14px;
-            color: #fff;
-            border: 2px solid #fff;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
-            z-index: 2;
-        }
-
-        /* Colors for Timeline Steps */
-        .bg-primary {
-            background-color: #007bff !important;
-        }
-
-        .bg-success {
-            background-color: #28a745 !important;
-        }
-
-        .bg-danger {
-            background-color: #dc3545 !important;
-        }
-
-        .bg-warning {
-            background-color: #ffc107 !important;
-            color: #333 !important;
-        }
-
-        /* Content Box */
-        .timeline-content {
-            background: #fff;
-            border: 1px solid #dee2e6;
-            border-radius: 6px;
-            padding: 12px 15px;
-            position: relative;
-        }
-
-        /* Little arrow pointing to number */
-        .timeline-content::after {
-            content: '';
-            position: absolute;
-            top: 10px;
-            left: -6px;
-            width: 10px;
-            height: 10px;
-            background: #fff;
-            border-left: 1px solid #dee2e6;
-            border-bottom: 1px solid #dee2e6;
-            transform: rotate(45deg);
-        }
-
-        .timeline-header {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 4px;
-        }
-
-        .user-name {
-            font-weight: bold;
-            font-size: 1rem;
-            color: #343a40;
-        }
-
-        .action-date {
-            font-size: 0.8rem;
-            color: #868e96;
-        }
-
-        .role-badge {
-            display: inline-block;
-            padding: 2px 6px;
-            font-size: 0.75rem;
-            border-radius: 4px;
-            background: #f1f3f5;
-            color: #495057;
-            margin-bottom: 6px;
-        }
-
-        .timeline-comment {
-            margin-top: 8px;
-            background-color: #f8f9fa;
-            /* Light grey background */
-            border-left: 4px solid #17a2b8;
-            /* Info color accent */
-            padding: 8px 12px;
-            font-size: 0.9rem;
-            color: #495057;
-            border-radius: 0 4px 4px 0;
-        }
+        .timeline-content { background: #fff; border: 1px solid #dee2e6; border-radius: 6px; padding: 12px 15px; position: relative; }
+        .timeline-content::after { content: ''; position: absolute; top: 10px; left: -6px; width: 10px; height: 10px; background: #fff; border-left: 1px solid #dee2e6; border-bottom: 1px solid #dee2e6; transform: rotate(45deg); }
+        .timeline-header { display: flex; justify-content: space-between; margin-bottom: 4px; }
+        .user-name { font-weight: bold; font-size: 1rem; color: #343a40; }
+        .action-date { font-size: 0.8rem; color: #868e96; }
+        .role-badge { display: inline-block; padding: 2px 6px; font-size: 0.75rem; border-radius: 4px; background: #f1f3f5; color: #495057; margin-bottom: 6px; }
+        .timeline-comment { margin-top: 8px; background-color: #f8f9fa; border-left: 4px solid #17a2b8; padding: 8px 12px; font-size: 0.9rem; color: #495057; border-radius: 0 4px 4px 0; }
     </style>
 @endsection
 
@@ -133,13 +28,11 @@
     <section class="content-header">
         <div class="container-fluid">
             <div class="row mb-2">
-                <div class="col-sm-6">
-                    <h1>{{ __('requisition.my_title') }}</h1>
-                </div>
+                <div class="col-sm-6"><h1>{{ __('requisition.my_title') }}</h1></div>
                 <div class="col-sm-6">
                     <ol class="breadcrumb float-sm-right">
-                        <li class="breadcrumb-item"><a href="{{ route('home') }}">{{ __('breadcrumb.home') }}</a></li>
-                        <li class="breadcrumb-item active">{{ __('breadcrumb.list') }}</li>
+                        <li class="breadcrumb-item"><a href={{ route('home') }}>{{ __('breadcrumb.home') }}</a></li>
+                        <li class="breadcrumb-item active">{{ __('requisition.my_title') }}</li>
                     </ol>
                 </div>
             </div>
@@ -149,9 +42,7 @@
     <div class="content">
         {{-- Filter Card --}}
         <div class="card card-primary">
-            <div class="card-header">
-                <h3 class="card-title">{{ __('menupermission.filter') }}</h3>
-            </div>
+            <div class="card-header"><h3 class="card-title">{{ __('menupermission.filter') }}</h3></div>
             <div class="card-body">
                 <div class="row">
                     <div class="col-md-3">
@@ -163,30 +54,18 @@
                             @endforeach
                         </select>
                     </div>
-                    <div class="col-md-3">
-                        <label>{{ __('requisition.start_date') }}</label>
-                        <input type="date" class="form-control" id="start_date">
-                    </div>
-                    <div class="col-md-3">
-                        <label>{{ __('requisition.end_date') }}</label>
-                        <input type="date" class="form-control" id="end_date">
-                    </div>
-                    <div class="col-md-3 d-flex align-items-end">
-                        <button id="filter-btn" class="btn btn-primary w-100"><i class="fas fa-search"></i>
-                            {{ __('buttons.search') }}</button>
-                    </div>
+                    <div class="col-md-3"><label>{{ __('requisition.start_date') }}</label><input type="date" class="form-control" id="start_date"></div>
+                    <div class="col-md-3"><label>{{ __('requisition.end_date') }}</label><input type="date" class="form-control" id="end_date"></div>
+                    <div class="col-md-3 d-flex align-items-end"><button id="filter-btn" class="btn btn-primary w-100"><i class="fas fa-search"></i> {{ __('buttons.search') }}</button></div>
                 </div>
             </div>
         </div>
 
         {{-- List Card --}}
         <div class="card card-primary">
-            <div class="card-header">
-                <div class="d-flex justify-content-between align-items-center">
-                    <h3 class="card-title">{{ __('requisition.list_title') }}</h3>
-                    <a href="{{ route('requisitions.create') }}" class="btn btn-sm btn-success ms-auto"><i
-                            class="fas fa-plus"></i></a>
-                </div>
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h3 class="card-title">{{ __('requisition.list_title') }}</h3>
+                <a href="{{ route('requisitions.create') }}" class="btn btn-sm btn-success ms-auto"><i class="fas fa-plus"></i></a>
             </div>
             <div class="card-body" id="requisition-list-container">
                 {{-- Partial view loads here --}}
@@ -196,12 +75,11 @@
 
     {{-- DETAILS MODAL --}}
     <div class="modal fade" id="detailsModal" tabindex="-1" role="dialog" aria-hidden="true">
-        <div class="modal-dialog modal-xl" role="document"> {{-- Extra Large Modal --}}
+        <div class="modal-dialog modal-xl" role="document">
             <div class="modal-content">
                 <div class="modal-header bg-info text-white">
-                    <h5 class="modal-title">Requisition Details & History</h5>
-                    <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close"
-                        onclick="$('#detailsModal').modal('hide')">
+                    <h5 class="modal-title">Requisition Details</h5>
+                    <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close" onclick="$('#detailsModal').modal('hide')">
                         <span aria-hidden="true">&times;</span>
                     </button>
                 </div>
@@ -211,16 +89,14 @@
                         <div class="col-md-7 border-right">
                             <div class="mb-3">
                                 <strong>Requestor:</strong> <span id="modal-requestor"></span><br>
-                                <strong>Date:</strong> <span id="modal-date"></span>
+                                <strong>Date:</strong> <span id="modal-date"></span><br>
+                                {{-- Status Badge --}}
+                                <strong>Status:</strong> <span id="modal-status-badge" class="badge"></span>
                             </div>
                             <h6 class="font-weight-bold text-info">Items</h6>
                             <table class="table table-sm table-bordered">
                                 <thead class="bg-light">
-                                    <tr>
-                                        <th>Product</th>
-                                        <th>Category</th>
-                                        <th class="text-center">Qty</th>
-                                    </tr>
+                                    <tr><th>Product</th><th>Category</th><th class="text-center">Qty</th></tr>
                                 </thead>
                                 <tbody id="modal-items-body"></tbody>
                             </table>
@@ -229,15 +105,20 @@
                         {{-- Right: Timeline --}}
                         <div class="col-md-5">
                             <h6 class="font-weight-bold text-info mb-3 pl-2">Approval History</h6>
-                            <div class="timeline-container" id="modal-timeline">
-                                {{-- Timeline loaded via JS --}}
-                            </div>
+                            <div class="timeline-container" id="modal-timeline"></div>
                         </div>
                     </div>
                 </div>
                 <div class="modal-footer bg-light">
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal"
-                        onclick="$('#detailsModal').modal('hide')">Close</button>
+                    {{-- ACKNOWLEDGE FORM (Hidden by default) --}}
+                    <form id="ack-form" method="POST" style="display: none;">
+                        @csrf
+                        <button type="button" id="btn-acknowledge" class="btn btn-success">
+                            <i class="fas fa-check-double"></i> Confirm Receipt
+                        </button>
+                    </form>
+
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal" onclick="$('#detailsModal').modal('hide')">Close</button>
                 </div>
             </div>
         </div>
@@ -257,26 +138,18 @@
                         start_date: $('#start_date').val(),
                         end_date: $('#end_date').val(),
                     },
-                    beforeSend: function() {
-                        $('#wait').show();
-                    },
+                    beforeSend: function() { $('#wait').show(); },
                     success: function(res) {
                         $('#wait').hide();
                         $('#requisition-list-container').html(res);
                         $('#my-req-table').DataTable();
                     },
-                    error: function() {
-                        $('#wait').hide();
-                        toastr.error('Error loading data');
-                    }
+                    error: function() { $('#wait').hide(); toastr.error('Error loading data'); }
                 });
             }
 
-            loadRequisitions(); // Initial load
-
-            $('#filter-btn').click(function() {
-                loadRequisitions();
-            });
+            loadRequisitions(); 
+            $('#filter-btn').click(function() { loadRequisitions(); });
 
             // 2. VIEW (MODAL) LOGIC
             $(document).on('click', '.view-req-btn', function() {
@@ -286,6 +159,7 @@
                 $('#modal-requestor').text('Loading...');
                 $('#modal-items-body').html('');
                 $('#modal-timeline').html('<div class="text-center p-3">Loading history...</div>');
+                $('#ack-form').hide(); // Reset button visibility
                 $('#detailsModal').modal('show');
 
                 $.ajax({
@@ -295,6 +169,28 @@
                         $('#modal-requestor').text(res.requestor);
                         $('#modal-date').text(res.formatted_date);
 
+                        // Update Status Badge
+                        let status = res.requisition.status;
+                        let badgeClass = 'bg-secondary';
+                        if(status === 'approved') badgeClass = 'bg-primary';
+                        if(status === 'delivered') badgeClass = 'bg-info';
+                        if(status === 'completed') badgeClass = 'bg-success';
+                        if(status === 'rejected') badgeClass = 'bg-danger';
+                        if(status === 'pending') badgeClass = 'bg-warning text-dark';
+                        
+                        $('#modal-status-badge')
+                            .removeClass()
+                            .addClass('badge ' + badgeClass)
+                            .text(status.toUpperCase());
+
+                        // *** SHOW ACKNOWLEDGE BUTTON IF DELIVERED ***
+                        if (status === 'delivered') {
+                            let ackUrl = "{{ route('requisitions.acknowledge', ':id') }}".replace(':id', res.requisition.id);
+                            $('#ack-form').attr('action', ackUrl).show();
+                        } else {
+                            $('#ack-form').hide();
+                        }
+
                         // Items
                         let itemsHtml = '';
                         res.requisition.items.forEach(item => {
@@ -303,31 +199,30 @@
                         });
                         $('#modal-items-body').html(itemsHtml);
 
-                        // Timeline (Using the new Numbered Style)
+                        // Timeline
                         let timelineHtml = '';
-                        res.timeline.forEach(item => {
-                            // Determine badge color based on status
-                            let bgClass = 'bg-' + item.color;
-                            // (Assuming your controller sends 'primary', 'success', 'danger', 'warning' in item.color)
+                        res.timeline.forEach(log => {
+                            let badgeClass = 'bg-primary';
+                            // Map status to colors for timeline dots
+                            if(log.status_raw === 'approved' || log.status_raw === 'processed') badgeClass = 'bg-primary'; // Intermediate approval
+                            if(log.status_raw === 'delivered') badgeClass = 'bg-info'; // Store Keeper done
+                            if(log.status_raw === 'completed') badgeClass = 'bg-success'; // User done
+                            if(log.status_raw === 'rejected') badgeClass = 'bg-danger';
+                            if(log.status_raw === 'pending') badgeClass = 'bg-warning';
 
-                            let commentHtml = '';
-                            if (item.comments) {
-                                commentHtml =
-                                    `<div class="timeline-comment">"${item.comments}"</div>`;
-                            }
+                            let commentHtml = log.comments ?
+                                `<div class="timeline-comment">"${log.comments}"</div>` : '';
 
                             timelineHtml += `
                                 <div class="timeline-entry">
-                                    <div class="timeline-number ${bgClass}">
-                                        ${item.step}
-                                    </div>
+                                    <div class="timeline-number ${badgeClass}">${log.step}</div>
                                     <div class="timeline-content">
                                         <div class="timeline-header">
-                                            <span class="user-name">${item.user}</span>
-                                            <span class="action-date">${item.date}</span>
+                                            <span class="user-name">${log.user}</span>
+                                            <span class="action-date">${log.date}</span>
                                         </div>
-                                        <span class="role-badge">${item.role}</span> 
-                                        <span class="text-${item.color} font-weight-bold small ml-1">(${item.title})</span>
+                                        <span class="role-badge">${log.role}</span> 
+                                        <span class="text-${log.color} font-weight-bold small ml-1">(${log.title})</span>
                                         ${commentHtml}
                                     </div>
                                 </div>
@@ -341,7 +236,23 @@
                 });
             });
 
-            // 3. DELETE LOGIC
+            // 3. ACKNOWLEDGE ACTION
+            $('#btn-acknowledge').click(function() {
+                Swal.fire({
+                    title: 'Confirm Receipt?',
+                    text: "I confirm that I have physically received these items.",
+                    icon: 'question',
+                    showCancelButton: true,
+                    confirmButtonColor: '#28a745',
+                    confirmButtonText: 'Yes, Received'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        $('#ack-form').submit();
+                    }
+                });
+            });
+
+            // 4. DELETE LOGIC (Existing)
             $(document).on('click', '.delete-req-btn', function() {
                 let id = $(this).data('id');
                 let url = "{{ route('requisitions.destroy', ':id') }}".replace(':id', id);
@@ -364,11 +275,10 @@
                             },
                             success: function(res) {
                                 toastr.success(res.message);
-                                loadRequisitions(); // Refresh list
+                                loadRequisitions(); 
                             },
                             error: function(xhr) {
-                                toastr.error(xhr.responseJSON.message ||
-                                    'Error deleting');
+                                toastr.error(xhr.responseJSON.message || 'Error deleting');
                             }
                         });
                     }

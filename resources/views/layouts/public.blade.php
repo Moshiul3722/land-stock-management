@@ -217,6 +217,19 @@
                     </span>
                 </div>
             </div>
+            {{-- <div class="footer-bottom text-center">
+                <div class="container">
+                    <div class="d-flex justify-content-center align-items-center gap-2">
+                        <span class="small">
+                            © {{ date('Y') }} Ministry of Land, All Rights Reserved. | 
+                            Technical Assistance:
+                        </span>
+                        <img src="{{ asset('theme/assets/img/uc-logo.png') }}" 
+                             alt="Ultracore Creatives" 
+                             style="height: 30px; width: auto; opacity: 0.8;">
+                    </div>
+                </div>
+            </div> --}}
         </footer>
     </div>
 

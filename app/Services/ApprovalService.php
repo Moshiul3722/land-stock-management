@@ -118,19 +118,21 @@ class ApprovalService
             }
             $model->update(['current_serial' => $nextStep->serial]);
         } else {
-            // No more steps, the process is complete
-            $model->update(['status' => 'approved']);
-
-            // If the approved model is a Lot, add its items to the stock.
             if ($model instanceof Lot) {
-                // STOCK IN: Add items to stock
+                // STOCK IN: Approved & Added
+                $model->update(['status' => 'approved']);
                 $this->addLotItemsToStock($model);
+                $this->notifyRequestorOfApproval($model);
             } elseif ($model instanceof Requisition) {
-                // STOCK OUT: Deduct items using FIFO
+                // STOCK OUT: Mark as Delivered (Waiting for Acknowledgment)
+                $model->update(['status' => 'delivered']);
+
+                // Physically deduct stock now
                 $this->deductRequisitionItemsFromStock($model);
+
+                // Notify requestor to acknowledge
+                $this->notifyRequestorOfDelivery($model);
             }
-            // NOTIFY REQUESTOR ON APPROVAL
-            $this->notifyRequestorOfApproval($model);
         }
     }
 
@@ -491,5 +493,16 @@ class ApprovalService
             'created_by' => Auth::id(),
             'updated_by' => Auth::id(),
         ]);
+    }
+
+    private function notifyRequestorOfDelivery(Model $model)
+    {
+        $requestorId = $model->requested_by_user_id;
+        $text = "Your Requisition #" . $model->id . " has been DELIVERED. Please acknowledge receipt.";
+        $url = route('requisitions.index'); // User goes here to acknowledge
+
+        if ($requestorId) {
+            $this->notificationService->createNotification($requestorId, $text, $url, Auth::id());
+        }
     }
 }

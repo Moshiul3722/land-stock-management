@@ -24,7 +24,8 @@
                 <td>
                     <span class="badge bg-info text-dark">{{ $item->purchase_type_name ?? 'N/A' }}</span>
                 </td>
-                <td class="text-center">
+                {{-- Logic: If quantity <= 10, add 'text-danger' class --}}
+                <td class="text-center font-weight-bold {{ $item->total_quantity <= 10 ? 'text-danger' : '' }}">
                     {{ $item->total_quantity }}
                 </td>
             </tr>

@@ -465,4 +465,35 @@ class RequisitionController extends Controller
 
         return view('requisition.print', compact('requisition'));
     }
+
+    /**
+     * User acknowledges receipt of items.
+     * Transitions status from 'delivered' -> 'completed'.
+     */
+    public function acknowledge(Requisition $requisition)
+    {
+        // 1. Validation: Ensure it is in the correct state
+        if ($requisition->status !== 'delivered') {
+            return redirect()->back()->with('error', 'This requisition is not ready for acknowledgment.');
+        }
+
+        // 2. Security: Ensure the logged-in user is the actual requestor
+        if ($requisition->requested_by_user_id !== Auth::id()) {
+            return redirect()->back()->with('error', 'You are not authorized to acknowledge this requisition.');
+        }
+
+        try {
+            // 3. Update Status
+            $requisition->update([
+                'status' => 'completed',
+                // If you added a 'received_at' column to your table, update it here:
+                // 'received_at' => now(), 
+            ]);
+
+            return redirect()->back()->with('success', 'Requisition acknowledged. Process completed successfully.');
+        } catch (Exception $e) {
+            Log::error('Acknowledgment Error: ' . $e->getMessage());
+            return redirect()->back()->with('error', 'Error processing acknowledgment.');
+        }
+    }
 }
