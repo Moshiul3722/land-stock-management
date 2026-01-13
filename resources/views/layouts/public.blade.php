@@ -133,7 +133,7 @@
                     </div>
                     <div class="col-md-6 col-10">
                         <h1 class="ministry-title">Ministry of Land</h1>
-                        <span class="ministry-subtitle">Government of the People's Republicss of Bangladesh</span>
+                        <span class="ministry-subtitle">Government of the People's Republic of Bangladesh</span>
                     </div>
                 </div>
             </div>
