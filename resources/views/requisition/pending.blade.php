@@ -138,7 +138,7 @@
         }
     </style>
     {{-- Import HTML5-QRCode Library --}}
-    <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
+
 @endsection
 
 @section('content')
@@ -318,6 +318,7 @@
 @endsection
 
 @push('js')
+    <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
     <script>
         let html5QrcodeScanner = null;
 
