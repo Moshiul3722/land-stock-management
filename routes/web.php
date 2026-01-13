@@ -145,3 +145,4 @@ Route::middleware(['auth', 'permission'])->group(function () {
     // Requisition Print/Slip Route
     Route::get('/requisitions/{requisition}/print', [App\Http\Controllers\RequisitionController::class, 'printSlip'])->name('requisitions.print');
 });
+// remote change
