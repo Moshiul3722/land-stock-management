@@ -3,7 +3,7 @@
         <tr>
             <th>{{ __('stock.table_sl') }}</th>
             <th>{{ __('stock.table_category') }}</th>
-            <th>{{ __('stock.table_product') }}</th>
+            <th>{{ __('subcategory.title') }}</th>
             <th>{{ __('stock.table_product') }}</th>
             <th>{{ __('stock.brand_spec') }}</th>
             <th>{{ __('stock.table_quantity') }}</th>
@@ -15,17 +15,15 @@
             <tr>
                 <td class="text-center">{{ $loop->iteration }}</td>
                 <td>{{ $item->category_name }}</td>
+                <td>{{ $item->sub_category_name ?? '-' }}</td>
                 <td>{{ $item->product_name }}</td>
                 <td>
                     {{-- Display Brand/Spec --}}
                     <strong>{{ $item->brand ?? 'N/A' }}</strong><br>
                     <small class="text-muted">{{ $item->specification }}</small>
                 </td>
-                <td>
-                    <span class="badge bg-info text-dark">{{ $item->purchase_type_name ?? 'N/A' }}</span>
-                </td>
-                {{-- Logic: If quantity <= 10, add 'text-danger' class --}}
-                <td class="text-center font-weight-bold {{ $item->total_quantity <= 10 ? 'text-danger' : '' }}">
+                {{-- Logic: 0 = Red, < 10 = Yellow, >= 10 = Green --}}
+                <td class="text-center font-weight-bold {{ $item->total_quantity == 0 ? 'text-danger' : ($item->total_quantity < 10 ? 'text-warning' : 'text-success') }}">
                     {{ $item->total_quantity }}
                 </td>
             </tr>

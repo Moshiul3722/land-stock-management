@@ -29,6 +29,7 @@ class Product extends Model
         'description',
         'category_id',
         'sub_category_id',
+        'product_unit',
         'created_by',
         'updated_by',
         'deleted_by',

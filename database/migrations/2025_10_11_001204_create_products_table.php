@@ -20,6 +20,7 @@ return new class extends Migration
                 ->nullable()
                 ->constrained('product_sub_categories')
                 ->onDelete('set null');
+            $table->string('product_unit')->nullable();
             $table->timestamps();
             $table->softDeletes();
             $table->unsignedBigInteger('created_by')->nullable();

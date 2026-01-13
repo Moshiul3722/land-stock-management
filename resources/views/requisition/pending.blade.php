@@ -558,7 +558,7 @@
                         items: itemsData
                     },
                     success: function(res) {
-                        toastr.success(res.message);
+                        toastr.success("Assignments & Quantities updated.");
                         evaluateApproveButtonFromUI();
                     },
                     error: function(err) {

@@ -64,8 +64,8 @@ class UserSeeder extends Seeder
 
         // Admin User
         User::updateOrCreate(['email' => 'admin1@land.com'], [
-            'name' => 'Admin-1',
-            'name_bn' => 'অ্যাডমিন-১',
+            'name' => 'Admin',
+            'name_bn' => 'অ্যাডমিন',
             'department_id' => '3',
             'role_id' => 2,
             'password' => Hash::make('admin'),
@@ -73,14 +73,14 @@ class UserSeeder extends Seeder
         ]);
 
         // Admin User
-        User::updateOrCreate(['email' => 'admin2@land.com'], [
-            'name' => 'Admin-2',
-            'name_bn' => 'অ্যাডমিন-২',
-            'department_id' => '3',
-            'role_id' => 2,
-            'password' => Hash::make('admin'),
-            'created_by' => 1
-        ]);
+        // User::updateOrCreate(['email' => 'admin2@land.com'], [
+        //     'name' => 'Admin-2',
+        //     'name_bn' => 'অ্যাডমিন-২',
+        //     'department_id' => '3',
+        //     'role_id' => 2,
+        //     'password' => Hash::make('admin'),
+        //     'created_by' => 1
+        // ]);
 
         // Store Admin User - 1
         User::updateOrCreate(['email' => 'storeadmin1@land.com'], [
