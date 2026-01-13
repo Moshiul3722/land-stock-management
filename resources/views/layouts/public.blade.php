@@ -71,7 +71,7 @@
         .gov-navbar .nav-link:hover {
             background-color: rgba(0, 0, 0, 0.1);
         }
-        
+
         .gov-navbar .active {
             background-color: #006a4e;
         }
@@ -128,12 +128,12 @@
                 <div class="row align-items-center">
                     <div class="col-md-1 col-2 text-center">
                         <!-- Use asset() for your local logo -->
-                        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/8/84/Government_Seal_of_Bangladesh.svg/1200px-Government_Seal_of_Bangladesh.svg.png" 
+                        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/8/84/Government_Seal_of_Bangladesh.svg/1200px-Government_Seal_of_Bangladesh.svg.png"
                              alt="BD Gov Logo" class="gov-logo">
                     </div>
                     <div class="col-md-6 col-10">
                         <h1 class="ministry-title">Ministry of Land</h1>
-                        <span class="ministry-subtitle">Government of the People's Republic of Bangladesh</span>
+                        <span class="ministry-subtitle">Government of the People's Republicaa of Bangladesh</span>
                     </div>
                 </div>
             </div>
@@ -212,7 +212,7 @@
             <div class="footer-bottom text-center">
                 <div class="container">
                     <span class="small">
-                        © {{ date('Y') }} Ministry of Land, All Rights Reserved. | 
+                        © {{ date('Y') }} Ministry of Land, All Rights Reserved. |
                         Technical Assistance: <strong>UltraCore Creatives Ltd.</strong>
                     </span>
                 </div>

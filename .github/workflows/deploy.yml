@@ -1,0 +1,51 @@
+name: Deploy to cPanel
+
+on:
+  push:
+    branches:
+      - stage  # Triggers on push to stage branch
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Deploy to server
+      uses: appleboy/ssh-action@master
+      with:
+        host: ${{ secrets.SSH_HOST }}
+        username: ${{ secrets.SSH_USERNAME }}
+        key: ${{ secrets.SSH_PRIVATE_KEY }}
+        port: ${{ secrets.SSH_PORT }}
+        script: |
+          cd /home/texpdyjc/demo.ultracorecreatives.com
+          git pull https://${{ secrets.GH_TOKEN }}@github.com/ultracorecreatives/inv-land.git stage
+
+          # Install composer dependencies
+          if command -v composer &> /dev/null; then
+            composer install --no-dev --optimize-autoloader --no-interaction
+          elif [ -f "/opt/cpanel/composer/bin/composer" ]; then
+            /usr/local/bin/ea-php82 /opt/cpanel/composer/bin/composer install --no-dev --optimize-autoloader --no-interaction
+          fi
+
+          # Migration
+          php artisan migrate --force
+
+          # Clear caches first
+          # php artisan view:clear
+          # php artisan config:clear
+          # php artisan route:clear
+          # php artisan cache:clear
+
+          # Rebuild caches
+          php artisan config:cache
+          php artisan route:cache
+          php artisan view:cache
+
+          # Set permissions
+          chmod -R 755 storage bootstrap/cache
+
+          echo "✅ Deployment completed!"
