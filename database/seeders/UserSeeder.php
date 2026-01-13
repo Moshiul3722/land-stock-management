@@ -84,8 +84,8 @@ class UserSeeder extends Seeder
 
         // Store Admin User - 1
         User::updateOrCreate(['email' => 'storeadmin1@land.com'], [
-            'name' => 'Store Admin-1',
-            'name_bn' => 'স্টোর অ্যাডমিন-১',
+            'name' => 'Store Admin AO',
+            'name_bn' => 'Store Admin AO',
             'department_id' => '3',
             'role_id' => 3,
             'password' => Hash::make('password'),
