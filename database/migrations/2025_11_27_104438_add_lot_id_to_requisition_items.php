@@ -11,6 +11,7 @@ return new class extends Migration
         Schema::table('requisition_items', function (Blueprint $table) {
             // Allows Store Admin to assign a specific lot later
             $table->foreignId('lot_id')->nullable()->after('product_id')->constrained('lots')->onDelete('set null');
+            $table->integer('original_quantity')->nullable()->after('quantity');
         });
     }
 
@@ -19,6 +20,7 @@ return new class extends Migration
         Schema::table('requisition_items', function (Blueprint $table) {
             $table->dropForeign(['lot_id']);
             $table->dropColumn('lot_id');
+            $table->dropColumn('original_quantity');
         });
     }
 };

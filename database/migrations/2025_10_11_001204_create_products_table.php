@@ -16,6 +16,10 @@ return new class extends Migration
             $table->string('name');
             $table->text('description')->nullable();
             $table->foreignId('category_id')->nullable()->constrained('product_categories')->onDelete('set null');
+            $table->foreignId('sub_category_id')
+                ->nullable()
+                ->constrained('product_sub_categories')
+                ->onDelete('set null');
             $table->timestamps();
             $table->softDeletes();
             $table->unsignedBigInteger('created_by')->nullable();

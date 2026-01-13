@@ -29,12 +29,20 @@ class ProductController extends Controller
     {
         // For AJAX requests (filtering)
         if ($request->ajax()) {
-            $categoryId = $request->input('category_id');
-            if ($categoryId) {
-                $products = Product::with(['category'])->where('category_id', $categoryId)->get();
-            } else {
-                $products = Product::with(['category'])->get();
+            $query = Product::with(['category', 'subCategory']);
+
+            // Filter by Category
+            if ($request->filled('category_id')) {
+                $query->where('category_id', $request->input('category_id'));
             }
+
+            // Filter by Sub Category (New)
+            if ($request->filled('sub_category_id')) {
+                $query->where('sub_category_id', $request->input('sub_category_id'));
+            }
+
+            $products = $query->get();
+            
             return view('product._product_list', compact('products'));
         }
 

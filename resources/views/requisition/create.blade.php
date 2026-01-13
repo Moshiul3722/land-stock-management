@@ -10,7 +10,7 @@
                 <div class="col-sm-6">
                     <ol class="breadcrumb float-sm-right">
                         <li class="breadcrumb-item"><a href={{ route('home') }}>{{ __('breadcrumb.home') }}</a></li>
-                        <li class="breadcrumb-item active">{{ __('breadcrumb.create') }}</li>
+                        <li class="breadcrumb-item active">{{ __('requisition.create_title') }}</li>
                     </ol>
                 </div>
             </div>
@@ -26,7 +26,7 @@
                     </div>
                     <div class="card-body">
                         <div class="row">
-                            <div class="form-group col-md-5">
+                            <div class="form-group col-md-4">
                                 <label for="category_filter">{{ __('category.title') }}</label>
                                 <select class="form-control select2" id="category_filter">
                                     <option value="">Select Category</option>
@@ -35,7 +35,13 @@
                                     @endforeach
                                 </select>
                             </div>
-                            <div class="form-group col-md-5">
+                            <div class="form-group col-md-4">
+                                <label for="sub_category_filter">{{ __('lot.table_sub_category') }}</label>
+                                <select class="form-control select2" id="sub_category_filter" disabled>
+                                    <option value="">Select Sub Category</option>
+                                </select>
+                            </div>
+                            <div class="form-group col-md-4">
                                 <label for="product_filter">{{ __('product.title') }}</label>
                                 <select class="form-control select2" id="product_filter" disabled>
                                     <option value="">Select Category First</option>
@@ -66,9 +72,10 @@
                                 <thead>
                                     <tr>
                                         <th>{{ __('stock.table_category') }}</th>
+                                        <th>{{ __('lot.table_sub_category') }}</th>
                                         <th>{{ __('stock.table_product') }}</th>
-                                        <th>{{ __('requisition.required_amount') }}</th>
-                                        <th>{{ __('stock.table_action') }}</th>
+                                        <th width="15%">{{ __('requisition.required_amount') }}</th>
+                                        <th width="10%">{{ __('stock.table_action') }}</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -99,7 +106,6 @@
 @push('js')
     <script>
         $(document).ready(function() {
-            // Initialize the DataTable (it will be empty at first)
             var requisitionTable = $('#requisition-table').DataTable({
                 "paging": false,
                 "info": false,
@@ -107,29 +113,56 @@
             });
             var rowCounter = 0;
 
-            // 1. Dependent Dropdown Logic
+            // --- Dependent Dropdown Logic ---
+
+            // 1. Category Change
             $('#category_filter').on('change', function() {
                 const categoryId = $(this).val();
+                const subCategorySelect = $('#sub_category_filter');
                 const productSelect = $('#product_filter');
-                const urlTemplate = "{{ route('products.by_category', ['categoryId' => ':id']) }}";
-                const finalUrl = urlTemplate.replace(':id', categoryId);
 
-                productSelect.prop('disabled', true).html('<option value="">Loading...</option>');
+                // Reset Sub Category & Product
+                subCategorySelect.html('<option value="">Select Sub Category</option>').prop('disabled',
+                    true);
+                productSelect.html('<option value="">Select Product</option>').prop('disabled', true);
+
                 if (!categoryId) {
                     productSelect.html('<option value="">Select Category First</option>');
                     return;
                 }
 
+                // A. Fetch Sub Categories
                 $.ajax({
-                    url: finalUrl,
+                    url: "{{ route('get.sub_categories', ':id') }}".replace(':id', categoryId),
+                    type: 'GET',
+                    success: function(data) {
+                        if (data.length > 0) {
+                            $.each(data, function(key, value) {
+                                subCategorySelect.append('<option value="' + value.id +
+                                    '">' + value.name + '</option>');
+                            });
+                            subCategorySelect.prop('disabled', false);
+                        } else {
+                            subCategorySelect.append(
+                                '<option value="">No Sub Categories</option>');
+                        }
+                    }
+                });
+
+                // B. Fetch Products (By Category)
+                // This populates the product list initially based on the main category
+                const url = "{{ route('products.by_category', ['categoryId' => ':id']) }}".replace(':id',
+                    categoryId);
+
+                $.ajax({
+                    url: url,
                     type: 'GET',
                     success: function(products) {
-                        let options = '<option value="">Select Product</option>';
-                        products.forEach(function(product) {
-                            options +=
-                                `<option value="${product.id}" data-category-name="${productSelect.find(':selected').text()}">${product.name}</option>`;
+                        $.each(products, function(key, value) {
+                            productSelect.append('<option value="' + value.id + '">' +
+                                value.name + '</option>');
                         });
-                        productSelect.html(options).prop('disabled', false);
+                        productSelect.prop('disabled', false);
                     },
                     error: function() {
                         toastr.error('Failed to load products.');
@@ -137,10 +170,60 @@
                 });
             });
 
-            // 2. "Add to List" Button Logic
+            // 2. Sub Category Change
+            $('#sub_category_filter').on('change', function() {
+                const subCategoryId = $(this).val();
+                const productSelect = $('#product_filter');
+
+                // Reset Product Dropdown
+                productSelect.empty().append('<option value="">Select Product</option>').prop('disabled',
+                    true);
+
+                // If cleared (but category still selected), revert to loading all products by category
+                if (!subCategoryId) {
+                    let categoryId = $('#category_filter').val();
+                    if (categoryId) {
+                        const url = "{{ route('products.by_category', ['categoryId' => ':id']) }}".replace(
+                            ':id', categoryId);
+                        $.ajax({
+                            url: url,
+                            type: 'GET',
+                            success: function(products) {
+                                $.each(products, function(key, value) {
+                                    productSelect.append('<option value="' + value.id +
+                                        '">' + value.name + '</option>');
+                                });
+                                productSelect.prop('disabled', false);
+                            }
+                        });
+                    }
+                    return;
+                }
+
+                // Fetch Products (By Sub Category)
+                const url = "{{ route('products.by_sub_category', ':id') }}".replace(':id', subCategoryId);
+
+                $.ajax({
+                    url: url,
+                    type: 'GET',
+                    success: function(products) {
+                        $.each(products, function(key, value) {
+                            productSelect.append('<option value="' + value.id + '">' +
+                                value.name + '</option>');
+                        });
+                        productSelect.prop('disabled', false);
+                    },
+                    error: function() {
+                        toastr.error('Failed to load products.');
+                    }
+                });
+            });
+
+            // 3. "Add to List" Button Logic
             $('#add-to-list-btn').on('click', function() {
                 const productSelect = $('#product_filter');
                 const productId = productSelect.val();
+
                 if (!productId) {
                     toastr.error('Please select a product first.');
                     return;
@@ -149,45 +232,30 @@
                 const productName = productSelect.find('option:selected').text();
                 const categoryName = $('#category_filter').find('option:selected').text();
 
+                // Handle Sub Category Name display
+                let subCategoryName = $('#sub_category_filter').find('option:selected').text();
+                if ($('#sub_category_filter').val() == "" || $('#sub_category_filter').prop('disabled')) {
+                    subCategoryName = "N/A";
+                }
+
                 rowCounter++;
-                // Add new row to DataTable
+
                 requisitionTable.row.add([
                     categoryName,
+                    subCategoryName, // Added Sub Cat column data
                     productName +
                     `<input type="hidden" name="details[${rowCounter}][product_id]" value="${productId}">`,
-                    `<input type="number" class="form-control" name="details[${rowCounter}][quantity]" min="1" required>`,
+                    `<input type="number" class="form-control" name="details[${rowCounter}][quantity]" min="1" value="1" required>`,
                     `<button type="button" class="btn btn-danger btn-sm remove-row"><i class="fa fa-trash"></i></button>`
                 ]).draw(false);
-
-                // const stockCheckUrl = "{{ route('stock.check_status', ['product' => ':id']) }}".replace(':id', productId);
-
-                // No stock check for now, just add the row
-                // Check stock status via AJAX
-                /* $.ajax({
-                    url: stockCheckUrl,
-                    type: 'GET',
-                    success: function(response) {
-                        rowCounter++;
-                        // Add new row to DataTable
-                        requisitionTable.row.add([
-                            categoryName,
-                            productName + `<input type="hidden" name="details[${rowCounter}][product_id]" value="${productId}">`,
-                            `<span class="${response.class} stock-status">${response.status}</span>` +
-                            `<input type="hidden" name="details[${rowCounter}][status]" value="${response.status}">`,
-                            `<input type="number" class="form-control" name="details[${rowCounter}][quantity]" min="1" required>`,
-                            `<button type="button" class="btn btn-danger btn-sm remove-row"><i class="fa fa-trash"></i></button>`
-                        ]).draw(false);
-                    },
-                    error: function() { toastr.error('Failed to check stock status.'); }
-                }); */
             });
 
-            // 3. Delete Row Logic
+            // 4. Delete Row Logic
             $('#requisition-table tbody').on('click', '.remove-row', function() {
                 requisitionTable.row($(this).parents('tr')).remove().draw(false);
             });
 
-            // 4. Form Submission Logic
+            // 5. Form Submission Logic
             $('#requisition-form').on('submit', function(e) {
                 var action = $(document.activeElement).attr('id'); // Get the ID of the button clicked
 
@@ -200,26 +268,12 @@
                     return false;
                 }
 
-                // Check 2 (CRITICAL): If submitting, check for "Not Available" items
-                // if (action === 'submit-approval-btn') {
-                //     var hasUnavailable = false;
-                //     $('#requisition-table .stock-status').each(function() {
-                //         if ($(this).text() === 'Not Available') {
-                //             hasUnavailable = true;
-                //         }
-                //     });
-
-                //     if (hasUnavailable) {
-                //         toastr.error("{{ __('requisition.toastr_cannot_submit') }}");
-                //         return false;
-                //     }
-                // }
-
-                // If all checks pass, show confirmation
-                var title = (action === 'save-draft-btn') ?
+                // Determine Titles/Text
+                var isSaveDraft = (action === 'save-draft-btn');
+                var title = isSaveDraft ?
                     '{{ __('requisition.sweetalert_draft_save_title') }}' :
                     '{{ __('requisition.sweetalert_save_title') }}';
-                var text = (action === 'save-draft-btn') ?
+                var text = isSaveDraft ?
                     '{{ __('requisition.sweetalert_draft_save_text') }}' :
                     '{{ __('requisition.sweetalert_save_text') }}';
 
@@ -233,10 +287,13 @@
                 }).then((result) => {
                     if (result.isConfirmed) {
                         // Add the action to the form and submit
-                        var actionValue = (action === 'save-draft-btn') ? 'save_draft' : 'submit';
-                        $(this).append(
-                            `<input type="hidden" name="action" value="${actionValue}" />`);
-                        this.submit();
+                        var form = $('#requisition-form');
+                        var actionValue = isSaveDraft ? 'save_draft' : 'submit';
+
+                        form.find('input[name="action"]').remove(); // Clear old hidden input
+                        form.append(`<input type="hidden" name="action" value="${actionValue}" />`);
+
+                        form[0].submit();
                     }
                 });
             });

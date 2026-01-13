@@ -305,5 +305,34 @@ class MenuSeeder extends Seeder
             'created_by' => 1,
             'updated_by' => 1
         ]);
+
+        
+        // Id = 22
+        CnfMenu::create([
+            'submodule_id' => 3,
+            'menu_name_en' => 'Add Sub-Category',
+            'menu_name_bn' => 'নতুন সাব-ক্যাটাগরী যুক্ত করুন',
+            'controller' => 'User',
+            'action' => 'View',
+            'route' => 'subcategories.create',
+            'is_menu' => 1,
+            'is_active' => 1,
+            'created_by' => 1,
+            'updated_by' => 1
+        ]);
+
+        // Id = 23
+        CnfMenu::create([
+            'submodule_id' => 3,
+            'menu_name_en' => 'View Sub-Category List',
+            'menu_name_bn' => 'সাব-ক্যাটাগরী তালিকা দেখুন',
+            'controller' => 'User',
+            'action' => 'View',
+            'route' => 'subcategories.index',
+            'is_menu' => 1,
+            'is_active' => 1,
+            'created_by' => 1,
+            'updated_by' => 1
+        ]);
     }
 }

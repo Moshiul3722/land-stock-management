@@ -28,6 +28,7 @@ class Product extends Model
         'name',
         'description',
         'category_id',
+        'sub_category_id',
         'created_by',
         'updated_by',
         'deleted_by',
@@ -39,6 +40,13 @@ class Product extends Model
     public function category(): BelongsTo
     {
         return $this->belongsTo(ProductCategory::class, 'category_id');
+    }
+    /**
+     * Get the sub-category that the product belongs to.
+     */
+    public function subCategory(): BelongsTo
+    {
+        return $this->belongsTo(ProductSubCategory::class, 'sub_category_id');
     }
 
     /**

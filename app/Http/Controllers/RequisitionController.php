@@ -425,4 +425,20 @@ class RequisitionController extends Controller
     //         return response()->json(['success' => false, 'message' => 'Update failed: ' . $e->getMessage()], 500);
     //     }
     // }
+
+
+    /**
+     * Display the printable requisition slip with QR Code.
+     */
+    public function printSlip(Requisition $requisition)
+    {
+        // Load all necessary relationships for the slip
+        $requisition->load([
+            'requestedBy.department', // To show user details
+            'items.product.category',
+            'items.lot' // To show assigned lot/brand info
+        ]);
+
+        return view('requisition.print', compact('requisition'));
+    }
 }
