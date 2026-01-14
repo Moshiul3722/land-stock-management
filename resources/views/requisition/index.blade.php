@@ -7,7 +7,7 @@
         .timeline-container::before { content: ''; position: absolute; top: 15px; bottom: 0; left: 15px; width: 2px; background: #e9ecef; z-index: 0; }
         .timeline-entry { position: relative; margin-bottom: 25px; padding-left: 50px; z-index: 1; }
         .timeline-number { position: absolute; left: 0; top: 0; width: 32px; height: 32px; border-radius: 50%; text-align: center; line-height: 28px; font-weight: bold; font-size: 14px; color: #fff; border: 2px solid #fff; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15); z-index: 2; }
-        
+
         .bg-primary { background-color: #007bff !important; }
         .bg-success { background-color: #28a745 !important; }
         .bg-danger { background-color: #dc3545 !important; }
@@ -148,7 +148,7 @@
                 });
             }
 
-            loadRequisitions(); 
+            loadRequisitions();
             $('#filter-btn').click(function() { loadRequisitions(); });
 
             // 2. VIEW (MODAL) LOGIC
@@ -173,11 +173,11 @@
                         let status = res.requisition.status;
                         let badgeClass = 'bg-secondary';
                         if(status === 'approved') badgeClass = 'bg-primary';
-                        if(status === 'delivered') badgeClass = 'bg-info';
+                        if(status === 'delivered') badgeClass = 'bg-success';
                         if(status === 'completed') badgeClass = 'bg-success';
                         if(status === 'rejected') badgeClass = 'bg-danger';
                         if(status === 'pending') badgeClass = 'bg-warning text-dark';
-                        
+
                         $('#modal-status-badge')
                             .removeClass()
                             .addClass('badge ' + badgeClass)
@@ -221,7 +221,7 @@
                                             <span class="user-name">${log.user}</span>
                                             <span class="action-date">${log.date}</span>
                                         </div>
-                                        <span class="role-badge">${log.role}</span> 
+                                        <span class="role-badge">${log.role}</span>
                                         <span class="text-${log.color} font-weight-bold small ml-1">(${log.title})</span>
                                         ${commentHtml}
                                     </div>
@@ -275,7 +275,7 @@
                             },
                             success: function(res) {
                                 toastr.success(res.message);
-                                loadRequisitions(); 
+                                loadRequisitions();
                             },
                             error: function(xhr) {
                                 toastr.error(xhr.responseJSON.message || 'Error deleting');
