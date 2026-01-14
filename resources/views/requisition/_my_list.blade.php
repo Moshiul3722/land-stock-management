@@ -15,8 +15,20 @@
                 <td>{{ $req->requisition_date->format('d-M-Y') }}</td>
                 <td class="text-center">{{ $req->items->count() }}</td>
                 <td class="text-center">
-                    <span
+                    {{-- <span
                         class="badge bg-{{ $req->status == 'approved' ? 'success' : ($req->status == 'rejected' ? 'danger' : 'warning') }}">
+                        {{ ucfirst($req->status) }}
+                    </span> --}}
+                    @php
+                        $badgeClass = 'bg-warning text-dark'; // Default (Pending/Draft)
+
+                        if (in_array($req->status, ['approved', 'delivered', 'completed', 'processed'])) {
+                            $badgeClass = 'bg-success';
+                        } elseif ($req->status === 'rejected') {
+                            $badgeClass = 'bg-danger';
+                        }
+                    @endphp
+                    <span class="badge {{ $badgeClass }}">
                         {{ ucfirst($req->status) }}
                     </span>
                 </td>
