@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('styles')
+@push('page_css')
     <style>
         /* Timeline CSS */
         .timeline-container {
@@ -56,7 +56,7 @@
         }
 
         .bg-warning {
-            background-color: #ffc107 !important;
+            background-color: #fd7e14 !important;
             color: #333 !important;
         }
 
@@ -139,7 +139,7 @@
     </style>
     {{-- Import HTML5-QRCode Library --}}
 
-@endsection
+@endpush
 
 @section('content')
     <section class="content-header">
@@ -245,8 +245,8 @@
                                             <th>Product</th>
                                             <th>Category / Sub Category</th>
                                             <th width="35%">Assigned Lot (Brand/Spec)</th>
-                                            <th width="80">Orig. Qty</th>
-                                            <th width="100">Req. Qty</th>
+                                            <th width="80">Requested Quantity</th>
+                                            <th width="100">Approved Quantity</th>
                                         </tr>
                                     </thead>
                                     <tbody id="modal-items-body"></tbody>
