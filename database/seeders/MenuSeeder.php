@@ -334,5 +334,35 @@ class MenuSeeder extends Seeder
             'created_by' => 1,
             'updated_by' => 1
         ]);
+
+        
+        // Id = 24
+        CnfMenu::create([
+            'submodule_id' => 10,
+            'menu_name_en' => 'Create Budget',
+            'menu_name_bn' => 'বাজেট তৈরি করুন',
+            'controller' => 'Budget',
+            'action' => 'View',
+            'route' => 'budgets.create',
+            'is_menu' => 1,
+            'is_active' => 1,
+            'created_by' => 1,
+            'updated_by' => 1
+        ]);
+
+        
+        // Id = 25
+        CnfMenu::create([
+            'submodule_id' => 10,
+            'menu_name_en' => 'View Budget List',
+            'menu_name_bn' => 'বাজেটের তালিকা দেখুন',
+            'controller' => 'Budget',
+            'action' => 'View',
+            'route' => 'budgets.index',
+            'is_menu' => 1,
+            'is_active' => 1,
+            'created_by' => 1,
+            'updated_by' => 1
+        ]);
     }
 }

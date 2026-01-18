@@ -13,6 +13,7 @@ use App\Http\Controllers\RequisitionController;
 use App\Http\Controllers\IssuedItemController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ReportController;
+use App\Http\Controllers\BudgetController;
 
 /*
 |--------------------------------------------------------------------------
@@ -126,6 +127,9 @@ Route::middleware(['auth', 'permission'])->group(function () {
     Route::resource('requisitions', RequisitionController::class);
     Route::get('/requisitions/{requisition}/details', [RequisitionController::class, 'getDetails'])->name('requisitions.get_details');
     Route::post('/requisitions/{requisition}/update-items', [RequisitionController::class, 'updateItems'])->name('requisitions.update_items');
+
+    // Budget Resources
+    Route::resource('budgets', BudgetController::class);
 
     // Issued Items Routes
     Route::get('/my-items', [IssuedItemController::class, 'index'])->name('issued_items.index');
