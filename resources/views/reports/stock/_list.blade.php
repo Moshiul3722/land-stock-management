@@ -12,7 +12,10 @@
     <tbody>
 
         @foreach ($stockSummary as $item)
-            <tr>
+            {{-- Logic: 0 = Red, < 10 = Yellow, >= 10 = Green --}}
+
+            <tr
+                class="{{ $item->total_quantity == 0 ? 'text-danger' : ($item->total_quantity < 10 ? 'text-warning' : 'text') }}">
                 <td class="text-center">{{ $loop->iteration }}</td>
                 <td>{{ $item->category_name }}</td>
                 <td>{{ $item->sub_category_name ?? '-' }}</td>
@@ -22,8 +25,7 @@
                     <strong>{{ $item->brand ?? 'N/A' }}</strong><br>
                     <small class="text-muted">{{ $item->specification }}</small>
                 </td>
-                {{-- Logic: 0 = Red, < 10 = Yellow, >= 10 = Green --}}
-                <td class="text-center font-weight-bold {{ $item->total_quantity == 0 ? 'text-danger' : ($item->total_quantity < 10 ? 'text-warning' : 'text-success') }}">
+                <td>
                     {{ $item->total_quantity }}
                 </td>
             </tr>
