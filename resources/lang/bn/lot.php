@@ -12,7 +12,7 @@ return [
     'purchase_type' => 'পণ্য ক্রয়ের ধরণ',
     'brand' => 'ব্র্যান্ড',
     'specification' => 'স্পেসিফিকেশন',
-    'add_title' => 'লট তৈরি করুন',
+    'add_title' => 'লট এন্ট্রি করুন',
     'edit_title' => 'লটের তথ্য হালনাগাদ করুন',
     'details_title' => 'লটের বিস্তারিত তথ্য',
     'table_submitted_by' => 'এন্ট্রি করেছেন',
@@ -20,7 +20,7 @@ return [
     'pending_list' => 'লট এন্ট্রির অনুরোধের তালিকা',
 
     'lot_number' => 'লট নম্বর/স্মারক নম্বর',
-    'entry_date' => 'এন্ট্রি তারিখ',
+    'entry_date' => 'তারিখ',
     'remarks' => 'মন্তব্য',
     'table_category' => 'প্রোডাক্ট ক্যাটাগরি',
     'table_sub_category' => 'প্রোডাক্ট সাব-ক্যাটাগরি',
