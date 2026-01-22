@@ -24,11 +24,20 @@ class BudgetService
         return $this->budgetRepository->getAllWithCategory();
     }
 
+    public function findById($id)
+    {
+        return $this->budgetRepository->find($id);
+    }
+
+    /**
+     * Store a new budget with duplicate checking.
+     */
     public function store(array $data)
     {
+        // 1. Basic Validation
         $validator = Validator::make($data, [
             'category_id' => 'required|exists:product_categories,id',
-            'fiscal_year' => 'required|string|regex:/^\d{4}-\d{4}$/', // Enforce format like 2024-2025
+            'fiscal_year' => 'required|string|regex:/^\d{4}-\d{4}$/', 
             'amount' => 'required|numeric|min:0',
             'remarks' => 'nullable|string'
         ]);
@@ -36,15 +45,16 @@ class BudgetService
         if ($validator->fails()) {
             throw new InvalidArgumentException($validator->errors()->first());
         }
-
-        // Custom check for uniqueness
+        
+        // 2. DUPLICATE CHECK: Check if budget already exists for this Category + Year
         $exists = $this->budgetRepository->allQuery()
             ->where('category_id', $data['category_id'])
             ->where('fiscal_year', $data['fiscal_year'])
-            ->first();
-
+            ->exists(); // Returns true/false
+        
         if ($exists) {
-            throw new InvalidArgumentException("A budget for this category and fiscal year already exists.");
+            // This message will be caught by the Controller and sent to the View's SweetAlert
+            throw new InvalidArgumentException("A budget for this category and fiscal year (" . $data['fiscal_year'] . ") already exists.");
         }
 
         $data['created_by'] = Auth::id();
@@ -81,14 +91,9 @@ class BudgetService
             }
         });
     }
-
+    
     public function destroy($id)
     {
         return $this->budgetRepository->delete($id);
-    }
-
-    public function findById($id)
-    {
-        return $this->budgetRepository->find($id);
     }
 }
