@@ -27,6 +27,7 @@ class Lot extends Model
      */
     protected $fillable = [
         'lot_number',
+        'fiscal_year_id',
         'purchase_date',
         'product_purchase_type_id',
         'entry_date',
@@ -68,5 +69,10 @@ class Lot extends Model
     public function approvalDetails(): HasMany
     {
         return $this->hasMany(ApprovalDetail::class, 'lot_id');
+    }
+
+    public function fiscalYear()
+    {
+        return $this->belongsTo(FiscalYear::class, 'fiscal_year_id');
     }
 }

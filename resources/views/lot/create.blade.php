@@ -24,29 +24,40 @@
                     <div class="card-header">
                         <h3 class="card-title">{{ __('lot.add_title') }}</h3>
                     </div>
-                    {{-- Add an ID to the form --}}
+                    {{-- Form with ID for JS handling --}}
                     <form id="lot-form" action="{{ route('lots.store') }}" method="POST">
                         @csrf
                         <div class="card-body">
                             {{-- Lot Master Information --}}
                             <div class="row">
-                                <div class="form-group col-md-6">
-                                    <label for="lot_number">{{ __('lot.lot_number') }} <span
-                                            style="color: red;">*</span></label>
+                                <div class="form-group col-md-4">
+                                    <label for="lot_number">{{ __('lot.lot_number') }} <span style="color: red;">*</span></label>
                                     <input type="text" class="form-control" id="lot_number" name="lot_number"
                                         value="{{ old('lot_number') }}" required>
                                 </div>
-                                <div class="form-group col-md-6">
-                                    <label for="entry_date">{{ __('lot.entry_date') }} <span
-                                            style="color: red;">*</span></label>
+                                <div class="form-group col-md-4">
+                                    <label for="entry_date">{{ __('lot.entry_date') }} <span style="color: red;">*</span></label>
                                     <input type="date" class="form-control" id="entry_date" name="entry_date"
                                         value="{{ old('entry_date', date('Y-m-d')) }}" required>
                                 </div>
 
+                                {{-- Fiscal Year Dropdown --}}
+                                <div class="form-group col-md-4">
+                                    <label for="fiscal_year_id">Fiscal Year <span style="color: red;">*</span></label>
+                                    <select class="form-control js-example-basic-single" name="fiscal_year_id" required>
+                                        <option value="">Select Fiscal Year</option>
+                                        @foreach ($fiscalYears as $year)
+                                            <option value="{{ $year->id }}"
+                                                {{ (old('fiscal_year_id') == $year->id || (isset($currentFiscalYearId) && $currentFiscalYearId == $year->id)) ? 'selected' : '' }}>
+                                                {{ $year->name }}
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                </div>
+
                                 {{-- Purchase Type Dropdown --}}
                                 <div class="form-group col-md-12">
-                                    <label for="product_purchase_type_id">{{ __('lot.purchase_type') }} <span
-                                            style="color: red;">*</span></label>
+                                    <label for="product_purchase_type_id">{{ __('lot.purchase_type') }} <span style="color: red;">*</span></label>
                                     <select class="form-control js-example-basic-single custom-select"
                                         id="product_purchase_type_id" name="product_purchase_type_id" required>
                                         <option value="">Select Purchase Type</option>
@@ -69,13 +80,13 @@
                             <table class="table table-bordered">
                                 <thead>
                                     <tr>
-                                        <th width="15%">{{ __('lot.table_category') }}</th>
-                                        <th width="15%">{{ __('lot.table_sub_category') }}</th>
-                                        <th width="15%">{{ __('lot.table_product') }}</th>
-                                        <th width="15%">{{ __('lot.brand') }}</th>
-                                        <th width="15%">{{ __('lot.specification') }}</th>
-                                        <th width="10%">{{ __('lot.table_quantity') }}</th>
-                                        {{-- <th width="10%">{{ __('lot.table_unit_price') }}</th> --}}
+                                        <th width="15%">{{ __('lot.table_category') }} <span class="text-danger">*</span></th>
+                                        <th width="15%">Sub Category <span class="text-danger">*</span></th>
+                                        <th width="15%">{{ __('lot.table_product') }} <span class="text-danger">*</span></th>
+                                        <th width="15%">Brand< <span class="text-danger">*</span></th>
+                                        <th width="15%">Specification <span class="text-danger">*</span></th>
+                                        <th width="10%">{{ __('lot.table_quantity') }} <span class="text-danger">*</span></th>
+                                        <th width="10%">Price <span class="text-danger">*</span></th>
                                         <th class="text-center" width="5%"><button type="button" id="add-row"
                                                 class="btn btn-success btn-sm"><i class="fa fa-plus"></i></button></th>
                                     </tr>
@@ -174,6 +185,7 @@
                     <input type="text" class="form-control autocomplete-spec" name="details[${rowIdx}][specification]" placeholder="Specification">
                 </td>
                 <td><input type="number" class="form-control" name="details[${rowIdx}][quantity]" min="1" required></td>
+                <td><input type="number" class="form-control" name="details[${rowIdx}][unit_price]" step="0.01" min="0" required></td>
                 <td class="text-center"><button type="button" class="btn btn-danger btn-sm remove-row"><i class="fa fa-trash"></i></button></td>
             </tr>
         `;
@@ -254,8 +266,8 @@
                 const productSelect = row.find('.product-select');
 
                 // Reset and Disable
-                subCatSelect.empty().append('<option value="">Select Sub Category</option>').prop(
-                    'disabled', true);
+                subCatSelect.empty().append('<option value="">Select Sub Category</option>').prop('disabled',
+                    true);
                 productSelect.empty().append('<option value="">Select Product</option>').prop('disabled',
                     true);
 
@@ -277,7 +289,6 @@
                 });
 
                 // 2. Fetch Products (Based on Category)
-                // This populates the product list initially based on the main category
                 $.ajax({
                     url: "{{ route('products.by_category', ':id') }}".replace(':id', categoryId),
                     type: 'GET',
@@ -300,18 +311,15 @@
                 const row = $(this).closest('tr');
                 const productSelect = row.find('.product-select');
 
-                // If no sub category selected, we might want to revert to category-only products or clear
-                // Here we clear and reload based on sub category if present
+                // Reset Product
                 productSelect.empty().append('<option value="">Select Product</option>').prop('disabled',
                     true);
 
                 if (!subCategoryId) {
-                    // Optional: If Sub Category is cleared, reload products by Category again?
-                    // For now, let's just leave it empty or user re-selects category to reset.
+                    // Optional: Revert to Category-based products if needed
                     return;
                 }
 
-                // IMPORTANT: Ensure you have a route for this: Route::get('/get-products-by-sub-category/{id}', ...)
                 const url = "{{ url('/get-products-by-sub-category') }}/" + subCategoryId;
 
                 $.ajax({
@@ -326,7 +334,6 @@
                     },
                     error: function() {
                         toastr.error('Failed to load products for this sub-category.');
-                        // Fallback or handle error
                     }
                 });
             });

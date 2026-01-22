@@ -11,6 +11,7 @@ class LotRepository extends BaseRepository
         'id',
         'lot_number',
         'purchase_date',
+        'fiscal_year_id',
         'product_purchase_type_id',
         'entry_date',
         'status',

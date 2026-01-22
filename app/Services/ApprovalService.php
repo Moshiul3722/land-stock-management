@@ -119,7 +119,10 @@ class ApprovalService
             $model->update(['current_serial' => $nextStep->serial]);
         } else {
             if ($model instanceof Lot) {
-                // STOCK IN: Approved & Added
+                // 1. NEW: Check Budget Availability & Deduct
+                // This will throw an exception if budget is insufficient, rolling back the transaction
+                $this->processBudgetForLot($model);
+                // 2. Stock In (If budget check passed)
                 $model->update(['status' => 'approved']);
                 $this->addLotItemsToStock($model);
                 $this->notifyRequestorOfApproval($model);
@@ -503,6 +506,60 @@ class ApprovalService
 
         if ($requestorId) {
             $this->notificationService->createNotification($requestorId, $text, $url, Auth::id());
+        }
+    }
+
+    /**
+     * Calculate cost per category based on Lot items and update budget spent amount.
+     * Throws exception if budget is exceeded or not found.
+     */
+    private function processBudgetForLot(Lot $lot): void
+    {
+        // Load product categories to group costs
+        $lot->load('lotDetails.product.category');
+        
+        $fiscalYearId = $lot->fiscal_year_id;
+        if (!$fiscalYearId) {
+            throw new Exception("Lot #{$lot->lot_number} does not have a Fiscal Year assigned. Cannot process budget.");
+        }
+
+        // Group details by Category ID to sum costs (Quantity * Unit Price)
+        $categoryCosts = [];
+
+        foreach ($lot->lotDetails as $detail) {
+            $catId = $detail->product->category_id;
+            $cost = $detail->unit_price;
+
+            if (!isset($categoryCosts[$catId])) {
+                $categoryCosts[$catId] = 0;
+            }
+            $categoryCosts[$catId] += $cost;
+        }
+        // Process each category involved in this Lot
+        foreach ($categoryCosts as $catId => $totalCost) {
+            // Find the specific Budget record for this Category + Fiscal Year
+            // We use lockForUpdate() to prevent race conditions during concurrent approvals
+            $budget = \App\Models\Budget::where('category_id', $catId)
+                ->where('fiscal_year_id', $fiscalYearId)
+                ->lockForUpdate() 
+                ->first();
+
+            if (!$budget) {
+                $catName = \App\Models\ProductCategory::find($catId)->name ?? 'Unknown';
+                throw new Exception("No budget defined for Category: '{$catName}' in this Fiscal Year. Cannot approve Lot.");
+            }
+
+            // Check Availability
+            $available = $budget->amount - $budget->spent_amount;
+
+            if ($totalCost > $available) {
+                $catName = $budget->category->name;
+                $formattedCost = number_format($totalCost, 2);
+                $formattedAvail = number_format($available, 2);
+                throw new Exception("Budget exceeded for '{$catName}'. Cost: {$formattedCost}, Available: {$formattedAvail}.");
+            }
+            // Deduct (Update Spent Amount)
+            $budget->increment('spent_amount', $totalCost);
         }
     }
 }

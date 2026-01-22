@@ -44,9 +44,13 @@
                                 <p>
                                     @php
                                         $badgeClass = 'bg-secondary';
-                                        if ($lot->status === 'pending') $badgeClass = 'bg-warning text-dark';
-                                        elseif ($lot->status === 'approved') $badgeClass = 'bg-success';
-                                        elseif ($lot->status === 'rejected') $badgeClass = 'bg-danger';
+                                        if ($lot->status === 'pending') {
+                                            $badgeClass = 'bg-warning text-dark';
+                                        } elseif ($lot->status === 'approved') {
+                                            $badgeClass = 'bg-success';
+                                        } elseif ($lot->status === 'rejected') {
+                                            $badgeClass = 'bg-danger';
+                                        }
                                     @endphp
                                     <span class="badge {{ $badgeClass }}">{{ ucfirst($lot->status) }}</span>
                                 </p>
@@ -57,7 +61,7 @@
                             </div>
                         </div>
                         <hr>
-                        
+
                         {{-- Lot Details Table --}}
                         <h5>Lot Items</h5>
                         <table class="table table-bordered table-striped">
@@ -94,9 +98,9 @@
                         <a href="{{ route('lots.index') }}" class="btn btn-secondary">
                             <i class="fas fa-arrow-left"></i> {{ __('buttons.back_to_list') }}
                         </a>
-                        
+
                         {{-- Edit Button (Only if Draft) --}}
-                        @if($lot->status === 'draft')
+                        @if ($lot->status === 'draft')
                             <a href="{{ route('lots.edit', $lot) }}" class="btn btn-warning float-right ml-2">
                                 <i class="fas fa-edit"></i> {{ __('buttons.edit') }}
                             </a>
@@ -104,7 +108,7 @@
 
                         {{-- Approve/Reject Buttons (Only if Pending & Store Admin) --}}
                         {{-- Assuming Role ID 3 is Store Admin --}}
-                        @if($lot->status === 'pending' && (Auth::user()->role_id == 3 || Auth::user()->role_id == 2))
+                        @if ($lot->status === 'pending' && (Auth::user()->role_id == 3 || Auth::user()->role_id == 2))
                             <button type="button" id="btn-reject" class="btn btn-danger float-right ml-2">
                                 <i class="fas fa-times"></i> Reject
                             </button>
@@ -113,11 +117,13 @@
                             </button>
 
                             {{-- Hidden Forms for Actions --}}
-                            <form id="approve-form" action="{{ route('lots.approve', $lot->id) }}" method="POST" style="display:none;">
+                            <form id="approve-form" action="{{ route('lots.approve', $lot->id) }}" method="POST"
+                                style="display:none;">
                                 @csrf
                                 <input type="hidden" name="comments" id="approve-comments">
                             </form>
-                            <form id="reject-form" action="{{ route('lots.reject', $lot->id) }}" method="POST" style="display:none;">
+                            <form id="reject-form" action="{{ route('lots.reject', $lot->id) }}" method="POST"
+                                style="display:none;">
                                 @csrf
                                 <input type="hidden" name="comments" id="reject-comments">
                             </form>
@@ -130,48 +136,64 @@
 @endsection
 
 @push('js')
-<script>
-    $(document).ready(function() {
-        // Approve Button Logic
-        $('#btn-approve').click(function() {
-            Swal.fire({
-                title: 'Approve Lot?',
-                text: "This will add items to the live stock. This action cannot be undone.",
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonColor: '#28a745',
-                cancelButtonColor: '#6c757d',
-                confirmButtonText: 'Yes, Approve it!',
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    $('#approve-comments').val(result.value);
-                    $('#approve-form').submit();
-                }
-            });
-        });
+    <script>
+        $(document).ready(function() {
 
-        // Reject Button Logic
-        $('#btn-reject').click(function() {
-            Swal.fire({
-                title: 'Reject Lot?',
-                text: "Please provide a reason for rejection.",
-                icon: 'error',
-                showCancelButton: true,
-                confirmButtonColor: '#d33',
-                cancelButtonColor: '#6c757d',
-                confirmButtonText: 'Yes, Reject it!',
-                inputValidator: (value) => {
-                    if (!value) {
-                        return 'You need to write a reason!'
+            // Error Message (e.g., Budget Exceeded)
+            @if (session('error'))
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Action Failed',
+                    text: "{{ session('error') }}",
+                    confirmButtonColor: '#d33',
+                    confirmButtonText: 'OK'
+                });
+            @endif
+
+            // Success Message
+            @if (session('success'))
+                toastr.success("{{ session('success') }}");
+            @endif
+            // Approve Button Logic
+            $('#btn-approve').click(function() {
+                Swal.fire({
+                    title: 'Approve Lot?',
+                    text: "This will add items to the live stock. This action cannot be undone.",
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#28a745',
+                    cancelButtonColor: '#6c757d',
+                    confirmButtonText: 'Yes, Approve it!',
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        $('#approve-comments').val(result.value);
+                        $('#approve-form').submit();
                     }
-                }
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    $('#reject-comments').val(result.value);
-                    $('#reject-form').submit();
-                }
+                });
+            });
+
+            // Reject Button Logic
+            $('#btn-reject').click(function() {
+                Swal.fire({
+                    title: 'Reject Lot?',
+                    text: "Please provide a reason for rejection.",
+                    icon: 'error',
+                    showCancelButton: true,
+                    confirmButtonColor: '#d33',
+                    cancelButtonColor: '#6c757d',
+                    confirmButtonText: 'Yes, Reject it!',
+                    inputValidator: (value) => {
+                        if (!value) {
+                            return 'You need to write a reason!'
+                        }
+                    }
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        $('#reject-comments').val(result.value);
+                        $('#reject-form').submit();
+                    }
+                });
             });
         });
-    });
-</script>
+    </script>
 @endpush

@@ -17,6 +17,7 @@ class Budget extends Model
         'category_id',
         'fiscal_year_id',
         'amount',
+        'spent_amount',
         'remarks',
         'created_by',
         'updated_by'

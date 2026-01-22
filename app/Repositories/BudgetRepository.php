@@ -9,7 +9,9 @@ class BudgetRepository extends BaseRepository
 {
     protected $fieldSearchable = [
         'category_id',
-        'fiscal_year_id'
+        'fiscal_year_id',
+        'spent_amount',
+        'amount',
     ];
 
     public function getFieldsSearchable(): array
