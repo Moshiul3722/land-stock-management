@@ -35,6 +35,7 @@ class DatabaseSeeder extends Seeder
             ProductSeeder::class,
             ApprovalEntitySeeder::class,
             ApprovalProcessSeeder::class,
+            FiscalYearSeeder::class,
             // TestSeeder::class,
         ]);
     }
