@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\FiscalYear;
 use App\Services\BudgetService;
 use App\Services\ProductCategoryService;
 use Exception;
@@ -23,18 +24,19 @@ class BudgetController extends Controller
     {
         $budgets = $this->budgetService->fetchAll();
         $categories = $this->categoryService->fetchAll();
-        $defaultFiscalYear = date('Y') . '-' . (date('Y') + 1);
-        return view('budget.index', compact('budgets', 'categories', 'defaultFiscalYear'));
+        // Fetch all fiscal years for filtering in the index view
+        $fiscalYears = FiscalYear::orderBy('name', 'desc')->get();
+        
+        return view('budget.index', compact('budgets', 'categories', 'fiscalYears'));
     }
 
     public function create()
     {
         $categories = $this->categoryService->fetchAll();
-        // Generate next fiscal year string (e.g., 2025-2026) as default
-        $currentYear = date('Y');
-        $defaultFiscalYear = $currentYear . '-' . ($currentYear + 1);
+        // Fetch only active fiscal years for creating new budgets
+        $fiscalYears = FiscalYear::where('is_active', true)->orderBy('name', 'desc')->get();
         
-        return view('budget.create', compact('categories', 'defaultFiscalYear'));
+        return view('budget.create', compact('categories', 'fiscalYears'));
     }
 
     public function store(Request $request)

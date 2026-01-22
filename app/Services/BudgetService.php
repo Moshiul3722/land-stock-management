@@ -30,14 +30,15 @@ class BudgetService
     }
 
     /**
-     * Store a new budget with duplicate checking.
+     * Store a new budget.
+     * Checks for ACTIVE duplicates only (ignores soft-deleted records).
      */
     public function store(array $data)
     {
         // 1. Basic Validation
         $validator = Validator::make($data, [
             'category_id' => 'required|exists:product_categories,id',
-            'fiscal_year' => 'required|string|regex:/^\d{4}-\d{4}$/', 
+            'fiscal_year_id' => 'required|exists:fiscal_years,id',
             'amount' => 'required|numeric|min:0',
             'remarks' => 'nullable|string'
         ]);
@@ -45,16 +46,18 @@ class BudgetService
         if ($validator->fails()) {
             throw new InvalidArgumentException($validator->errors()->first());
         }
-        
-        // 2. DUPLICATE CHECK: Check if budget already exists for this Category + Year
-        $exists = $this->budgetRepository->allQuery()
+
+        // 2. LOGIC CHECK: "Is there an ACTIVE budget for this Category + Year?"
+        // allQuery() automatically applies "WHERE deleted_at IS NULL" via SoftDeletes on the Model
+        $activeBudgetExists = $this->budgetRepository->allQuery()
             ->where('category_id', $data['category_id'])
-            ->where('fiscal_year', $data['fiscal_year'])
-            ->exists(); // Returns true/false
-        
-        if ($exists) {
-            // This message will be caught by the Controller and sent to the View's SweetAlert
-            throw new InvalidArgumentException("A budget for this category and fiscal year (" . $data['fiscal_year'] . ") already exists.");
+            ->where('fiscal_year_id', $data['fiscal_year_id'])
+            ->exists();
+
+        if ($activeBudgetExists) {
+            // Fetch name for error message
+            $yearName = \App\Models\FiscalYear::find($data['fiscal_year_id'])->name;
+            throw new InvalidArgumentException("An active budget for this category and fiscal year ($yearName) already exists.");
         }
 
         $data['created_by'] = Auth::id();
@@ -91,7 +94,7 @@ class BudgetService
             }
         });
     }
-    
+
     public function destroy($id)
     {
         return $this->budgetRepository->delete($id);

@@ -9,7 +9,7 @@ class BudgetRepository extends BaseRepository
 {
     protected $fieldSearchable = [
         'category_id',
-        'fiscal_year'
+        'fiscal_year_id'
     ];
 
     public function getFieldsSearchable(): array
@@ -27,6 +27,6 @@ class BudgetRepository extends BaseRepository
      */
     public function getAllWithCategory()
     {
-        return $this->model->with('category')->orderBy('fiscal_year', 'desc')->get();
+        return $this->model->with('category')->orderBy('fiscal_year_id', 'desc')->get();
     }
 }

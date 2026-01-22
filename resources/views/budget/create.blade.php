@@ -26,33 +26,33 @@
                         <h3 class="card-title">New Budget Allocation</h3>
                     </div>
 
-                    {{-- Form with ID for JavaScript handling --}}
                     <form id="budget-form" action="{{ route('budgets.store') }}" method="POST">
                         @csrf
                         <div class="card-body">
                             <div class="row">
-                                {{-- Category Selection --}}
+                                {{-- Category --}}
                                 <div class="col-md-6 form-group">
                                     <label for="category_id">Category <span class="text-danger">*</span></label>
                                     <select class="form-control select2" name="category_id" required>
                                         <option value="">Select Category</option>
                                         @foreach ($categories as $cat)
-                                            <option value="{{ $cat->id }}"
-                                                {{ old('category_id') == $cat->id ? 'selected' : '' }}>
-                                                {{ $cat->name }}
-                                            </option>
+                                            <option value="{{ $cat->id }}">{{ $cat->name }}</option>
                                         @endforeach
                                     </select>
                                 </div>
 
-                                {{-- Fiscal Year --}}
+                                {{-- Fiscal Year Dropdown --}}
                                 <div class="col-md-6 form-group">
-                                    <label for="fiscal_year">Fiscal Year <span class="text-danger">*</span></label>
-                                    {{-- Uses defaultFiscalYear passed from controller, or old input if validation failed --}}
-                                    <input type="text" class="form-control" name="fiscal_year"
-                                        value="{{ old('fiscal_year', $defaultFiscalYear ?? date('Y') . '-' . (date('Y') + 1)) }}"
-                                        placeholder="YYYY-YYYY" required>
-                                    <small class="text-muted">Format: 2024-2025</small>
+                                    <label for="fiscal_year_id">Fiscal Year <span class="text-danger">*</span></label>
+                                    <select class="form-control select2" name="fiscal_year_id" required>
+                                        <option value="">Select Fiscal Year</option>
+                                        @foreach ($fiscalYears as $year)
+                                            <option value="{{ $year->id }}"
+                                                {{ old('fiscal_year_id') == $year->id ? 'selected' : '' }}>
+                                                {{ $year->name }}
+                                            </option>
+                                        @endforeach
+                                    </select>
                                 </div>
 
                                 {{-- Amount --}}
@@ -88,11 +88,9 @@
 @push('js')
     <script>
         $(document).ready(function() {
-            // Initialize Select2
             $('.select2').select2();
 
-            // 1. CRITICAL: Handle Duplicate Entry Errors via SweetAlert
-            // If the Service throws an exception (e.g., "Budget already exists"), the Controller redirects back with 'error'.
+            // 1. Handle Duplicate/Server Errors
             @if (session('error'))
                 Swal.fire({
                     icon: 'error',
@@ -103,21 +101,16 @@
                 });
             @endif
 
-            // 2. Handle Success Messages
-            @if (session('success'))
-                toastr.success("{{ session('success') }}");
-            @endif
-
-            // 3. Handle Standard Validation Errors (e.g. Missing fields)
+            // 2. Handle Validation Errors
             @if ($errors->any())
                 @foreach ($errors->all() as $error)
                     toastr.error("{{ $error }}");
                 @endforeach
             @endif
 
-            // 4. Form Submission Confirmation
+            // 3. Form Submission Confirmation
             $('#budget-form').on('submit', function(e) {
-                e.preventDefault(); // Stop default submission
+                e.preventDefault();
                 var form = this;
 
                 Swal.fire({
@@ -131,7 +124,7 @@
                     cancelButtonText: 'Cancel'
                 }).then((result) => {
                     if (result.isConfirmed) {
-                        form.submit(); // Continue submission
+                        form.submit();
                     }
                 });
             });

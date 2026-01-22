@@ -23,23 +23,26 @@
             <div class="col-md-12">
                 <div class="card card-primary">
                     <div class="card-header">
-                        <h3 class="card-title">Edit Budget: {{ $budget->category->name }} ({{ $budget->fiscal_year }})</h3>
+                        <h3 class="card-title">Edit Budget Allocation</h3>
                     </div>
-                    {{-- Added ID for JS handling --}}
+
+                    {{-- Form ID for JS handling --}}
                     <form id="budget-form" action="{{ route('budgets.update', $budget->id) }}" method="POST">
                         @csrf
                         @method('PUT')
                         <div class="card-body">
                             <div class="row">
-                                {{-- Read Only fields for context --}}
+                                {{-- Read Only fields (Identity of the budget) --}}
                                 <div class="col-md-6 form-group">
                                     <label>Category</label>
-                                    <input type="text" class="form-control" value="{{ $budget->category->name }}"
-                                        disabled>
+                                    <input type="text" class="form-control"
+                                        value="{{ $budget->category->name ?? 'N/A' }}" disabled>
                                 </div>
                                 <div class="col-md-6 form-group">
                                     <label>Fiscal Year</label>
-                                    <input type="text" class="form-control" value="{{ $budget->fiscal_year }}" disabled>
+                                    {{-- Display the Name via Relationship --}}
+                                    <input type="text" class="form-control"
+                                        value="{{ $budget->fiscalYear->name ?? 'N/A' }}" disabled>
                                 </div>
 
                                 {{-- Editable fields --}}
@@ -76,7 +79,7 @@
             @if (session('error'))
                 Swal.fire({
                     icon: 'error',
-                    title: 'Error!',
+                    title: 'Operation Failed',
                     text: "{{ session('error') }}",
                     confirmButtonColor: '#d33',
                     confirmButtonText: 'OK'
