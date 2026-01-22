@@ -15,7 +15,7 @@ class Budget extends Model
 
     protected $fillable = [
         'category_id',
-        'fiscal_year',
+        'fiscal_year_id',
         'amount',
         'remarks',
         'created_by',
@@ -30,5 +30,9 @@ class Budget extends Model
     public function creator(): BelongsTo
     {
         return $this->belongsTo(User::class, 'created_by');
+    }
+    public function fiscalYear()
+    {
+        return $this->belongsTo(FiscalYear::class, 'fiscal_year_id');
     }
 }
