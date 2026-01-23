@@ -110,7 +110,7 @@
     {{-- 5. Footer / Signatures --}}
     <div class="signatures">
         <div class="signature-box" style="float: left;">
-            Received By<br>
+            Requested By<br>
             <small>(Signature & Date)</small>
         </div>
         
@@ -118,7 +118,7 @@
 
         <div class="signature-box" style="float: right;">
             Issued By<br>
-            <small>Store Keeper</small>
+            <small>(Signature & Date)</small>
         </div>
     </div>
 

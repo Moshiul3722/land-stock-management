@@ -50,13 +50,13 @@ class RequisitionController extends Controller
             $data = $request->all();
             $data['requisition_date'] = now()->format('Y-m-d');
 
-            $this->requisitionService->store($data, $action);
+            $requisition =$this->requisitionService->store($data, $action);
 
             $message = ($action === 'save_draft')
                 ? 'Requisition saved as draft successfully.'
                 : 'Requisition submitted for approval successfully.';
 
-            return redirect()->route('requisitions.index')->with('success', $message);
+            return redirect()->route('requisitions.index')->with('success', $message)->with('new_requisition_id', $requisition->id);
         } catch (Exception $e) {
             Log::error($e->getMessage());
             return redirect()->back()->withInput()->with('error', $e->getMessage());

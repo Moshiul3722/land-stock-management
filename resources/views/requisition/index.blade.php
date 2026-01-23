@@ -1,18 +1,19 @@
 @extends('layouts.app')
 
-@section('page_css')
+@push('page_css')
     <style>
         /* Timeline CSS */
         .timeline-container { position: relative; padding: 10px 0; }
         .timeline-container::before { content: ''; position: absolute; top: 15px; bottom: 0; left: 15px; width: 2px; background: #e9ecef; z-index: 0; }
         .timeline-entry { position: relative; margin-bottom: 25px; padding-left: 50px; z-index: 1; }
         .timeline-number { position: absolute; left: 0; top: 0; width: 32px; height: 32px; border-radius: 50%; text-align: center; line-height: 28px; font-weight: bold; font-size: 14px; color: #fff; border: 2px solid #fff; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15); z-index: 2; }
-
+        
         .bg-primary { background-color: #007bff !important; }
         .bg-success { background-color: #28a745 !important; }
         .bg-danger { background-color: #dc3545 !important; }
-        .bg-warning { background-color: #ffc107 !important; color: #333 !important; }
-        .bg-info    { background-color: #17a2b8 !important; } /* Delivered Color */
+        /* Custom Orange for Pending */
+        .bg-warning { background-color: #fd7e14 !important; color: #fff !important; } 
+        .bg-info    { background-color: #17a2b8 !important; }
 
         .timeline-content { background: #fff; border: 1px solid #dee2e6; border-radius: 6px; padding: 12px 15px; position: relative; }
         .timeline-content::after { content: ''; position: absolute; top: 10px; left: -6px; width: 10px; height: 10px; background: #fff; border-left: 1px solid #dee2e6; border-bottom: 1px solid #dee2e6; transform: rotate(45deg); }
@@ -22,7 +23,7 @@
         .role-badge { display: inline-block; padding: 2px 6px; font-size: 0.75rem; border-radius: 4px; background: #f1f3f5; color: #495057; margin-bottom: 6px; }
         .timeline-comment { margin-top: 8px; background-color: #f8f9fa; border-left: 4px solid #17a2b8; padding: 8px 12px; font-size: 0.9rem; color: #495057; border-radius: 0 4px 4px 0; }
     </style>
-@endsection
+@endpush
 
 @section('content')
     <section class="content-header">
@@ -31,7 +32,7 @@
                 <div class="col-sm-6"><h1>{{ __('requisition.my_title') }}</h1></div>
                 <div class="col-sm-6">
                     <ol class="breadcrumb float-sm-right">
-                        <li class="breadcrumb-item"><a href={{ route('home') }}>{{ __('breadcrumb.home') }}</a></li>
+                        <li class="breadcrumb-item"><a href="{{ route('home') }}">{{ __('breadcrumb.home') }}</a></li>
                         <li class="breadcrumb-item active">{{ __('requisition.my_title') }}</li>
                     </ol>
                 </div>
@@ -90,7 +91,6 @@
                             <div class="mb-3">
                                 <strong>Requestor:</strong> <span id="modal-requestor"></span><br>
                                 <strong>Date:</strong> <span id="modal-date"></span><br>
-                                {{-- Status Badge --}}
                                 <strong>Status:</strong> <span id="modal-status-badge" class="badge"></span>
                             </div>
                             <h6 class="font-weight-bold text-info">Items</h6>
@@ -110,7 +110,12 @@
                     </div>
                 </div>
                 <div class="modal-footer bg-light">
-                    {{-- ACKNOWLEDGE FORM (Hidden by default) --}}
+                    {{-- NEW: Print Slip Button (Visible for Requestor) --}}
+                    <a href="#" id="btn-print-slip" target="_blank" class="btn btn-default mr-auto">
+                        <i class="fas fa-print"></i> Print Slip
+                    </a>
+
+                    {{-- ACKNOWLEDGE FORM --}}
                     <form id="ack-form" method="POST" style="display: none;">
                         @csrf
                         <button type="button" id="btn-acknowledge" class="btn btn-success">
@@ -148,18 +153,25 @@
                 });
             }
 
-            loadRequisitions();
+            loadRequisitions(); 
             $('#filter-btn').click(function() { loadRequisitions(); });
 
             // 2. VIEW (MODAL) LOGIC
             $(document).on('click', '.view-req-btn', function() {
                 let url = $(this).data('url');
-
+                let id = $(this).data('id'); // Get ID directly
+                
                 // Reset Modal
                 $('#modal-requestor').text('Loading...');
                 $('#modal-items-body').html('');
                 $('#modal-timeline').html('<div class="text-center p-3">Loading history...</div>');
-                $('#ack-form').hide(); // Reset button visibility
+                $('#ack-form').hide(); 
+                
+                // Set Print Button URL
+                let printUrl = "{{ route('requisitions.print', ':id') }}".replace(':id', id);
+                
+                $('#btn-print-slip').attr('href', printUrl);
+
                 $('#detailsModal').modal('show');
 
                 $.ajax({
@@ -173,17 +185,17 @@
                         let status = res.requisition.status;
                         let badgeClass = 'bg-secondary';
                         if(status === 'approved') badgeClass = 'bg-primary';
-                        if(status === 'delivered') badgeClass = 'bg-success';
+                        if(status === 'delivered') badgeClass = 'bg-info';
                         if(status === 'completed') badgeClass = 'bg-success';
                         if(status === 'rejected') badgeClass = 'bg-danger';
                         if(status === 'pending') badgeClass = 'bg-warning text-dark';
-
+                        
                         $('#modal-status-badge')
                             .removeClass()
                             .addClass('badge ' + badgeClass)
                             .text(status.toUpperCase());
 
-                        // *** SHOW ACKNOWLEDGE BUTTON IF DELIVERED ***
+                        // SHOW ACKNOWLEDGE BUTTON IF DELIVERED
                         if (status === 'delivered') {
                             let ackUrl = "{{ route('requisitions.acknowledge', ':id') }}".replace(':id', res.requisition.id);
                             $('#ack-form').attr('action', ackUrl).show();
@@ -203,10 +215,9 @@
                         let timelineHtml = '';
                         res.timeline.forEach(log => {
                             let badgeClass = 'bg-primary';
-                            // Map status to colors for timeline dots
-                            if(log.status_raw === 'approved' || log.status_raw === 'processed') badgeClass = 'bg-primary'; // Intermediate approval
-                            if(log.status_raw === 'delivered') badgeClass = 'bg-info'; // Store Keeper done
-                            if(log.status_raw === 'completed') badgeClass = 'bg-success'; // User done
+                            if(log.status_raw === 'approved' || log.status_raw === 'processed') badgeClass = 'bg-primary';
+                            if(log.status_raw === 'delivered') badgeClass = 'bg-info';
+                            if(log.status_raw === 'completed') badgeClass = 'bg-success';
                             if(log.status_raw === 'rejected') badgeClass = 'bg-danger';
                             if(log.status_raw === 'pending') badgeClass = 'bg-warning';
 
@@ -221,12 +232,11 @@
                                             <span class="user-name">${log.user}</span>
                                             <span class="action-date">${log.date}</span>
                                         </div>
-                                        <span class="role-badge">${log.role}</span>
+                                        <span class="role-badge">${log.role}</span> 
                                         <span class="text-${log.color} font-weight-bold small ml-1">(${log.title})</span>
                                         ${commentHtml}
                                     </div>
-                                </div>
-                            `;
+                                </div>`;
                         });
                         $('#modal-timeline').html(timelineHtml);
                     },
@@ -252,7 +262,7 @@
                 });
             });
 
-            // 4. DELETE LOGIC (Existing)
+            // 4. DELETE LOGIC
             $(document).on('click', '.delete-req-btn', function() {
                 let id = $(this).data('id');
                 let url = "{{ route('requisitions.destroy', ':id') }}".replace(':id', id);
@@ -275,7 +285,7 @@
                             },
                             success: function(res) {
                                 toastr.success(res.message);
-                                loadRequisitions();
+                                loadRequisitions(); 
                             },
                             error: function(xhr) {
                                 toastr.error(xhr.responseJSON.message || 'Error deleting');
@@ -284,6 +294,25 @@
                     }
                 });
             });
+
+            // 5. PROMPT FOR NEW REQUISITION SLIP
+            @if(session('new_requisition_id'))
+                Swal.fire({
+                    title: 'Success!',
+                    text: "Requisition initiated successfully. Do you want to download the slip?",
+                    icon: 'success',
+                    showCancelButton: true,
+                    confirmButtonColor: '#3085d6',
+                    cancelButtonColor: '#6c757d',
+                    confirmButtonText: '<i class="fas fa-print"></i> Yes, Print Slip',
+                    cancelButtonText: 'Later'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        let url = "{{ route('requisitions.print', ':id') }}".replace(':id', "{{ session('new_requisition_id') }}");
+                        window.open(url, '_blank');
+                    }
+                });
+            @endif
         });
     </script>
 @endpush

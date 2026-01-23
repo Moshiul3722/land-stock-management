@@ -34,7 +34,7 @@
                 </td>
                 <td class="text-center">
                     <button type="button" class="btn btn-info btn-sm view-req-btn"
-                        data-url="{{ route('requisitions.get_details', $req->id) }}" title="View Details">
+                        data-url="{{ route('requisitions.get_details', $req->id) }}" data-id="{{ $req->id }}" title="View Details">
                         <i class="fa fa-eye"></i>
                     </button>
 
