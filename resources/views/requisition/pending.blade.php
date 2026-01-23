@@ -268,9 +268,9 @@
                 </div>
                 <div class="modal-footer bg-light">
                     {{-- Print Button --}}
-                    <a href="#" id="btn-print" target="_blank" class="btn btn-default mr-auto">
+                    {{-- <a href="#" id="btn-print" target="_blank" class="btn btn-default mr-auto">
                         <i class="fas fa-print"></i> Print Slip
-                    </a>
+                    </a> --}}
 
                     <button type="button" class="btn btn-secondary" data-dismiss="modal"
                         onclick="$('#actionModal').modal('hide')">Close</button>
