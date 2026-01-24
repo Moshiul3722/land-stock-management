@@ -29,6 +29,7 @@ class Requisition extends Model
         'requisition_date',
         'status',
         'is_print_enabled',
+        'is_physically_verified',
         'current_serial',
         'created_by',
         'updated_by',

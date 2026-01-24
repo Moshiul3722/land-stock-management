@@ -13,6 +13,7 @@ class RequisitionRepository extends BaseRepository
         'requested_by_user_id',
         'requisition_date',
         'is_print_enabled',
+        'is_physically_verified',
         'status',
         'current_serial',
     ];
