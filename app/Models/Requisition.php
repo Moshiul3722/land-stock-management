@@ -28,6 +28,7 @@ class Requisition extends Model
         'requested_by_user_id',
         'requisition_date',
         'status',
+        'is_print_enabled',
         'current_serial',
         'created_by',
         'updated_by',
