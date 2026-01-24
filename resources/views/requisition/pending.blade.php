@@ -670,9 +670,18 @@
                 let comments = $('#action-comments').val();
                 let actionText = isStoreAdmin ? 'Approve' : 'Process & Complete';
 
-                if (isStoreAdmin && $('.item-lot-select').filter((_, el) => !$(el).val()).length > 0) {
-                    toastr.warning("Please assign a Brand/Spec to all items before approving.");
-                    return;
+                if (isStoreAdmin) {
+                    // Check 1: Unavailable Items
+                    if ($('.stock-unavailable').length > 0) {
+                        toastr.warning(
+                            "Cannot approve. Some items are unavailable. Please split them first.");
+                        return;
+                    }
+                    // Check 2: Unassigned Dropdowns
+                    if ($('.item-lot-select').filter((_, el) => !$(el).val()).length > 0) {
+                        toastr.warning("Please assign a Brand/Spec to all items before approving.");
+                        return;
+                    }
                 }
 
                 Swal.fire({
@@ -722,7 +731,19 @@
 
             function evaluateApproveButtonFromUI() {
                 if (!isStoreAdmin) return;
-                let canApprove = true;
+
+                let hasUnavailable = $('.stock-unavailable').length > 0;
+                let hasUnassigned = $('.item-lot-select').filter((_, el) => !$(el).val()).length > 0;
+
+                // Button is enabled ONLY if there are NO unavailable items AND NO unassigned dropdowns
+                let canApprove = !hasUnavailable && !hasUnassigned;
+                const btn = $('#btn-approve');
+                if (canApprove) {
+                    btn.prop('disabled', false).attr('title', 'Ready to approve');
+                } else {
+                    btn.prop('disabled', true).attr('title',
+                    'Resolve unavailable items or assign stock to proceed');
+                }
                 // Only check items that are NOT checked for splitting
                 // If item has unavailable stock but IS NOT checked for split, then we cannot approve.
                 // If it IS checked for split, we ignore it for approval (it will be moved away)
@@ -731,19 +752,19 @@
                 // When "Split" runs, items disappear, so then we can approve.
                 // So: Keep logic simple.
 
-                if ($('.stock-unavailable').length > 0) canApprove = false;
-                $('.item-lot-select').each(function() {
-                    if (!$(this).val()) {
-                        canApprove = false;
-                        return false;
-                    }
-                });
-                const btn = $('#btn-approve');
-                if (canApprove) {
-                    btn.prop('disabled', false).attr('title', 'Ready to approve');
-                } else {
-                    btn.prop('disabled', true).attr('title', 'Please assign stock to all items first');
-                }
+                // if ($('.stock-unavailable').length > 0) canApprove = false;
+                // $('.item-lot-select').each(function() {
+                //     if (!$(this).val()) {
+                //         canApprove = false;
+                //         return false;
+                //     }
+                // });
+                // const btn = $('#btn-approve');
+                // if (canApprove) {
+                //     btn.prop('disabled', false).attr('title', 'Ready to approve');
+                // } else {
+                //     btn.prop('disabled', true).attr('title', 'Please assign stock to all items first');
+                // }
             }
         });
     </script>
