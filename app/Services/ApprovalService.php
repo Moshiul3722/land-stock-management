@@ -107,9 +107,20 @@ class ApprovalService
         $entity = ApprovalEntity::where('name', $entityName)->firstOrFail();
         $nextStep = $entity->processes()->where('serial', $currentSerial + 1)->first();
         if ($nextStep) {
+            // --- Move to Next Approver ---
             $nextApprovers = User::where('role_id', $nextStep->role_id)->get();
             if ($nextApprovers->isEmpty()) {
                 throw new Exception("No users found for the role required in the next approval step.");
+            }
+
+            // === NEW LOGIC: Enable Print when moving to Store Keeper (Role 4) ===
+            // This happens when the Admin approves and the next step is the Store Keeper.
+            if ($nextStep->role_id == 4 && $model instanceof Requisition) {
+                // 1. Enable Print Flag
+                $model->update(['is_print_enabled' => true]);
+                
+                // 2. Notify Requestor that slip is ready
+                $this->notifyRequestorReadyForPrint($model);
             }
 
             foreach ($nextApprovers as $approver) {
@@ -560,6 +571,20 @@ class ApprovalService
             }
             // Deduct (Update Spent Amount)
             $budget->increment('spent_amount', $totalCost);
+        }
+    }
+
+    /**
+     * Notify Requestor that the Requisition is approved and Slip is ready to print.
+     */
+    private function notifyRequestorReadyForPrint(Requisition $requisition)
+    {
+        $requestorId = $requisition->requested_by_user_id;
+        $text = "Requisition #{$requisition->id} Approved. Please print your invoice and collect your items.";
+        $url = route('requisitions.index');
+
+        if ($requestorId) {
+            $this->notificationService->createNotification($requestorId, $text, $url, Auth::id());
         }
     }
 }

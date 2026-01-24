@@ -194,7 +194,23 @@
                             .removeClass()
                             .addClass('badge ' + badgeClass)
                             .text(status.toUpperCase());
+                            
+                        // ============================================================
+                        // PRINT SLIP VISIBILITY LOGIC
+                        // ============================================================
+                        // Show button if flag is true OR if status suggests it's already done
+                        let canPrint = res.is_print_enabled || 
+                                       status === 'delivered' || 
+                                       status === 'completed';
 
+                        if (canPrint) {
+                            let printUrl = "{{ route('requisitions.print', ':id') }}".replace(':id', res.requisition.id);
+                            $('#btn-print-slip').attr('href', printUrl).show();
+                        } else {
+                            $('#btn-print-slip').hide();
+                        }
+                        // ============================================================
+                        
                         // SHOW ACKNOWLEDGE BUTTON IF DELIVERED
                         if (status === 'delivered') {
                             let ackUrl = "{{ route('requisitions.acknowledge', ':id') }}".replace(':id', res.requisition.id);

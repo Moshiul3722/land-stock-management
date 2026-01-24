@@ -258,6 +258,7 @@ class RequisitionController extends Controller
 
         return response()->json([
             'requisition' => $requisition,
+            'is_print_enabled' => $requisition->is_print_enabled,
             'requestor' => $requisition->requestedBy->name,
             'formatted_date' => $requisition->requisition_date->format('d M, Y'),
             'timeline' => $timeline
