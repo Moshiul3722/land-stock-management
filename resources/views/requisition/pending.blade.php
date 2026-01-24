@@ -579,7 +579,7 @@
                                 item_ids: selectedItemIds
                             },
                             success: function(response) {
-                                toastr.success(response.message);
+                                toastr.success("New requisition created and Store Keeper notified.");
                                 $('#actionModal').modal('hide');
                                 setTimeout(() => {
                                     location.reload();
