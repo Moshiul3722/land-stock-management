@@ -143,13 +143,11 @@ class LotService
             'details.*.quantity' => 'required|integer|min:1',
             'details.*.unit_price' => 'required|numeric|min:0',
         ]);
-
         if ($validator->fails()) {
             throw new InvalidArgumentException($validator->errors()->first());
         }
 
         $lot = $this->lotRepository->find($id);
-
         if ($lot->status !== 'draft') {
             throw new InvalidArgumentException('This lot cannot be edited as it is already in the approval process.');
         }

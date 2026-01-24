@@ -50,7 +50,7 @@ class RequisitionController extends Controller
             $data = $request->all();
             $data['requisition_date'] = now()->format('Y-m-d');
 
-            $requisition =$this->requisitionService->store($data, $action);
+            $requisition = $this->requisitionService->store($data, $action);
 
             $message = ($action === 'save_draft')
                 ? 'Requisition saved as draft successfully.'
@@ -255,6 +255,7 @@ class RequisitionController extends Controller
     {
         $requisition->load([
             'items.product.category',
+            'items.product.subCategory',
             'requestedBy',
             'approvalDetails.fromUser.role',
             'approvalDetails.toUser.role',
@@ -275,6 +276,7 @@ class RequisitionController extends Controller
                 })
                 ->where('stocks.product_id', $item->product_id)
                 ->whereNull('stocks.deleted_at')
+                ->whereNull('lot_details.deleted_at') 
                 ->where('stocks.quantity', '>', 0) // Only show lots that have stock
                 ->select(
                     'lots.id',
@@ -284,6 +286,7 @@ class RequisitionController extends Controller
                     'stocks.specification',
                     'stocks.quantity'
                 )
+                ->distinct()
                 ->get();
         }
 
@@ -494,6 +497,38 @@ class RequisitionController extends Controller
         } catch (Exception $e) {
             Log::error('Acknowledgment Error: ' . $e->getMessage());
             return redirect()->back()->with('error', 'Error processing acknowledgment.');
+        }
+    }
+
+    /**
+     * Split selected items into a new requisition and notify Store Keeper.
+     */
+    public function split(Request $request, Requisition $requisition)
+    {
+        try {
+            // Get the list of item IDs to move to the new requisition
+            $itemIds = $request->input('item_ids', []);
+
+            if (empty($itemIds)) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'No items selected for splitting.'
+                ], 400);
+            }
+
+            // Delegate logic to service
+            $this->requisitionService->splitAndNotify($requisition, $itemIds);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Items moved to new requisition and Store Keeper notified.'
+            ]);
+        } catch (Exception $e) {
+            Log::error($e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Error: ' . $e->getMessage()
+            ], 500);
         }
     }
 }

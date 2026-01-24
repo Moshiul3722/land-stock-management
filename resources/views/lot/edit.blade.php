@@ -25,24 +25,38 @@
                         <h3 class="card-title">{{ __('lot.edit_title') }}</h3>
                     </div>
 
-                    {{-- Add ID for JS handling --}}
+                    {{-- Form with ID for JS handling --}}
                     <form id="lot-form" action="{{ route('lots.update', $lot) }}" method="POST">
                         @csrf
                         @method('PUT')
                         <div class="card-body">
                             {{-- Lot Master Information --}}
                             <div class="row">
-                                <div class="form-group col-md-6">
+                                <div class="form-group col-md-4">
                                     <label for="lot_number">{{ __('lot.lot_number') }} <span
                                             style="color: red;">*</span></label>
                                     <input type="text" class="form-control" id="lot_number" name="lot_number"
                                         value="{{ old('lot_number', $lot->lot_number) }}" required>
                                 </div>
-                                <div class="form-group col-md-6">
+                                <div class="form-group col-md-4">
                                     <label for="entry_date">{{ __('lot.entry_date') }} <span
                                             style="color: red;">*</span></label>
                                     <input type="date" class="form-control" id="entry_date" name="entry_date"
                                         value="{{ old('entry_date', $lot->entry_date->format('Y-m-d')) }}" required>
+                                </div>
+
+                                {{-- Fiscal Year Dropdown --}}
+                                <div class="form-group col-md-4">
+                                    <label for="fiscal_year_id">Fiscal Year <span style="color: red;">*</span></label>
+                                    <select class="form-control js-example-basic-single" name="fiscal_year_id" required>
+                                        <option value="">Select Fiscal Year</option>
+                                        @foreach ($fiscalYears as $year)
+                                            <option value="{{ $year->id }}"
+                                                {{ old('fiscal_year_id', $lot->fiscal_year_id) == $year->id ? 'selected' : '' }}>
+                                                {{ $year->name }}
+                                            </option>
+                                        @endforeach
+                                    </select>
                                 </div>
 
                                 <div class="form-group col-md-12">
@@ -73,11 +87,12 @@
                                 <thead>
                                     <tr>
                                         <th width="15%">{{ __('lot.table_category') }}</th>
-                                        <th width="15%">{{ __('lot.table_sub_category') }}</th>
+                                        <th width="15%">Sub Category</th>
                                         <th width="15%">{{ __('lot.table_product') }}</th>
-                                        <th width="15%">{{ __('lot.brand') }}</th>
-                                        <th width="15%">{{ __('lot.specification') }}</th>
+                                        <th width="15%">Brand</th>
+                                        <th width="15%">Specification</th>
                                         <th width="10%">{{ __('lot.table_quantity') }}</th>
+                                        <th width="10%">Unit Price <span class="text-danger">*</span></th>
                                         <th class="text-center" width="5%"><button type="button" id="add-row"
                                                 class="btn btn-success btn-sm"><i class="fa fa-plus"></i></button></th>
                                     </tr>
@@ -99,9 +114,15 @@
                                             </td>
                                             <td>
                                                 {{-- Sub Category (Will be loaded via JS based on data attributes) --}}
+                                                {{-- Check both sub_category_id (direct on product) or subCategory relationship --}}
+                                                @php
+                                                    $subCatId =
+                                                        $detail->product->sub_category_id ??
+                                                        ($detail->product->subCategory->id ?? '');
+                                                @endphp
                                                 <select class="form-control sub-category-select select2-dynamic"
                                                     name="details[{{ $index }}][sub_category_id]"
-                                                    data-selected="{{ optional($detail->product)->sub_category_id }}">
+                                                    data-selected="{{ $subCatId }}">
                                                     <option value="">Select Sub Category</option>
                                                 </select>
                                             </td>
@@ -127,6 +148,11 @@
                                                 <input type="number" class="form-control"
                                                     name="details[{{ $index }}][quantity]" min="1"
                                                     value="{{ $detail->quantity }}" required>
+                                            </td>
+                                            <td>
+                                                <input type="number" class="form-control"
+                                                    name="details[{{ $index }}][unit_price]" step="0.01"
+                                                    min="0" value="{{ $detail->unit_price }}" required>
                                             </td>
                                             <td class="text-center">
                                                 <button type="button" class="btn btn-danger btn-sm remove-row"><i
@@ -197,7 +223,7 @@
                 });
             }
 
-            // Initialize existing rows
+            // Initialize existing rows (PRE-LOADING DATA)
             $('tr[id^="R"]').each(function() {
                 let row = $(this);
                 initSelect2(row);
@@ -205,13 +231,17 @@
 
                 // Trigger data loading for existing rows
                 let catSelect = row.find('.category-select');
-                let subCatId = row.find('.sub-category-select').data('selected');
+                let subCatSelect = row.find('.sub-category-select');
+                let subCatId = subCatSelect.data('selected');
                 let prodId = row.find('.product-select').data('selected');
 
                 if (catSelect.val()) {
+                    // Load Sub Categories, select the saved one if exists
                     loadSubCategories(row, catSelect.val(), subCatId);
 
-                    // If we have a sub-category ID, load products by sub-cat, otherwise by cat
+                    // Load Products
+                    // If we have a sub-category ID, load products filtered by it
+                    // Otherwise, load products by main category
                     if (subCatId) {
                         loadProductsBySubCat(row, subCatId, prodId);
                     } else {
@@ -250,6 +280,7 @@
                             <input type="text" class="form-control autocomplete-spec" name="details[${rowIdx}][specification]" placeholder="Specification">
                         </td>
                         <td><input type="number" class="form-control" name="details[${rowIdx}][quantity]" min="1" required></td>
+                        <td><input type="number" class="form-control" name="details[${rowIdx}][unit_price]" step="0.01" min="0" required></td>
                         <td class="text-center"><button type="button" class="btn btn-danger btn-sm remove-row"><i class="fa fa-trash"></i></button></td>
                     </tr>
                 `;

@@ -26,6 +26,7 @@
             z-index: 1;
         }
 
+        /* Numbered Circle */
         .timeline-number {
             position: absolute;
             left: 0;
@@ -43,6 +44,7 @@
             z-index: 2;
         }
 
+        /* Colors */
         .bg-primary {
             background-color: #007bff !important;
         }
@@ -55,9 +57,13 @@
             background-color: #dc3545 !important;
         }
 
-        .bg-warning {
+        /* FIX: Force Orange color for Warning/Pending state in Timeline & Badges */
+        .bg-warning,
+        .badge.bg-warning,
+        .timeline-number.bg-warning {
             background-color: #fd7e14 !important;
-            color: #333 !important;
+            /* Orange/Amber */
+            color: #fff !important;
         }
 
         .timeline-content {
@@ -137,8 +143,6 @@
             border-radius: 8px;
         }
     </style>
-    {{-- Import HTML5-QRCode Library --}}
-
 @endpush
 
 @section('content')
@@ -216,25 +220,30 @@
                 </div>
                 <div class="modal-body">
                     <div class="row">
-                        {{-- LEFT: Details --}}
                         <div class="col-md-8 border-right">
+                            {{-- Info --}}
                             <div class="row mb-3">
                                 <div class="col-md-6"><strong>Requested By:</strong> <span id="modal-requestor"></span>
                                 </div>
                                 <div class="col-md-6 text-right"><strong>Date:</strong> <span id="modal-date"></span></div>
                             </div>
 
-                            {{-- Items Table --}}
+                            {{-- Action Header --}}
                             <div class="d-flex justify-content-between align-items-center mb-2">
                                 <h6 class="font-weight-bold text-primary mb-0">Items & Assignment</h6>
 
-                                {{-- 
-                                    Update Button: Only for Store Admin (Role 3)
-                                --}}
                                 @if (Auth::user()->role_id == 3)
-                                    <button type="button" id="btn-update-qty" class="btn btn-warning btn-sm shadow-sm">
-                                        <i class="fas fa-save"></i> Save Assignments & Qty
-                                    </button>
+                                    <div>
+                                        {{-- Split Button --}}
+                                        <button type="button" id="btn-split-notify"
+                                            class="btn btn-danger btn-sm shadow-sm mr-2" style="display: none;">
+                                            <i class="fas fa-random"></i> Create New Req. & Notify
+                                        </button>
+
+                                        <button type="button" id="btn-update-qty" class="btn btn-warning btn-sm shadow-sm">
+                                            <i class="fas fa-save"></i> Save Assignments & Qty
+                                        </button>
+                                    </div>
                                 @endif
                             </div>
 
@@ -242,11 +251,15 @@
                                 <table class="table table-sm table-bordered table-hover">
                                     <thead class="bg-light text-center">
                                         <tr>
+                                            {{-- Checkbox Column Header --}}
+                                            @if (Auth::user()->role_id == 3)
+                                                <th width="5%"><i class="fas fa-check-square"></i></th>
+                                            @endif
                                             <th>Product</th>
                                             <th>Category / Sub Category</th>
                                             <th width="35%">Assigned Lot (Brand/Spec)</th>
-                                            <th width="80">Requested Quantity</th>
-                                            <th width="100">Approved Quantity</th>
+                                            <th width="80">Orig. Qty</th>
+                                            <th width="100">Req. Qty</th>
                                         </tr>
                                     </thead>
                                     <tbody id="modal-items-body"></tbody>
@@ -254,12 +267,11 @@
                             </form>
 
                             <div class="form-group mt-4">
-                                <label>Your Comments (Required for Rejection)</label>
+                                <label>Your Comments</label>
                                 <textarea class="form-control" id="action-comments" rows="3" placeholder="Enter comments..."></textarea>
                             </div>
                         </div>
 
-                        {{-- RIGHT: Timeline --}}
                         <div class="col-md-4">
                             <h6 class="font-weight-bold text-primary mb-3 ml-2">Approval History</h6>
                             <div id="modal-timeline" class="timeline-container"></div>
@@ -267,21 +279,17 @@
                     </div>
                 </div>
                 <div class="modal-footer bg-light">
-                    {{-- Print Button --}}
-                    {{-- <a href="#" id="btn-print" target="_blank" class="btn btn-default mr-auto">
-                        <i class="fas fa-print"></i> Print Slip
-                    </a> --}}
+                    <a href="#" id="btn-print" target="_blank" class="btn btn-default mr-auto"><i
+                            class="fas fa-print"></i> Print Slip</a>
 
                     <button type="button" class="btn btn-secondary" data-dismiss="modal"
                         onclick="$('#actionModal').modal('hide')">Close</button>
 
-                    {{-- Reject Button: Hidden for Store Keeper (Role 4) --}}
                     @if (Auth::user()->role_id != 4)
                         <button type="button" class="btn btn-danger" id="btn-reject"><i class="fas fa-times"></i>
                             Reject</button>
                     @endif
 
-                    {{-- Approve/Process Button --}}
                     <button type="button" class="btn btn-success" id="btn-approve">
                         <i class="fas fa-check"></i> {{ Auth::user()->role_id == 4 ? 'Process & Complete' : 'Approve' }}
                     </button>
@@ -373,7 +381,6 @@
             });
             let currentRequisitionId = null;
 
-            // --- ROLE CHECKS ---
             const isStoreAdmin = {{ Auth::user()->role_id == 3 ? 'true' : 'false' }};
             const isStoreKeeper = {{ Auth::user()->role_id == 4 ? 'true' : 'false' }};
 
@@ -408,13 +415,15 @@
                 currentRequisitionId = $(this).data('id');
 
                 $('#actionModal').modal('show');
+                $('#btn-split-notify').hide();
+
                 $('#modal-timeline').html('<div class="text-center p-3">Loading...</div>');
                 let printUrl = "{{ route('requisitions.print', ':id') }}".replace(':id',
                     currentRequisitionId);
                 $('#btn-print').attr('href', printUrl);
 
                 $('#modal-items-body').html(
-                    '<tr><td colspan="5" class="text-center">Loading items...</td></tr>');
+                    '<tr><td colspan="6" class="text-center">Loading items...</td></tr>');
 
                 $.ajax({
                     url: url,
@@ -427,15 +436,14 @@
                         res.requisition.items.forEach(item => {
                             let assignmentHtml =
                                 '<span class="text-muted small font-italic">Pending Assignment</span>';
+                            let isUnavailable = false;
 
                             if (isStoreAdmin) {
-                                // Store Admin: Shows Editable Dropdown to Assign Lots
                                 let options =
                                     '<option value="">-- Select Brand/Spec --</option>';
                                 if (item.available_lots && item.available_lots.length >
                                     0) {
                                     item.available_lots.forEach(lot => {
-                                        // Use lot_detail_id as value
                                         let selected = (item.lot_detail_id ==
                                                 lot.lot_detail_id) ?
                                             'selected' : '';
@@ -449,10 +457,9 @@
                                 } else {
                                     assignmentHtml =
                                         '<span class="text-danger small font-weight-bold stock-unavailable">Stock Unavailable</span>';
+                                    isUnavailable = true;
                                 }
                             } else if (item.lot_detail_id) {
-                                // Store Keeper / Others: Shows READ-ONLY Assigned Text
-                                // Find the details in available_lots array to display name
                                 let foundLot = item.available_lots ? item.available_lots
                                     .find(l => l.lot_detail_id == item.lot_detail_id) :
                                     null;
@@ -462,29 +469,34 @@
                                 assignmentHtml =
                                     `<span class="text-success small font-weight-bold"><i class="fas fa-check"></i> ${label}</span>`;
                             } else {
-                                // Edge case: User is not admin, and no lot assigned yet
                                 assignmentHtml =
                                     '<span class="text-danger small font-weight-bold">Not Assigned</span>';
                             }
 
-                            // Input Logic: Store Admin = Editable, Others = Readonly
                             let disabledAttr = isStoreAdmin ? '' : 'disabled';
                             let inputClass = isStoreAdmin ?
                                 'form-control form-control-sm item-qty-input text-center' :
                                 'form-control-plaintext text-center font-weight-bold';
-
-                            // Sub Category Display Logic
-                            let subCatName = '';
-                            if (item.product.sub_category) subCatName = item.product
-                                .sub_category.name;
-                            else if (item.product.subCategory) subCatName = item.product
-                                .subCategory.name;
                             let categoryDisplay = item.product.category.name;
-                            if (subCatName) categoryDisplay +=
-                                `<br><small class="text-muted">${subCatName}</small>`;
+                            if (item.product.sub_category) categoryDisplay +=
+                                `<br><small class="text-muted">${item.product.sub_category.name}</small>`;
+                            else if (item.product.subCategory) categoryDisplay +=
+                                `<br><small class="text-muted">${item.product.subCategory.name}</small>`;
+
+                            // Checkbox Logic
+                            let checkboxHtml = '';
+                            if (isStoreAdmin) {
+                                if (isUnavailable) {
+                                    checkboxHtml =
+                                        `<td class="text-center"><input type="checkbox" class="split-item-checkbox" value="${item.id}"></td>`;
+                                } else {
+                                    checkboxHtml = `<td></td>`;
+                                }
+                            }
 
                             itemsHtml += `
                             <tr>
+                                ${checkboxHtml}
                                 <td>${item.product.name}</td>
                                 <td>${categoryDisplay}</td>
                                 <td>${assignmentHtml}</td>
@@ -500,11 +512,8 @@
                             </tr>`;
                         });
                         $('#modal-items-body').html(itemsHtml);
-
-                        // Evaluate button state immediately
                         evaluateApproveButtonFromUI();
 
-                        // Timeline
                         let timelineHtml = '';
                         res.timeline.forEach(item => {
                             let bgClass = 'bg-' + (item.color || 'secondary');
@@ -533,7 +542,58 @@
                 });
             });
 
-            // 2. Update Quantity (Store Admin Only)
+            // Toggle Split Button Visibility
+            $(document).on('change', '.split-item-checkbox', function() {
+                if ($('.split-item-checkbox:checked').length > 0) {
+                    $('#btn-split-notify').fadeIn();
+                } else {
+                    $('#btn-split-notify').fadeOut();
+                }
+            });
+
+            // Split & Notify Action
+            $('#btn-split-notify').click(function() {
+                let selectedItemIds = [];
+                $('.split-item-checkbox:checked').each(function() {
+                    selectedItemIds.push($(this).val());
+                });
+
+                if (selectedItemIds.length === 0) return;
+
+                let url = "{{ route('requisitions.split', ':id') }}".replace(':id', currentRequisitionId);
+
+                Swal.fire({
+                    title: 'Create New Req?',
+                    text: "Selected items will be moved to a new requisition and Store Keeper will be notified.",
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#d33',
+                    confirmButtonText: 'Yes, Split & Notify'
+                }).then((res) => {
+                    if (res.isConfirmed) {
+                        $.ajax({
+                            url: url,
+                            type: 'POST',
+                            data: {
+                                _token: "{{ csrf_token() }}",
+                                item_ids: selectedItemIds
+                            },
+                            success: function(response) {
+                                toastr.success(response.message);
+                                $('#actionModal').modal('hide');
+                                setTimeout(() => {
+                                    location.reload();
+                                }, 1000);
+                            },
+                            error: function(xhr) {
+                                toastr.error('Error: ' + xhr.responseJSON.message);
+                            }
+                        });
+                    }
+                });
+            });
+
+            // Update Quantity
             $('#btn-update-qty').click(function() {
                 let itemsData = {};
                 $('.item-qty-input').each(function() {
@@ -541,7 +601,6 @@
                     let lotSelect = $(`.item-lot-select[data-id="${id}"]`);
                     itemsData[id] = {
                         quantity: $(this).val(),
-                        // Store Admin sends lot_detail_id to save assignment
                         lot_detail_id: lotSelect.length ? lotSelect.val() : null
                     };
                 });
@@ -558,7 +617,7 @@
                         items: itemsData
                     },
                     success: function(res) {
-                        toastr.success("Assignments & Quantities updated.");
+                        toastr.success(res.message);
                         evaluateApproveButtonFromUI();
                     },
                     error: function(err) {
@@ -571,14 +630,13 @@
                 });
             });
 
-            // 3. Approve
+            // Approve
             $('#btn-approve').click(function() {
                 let url = "{{ route('requisitions.approve', ':id') }}".replace(':id',
                 currentRequisitionId);
                 let comments = $('#action-comments').val();
                 let actionText = isStoreAdmin ? 'Approve' : 'Process & Complete';
 
-                // Validation for Store Admin: Must assign lots
                 if (isStoreAdmin && $('.item-lot-select').filter((_, el) => !$(el).val()).length > 0) {
                     toastr.warning("Please assign a Brand/Spec to all items before approving.");
                     return;
@@ -600,7 +658,7 @@
                 });
             });
 
-            // 4. Reject
+            // Reject
             $('#btn-reject').click(function() {
                 let url = "{{ route('requisitions.reject', ':id') }}".replace(':id', currentRequisitionId);
                 let comments = $('#action-comments').val();
@@ -630,10 +688,16 @@
             });
 
             function evaluateApproveButtonFromUI() {
-                // Only Store Admin needs this check
                 if (!isStoreAdmin) return;
-
                 let canApprove = true;
+                // Only check items that are NOT checked for splitting
+                // If item has unavailable stock but IS NOT checked for split, then we cannot approve.
+                // If it IS checked for split, we ignore it for approval (it will be moved away)
+
+                // Actually, simplest logic: If visible item has no stock/assignment, disable.
+                // When "Split" runs, items disappear, so then we can approve.
+                // So: Keep logic simple.
+
                 if ($('.stock-unavailable').length > 0) canApprove = false;
                 $('.item-lot-select').each(function() {
                     if (!$(this).val()) {

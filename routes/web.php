@@ -150,5 +150,8 @@ Route::middleware(['auth', 'permission'])->group(function () {
     Route::get('/requisitions/{requisition}/print', [App\Http\Controllers\RequisitionController::class, 'printSlip'])->name('requisitions.print');
 
     Route::post('/requisitions/{requisition}/acknowledge', [App\Http\Controllers\RequisitionController::class, 'acknowledge'])->name('requisitions.acknowledge');
+
+    // Split Requisition Route
+    Route::post('/requisitions/{requisition}/split', [App\Http\Controllers\RequisitionController::class, 'split'])->name('requisitions.split');
 });
 
