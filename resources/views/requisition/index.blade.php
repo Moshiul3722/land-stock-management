@@ -295,23 +295,17 @@
                 });
             });
 
-            // 5. PROMPT FOR NEW REQUISITION SLIP
-            @if(session('new_requisition_id'))
-                Swal.fire({
-                    title: 'Success!',
-                    text: "Requisition initiated successfully. Do you want to download the slip?",
-                    icon: 'success',
-                    showCancelButton: true,
-                    confirmButtonColor: '#3085d6',
-                    cancelButtonColor: '#6c757d',
-                    confirmButtonText: '<i class="fas fa-print"></i> Yes, Print Slip',
-                    cancelButtonText: 'Later'
-                }).then((result) => {
-                    if (result.isConfirmed) {
-                        let url = "{{ route('requisitions.print', ':id') }}".replace(':id', "{{ session('new_requisition_id') }}");
-                        window.open(url, '_blank');
-                    }
-                });
+            // 5.  Toastr Logic for Success/Error (Bangla Messages)
+            @if(session('success'))
+                @if(session('new_requisition_id'))
+                    toastr.success("আপনার রিকুইজিশন জমা হয়েছে");
+                @else
+                    toastr.success("{{ session('success') }}");
+                @endif
+            @endif
+
+            @if(session('error'))
+                toastr.error("রিকুইজিশন জমা হয়নি। সমস্যা হয়েছে");
             @endif
         });
     </script>
