@@ -179,7 +179,7 @@ class RequisitionController extends Controller
                 })
                 ->where('stocks.product_id', $item->product_id)
                 ->whereNull('stocks.deleted_at')
-                ->whereNull('lot_details.deleted_at') 
+                ->whereNull('lot_details.deleted_at')
                 ->where('stocks.quantity', '>', 0) // Only show lots that have stock
                 ->select(
                     'lots.id',
@@ -410,23 +410,30 @@ class RequisitionController extends Controller
     public function split(Request $request, Requisition $requisition)
     {
         try {
-            // Get the list of item IDs to move to the new requisition
             $itemIds = $request->input('item_ids', []);
 
             if (empty($itemIds)) {
                 return response()->json([
                     'success' => false,
-                    'message' => 'No items selected for splitting.'
+                    'message' => 'No items selected.'
                 ], 400);
             }
 
             // Delegate logic to service
-            $this->requisitionService->splitAndNotify($requisition, $itemIds);
+            // Returns Requisition object (if split) or null (if just notified)
+            $newRequisition = $this->requisitionService->splitAndNotify($requisition, $itemIds);
 
-            return response()->json([
-                'success' => true,
-                'message' => 'Items moved to new requisition and Store Keeper notified.'
-            ]);
+            if ($newRequisition) {
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Unavailable items moved to a new requisition (#' . $newRequisition->id . '). Store Keeper notified.'
+                ]);
+            } else {
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Store Keeper notified to add stock for all items. No new requisition created.'
+                ]);
+            }
         } catch (Exception $e) {
             Log::error($e->getMessage());
             return response()->json([

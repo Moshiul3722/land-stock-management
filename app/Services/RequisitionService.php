@@ -351,57 +351,66 @@ class RequisitionService
     public function splitAndNotify(Requisition $originalReq, array $itemIds)
     {
         return DB::transaction(function () use ($originalReq, $itemIds) {
-            // 1. Create New Requisition (Clone details from original)
-            // We set status to 'pending' immediately as it is auto-submitted
-            $newReq = $this->requisitionRepository->create([
-                'requisition_date' => $originalReq->requisition_date,
-                'remarks' => "Split from Requisition #{$originalReq->id}. " . $originalReq->remarks,
-                'status' => 'pending',
-                'current_serial' => 1,
-                'requested_by_user_id' => $originalReq->requested_by_user_id,
-            ]);
 
-            // 2. Move Items to New Requisition
-            // We fetch the items first to get product names for the notification
-            $itemsToMove = \App\Models\RequisitionItem::whereIn('id', $itemIds)
+            // 1. Check if we are selecting ALL items
+            $totalItemCount = $originalReq->items()->count();
+            $isFullSelection = count($itemIds) >= $totalItemCount;
+
+            // Common: Get names for notification
+            $selectedItems = \App\Models\RequisitionItem::whereIn('id', $itemIds)
                 ->where('requisition_id', $originalReq->id)
                 ->with('product')
                 ->get();
 
-            if ($itemsToMove->isEmpty()) {
+            if ($selectedItems->isEmpty()) {
                 throw new InvalidArgumentException("Selected items not found in the original requisition.");
             }
 
-            $missingProductNames = [];
+            $missingProductNames = $selectedItems->pluck('product.name')->unique()->toArray();
+            $productList = implode(', ', $missingProductNames);
+            $storeKeepers = User::where('role_id', 4)->get();
+            $url = route('lots.create'); // Link to Stock Entry
 
-            foreach ($itemsToMove as $item) {
-                // Update the parent ID to the new Requisition
-                $item->update(['requisition_id' => $newReq->id]);
-                $missingProductNames[] = $item->product->name ?? 'Unknown Item';
+            // --- CASE A: FULL SELECTION (Notify Only) ---
+            if ($isFullSelection) {
+                $text = "Stock Required! All items unavailable for Requisition #{$originalReq->id}: {$productList}";
+
+                foreach ($storeKeepers as $keeper) {
+                    $this->notificationService->createNotification($keeper->id, $text, $url, Auth::id());
+                }
+
+                return null; // Indicate no new requisition created
             }
 
-            // 3. Initiate Workflow for New Requisition (Auto-Submit)
-            // Passing remarks to be logged in the timeline
+            // --- CASE B: PARTIAL SPLIT (Create New Req) ---
+            
+            // 2. Create New Requisition
+            $newReq = $this->requisitionRepository->create([
+                'requisition_date' => $originalReq->requisition_date,
+                'remarks' => "Split from Requisition #{$originalReq->id}. " . $originalReq->remarks,
+                'status' => 'pending', 
+                'current_serial' => 1, 
+                'requested_by_user_id' => $originalReq->requested_by_user_id,
+            ]);
+
+            // 3. Move Items
+            foreach ($selectedItems as $item) {
+                $item->update(['requisition_id' => $newReq->id]);
+            }
+
+            // 4. Auto-Submit New Req
             $this->approvalService->submitForApproval(
-                $newReq,
-                'Requisition Approval',
+                $newReq, 
+                'Requisition Approval', 
                 'Auto-generated split requisition for out-of-stock items.'
             );
 
-            // 4. Notify Store Keepers (Role ID 4)
-            // We notify them that these items are missing and stock is needed
-            $storeKeepers = User::where('role_id', 4)->get();
-            $productList = implode(', ', array_unique($missingProductNames));
-            $text = "Stock Request: Items missing for Split Requisition #{$newReq->id}: {$productList}";
-            $url = route('lots.create'); // Direct link to Add Stock page
-
+            
+            // 5. Notify
+            $text = "Stock Required! Items moved to Split Requisition #{$newReq->id}: {$productList}";
+            
             foreach ($storeKeepers as $keeper) {
-                $this->notificationService->createNotification(
-                    $keeper->id,
-                    $text,
-                    $url,
-                    Auth::id()
-                );
+                $this->notificationService->createNotification($keeper->id, $text, $url, Auth::id());
             }
 
             return $newReq;

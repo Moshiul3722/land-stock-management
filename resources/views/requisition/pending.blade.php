@@ -380,7 +380,9 @@
                 ]
             });
             let currentRequisitionId = null;
+            let totalItemsInModal = 0;
 
+            // Role constants
             const isStoreAdmin = {{ Auth::user()->role_id == 3 ? 'true' : 'false' }};
             const isStoreKeeper = {{ Auth::user()->role_id == 4 ? 'true' : 'false' }};
 
@@ -415,7 +417,7 @@
                 currentRequisitionId = $(this).data('id');
 
                 $('#actionModal').modal('show');
-                $('#btn-split-notify').hide();
+                $('#btn-split-notify').hide(); // Reset button visibility
 
                 $('#modal-timeline').html('<div class="text-center p-3">Loading...</div>');
                 let printUrl = "{{ route('requisitions.print', ':id') }}".replace(':id',
@@ -432,11 +434,15 @@
                         $('#modal-requestor').text(res.requestor);
                         $('#modal-date').text(res.formatted_date);
 
+                        // Store total item count to compare later
+                        totalItemsInModal = res.requisition.items.length;
+
                         let itemsHtml = '';
                         res.requisition.items.forEach(item => {
                             let assignmentHtml =
                                 '<span class="text-muted small font-italic">Pending Assignment</span>';
                             let isUnavailable = false;
+
 
                             if (isStoreAdmin) {
                                 let options =
@@ -544,10 +550,24 @@
 
             // Toggle Split Button Visibility
             $(document).on('change', '.split-item-checkbox', function() {
-                if ($('.split-item-checkbox:checked').length > 0) {
-                    $('#btn-split-notify').fadeIn();
+                let checkedCount = $('.split-item-checkbox:checked').length;
+                let btn = $('#btn-split-notify');
+
+                if (checkedCount > 0) {
+                    btn.fadeIn();
+
+                    // CHECK: Are we selecting ALL items?
+                    if (checkedCount === totalItemsInModal) {
+                        // CASE A: Full Selection -> Notify Only (Blue Button)
+                        btn.removeClass('btn-danger').addClass('btn-info');
+                        btn.html('<i class="fas fa-bell"></i> Notify for Stock (No Split)');
+                    } else {
+                        // CASE B: Partial Selection -> Split (Red Button)
+                        btn.removeClass('btn-info').addClass('btn-danger');
+                        btn.html('<i class="fas fa-random"></i> Create New Req. & Notify');
+                    }
                 } else {
-                    $('#btn-split-notify').fadeOut();
+                    btn.fadeOut();
                 }
             });
 
@@ -560,15 +580,25 @@
 
                 if (selectedItemIds.length === 0) return;
 
+                // Determine Context
+                let isFullSelection = (selectedItemIds.length === totalItemsInModal);
+
+                let title = isFullSelection ? 'Notify Store Keeper?' : 'Create New Req?';
+                let text = isFullSelection ?
+                    "All items are unavailable. Store Keeper will be notified to add stock. No new requisition will be created." :
+                    "Selected items will be moved to a new requisition and Store Keeper will be notified.";
+                let confirmBtnText = isFullSelection ? 'Yes, Notify' : 'Yes, Split & Notify';
+                let confirmBtnColor = isFullSelection ? '#17a2b8' : '#d33'; // Blue vs Red
+
                 let url = "{{ route('requisitions.split', ':id') }}".replace(':id', currentRequisitionId);
 
                 Swal.fire({
-                    title: 'Create New Req?',
-                    text: "Selected items will be moved to a new requisition and Store Keeper will be notified.",
+                    title: title,
+                    text: text,
                     icon: 'warning',
                     showCancelButton: true,
-                    confirmButtonColor: '#d33',
-                    confirmButtonText: 'Yes, Split & Notify'
+                    confirmButtonColor: confirmBtnColor,
+                    confirmButtonText: confirmBtnText
                 }).then((res) => {
                     if (res.isConfirmed) {
                         $.ajax({
@@ -579,8 +609,11 @@
                                 item_ids: selectedItemIds
                             },
                             success: function(response) {
-                                toastr.success("New requisition created and Store Keeper notified.");
+                                toastr.success(response.message);
                                 $('#actionModal').modal('hide');
+
+                                // If Split (Partial), original Req changes, reload table.
+                                // If Notify (Full), original Req stays pending, but reload ensures UI freshness.
                                 setTimeout(() => {
                                     location.reload();
                                 }, 1000);
@@ -633,7 +666,7 @@
             // Approve
             $('#btn-approve').click(function() {
                 let url = "{{ route('requisitions.approve', ':id') }}".replace(':id',
-                currentRequisitionId);
+                    currentRequisitionId);
                 let comments = $('#action-comments').val();
                 let actionText = isStoreAdmin ? 'Approve' : 'Process & Complete';
 
@@ -652,7 +685,7 @@
                         let form = $('#approve-form');
                         form.attr('action', url);
                         form.html(
-                        `@csrf <input type="hidden" name="comments" value="${comments}">`);
+                            `@csrf <input type="hidden" name="comments" value="${comments}">`);
                         form.submit();
                     }
                 });
@@ -677,7 +710,7 @@
                         let form = $('#reject-form');
                         form.attr('action', url);
                         form.html(
-                        `@csrf <input type="hidden" name="comments" value="${comments}">`);
+                            `@csrf <input type="hidden" name="comments" value="${comments}">`);
                         form.submit();
                     }
                 });
