@@ -43,6 +43,7 @@
             z-index: 2;
         }
 
+        /* Colors */
         .bg-primary {
             background-color: #007bff !important;
         }
@@ -55,12 +56,8 @@
             background-color: #dc3545 !important;
         }
 
-        /* Custom Orange for Pending */
-        .bg-warning,
-        .badge.bg-warning,
-        .timeline-number.bg-warning {
+        .bg-custom-warning {
             background-color: #fd7e14 !important;
-            /* Orange/Amber */
             color: #fff !important;
         }
 
@@ -122,13 +119,6 @@
             border-radius: 0 4px 4px 0;
         }
 
-        .timeline-comment strong {
-            display: block;
-            font-size: 0.75rem;
-            color: #17a2b8;
-            margin-bottom: 2px;
-        }
-
         /* Scanner Styles */
         #reader {
             width: 100%;
@@ -141,6 +131,7 @@
             border-radius: 8px;
         }
     </style>
+
 @endpush
 
 @section('content')
@@ -158,9 +149,10 @@
         <div class="card card-primary">
             <div class="card-header">
                 <h3 class="card-title">{{ __('requisition.pending_list') }}</h3>
-                <div class="card-tools">
-                    {{-- SCANNER: Only for Store Keeper (Role 4) --}}
-                    @if (Auth::user()->role_id == 4)
+
+                {{-- SCANNER TOOLS (ONLY FOR STORE KEEPER - Role 4) --}}
+                @if (Auth::user()->role_id == 4)
+                    <div class="card-tools">
                         <div class="input-group input-group-sm" style="width: 300px;">
                             <input type="text" id="scan-qr-input" class="form-control float-right"
                                 placeholder="Scan or Type ID...">
@@ -171,8 +163,8 @@
                                 </button>
                             </div>
                         </div>
-                    @endif
-                </div>
+                    </div>
+                @endif
             </div>
             <div class="card-body">
                 <table id="pending-req-table" class="table table-bordered table-striped">
@@ -198,7 +190,9 @@
                                     <button class="btn btn-info btn-sm view-action-btn"
                                         data-id="{{ $task->requisition->id }}"
                                         data-url="{{ route('requisitions.get_details', $task->requisition->id) }}">
-                                        <i class="fa fa-eye"></i> View{{ Auth::user()->role_id == 3 ? ' & Action' : '' }}
+                                        {{-- Conditional Text: Action for Approvers, View for Store Keeper --}}
+                                        <i class="fa fa-eye"></i>
+                                        {{ in_array(Auth::user()->role_id, [2, 3]) ? 'View & Action' : 'View' }}
                                     </button>
                                 </td>
                             </tr>
@@ -222,19 +216,19 @@
                 </div>
                 <div class="modal-body">
                     <div class="row">
-                        {{-- LEFT: Details --}}
                         <div class="col-md-8 border-right">
+                            {{-- Info --}}
                             <div class="row mb-3">
                                 <div class="col-md-6"><strong>Requested By:</strong> <span id="modal-requestor"></span>
                                 </div>
                                 <div class="col-md-6 text-right"><strong>Date:</strong> <span id="modal-date"></span></div>
                             </div>
 
-                            {{-- Items Table --}}
+                            {{-- Action Header --}}
                             <div class="d-flex justify-content-between align-items-center mb-2">
                                 <h6 class="font-weight-bold text-primary mb-0">Items & Assignment</h6>
 
-                                {{-- BUTTONS ONLY FOR STORE ADMIN (3) --}}
+                                {{-- BUTTONS: ONLY FOR STORE ADMIN (3) --}}
                                 @if (Auth::user()->role_id == 3)
                                     <div>
                                         <button type="button" id="btn-split-notify"
@@ -253,7 +247,7 @@
                                 <table class="table table-sm table-bordered table-hover">
                                     <thead class="bg-light text-center">
                                         <tr>
-                                            {{-- Checkbox Column (Admin Only) --}}
+                                            {{-- Checkbox: Only for Store Admin (3) --}}
                                             @if (Auth::user()->role_id == 3)
                                                 <th width="5%"><i class="fas fa-check-square"></i></th>
                                             @endif
@@ -274,7 +268,6 @@
                             </div>
                         </div>
 
-                        {{-- RIGHT: Timeline --}}
                         <div class="col-md-4">
                             <h6 class="font-weight-bold text-primary mb-3 ml-2">Approval History</h6>
                             <div id="modal-timeline" class="timeline-container"></div>
@@ -282,8 +275,8 @@
                     </div>
                 </div>
                 <div class="modal-footer bg-light">
-                    {{-- Print Slip (For Admin to verify or reprint) --}}
-                    @if (Auth::user()->role_id == 3)
+                    {{-- Print: Visible for Admin (2) & Store Admin (3) --}}
+                    @if (in_array(Auth::user()->role_id, [2, 3]))
                         <a href="#" id="btn-print" target="_blank" class="btn btn-default mr-auto"><i
                                 class="fas fa-print"></i> Print Slip</a>
                     @endif
@@ -291,8 +284,8 @@
                     <button type="button" class="btn btn-secondary" data-dismiss="modal"
                         onclick="$('#actionModal').modal('hide')">Close</button>
 
-                    {{-- ACTIONS ONLY FOR STORE ADMIN (3) --}}
-                    @if (Auth::user()->role_id == 3)
+                    {{-- Actions: Visible for Admin (2) & Store Admin (3) --}}
+                    @if (in_array(Auth::user()->role_id, [2, 3]))
                         <button type="button" class="btn btn-danger" id="btn-reject"><i class="fas fa-times"></i>
                             Reject</button>
                         <button type="button" class="btn btn-success" id="btn-approve"><i class="fas fa-check"></i>
@@ -339,6 +332,7 @@
     <script>
         let html5QrcodeScanner = null;
 
+        // --- SCANNER LOGIC (Store Keeper) ---
         function onScanSuccess(decodedText, decodedResult) {
             let cleanVal = decodedText.split('?')[0];
             let parts = cleanVal.split('/');
@@ -397,7 +391,6 @@
         function startScanner() {
             $('#scannerModal').modal('show');
             if (html5QrcodeScanner === null) {
-                // Check if library loaded
                 if (typeof Html5QrcodeScanner !== 'undefined') {
                     html5QrcodeScanner = new Html5QrcodeScanner("reader", {
                         fps: 10,
@@ -432,34 +425,38 @@
             let currentRequisitionId = null;
             let totalItemsInModal = 0;
 
+            // Roles
             const isStoreAdmin = {{ Auth::user()->role_id == 3 ? 'true' : 'false' }};
             const isStoreKeeper = {{ Auth::user()->role_id == 4 ? 'true' : 'false' }};
+            const isApprover = {{ in_array(Auth::user()->role_id, [2, 3]) ? 'true' : 'false' }};
 
-            // --- SCANNER EVENTS ---
-            $('#btn-open-camera').click(function() {
-                startScanner();
-            });
-            $('#scannerModal').on('hidden.bs.modal', function() {
-                stopScanner();
-            });
+            // --- BIND SCANNER EVENTS (Only for Store Keeper) ---
+            if (isStoreKeeper) {
+                $('#btn-open-camera').click(function() {
+                    startScanner();
+                });
+                $('#scannerModal').on('hidden.bs.modal', function() {
+                    stopScanner();
+                });
 
-            $('#scan-qr-input').on('keyup', function(e) {
-                if (e.key === 'Enter' || e.keyCode === 13) {
-                    let val = $(this).val();
-                    if (!val) return;
+                $('#scan-qr-input').on('keyup', function(e) {
+                    if (e.key === 'Enter' || e.keyCode === 13) {
+                        let val = $(this).val();
+                        if (!val) return;
 
-                    let cleanVal = val.split('?')[0];
-                    let parts = cleanVal.split('/');
-                    let id = parts[parts.length - 1];
+                        let cleanVal = val.split('?')[0];
+                        let parts = cleanVal.split('/');
+                        let id = parts[parts.length - 1];
 
-                    if ($.isNumeric(id)) {
-                        $(this).val('');
-                        processRequisitionViaScan(id);
-                    } else {
-                        toastr.error('Invalid QR Code');
+                        if ($.isNumeric(id)) {
+                            $(this).val('');
+                            processRequisitionViaScan(id);
+                        } else {
+                            toastr.error('Invalid QR Code');
+                        }
                     }
-                }
-            });
+                });
+            }
 
             // --- VIEW MODAL ---
             $('#pending-req-table tbody').on('click', '.view-action-btn', function() {
@@ -469,7 +466,7 @@
                 $('#actionModal').modal('show');
                 $('#btn-split-notify').hide();
 
-                // Read-Only for Store Keeper
+                // Read-Only for Store Keeper (Role 4)
                 if (isStoreKeeper) {
                     $('#action-comments').prop('disabled', true).val('');
                 } else {
@@ -498,6 +495,7 @@
                             let isUnavailable = false;
 
                             if (isStoreAdmin) {
+                                // STORE ADMIN (Role 3): Editable Dropdowns
                                 let options =
                                     '<option value="">-- Select Brand/Spec --</option>';
                                 if (item.available_lots && item.available_lots.length >
@@ -519,6 +517,7 @@
                                     isUnavailable = true;
                                 }
                             } else if (item.lot_detail_id) {
+                                // ADMIN (Role 2) or Store Keeper: Read-Only Assigned Text
                                 let foundLot = item.available_lots ? item.available_lots
                                     .find(l => l.lot_detail_id == item.lot_detail_id) :
                                     null;
@@ -532,6 +531,7 @@
                                     '<span class="text-danger small font-weight-bold">Not Assigned</span>';
                             }
 
+                            // Edit permissions for Qty Input
                             let disabledAttr = isStoreAdmin ? '' : 'disabled';
                             let inputClass = isStoreAdmin ?
                                 'form-control form-control-sm item-qty-input text-center' :
@@ -546,7 +546,7 @@
                             if (subCatName) categoryDisplay +=
                                 `<br><small class="text-muted">${subCatName}</small>`;
 
-                            // Checkbox Logic (Admin Only)
+                            // Checkbox Logic (Role 3 Only)
                             let checkboxHtml = '';
                             if (isStoreAdmin) {
                                 if (isUnavailable) {
@@ -609,9 +609,9 @@
                 });
             });
 
-            // --- ADMIN ACTIONS ---
+            // --- STORE ADMIN SPECIFIC ACTIONS (Role 3) ---
             if (isStoreAdmin) {
-                // Split Button Logic
+                // Split Button Toggle
                 $(document).on('change', '.split-item-checkbox', function() {
                     let checkedCount = $('.split-item-checkbox:checked').length;
                     let btn = $('#btn-split-notify');
@@ -629,7 +629,7 @@
                     }
                 });
 
-                // Split
+                // Split Action
                 $('#btn-split-notify').click(function() {
                     let selectedItemIds = [];
                     $('.split-item-checkbox:checked').each(function() {
@@ -642,7 +642,6 @@
                     let text = isFull ? "All items unavailable. Store Keeper will be notified." :
                         "Selected items will move to new requisition.";
                     let btnText = isFull ? 'Yes, Notify' : 'Yes, Split';
-                    let confirmColor = isFull ? '#17a2b8' : '#d33';
                     let url = "{{ route('requisitions.split', ':id') }}".replace(':id',
                         currentRequisitionId);
 
@@ -651,7 +650,7 @@
                             text: text,
                             icon: 'warning',
                             showCancelButton: true,
-                            confirmButtonColor: confirmColor,
+                            confirmButtonColor: '#d33',
                             confirmButtonText: btnText
                         })
                         .then((res) => {
@@ -715,24 +714,31 @@
                     });
                 });
 
+                $(document).on('change', '.item-lot-select', function() {
+                    evaluateApproveButtonFromUI();
+                });
+            }
+
+            // --- APPROVER ACTIONS (Role 2 & 3) ---
+            if (isApprover) {
                 // Approve
                 $('#btn-approve').click(function() {
                     let url = "{{ route('requisitions.approve', ':id') }}".replace(':id',
                         currentRequisitionId);
                     let comments = $('#action-comments').val();
 
-                    // UPDATED VALIDATION LOGIC
-                    // Check 1: Unavailable Items
-                    if ($('.stock-unavailable').length > 0) {
-                        toastr.warning(
-                            "Cannot approve. Some items are unavailable. Please split or resolve them first."
-                            );
-                        return;
-                    }
-                    // Check 2: Unassigned Dropdowns
-                    if ($('.item-lot-select').filter((_, el) => !$(el).val()).length > 0) {
-                        toastr.warning("Please assign a Brand/Spec to all items before approving.");
-                        return;
+                    // Store Admin Validation (Must Assign)
+                    if (isStoreAdmin) {
+                        if ($('.stock-unavailable').length > 0) {
+                            toastr.warning(
+                                "Cannot approve. Some items are unavailable. Please split or resolve them first."
+                                );
+                            return;
+                        }
+                        if ($('.item-lot-select').filter((_, el) => !$(el).val()).length > 0) {
+                            toastr.warning("Please assign a Brand/Spec to all items before approving.");
+                            return;
+                        }
                     }
 
                     Swal.fire({
@@ -778,19 +784,15 @@
                         }
                     });
                 });
-
-                $(document).on('change', '.item-lot-select', function() {
-                    evaluateApproveButtonFromUI();
-                });
             }
 
             function evaluateApproveButtonFromUI() {
                 if (!isStoreAdmin) return;
-
-                let hasUnavailable = $('.stock-unavailable').length > 0;
-                let hasUnassigned = $('.item-lot-select').filter((_, el) => !$(el).val()).length > 0;
-                let canApprove = !hasUnavailable && !hasUnassigned;
-
+                let canApprove = true;
+                if ($('.stock-unavailable').length > 0) canApprove = false;
+                $('.item-lot-select').each(function() {
+                    if (!$(this).val()) canApprove = false;
+                });
                 const btn = $('#btn-approve');
                 if (canApprove) {
                     btn.prop('disabled', false).attr('title', 'Ready to approve');
