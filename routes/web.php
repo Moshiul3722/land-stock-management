@@ -153,5 +153,8 @@ Route::middleware(['auth', 'permission'])->group(function () {
 
     // Split Requisition Route
     Route::post('/requisitions/{requisition}/split', [App\Http\Controllers\RequisitionController::class, 'split'])->name('requisitions.split');
+
+    // Auto Verify by QR Code
+    Route::post('/requisitions/{requisition}/verify-scan', [App\Http\Controllers\RequisitionController::class, 'verifyAndProcess'])->name('requisitions.verify_scan');
 });
 

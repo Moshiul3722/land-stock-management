@@ -442,4 +442,40 @@ class RequisitionController extends Controller
             ], 500);
         }
     }
+
+    /**
+     * Process a requisition via QR Scan (Store Keeper Only).
+     * Validates, sets physical verification flag, and moves workflow to 'delivered'.
+     */
+    public function verifyAndProcess(Request $request, Requisition $requisition)
+    {
+        // 1. Authorization Check (Role 4 = Store Keeper)
+        if (Auth::user()->role_id != 4) {
+            return response()->json(['success' => false, 'message' => 'Unauthorized. Only Store Keepers can scan.'], 403);
+        }
+
+        // 2. State Check (Prevent double processing)
+        if ($requisition->status === 'delivered' || $requisition->status === 'completed') {
+            return response()->json(['success' => false, 'message' => 'This requisition has already been processed.'], 400);
+        }
+
+        try {
+            // 3. Set Physical Verification Flag
+            $requisition->update(['is_physically_verified' => true]);
+
+            // 4. Trigger Approval Service to finalize
+            // This reuses the existing approval logic. Since the current step is Store Keeper,
+            // the service will automatically deduct stock and set status to 'delivered'.
+            $this->requisitionService->approveRequisition($requisition, 'Physically Verified via QR Scan');
+
+            return response()->json([
+                'success' => true, 
+                'message' => 'Requisition #' . $requisition->id . ' verified and processed successfully.'
+            ]);
+
+        } catch (Exception $e) {
+            Log::error($e->getMessage());
+            return response()->json(['success' => false, 'message' => 'Error: ' . $e->getMessage()], 500);
+        }
+    }
 }

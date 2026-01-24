@@ -26,7 +26,6 @@
             z-index: 1;
         }
 
-        /* Numbered Circle */
         .timeline-number {
             position: absolute;
             left: 0;
@@ -44,7 +43,6 @@
             z-index: 2;
         }
 
-        /* Colors */
         .bg-primary {
             background-color: #007bff !important;
         }
@@ -57,7 +55,7 @@
             background-color: #dc3545 !important;
         }
 
-        /* FIX: Force Orange color for Warning/Pending state in Timeline & Badges */
+        /* Custom Orange for Pending */
         .bg-warning,
         .badge.bg-warning,
         .timeline-number.bg-warning {
@@ -161,15 +159,19 @@
             <div class="card-header">
                 <h3 class="card-title">{{ __('requisition.pending_list') }}</h3>
                 <div class="card-tools">
-                    <div class="input-group input-group-sm" style="width: 300px;">
-                        <input type="text" id="scan-qr-input" class="form-control float-right"
-                            placeholder="Scan or Type ID...">
-                        <div class="input-group-append">
-                            <button type="button" class="btn btn-warning" id="btn-open-camera" title="Scan with Camera">
-                                <i class="fas fa-camera"></i>
-                            </button>
+                    {{-- SCANNER: Only for Store Keeper (Role 4) --}}
+                    @if (Auth::user()->role_id == 4)
+                        <div class="input-group input-group-sm" style="width: 300px;">
+                            <input type="text" id="scan-qr-input" class="form-control float-right"
+                                placeholder="Scan or Type ID...">
+                            <div class="input-group-append">
+                                <button type="button" class="btn btn-warning" id="btn-open-camera"
+                                    title="Scan with Camera">
+                                    <i class="fas fa-camera"></i>
+                                </button>
+                            </div>
                         </div>
-                    </div>
+                    @endif
                 </div>
             </div>
             <div class="card-body">
@@ -196,7 +198,7 @@
                                     <button class="btn btn-info btn-sm view-action-btn"
                                         data-id="{{ $task->requisition->id }}"
                                         data-url="{{ route('requisitions.get_details', $task->requisition->id) }}">
-                                        <i class="fa fa-eye"></i> View & Action
+                                        <i class="fa fa-eye"></i> View{{ Auth::user()->role_id == 3 ? ' & Action' : '' }}
                                     </button>
                                 </td>
                             </tr>
@@ -220,21 +222,21 @@
                 </div>
                 <div class="modal-body">
                     <div class="row">
+                        {{-- LEFT: Details --}}
                         <div class="col-md-8 border-right">
-                            {{-- Info --}}
                             <div class="row mb-3">
                                 <div class="col-md-6"><strong>Requested By:</strong> <span id="modal-requestor"></span>
                                 </div>
                                 <div class="col-md-6 text-right"><strong>Date:</strong> <span id="modal-date"></span></div>
                             </div>
 
-                            {{-- Action Header --}}
+                            {{-- Items Table --}}
                             <div class="d-flex justify-content-between align-items-center mb-2">
                                 <h6 class="font-weight-bold text-primary mb-0">Items & Assignment</h6>
 
+                                {{-- BUTTONS ONLY FOR STORE ADMIN (3) --}}
                                 @if (Auth::user()->role_id == 3)
                                     <div>
-                                        {{-- Split Button --}}
                                         <button type="button" id="btn-split-notify"
                                             class="btn btn-danger btn-sm shadow-sm mr-2" style="display: none;">
                                             <i class="fas fa-random"></i> Create New Req. & Notify
@@ -251,7 +253,7 @@
                                 <table class="table table-sm table-bordered table-hover">
                                     <thead class="bg-light text-center">
                                         <tr>
-                                            {{-- Checkbox Column Header --}}
+                                            {{-- Checkbox Column (Admin Only) --}}
                                             @if (Auth::user()->role_id == 3)
                                                 <th width="5%"><i class="fas fa-check-square"></i></th>
                                             @endif
@@ -267,11 +269,12 @@
                             </form>
 
                             <div class="form-group mt-4">
-                                <label>Your Comments</label>
+                                <label>Approval Comments</label>
                                 <textarea class="form-control" id="action-comments" rows="3" placeholder="Enter comments..."></textarea>
                             </div>
                         </div>
 
+                        {{-- RIGHT: Timeline --}}
                         <div class="col-md-4">
                             <h6 class="font-weight-bold text-primary mb-3 ml-2">Approval History</h6>
                             <div id="modal-timeline" class="timeline-container"></div>
@@ -279,46 +282,50 @@
                     </div>
                 </div>
                 <div class="modal-footer bg-light">
-                    <a href="#" id="btn-print" target="_blank" class="btn btn-default mr-auto"><i
-                            class="fas fa-print"></i> Print Slip</a>
+                    {{-- Print Slip (For Admin to verify or reprint) --}}
+                    @if (Auth::user()->role_id == 3)
+                        <a href="#" id="btn-print" target="_blank" class="btn btn-default mr-auto"><i
+                                class="fas fa-print"></i> Print Slip</a>
+                    @endif
 
                     <button type="button" class="btn btn-secondary" data-dismiss="modal"
                         onclick="$('#actionModal').modal('hide')">Close</button>
 
-                    @if (Auth::user()->role_id != 4)
+                    {{-- ACTIONS ONLY FOR STORE ADMIN (3) --}}
+                    @if (Auth::user()->role_id == 3)
                         <button type="button" class="btn btn-danger" id="btn-reject"><i class="fas fa-times"></i>
                             Reject</button>
+                        <button type="button" class="btn btn-success" id="btn-approve"><i class="fas fa-check"></i>
+                            Approve</button>
                     @endif
-
-                    <button type="button" class="btn btn-success" id="btn-approve">
-                        <i class="fas fa-check"></i> {{ Auth::user()->role_id == 4 ? 'Process & Complete' : 'Approve' }}
-                    </button>
                 </div>
             </div>
         </div>
     </div>
 
-    {{-- SCANNER MODAL --}}
-    <div class="modal fade" id="scannerModal" tabindex="-1" role="dialog" aria-hidden="true">
-        <div class="modal-dialog modal-md" role="document">
-            <div class="modal-content">
-                <div class="modal-header bg-warning">
-                    <h5 class="modal-title"><i class="fas fa-camera"></i> Scan QR Code</h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"
-                        onclick="stopScanner()">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-                <div class="modal-body p-0">
-                    <div id="reader" style="width: 100%;"></div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" onclick="stopScanner()"
-                        data-dismiss="modal">Close</button>
+    {{-- SCANNER MODAL (Only for Store Keeper) --}}
+    @if (Auth::user()->role_id == 4)
+        <div class="modal fade" id="scannerModal" tabindex="-1" role="dialog" aria-hidden="true">
+            <div class="modal-dialog modal-md" role="document">
+                <div class="modal-content">
+                    <div class="modal-header bg-warning">
+                        <h5 class="modal-title"><i class="fas fa-camera"></i> Scan Gate Pass QR</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close"
+                            onclick="stopScanner()">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body p-0">
+                        <div id="reader" style="width: 100%;"></div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" onclick="stopScanner()"
+                            data-dismiss="modal">Close</button>
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
+    @endif
 
     {{-- Hidden Forms --}}
     <form id="approve-form" method="POST" style="display:none;">@csrf</form>
@@ -326,7 +333,9 @@
 @endsection
 
 @push('js')
-    <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
+    @if (Auth::user()->role_id == 4)
+        <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
+    @endif
     <script>
         let html5QrcodeScanner = null;
 
@@ -341,9 +350,46 @@
                 toastr.success('Found Requisition #' + id);
                 stopScanner();
                 $('#scannerModal').modal('hide');
+                processRequisitionViaScan(id);
             } else {
                 toastr.warning('Invalid QR Code Format');
             }
+        }
+
+        function processRequisitionViaScan(id) {
+            Swal.fire({
+                title: 'Processing Requisition #' + id,
+                text: "Verifying and releasing stock...",
+                icon: 'info',
+                showConfirmButton: false,
+                allowOutsideClick: false,
+                willOpen: () => {
+                    Swal.showLoading();
+                    $.ajax({
+                        url: "{{ url('/requisitions') }}/" + id + "/verify-scan",
+                        type: "POST",
+                        data: {
+                            _token: "{{ csrf_token() }}"
+                        },
+                        success: function(res) {
+                            Swal.fire({
+                                    icon: 'success',
+                                    title: 'Success!',
+                                    text: res.message,
+                                    timer: 2000
+                                })
+                                .then(() => {
+                                    location.reload();
+                                });
+                        },
+                        error: function(err) {
+                            let msg = err.responseJSON ? err.responseJSON.message :
+                                'Processing Failed';
+                            Swal.fire('Error', msg, 'error');
+                        }
+                    });
+                }
+            });
         }
 
         function onScanFailure(error) {}
@@ -351,15 +397,19 @@
         function startScanner() {
             $('#scannerModal').modal('show');
             if (html5QrcodeScanner === null) {
-                html5QrcodeScanner = new Html5QrcodeScanner(
-                    "reader", {
+                // Check if library loaded
+                if (typeof Html5QrcodeScanner !== 'undefined') {
+                    html5QrcodeScanner = new Html5QrcodeScanner("reader", {
                         fps: 10,
                         qrbox: {
                             width: 250,
                             height: 250
                         }
                     }, false);
-                html5QrcodeScanner.render(onScanSuccess, onScanFailure);
+                    html5QrcodeScanner.render(onScanSuccess, onScanFailure);
+                } else {
+                    console.error("Scanner library not loaded.");
+                }
             }
         }
 
@@ -368,7 +418,7 @@
                 html5QrcodeScanner.clear().then(_ => {
                     html5QrcodeScanner = null;
                 }).catch(error => {
-                    console.error("Failed to clear html5QrcodeScanner.");
+                    console.error("Failed to clear.");
                 });
             }
         }
@@ -382,10 +432,10 @@
             let currentRequisitionId = null;
             let totalItemsInModal = 0;
 
-            // Role constants
             const isStoreAdmin = {{ Auth::user()->role_id == 3 ? 'true' : 'false' }};
             const isStoreKeeper = {{ Auth::user()->role_id == 4 ? 'true' : 'false' }};
 
+            // --- SCANNER EVENTS ---
             $('#btn-open-camera').click(function() {
                 startScanner();
             });
@@ -397,33 +447,39 @@
                 if (e.key === 'Enter' || e.keyCode === 13) {
                     let val = $(this).val();
                     if (!val) return;
+
                     let cleanVal = val.split('?')[0];
                     let parts = cleanVal.split('/');
                     let id = parts[parts.length - 1];
 
                     if ($.isNumeric(id)) {
-                        table.search(id).draw();
                         $(this).val('');
-                        toastr.info('Filtered for Requisition #' + id);
+                        processRequisitionViaScan(id);
                     } else {
                         toastr.error('Invalid QR Code');
                     }
                 }
             });
 
-            // 1. View & Load Data
+            // --- VIEW MODAL ---
             $('#pending-req-table tbody').on('click', '.view-action-btn', function() {
                 let url = $(this).data('url');
                 currentRequisitionId = $(this).data('id');
 
                 $('#actionModal').modal('show');
-                $('#btn-split-notify').hide(); // Reset button visibility
+                $('#btn-split-notify').hide();
+
+                // Read-Only for Store Keeper
+                if (isStoreKeeper) {
+                    $('#action-comments').prop('disabled', true).val('');
+                } else {
+                    $('#action-comments').prop('disabled', false).val('');
+                    let printUrl = "{{ route('requisitions.print', ':id') }}".replace(':id',
+                        currentRequisitionId);
+                    $('#btn-print').attr('href', printUrl);
+                }
 
                 $('#modal-timeline').html('<div class="text-center p-3">Loading...</div>');
-                let printUrl = "{{ route('requisitions.print', ':id') }}".replace(':id',
-                    currentRequisitionId);
-                $('#btn-print').attr('href', printUrl);
-
                 $('#modal-items-body').html(
                     '<tr><td colspan="6" class="text-center">Loading items...</td></tr>');
 
@@ -433,8 +489,6 @@
                     success: function(res) {
                         $('#modal-requestor').text(res.requestor);
                         $('#modal-date').text(res.formatted_date);
-
-                        // Store total item count to compare later
                         totalItemsInModal = res.requisition.items.length;
 
                         let itemsHtml = '';
@@ -442,7 +496,6 @@
                             let assignmentHtml =
                                 '<span class="text-muted small font-italic">Pending Assignment</span>';
                             let isUnavailable = false;
-
 
                             if (isStoreAdmin) {
                                 let options =
@@ -483,13 +536,17 @@
                             let inputClass = isStoreAdmin ?
                                 'form-control form-control-sm item-qty-input text-center' :
                                 'form-control-plaintext text-center font-weight-bold';
-                            let categoryDisplay = item.product.category.name;
-                            if (item.product.sub_category) categoryDisplay +=
-                                `<br><small class="text-muted">${item.product.sub_category.name}</small>`;
-                            else if (item.product.subCategory) categoryDisplay +=
-                                `<br><small class="text-muted">${item.product.subCategory.name}</small>`;
 
-                            // Checkbox Logic
+                            let subCatName = '';
+                            if (item.product.sub_category) subCatName = item.product
+                                .sub_category.name;
+                            else if (item.product.subCategory) subCatName = item.product
+                                .subCategory.name;
+                            let categoryDisplay = item.product.category.name;
+                            if (subCatName) categoryDisplay +=
+                                `<br><small class="text-muted">${subCatName}</small>`;
+
+                            // Checkbox Logic (Admin Only)
                             let checkboxHtml = '';
                             if (isStoreAdmin) {
                                 if (isUnavailable) {
@@ -518,11 +575,15 @@
                             </tr>`;
                         });
                         $('#modal-items-body').html(itemsHtml);
-                        evaluateApproveButtonFromUI();
 
+                        if (isStoreAdmin) evaluateApproveButtonFromUI();
+
+                        // Timeline
                         let timelineHtml = '';
                         res.timeline.forEach(item => {
-                            let bgClass = 'bg-' + (item.color || 'secondary');
+                            let colorClass = item.color || 'secondary';
+                            if (colorClass === 'warning') colorClass = 'custom-warning';
+                            let bgClass = 'bg-' + colorClass;
                             let commentHtml = item.comments ?
                                 `<div class="timeline-comment">"${item.comments}"</div>` :
                                 '';
@@ -548,133 +609,124 @@
                 });
             });
 
-            // Toggle Split Button Visibility
-            $(document).on('change', '.split-item-checkbox', function() {
-                let checkedCount = $('.split-item-checkbox:checked').length;
-                let btn = $('#btn-split-notify');
-
-                if (checkedCount > 0) {
-                    btn.fadeIn();
-
-                    // CHECK: Are we selecting ALL items?
-                    if (checkedCount === totalItemsInModal) {
-                        // CASE A: Full Selection -> Notify Only (Blue Button)
-                        btn.removeClass('btn-danger').addClass('btn-info');
-                        btn.html('<i class="fas fa-bell"></i> Notify for Stock (No Split)');
+            // --- ADMIN ACTIONS ---
+            if (isStoreAdmin) {
+                // Split Button Logic
+                $(document).on('change', '.split-item-checkbox', function() {
+                    let checkedCount = $('.split-item-checkbox:checked').length;
+                    let btn = $('#btn-split-notify');
+                    if (checkedCount > 0) {
+                        btn.fadeIn();
+                        if (checkedCount === totalItemsInModal) {
+                            btn.removeClass('btn-danger').addClass('btn-info').html(
+                                '<i class="fas fa-bell"></i> Notify for Stock (No Split)');
+                        } else {
+                            btn.removeClass('btn-info').addClass('btn-danger').html(
+                                '<i class="fas fa-random"></i> Create New Req. & Notify');
+                        }
                     } else {
-                        // CASE B: Partial Selection -> Split (Red Button)
-                        btn.removeClass('btn-info').addClass('btn-danger');
-                        btn.html('<i class="fas fa-random"></i> Create New Req. & Notify');
+                        btn.fadeOut();
                     }
-                } else {
-                    btn.fadeOut();
-                }
-            });
-
-            // Split & Notify Action
-            $('#btn-split-notify').click(function() {
-                let selectedItemIds = [];
-                $('.split-item-checkbox:checked').each(function() {
-                    selectedItemIds.push($(this).val());
                 });
 
-                if (selectedItemIds.length === 0) return;
+                // Split
+                $('#btn-split-notify').click(function() {
+                    let selectedItemIds = [];
+                    $('.split-item-checkbox:checked').each(function() {
+                        selectedItemIds.push($(this).val());
+                    });
+                    if (selectedItemIds.length === 0) return;
 
-                // Determine Context
-                let isFullSelection = (selectedItemIds.length === totalItemsInModal);
+                    let isFull = (selectedItemIds.length === totalItemsInModal);
+                    let title = isFull ? 'Notify Store Keeper?' : 'Create New Req?';
+                    let text = isFull ? "All items unavailable. Store Keeper will be notified." :
+                        "Selected items will move to new requisition.";
+                    let btnText = isFull ? 'Yes, Notify' : 'Yes, Split';
+                    let confirmColor = isFull ? '#17a2b8' : '#d33';
+                    let url = "{{ route('requisitions.split', ':id') }}".replace(':id',
+                        currentRequisitionId);
 
-                let title = isFullSelection ? 'Notify Store Keeper?' : 'Create New Req?';
-                let text = isFullSelection ?
-                    "All items are unavailable. Store Keeper will be notified to add stock. No new requisition will be created." :
-                    "Selected items will be moved to a new requisition and Store Keeper will be notified.";
-                let confirmBtnText = isFullSelection ? 'Yes, Notify' : 'Yes, Split & Notify';
-                let confirmBtnColor = isFullSelection ? '#17a2b8' : '#d33'; // Blue vs Red
-
-                let url = "{{ route('requisitions.split', ':id') }}".replace(':id', currentRequisitionId);
-
-                Swal.fire({
-                    title: title,
-                    text: text,
-                    icon: 'warning',
-                    showCancelButton: true,
-                    confirmButtonColor: confirmBtnColor,
-                    confirmButtonText: confirmBtnText
-                }).then((res) => {
-                    if (res.isConfirmed) {
-                        $.ajax({
-                            url: url,
-                            type: 'POST',
-                            data: {
-                                _token: "{{ csrf_token() }}",
-                                item_ids: selectedItemIds
-                            },
-                            success: function(response) {
-                                toastr.success(response.message);
-                                $('#actionModal').modal('hide');
-
-                                // If Split (Partial), original Req changes, reload table.
-                                // If Notify (Full), original Req stays pending, but reload ensures UI freshness.
-                                setTimeout(() => {
-                                    location.reload();
-                                }, 1000);
-                            },
-                            error: function(xhr) {
-                                toastr.error('Error: ' + xhr.responseJSON.message);
+                    Swal.fire({
+                            title: title,
+                            text: text,
+                            icon: 'warning',
+                            showCancelButton: true,
+                            confirmButtonColor: confirmColor,
+                            confirmButtonText: btnText
+                        })
+                        .then((res) => {
+                            if (res.isConfirmed) {
+                                $.ajax({
+                                    url: url,
+                                    type: 'POST',
+                                    data: {
+                                        _token: "{{ csrf_token() }}",
+                                        item_ids: selectedItemIds
+                                    },
+                                    success: function(response) {
+                                        toastr.success(response.message);
+                                        $('#actionModal').modal('hide');
+                                        setTimeout(() => {
+                                            location.reload();
+                                        }, 1000);
+                                    },
+                                    error: function(xhr) {
+                                        toastr.error('Error: ' + xhr.responseJSON.message);
+                                    }
+                                });
                             }
                         });
-                    }
                 });
-            });
 
-            // Update Quantity
-            $('#btn-update-qty').click(function() {
-                let itemsData = {};
-                $('.item-qty-input').each(function() {
-                    let id = $(this).data('id');
-                    let lotSelect = $(`.item-lot-select[data-id="${id}"]`);
-                    itemsData[id] = {
-                        quantity: $(this).val(),
-                        lot_detail_id: lotSelect.length ? lotSelect.val() : null
-                    };
+                // Update Qty
+                $('#btn-update-qty').click(function() {
+                    let itemsData = {};
+                    $('.item-qty-input').each(function() {
+                        let id = $(this).data('id');
+                        let lotSelect = $(`.item-lot-select[data-id="${id}"]`);
+                        itemsData[id] = {
+                            quantity: $(this).val(),
+                            lot_detail_id: lotSelect.length ? lotSelect.val() : null
+                        };
+                    });
+                    let url = "{{ route('requisitions.update_items', ':id') }}".replace(':id',
+                        currentRequisitionId);
+                    let btn = $(this);
+                    btn.html('Saving...').prop('disabled', true);
+
+                    $.ajax({
+                        url: url,
+                        type: 'POST',
+                        data: {
+                            _token: "{{ csrf_token() }}",
+                            items: itemsData
+                        },
+                        success: function(res) {
+                            toastr.success(res.message);
+                            evaluateApproveButtonFromUI();
+                        },
+                        error: function() {
+                            toastr.error("Failed to update.");
+                        },
+                        complete: function() {
+                            btn.html('<i class="fas fa-save"></i> Save Assignments & Qty').prop(
+                                'disabled', false);
+                        }
+                    });
                 });
-                let url = "{{ route('requisitions.update_items', ':id') }}".replace(':id',
-                    currentRequisitionId);
-                let btn = $(this);
-                btn.html('<i class="fas fa-spinner fa-spin"></i> Saving...').prop('disabled', true);
 
-                $.ajax({
-                    url: url,
-                    type: 'POST',
-                    data: {
-                        _token: "{{ csrf_token() }}",
-                        items: itemsData
-                    },
-                    success: function(res) {
-                        toastr.success(res.message);
-                        evaluateApproveButtonFromUI();
-                    },
-                    error: function(err) {
-                        toastr.error("Failed to update.");
-                    },
-                    complete: function() {
-                        btn.html('<i class="fas fa-save"></i> Save Assignments & Qty').prop(
-                            'disabled', false);
-                    }
-                });
-            });
+                // Approve
+                $('#btn-approve').click(function() {
+                    let url = "{{ route('requisitions.approve', ':id') }}".replace(':id',
+                        currentRequisitionId);
+                    let comments = $('#action-comments').val();
 
-            // Approve
-            $('#btn-approve').click(function() {
-                let url = "{{ route('requisitions.approve', ':id') }}".replace(':id',
-                    currentRequisitionId);
-                let comments = $('#action-comments').val();
-                let actionText = isStoreAdmin ? 'Approve' : 'Process & Complete';
-
-                if (isStoreAdmin) {
+                    // UPDATED VALIDATION LOGIC
                     // Check 1: Unavailable Items
                     if ($('.stock-unavailable').length > 0) {
                         toastr.warning(
-                            "Cannot approve. Some items are unavailable. Please split them first.");
+                            "Cannot approve. Some items are unavailable. Please split or resolve them first."
+                            );
                         return;
                     }
                     // Check 2: Unassigned Dropdowns
@@ -682,61 +734,63 @@
                         toastr.warning("Please assign a Brand/Spec to all items before approving.");
                         return;
                     }
-                }
 
-                Swal.fire({
-                    title: actionText + '?',
-                    icon: 'success',
-                    showCancelButton: true,
-                    confirmButtonText: 'Yes, ' + actionText
-                }).then((res) => {
-                    if (res.isConfirmed) {
-                        let form = $('#approve-form');
-                        form.attr('action', url);
-                        form.html(
-                            `@csrf <input type="hidden" name="comments" value="${comments}">`);
-                        form.submit();
-                    }
+                    Swal.fire({
+                        title: 'Approve?',
+                        icon: 'success',
+                        showCancelButton: true,
+                        confirmButtonText: 'Yes'
+                    }).then((res) => {
+                        if (res.isConfirmed) {
+                            let form = $('#approve-form');
+                            form.attr('action', url);
+                            form.html(
+                                `@csrf <input type="hidden" name="comments" value="${comments}">`
+                                );
+                            form.submit();
+                        }
+                    });
                 });
-            });
 
-            // Reject
-            $('#btn-reject').click(function() {
-                let url = "{{ route('requisitions.reject', ':id') }}".replace(':id', currentRequisitionId);
-                let comments = $('#action-comments').val();
-                if (!comments) {
-                    toastr.error("Comments required");
-                    return;
-                }
-                Swal.fire({
-                    title: 'Reject?',
-                    icon: 'warning',
-                    showCancelButton: true,
-                    confirmButtonColor: '#d33',
-                    confirmButtonText: 'Yes'
-                }).then((res) => {
-                    if (res.isConfirmed) {
-                        let form = $('#reject-form');
-                        form.attr('action', url);
-                        form.html(
-                            `@csrf <input type="hidden" name="comments" value="${comments}">`);
-                        form.submit();
+                // Reject
+                $('#btn-reject').click(function() {
+                    let url = "{{ route('requisitions.reject', ':id') }}".replace(':id',
+                        currentRequisitionId);
+                    let comments = $('#action-comments').val();
+                    if (!comments) {
+                        toastr.error("Comments required");
+                        return;
                     }
+                    Swal.fire({
+                        title: 'Reject?',
+                        icon: 'warning',
+                        showCancelButton: true,
+                        confirmButtonColor: '#d33',
+                        confirmButtonText: 'Yes'
+                    }).then((res) => {
+                        if (res.isConfirmed) {
+                            let form = $('#reject-form');
+                            form.attr('action', url);
+                            form.html(
+                                `@csrf <input type="hidden" name="comments" value="${comments}">`
+                                );
+                            form.submit();
+                        }
+                    });
                 });
-            });
 
-            $(document).on('change', '.item-lot-select', function() {
-                evaluateApproveButtonFromUI();
-            });
+                $(document).on('change', '.item-lot-select', function() {
+                    evaluateApproveButtonFromUI();
+                });
+            }
 
             function evaluateApproveButtonFromUI() {
                 if (!isStoreAdmin) return;
 
                 let hasUnavailable = $('.stock-unavailable').length > 0;
                 let hasUnassigned = $('.item-lot-select').filter((_, el) => !$(el).val()).length > 0;
-
-                // Button is enabled ONLY if there are NO unavailable items AND NO unassigned dropdowns
                 let canApprove = !hasUnavailable && !hasUnassigned;
+
                 const btn = $('#btn-approve');
                 if (canApprove) {
                     btn.prop('disabled', false).attr('title', 'Ready to approve');
@@ -744,27 +798,6 @@
                     btn.prop('disabled', true).attr('title',
                     'Resolve unavailable items or assign stock to proceed');
                 }
-                // Only check items that are NOT checked for splitting
-                // If item has unavailable stock but IS NOT checked for split, then we cannot approve.
-                // If it IS checked for split, we ignore it for approval (it will be moved away)
-
-                // Actually, simplest logic: If visible item has no stock/assignment, disable.
-                // When "Split" runs, items disappear, so then we can approve.
-                // So: Keep logic simple.
-
-                // if ($('.stock-unavailable').length > 0) canApprove = false;
-                // $('.item-lot-select').each(function() {
-                //     if (!$(this).val()) {
-                //         canApprove = false;
-                //         return false;
-                //     }
-                // });
-                // const btn = $('#btn-approve');
-                // if (canApprove) {
-                //     btn.prop('disabled', false).attr('title', 'Ready to approve');
-                // } else {
-                //     btn.prop('disabled', true).attr('title', 'Please assign stock to all items first');
-                // }
             }
         });
     </script>
