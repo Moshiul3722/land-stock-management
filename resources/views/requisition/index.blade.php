@@ -112,7 +112,7 @@
                 <div class="modal-footer bg-light">
                     {{-- NEW: Print Slip Button (Visible for Requestor) --}}
                     <a href="#" id="btn-print-slip" target="_blank" class="btn btn-default mr-auto">
-                        <i class="fas fa-print"></i> Print Slip
+                        <i class="fas fa-print"></i> {{ __('requisition.print_invoice') }}
                     </a>
 
                     {{-- ACKNOWLEDGE FORM --}}
