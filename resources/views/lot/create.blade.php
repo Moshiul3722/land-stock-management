@@ -83,7 +83,7 @@
                                         <th width="15%">{{ __('lot.table_category') }} <span class="text-danger">*</span></th>
                                         <th width="15%">Sub Category <span class="text-danger">*</span></th>
                                         <th width="15%">{{ __('lot.table_product') }} <span class="text-danger">*</span></th>
-                                        <th width="15%">Brand< <span class="text-danger">*</span></th>
+                                        <th width="15%">Brand<span class="text-danger">*</span></th>
                                         <th width="15%">Specification <span class="text-danger">*</span></th>
                                         <th width="10%">{{ __('lot.table_quantity') }} <span class="text-danger">*</span></th>
                                         <th width="10%">Price <span class="text-danger">*</span></th>
