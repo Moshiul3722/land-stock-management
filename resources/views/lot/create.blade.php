@@ -83,10 +83,10 @@
                                         <th width="15%">{{ __('lot.table_category') }} <span class="text-danger">*</span></th>
                                         <th width="15%">Sub Category <span class="text-danger">*</span></th>
                                         <th width="15%">{{ __('lot.table_product') }} <span class="text-danger">*</span></th>
-                                        <th width="15%">Brand<span class="text-danger">*</span></th>
-                                        <th width="15%">Specification <span class="text-danger">*</span></th>
+                                        <th width="15%">{{ __('lot.brand') }}<span class="text-danger">*</span></th>
+                                        <th width="15%">{{ __('lot.specification') }} <span class="text-danger">*</span></th>
                                         <th width="10%">{{ __('lot.table_quantity') }} <span class="text-danger">*</span></th>
-                                        <th width="10%">Price <span class="text-danger">*</span></th>
+                                        <th width="10%">{{ __('lot.price') }} <span class="text-danger">*</span></th>
                                         <th class="text-center" width="5%"><button type="button" id="add-row"
                                                 class="btn btn-success btn-sm"><i class="fa fa-plus"></i></button></th>
                                     </tr>

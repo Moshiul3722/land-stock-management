@@ -12,6 +12,7 @@ return [
     'purchase_type' => 'পণ্য ক্রয়ের ধরণ',
     'brand' => 'ব্র্যান্ড',
     'specification' => 'স্পেসিফিকেশন',
+    'price' => 'মূল্য',
     'add_title' => 'লট এন্ট্রি করুন',
     'edit_title' => 'লটের তথ্য হালনাগাদ করুন',
     'details_title' => 'লটের বিস্তারিত তথ্য',
