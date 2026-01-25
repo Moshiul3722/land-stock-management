@@ -305,7 +305,10 @@ class RequisitionService
     {
         $pendingTask = $requisition->approvalDetails()
             ->where('status', 'pending')
-            ->firstOrFail();
+            ->first();
+        if (!$pendingTask) {
+            throw new InvalidArgumentException('No pending approval task found for this requisition.');
+        }
 
         $this->approvalService->approve($pendingTask, $comments);
     }
@@ -321,7 +324,10 @@ class RequisitionService
 
         $pendingTask = $requisition->approvalDetails()
             ->where('status', 'pending')
-            ->firstOrFail();
+            ->first();
+        if (!$pendingTask) {
+            throw new InvalidArgumentException('No pending approval task found for this requisition.');
+        }
 
         $this->approvalService->reject($pendingTask, $comments);
     }

@@ -257,7 +257,10 @@ class LotService
         // This business logic now lives in the service
         $pendingTask = $lot->approvalDetails()
             ->where('status', 'pending')
-            ->firstOrFail(); // Fails if no pending task
+            ->first();
+        if (!$pendingTask) {
+            throw new InvalidArgumentException('No pending approval task found for this lot.');
+        }
 
         // Call the approval service with the specific task
         $this->approvalService->approve($pendingTask, $comments);
@@ -278,7 +281,10 @@ class LotService
 
         $pendingTask = $lot->approvalDetails()
             ->where('status', 'pending')
-            ->firstOrFail();
+            ->first();
+        if (!$pendingTask) {
+            throw new InvalidArgumentException('No pending approval task found for this lot.');
+        }
 
         $this->approvalService->reject($pendingTask, $comments);
     }
