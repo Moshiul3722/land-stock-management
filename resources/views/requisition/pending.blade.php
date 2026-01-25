@@ -131,7 +131,6 @@
             border-radius: 8px;
         }
     </style>
-
 @endpush
 
 @section('content')
@@ -264,12 +263,14 @@
 
                             <div class="form-group mt-4">
                                 <label>{{ __('requisition.approval_comments') }}</label>
-                                <textarea class="form-control" id="action-comments" rows="3" placeholder="{{ __('requisition.enter_comments') }}"></textarea>
+                                <textarea class="form-control" id="action-comments" rows="3"
+                                    placeholder="{{ __('requisition.enter_comments') }}"></textarea>
                             </div>
                         </div>
 
                         <div class="col-md-4">
-                            <h6 class="font-weight-bold text-primary mb-3 ml-2">{{ __('requisition.approval_history') }}</h6>
+                            <h6 class="font-weight-bold text-primary mb-3 ml-2">{{ __('requisition.approval_history') }}
+                            </h6>
                             <div id="modal-timeline" class="timeline-container"></div>
                         </div>
                     </div>
@@ -425,6 +426,9 @@
             let currentRequisitionId = null;
             let totalItemsInModal = 0;
 
+            // Flag to track if user touched inputs
+            let hasUnsavedChanges = false;
+
             // Roles
             const isStoreAdmin = {{ Auth::user()->role_id == 3 ? 'true' : 'false' }};
             const isStoreKeeper = {{ Auth::user()->role_id == 4 ? 'true' : 'false' }};
@@ -465,6 +469,9 @@
 
                 $('#actionModal').modal('show');
                 $('#btn-split-notify').hide();
+
+                hasUnsavedChanges = false;
+                updateSaveButtonUI();
 
                 // Read-Only for Store Keeper (Role 4)
                 if (isStoreKeeper) {
@@ -677,6 +684,13 @@
                         });
                 });
 
+                // DETECT CHANGES TO INPUTS
+                $(document).on('change input', '.item-lot-select, .item-qty-input', function() {
+                    hasUnsavedChanges = true;
+                    evaluateApproveButtonFromUI();
+                    updateSaveButtonUI();
+                });
+
                 // Update Qty
                 $('#btn-update-qty').click(function() {
                     let itemsData = {};
@@ -702,6 +716,9 @@
                         },
                         success: function(res) {
                             toastr.success(res.message);
+                            // RESET DIRTY FLAG ON SUCCESS
+                            hasUnsavedChanges = false;
+                            updateSaveButtonUI();
                             evaluateApproveButtonFromUI();
                         },
                         error: function() {
@@ -732,7 +749,7 @@
                         if ($('.stock-unavailable').length > 0) {
                             toastr.warning(
                                 "Cannot approve. Some items are unavailable. Please split or resolve them first."
-                                );
+                            );
                             return;
                         }
                         if ($('.item-lot-select').filter((_, el) => !$(el).val()).length > 0) {
@@ -752,7 +769,7 @@
                             form.attr('action', url);
                             form.html(
                                 `@csrf <input type="hidden" name="comments" value="${comments}">`
-                                );
+                            );
                             form.submit();
                         }
                     });
@@ -779,11 +796,23 @@
                             form.attr('action', url);
                             form.html(
                                 `@csrf <input type="hidden" name="comments" value="${comments}">`
-                                );
+                            );
                             form.submit();
                         }
                     });
                 });
+            }
+            // Helper to update Save Button Appearance
+            function updateSaveButtonUI() {
+                if (!isStoreAdmin) return;
+                const btn = $('#btn-update-qty');
+                if (hasUnsavedChanges) {
+                    btn.removeClass('btn-warning').addClass('btn-danger');
+                    btn.html('<i class="fas fa-save"></i> Save Assignments & Qty *');
+                } else {
+                    btn.removeClass('btn-danger').addClass('btn-warning');
+                    btn.html('<i class="fas fa-save"></i> Save Assignments & Qty');
+                }
             }
 
             function evaluateApproveButtonFromUI() {
@@ -798,7 +827,7 @@
                     btn.prop('disabled', false).attr('title', 'Ready to approve');
                 } else {
                     btn.prop('disabled', true).attr('title',
-                    'Resolve unavailable items or assign stock to proceed');
+                        'Resolve unavailable items or assign stock to proceed');
                 }
             }
         });
