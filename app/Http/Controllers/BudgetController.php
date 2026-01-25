@@ -26,7 +26,6 @@ class BudgetController extends Controller
         $categories = $this->categoryService->fetchAll();
         // Fetch all fiscal years for filtering in the index view
         $fiscalYears = FiscalYear::orderBy('name', 'desc')->get();
-        
         return view('budget.index', compact('budgets', 'categories', 'fiscalYears'));
     }
 
@@ -35,8 +34,14 @@ class BudgetController extends Controller
         $categories = $this->categoryService->fetchAll();
         // Fetch only active fiscal years for creating new budgets
         $fiscalYears = FiscalYear::where('is_active', true)->orderBy('name', 'desc')->get();
-        
-        return view('budget.create', compact('categories', 'fiscalYears'));
+        // Determine Current Fiscal Year ID based on today's date
+        $today = date('Y-m-d');
+        $currentFiscalYear = $fiscalYears->first(function ($year) use ($today) {
+            return $today >= $year->start_date && $today <= $year->end_date;
+        });
+        $currentFiscalYearId = $currentFiscalYear ? $currentFiscalYear->id : null;
+
+        return view('budget.create', compact('categories', 'fiscalYears', 'currentFiscalYearId'));
     }
 
     public function store(Request $request)
@@ -48,7 +53,7 @@ class BudgetController extends Controller
             return redirect()->back()->withInput()->with('error', $e->getMessage());
         }
     }
-    
+
     public function edit($id)
     {
         $budget = $this->budgetService->findById($id);
@@ -65,7 +70,7 @@ class BudgetController extends Controller
             return redirect()->back()->withInput()->with('error', $e->getMessage());
         }
     }
-    
+
     public function destroy($id)
     {
         try {

@@ -5,12 +5,12 @@
         <div class="container-fluid">
             <div class="row mb-2">
                 <div class="col-sm-6">
-                    <h1>Budget Management</h1>
+                    <h1>{{ __('budget.budget_management') }}</h1>
                 </div>
                 <div class="col-sm-6">
                     <ol class="breadcrumb float-sm-right">
                         <li class="breadcrumb-item"><a href={{ route('home') }}>{{ __('breadcrumb.home') }}</a></li>
-                        <li class="breadcrumb-item active">Budget List</li>
+                        <li class="breadcrumb-item active">{{ __('breadcrumb.list') }}</li>
                     </ol>
                 </div>
             </div>
@@ -23,11 +23,11 @@
                 <div class="card card-primary card-outline">
                     <div class="card-header">
                         <h3 class="card-title">
-                            <i class="fas fa-coins mr-1"></i> Budget List
+                            <i class="fas fa-coins mr-1"></i> {{ __('budget.budget_list') }}
                         </h3>
                         <div class="card-tools">
                             <a href="{{ route('budgets.create') }}" class="btn btn-success btn-sm" title="{{ __('buttons.create') }}">
-                                <i class="fas fa-plus"></i> Define New Budget
+                                <i class="fas fa-plus"></i> {{ __('budget.define_new_budget') }}
                             </a>
                         </div>
                     </div>
@@ -36,13 +36,13 @@
                             <thead>
                                 <tr>
                                     <th style="width: 5%" class="text-center">SL</th>
-                                    <th style="width: 10%">Fiscal Year</th>
-                                    <th style="width: 15%">Category</th>
-                                    <th style="width: 15%" class="text-right">Allocated (BDT)</th>
-                                    <th style="width: 15%" class="text-right">Spent (BDT)</th>
-                                    <th style="width: 15%" class="text-right">Remaining (BDT)</th>
-                                    <th style="width: 15%">Remarks</th>
-                                    <th style="width: 10%" class="text-center">Action</th>
+                                    <th style="width: 10%">{{ __('budget.fiscal_year') }}</th>
+                                    <th style="width: 15%">{{ __('budget.table_category') }}</th>
+                                    <th style="width: 15%" class="text-right">{{ __('budget.allocated_taka') }}</th>
+                                    <th style="width: 15%" class="text-right">{{ __('budget.spent_taka') }}</th>
+                                    <th style="width: 15%" class="text-right">{{ __('budget.remaining_taka') }}</th>
+                                    <th style="width: 15%">{{ __('budget.remarks') }}</th>
+                                    <th style="width: 10%" class="text-center">{{ __('budget.table_action') }}</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -116,7 +116,7 @@
             var id = $(this).data('id');
             var row = table.row($(this).parents('tr'));
             var url = "{{ route('budgets.destroy', ':id') }}".replace(':id', id);
-            
+
             Swal.fire({
                 title: "{{ __('sweetalert.confirmation') }}",
                 text: "{{ __('sweetalert.delete_revert_text') }}",
@@ -131,9 +131,9 @@
                     $.ajax({
                         url: url,
                         type: 'POST',
-                        data: { 
-                            _method: 'DELETE', 
-                            _token: '{{ csrf_token() }}' 
+                        data: {
+                            _method: 'DELETE',
+                            _token: '{{ csrf_token() }}'
                         },
                         success: function(res) {
                             toastr.success(res.message);

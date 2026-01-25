@@ -5,12 +5,12 @@
         <div class="container-fluid">
             <div class="row mb-2">
                 <div class="col-sm-6">
-                    <h1>Define Budget</h1>
+                    <h1>{{ __('budget.budget_allocation') }}</h1>
                 </div>
                 <div class="col-sm-6">
                     <ol class="breadcrumb float-sm-right">
                         <li class="breadcrumb-item"><a href={{ route('home') }}>{{ __('breadcrumb.home') }}</a></li>
-                        <li class="breadcrumb-item"><a href={{ route('budgets.index') }}>Budget List</a></li>
+                        <li class="breadcrumb-item"><a href={{ route('budgets.index') }}>{{ __('breadcrumb.list') }}</a></li>
                         <li class="breadcrumb-item active">{{ __('breadcrumb.create') }}</li>
                     </ol>
                 </div>
@@ -23,7 +23,7 @@
             <div class="col-md-12">
                 <div class="card card-primary">
                     <div class="card-header">
-                        <h3 class="card-title">New Budget Allocation</h3>
+                        <h3 class="card-title">{{ __('budget.new_budget_allocation') }}</h3>
                     </div>
 
                     <form id="budget-form" action="{{ route('budgets.store') }}" method="POST">
@@ -32,7 +32,7 @@
                             <div class="row">
                                 {{-- Category --}}
                                 <div class="col-md-6 form-group">
-                                    <label for="category_id">Category <span class="text-danger">*</span></label>
+                                    <label for="category_id">{{ __('lot.table_category') }} <span class="text-danger">*</span></label>
                                     <select class="form-control select2" name="category_id" required>
                                         <option value="">Select Category</option>
                                         @foreach ($categories as $cat)
@@ -43,12 +43,12 @@
 
                                 {{-- Fiscal Year Dropdown --}}
                                 <div class="col-md-6 form-group">
-                                    <label for="fiscal_year_id">Fiscal Year <span class="text-danger">*</span></label>
+                                    <label for="fiscal_year_id">{{ __('lot.fiscal_year') }} <span class="text-danger">*</span></label>
                                     <select class="form-control select2" name="fiscal_year_id" required>
                                         <option value="">Select Fiscal Year</option>
                                         @foreach ($fiscalYears as $year)
                                             <option value="{{ $year->id }}"
-                                                {{ old('fiscal_year_id') == $year->id ? 'selected' : '' }}>
+                                                {{ (old('fiscal_year_id') == $year->id || (isset($currentFiscalYearId) && $currentFiscalYearId == $year->id)) ? 'selected' : '' }}>
                                                 {{ $year->name }}
                                             </option>
                                         @endforeach
@@ -57,14 +57,14 @@
 
                                 {{-- Amount --}}
                                 <div class="col-md-6 form-group">
-                                    <label for="amount">Budget Amount <span class="text-danger">*</span></label>
+                                    <label for="amount">{{ __('budget.budget_amount') }} <span class="text-danger">*</span></label>
                                     <input type="number" step="0.01" class="form-control" name="amount"
                                         value="{{ old('amount') }}" placeholder="0.00" required>
                                 </div>
 
                                 {{-- Remarks --}}
                                 <div class="col-md-12 form-group">
-                                    <label for="remarks">Remarks</label>
+                                    <label for="remarks">{{ __('lot.remarks') }}</label>
                                     <textarea class="form-control" name="remarks" rows="2">{{ old('remarks') }}</textarea>
                                 </div>
                             </div>
