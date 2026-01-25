@@ -90,6 +90,35 @@
 
             var approvalForm = $('#approval-form');
 
+            // ============================================
+            // 1. HANDLE FLASH MESSAGES (SUCCESS / ERROR)
+            // ============================================
+            
+            // Check if there is a 'success' message in the session
+            @if(session('success'))
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Success',
+                    text: {!! json_encode(session('success')) !!}, // Safely encode string
+                    timer: 3000,
+                    showConfirmButton: false
+                });
+            @endif
+
+            // Check if there is an 'error' message in the session (Your Budget Error)
+            @if(session('error'))
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Operation Failed',
+                    text: {!! json_encode(session('error')) !!}, // Safely encode string
+                    confirmButtonText: 'Okay'
+                });
+            @endif
+
+            // ============================================
+            // 2. EXISTING BUTTON LOGIC
+            // ============================================
+
             // APPROVE Button Click
             $('#pending-lots-table').on('click', '.approve-btn', function(e) {
                 e.preventDefault();
@@ -106,7 +135,7 @@
                     cancelButtonColor: '#d33'
                 }).then((result) => {
                     if (result.isConfirmed) {
-                        $('#swal-comments').val(''); // Ensure comments are empty for approval
+                        $('#swal-comments').val(''); 
                         approvalForm.attr('action', actionUrl);
                         approvalForm.submit();
                     }
@@ -137,7 +166,7 @@
                     }
                 }).then((result) => {
                     if (result.isConfirmed) {
-                        $('#swal-comments').val(result.value); // Add comments to hidden form
+                        $('#swal-comments').val(result.value); 
                         approvalForm.attr('action', actionUrl);
                         approvalForm.submit();
                     }
