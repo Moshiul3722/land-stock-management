@@ -43,7 +43,7 @@
 
                                 {{-- Fiscal Year Dropdown --}}
                                 <div class="form-group col-md-4">
-                                    <label for="fiscal_year_id">Fiscal Year <span style="color: red;">*</span></label>
+                                    <label for="fiscal_year_id">{{ __('lot.fiscal_year') }} <span style="color: red;">*</span></label>
                                     <select class="form-control js-example-basic-single" name="fiscal_year_id" required>
                                         <option value="">Select Fiscal Year</option>
                                         @foreach ($fiscalYears as $year)
@@ -81,7 +81,7 @@
                                 <thead>
                                     <tr>
                                         <th width="15%">{{ __('lot.table_category') }} <span class="text-danger">*</span></th>
-                                        <th width="15%">Sub Category <span class="text-danger">*</span></th>
+                                        <th width="15%">{{ __('lot.table_sub_category') }} <span class="text-danger">*</span></th>
                                         <th width="15%">{{ __('lot.table_product') }} <span class="text-danger">*</span></th>
                                         <th width="15%">{{ __('lot.brand') }}<span class="text-danger">*</span></th>
                                         <th width="15%">{{ __('lot.specification') }} <span class="text-danger">*</span></th>

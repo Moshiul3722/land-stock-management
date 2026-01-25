@@ -11,7 +11,7 @@
                     <ol class="breadcrumb float-sm-right">
                         <li class="breadcrumb-item"><a href={{ route('home') }}>{{ __('breadcrumb.home') }}</a></li>
                         <li class="breadcrumb-item"><a href={{ route('lots.index') }}>{{ __('breadcrumb.list') }}</a></li>
-                        <li class="breadcrumb-item active">{{ __('breadcrumb.view') }}</li>
+                        <li class="breadcrumb-item active">{{ __('breadcrumb.details') }}</li>
                     </ol>
                 </div>
             </div>
@@ -68,12 +68,12 @@
                             <thead>
                                 <tr>
                                     <th width="20%">{{ __('lot.table_category') }}</th>
-                                    <th width="15%">Sub Category</th> {{-- New Column --}}
+                                    <th width="15%">{{ __('lot.table_sub_category') }}</th>
                                     <th width="20%">{{ __('lot.table_product') }}</th>
                                     <th width="15%">{{ __('lot.brand') }}</th>
                                     <th width="15%">{{ __('lot.specification') }}</th>
                                     <th width="10%">{{ __('lot.table_quantity') }}</th>
-                                    <th width="10%">Unit Price</th>
+                                    <th width="10%">{{ __('lot.price') }}</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -110,10 +110,10 @@
                         {{-- Assuming Role ID 3 is Store Admin --}}
                         @if ($lot->status === 'pending' && (Auth::user()->role_id == 3 || Auth::user()->role_id == 2))
                             <button type="button" id="btn-reject" class="btn btn-danger float-right ml-2">
-                                <i class="fas fa-times"></i> Reject
+                                <i class="fas fa-times"></i> {{ __('lot.reject_lot') }}
                             </button>
                             <button type="button" id="btn-approve" class="btn btn-success float-right">
-                                <i class="fas fa-check"></i> Approve & Stock In
+                                <i class="fas fa-check"></i> {{ __('lot.approve_stock_in') }}
                             </button>
 
                             {{-- Hidden Forms for Actions --}}

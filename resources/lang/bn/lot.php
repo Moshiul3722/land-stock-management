@@ -10,6 +10,7 @@ return [
     'list_title' => 'লটের তালিকা',
     'title' => 'লটের ব্যবস্থাপনা',
     'purchase_type' => 'পণ্য ক্রয়ের ধরণ',
+    'fiscal_year' => 'অর্থ বছর',
     'brand' => 'ব্র্যান্ড',
     'specification' => 'স্পেসিফিকেশন',
     'price' => 'মূল্য',
@@ -19,7 +20,8 @@ return [
     'table_submitted_by' => 'এন্ট্রি করেছেন',
     'pending_title' => 'লট এন্ট্রির অনুরোধের তালিকা',
     'pending_list' => 'লট এন্ট্রির অনুরোধের তালিকা',
-
+    'approve_stock_in' => 'অনুমোদন করুন এবং স্টকে যুক্ত করুন',
+    'reject_lot' => 'লট বাতিল করুন',
     'lot_number' => 'লট নম্বর/স্মারক নম্বর',
     'entry_date' => 'তারিখ',
     'remarks' => 'মন্তব্য',
