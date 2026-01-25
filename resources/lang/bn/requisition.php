@@ -12,11 +12,22 @@ return [
 
     'select_product' => 'প্রডাক্ট নির্বাচন করুন',
     'list_title' => 'রিকুইজিশনের জন্য প্রডাক্টের তালিকা',
+    'product' => 'পণ্য',
+    'cat_sub_cat' => 'ক্যাটাগরি / সাব-ক্যাটাগরি',
+    'assigned_lot' => 'বরাদ্দকৃত লট (ব্র্যান্ড/স্পেসিফিকেশন)',
+    'requested_quantity' => 'অনুরোধকৃত পরিমাণ',
+    'approved_quantity' => 'অনুমোদিত পরিমাণ',
 
+    'approval_comments' => 'অনুমোদনের মন্তব্য',
     'start_date' => 'শুরুর তারিখ',
     'end_date' => 'শেষের তারিখ',
     'requisition_date' => 'রিকুইজিশন এর তারিখ',
     'items_count' => 'আইটেমের সংখ্যা',
+    'enter_comments' => 'মন্তব্য লিখুন...',
+    'approval_history' => 'অনুমোদনের ইতিহাস',
+    'print_invoice' => 'ইনভয়েস প্রিন্ট করুন',
+
+    'scan_qr' => 'QR স্ক্যান করুন',
 
     'stock_status' => 'স্টক স্ট্যাটাস',
     'required_amount' => 'প্রয়োজনীয় পরিমাণ',

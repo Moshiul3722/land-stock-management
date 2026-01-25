@@ -251,11 +251,11 @@
                                             @if (Auth::user()->role_id == 3)
                                                 <th width="5%"><i class="fas fa-check-square"></i></th>
                                             @endif
-                                            <th>Product</th>
-                                            <th>Category / Sub Category</th>
-                                            <th width="35%">Assigned Lot (Brand/Spec)</th>
-                                            <th width="80">Orig. Qty</th>
-                                            <th width="100">Req. Qty</th>
+                                            <th>{{ __('requisition.product') }}</th>
+                                            <th>{{ __('requisition.cat_sub_cat') }}</th>
+                                            <th width="35%">{{ __('requisition.assigned_lot') }}</th>
+                                            <th width="80">{{ __('requisition.requested_quantity') }}</th>
+                                            <th width="100">{{ __('requisition.approved_quantity') }}</th>
                                         </tr>
                                     </thead>
                                     <tbody id="modal-items-body"></tbody>
@@ -263,13 +263,13 @@
                             </form>
 
                             <div class="form-group mt-4">
-                                <label>Approval Comments</label>
-                                <textarea class="form-control" id="action-comments" rows="3" placeholder="Enter comments..."></textarea>
+                                <label>{{ __('requisition.approval_comments') }}</label>
+                                <textarea class="form-control" id="action-comments" rows="3" placeholder="{{ __('requisition.enter_comments') }}"></textarea>
                             </div>
                         </div>
 
                         <div class="col-md-4">
-                            <h6 class="font-weight-bold text-primary mb-3 ml-2">Approval History</h6>
+                            <h6 class="font-weight-bold text-primary mb-3 ml-2">{{ __('requisition.approval_history') }}</h6>
                             <div id="modal-timeline" class="timeline-container"></div>
                         </div>
                     </div>
@@ -278,18 +278,18 @@
                     {{-- Print: Visible for Admin (2) & Store Admin (3) --}}
                     @if (in_array(Auth::user()->role_id, [2, 3]))
                         <a href="#" id="btn-print" target="_blank" class="btn btn-default mr-auto"><i
-                                class="fas fa-print"></i> Print Slip</a>
+                                class="fas fa-print"></i> {{ __('requisition.print_invoice') }}</a>
                     @endif
 
                     <button type="button" class="btn btn-secondary" data-dismiss="modal"
-                        onclick="$('#actionModal').modal('hide')">Close</button>
+                        onclick="$('#actionModal').modal('hide')">{{ __('buttons.cancel') }}</button>
 
                     {{-- Actions: Visible for Admin (2) & Store Admin (3) --}}
                     @if (in_array(Auth::user()->role_id, [2, 3]))
                         <button type="button" class="btn btn-danger" id="btn-reject"><i class="fas fa-times"></i>
-                            Reject</button>
+                            {{ __('buttons.reject') }}</button>
                         <button type="button" class="btn btn-success" id="btn-approve"><i class="fas fa-check"></i>
-                            Approve</button>
+                            {{ __('buttons.approve') }}</button>
                     @endif
                 </div>
             </div>
@@ -302,7 +302,7 @@
             <div class="modal-dialog modal-md" role="document">
                 <div class="modal-content">
                     <div class="modal-header bg-warning">
-                        <h5 class="modal-title"><i class="fas fa-camera"></i> Scan Gate Pass QR</h5>
+                        <h5 class="modal-title"><i class="fas fa-camera"></i> {{ __('requisition.scan_qr') }}</h5>
                         <button type="button" class="close" data-dismiss="modal" aria-label="Close"
                             onclick="stopScanner()">
                             <span aria-hidden="true">&times;</span>
@@ -313,7 +313,7 @@
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" onclick="stopScanner()"
-                            data-dismiss="modal">Close</button>
+                            data-dismiss="modal">{{ __('buttons.cancel') }}</button>
                     </div>
                 </div>
             </div>
@@ -565,10 +565,10 @@
                                 <td>${assignmentHtml}</td>
                                 <td class="text-center font-weight-bold text-muted">${item.original_quantity || item.quantity}</td>
                                 <td>
-                                    <input type="number" 
-                                           class="${inputClass}" 
-                                           data-id="${item.id}" 
-                                           value="${item.quantity}" 
+                                    <input type="number"
+                                           class="${inputClass}"
+                                           data-id="${item.id}"
+                                           value="${item.quantity}"
                                            min="1"
                                            ${disabledAttr}>
                                 </td>
@@ -595,7 +595,7 @@
                                         <span class="user-name">${item.user}</span>
                                         <span class="action-date">${item.date}</span>
                                     </div>
-                                    <span class="role-badge">${item.role}</span> 
+                                    <span class="role-badge">${item.role}</span>
                                     <span class="text-${item.color} font-weight-bold small ml-1">(${item.title})</span>
                                     ${commentHtml}
                                 </div>

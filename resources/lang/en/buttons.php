@@ -14,4 +14,6 @@ return [
     'save_draft' => 'Draft Save',
     'submit_for_approval' => 'Submit for Approval',
     'add_to_list' => 'Add to List',
+    'reject' => 'Reject',
+    'approve' => 'Approve',
 ];
