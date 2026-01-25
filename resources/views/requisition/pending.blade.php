@@ -278,8 +278,8 @@
                 <div class="modal-footer bg-light">
                     {{-- Print: Visible for Admin (2) & Store Admin (3) --}}
                     @if (in_array(Auth::user()->role_id, [2, 3]))
-                        <a href="#" id="btn-print" target="_blank" class="btn btn-default mr-auto"><i
-                                class="fas fa-print"></i> {{ __('requisition.print_invoice') }}</a>
+                        <a href="#" id="btn-print" target="_blank" class="btn btn-default mr-auto"
+                            style="display: none;"><i class="fas fa-print"></i> {{ __('requisition.print_invoice') }}</a>
                     @endif
 
                     <button type="button" class="btn btn-secondary" data-dismiss="modal"
@@ -478,9 +478,6 @@
                     $('#action-comments').prop('disabled', true).val('');
                 } else {
                     $('#action-comments').prop('disabled', false).val('');
-                    let printUrl = "{{ route('requisitions.print', ':id') }}".replace(':id',
-                        currentRequisitionId);
-                    $('#btn-print').attr('href', printUrl);
                 }
 
                 $('#modal-timeline').html('<div class="text-center p-3">Loading...</div>');
@@ -494,7 +491,16 @@
                         $('#modal-requestor').text(res.requestor);
                         $('#modal-date').text(res.formatted_date);
                         totalItemsInModal = res.requisition.items.length;
-
+                        if (!isStoreKeeper) {
+                            let printUrl = "{{ route('requisitions.print', ':id') }}".replace(
+                                ':id', currentRequisitionId);
+                            $('#btn-print').attr('href', printUrl);
+                            if (res.is_print_enabled === true) {
+                                $('#btn-print').fadeIn(); // Show button
+                            } else {
+                                $('#btn-print').hide(); // Ensure it stays hidden
+                            }
+                        }
                         let itemsHtml = '';
                         res.requisition.items.forEach(item => {
                             let assignmentHtml =
@@ -715,7 +721,7 @@
                             items: itemsData
                         },
                         success: function(res) {
-                            toastr.success(res.message);
+                            toastr.success("Assignments & quantities updated successfully.");
                             // RESET DIRTY FLAG ON SUCCESS
                             hasUnsavedChanges = false;
                             updateSaveButtonUI();
