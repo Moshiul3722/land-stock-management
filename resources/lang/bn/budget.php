@@ -6,6 +6,7 @@ return [
     'budget_amount' => 'বাজেট পরিমাণ',
     'new_budget_allocation' => 'নতুন বাজেট বরাদ্দ',
     'budget_allocation' => 'বাজেট বরাদ্দকরণ',
+    'edit_budget_allocation' => 'বাজেট বরাদ্দকরণ সম্পাদনা',
     'budget_management' => 'বাজেট ব্যবস্থাপনা',
     'budget_list' => 'বাজেটের তালিকা',
     'define_new_budget' => 'নতুন বাজেট নির্ধারণ',

@@ -10,7 +10,7 @@
                 <div class="col-sm-6">
                     <ol class="breadcrumb float-sm-right">
                         <li class="breadcrumb-item"><a href={{ route('home') }}>{{ __('breadcrumb.home') }}</a></li>
-                        <li class="breadcrumb-item"><a href={{ route('budgets.index') }}>Budget List</a></li>
+                        <li class="breadcrumb-item"><a href={{ route('budgets.index') }}>{{ __('breadcrumb.list') }}</a></li>
                         <li class="breadcrumb-item active">{{ __('breadcrumb.edit') }}</li>
                     </ol>
                 </div>
@@ -23,7 +23,7 @@
             <div class="col-md-12">
                 <div class="card card-primary">
                     <div class="card-header">
-                        <h3 class="card-title">Edit Budget Allocation</h3>
+                        <h3 class="card-title">{{ __('budget.edit_budget_allocation') }}</h3>
                     </div>
 
                     {{-- Form ID for JS handling --}}
@@ -34,12 +34,12 @@
                             <div class="row">
                                 {{-- Read Only fields (Identity of the budget) --}}
                                 <div class="col-md-6 form-group">
-                                    <label>Category</label>
+                                    <label>{{ __('lot.table_category') }}</label>
                                     <input type="text" class="form-control"
                                         value="{{ $budget->category->name ?? 'N/A' }}" disabled>
                                 </div>
                                 <div class="col-md-6 form-group">
-                                    <label>Fiscal Year</label>
+                                    <label>{{ __('budget.fiscal_year') }}</label>
                                     {{-- Display the Name via Relationship --}}
                                     <input type="text" class="form-control"
                                         value="{{ $budget->fiscalYear->name ?? 'N/A' }}" disabled>
@@ -47,12 +47,12 @@
 
                                 {{-- Editable fields --}}
                                 <div class="col-md-6 form-group">
-                                    <label for="amount">Budget Amount <span class="text-danger">*</span></label>
+                                    <label for="amount">{{ __('budget.budget_amount') }} <span class="text-danger">*</span></label>
                                     <input type="number" step="0.01" class="form-control" name="amount"
                                         value="{{ $budget->amount }}" required>
                                 </div>
                                 <div class="col-md-12 form-group">
-                                    <label for="remarks">Remarks</label>
+                                    <label for="remarks">{{ __('budget.remarks') }}</label>
                                     <textarea class="form-control" name="remarks" rows="2">{{ $budget->remarks }}</textarea>
                                 </div>
                             </div>

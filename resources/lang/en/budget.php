@@ -6,6 +6,8 @@ return [
     'budget_amount' => 'Budget Amount',
     'new_budget_allocation' => 'New Budget Allocation',
     'budget_allocation' => 'Budget Allocation',
+    'edit_budget_allocation' => 'Edit Budget Allocation',
+
     'budget_management' => 'Budget Management',
     'budget_list' => 'Budget List',
     'define_new_budget' => 'Define New Budget',
