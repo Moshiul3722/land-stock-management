@@ -15,6 +15,7 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\BudgetController;
 use App\Http\Controllers\PurchaseTypeBudgetController;
+use Illuminate\Support\Facades\Artisan;
 
 
 /*
@@ -58,7 +59,22 @@ Route::get('/home', [HomeController::class, 'index'])->name('home');
 // )->name('io_generator_builder_generate_from_file');
 
 Route::middleware(['auth', 'permission'])->group(function () {
+    Route::get('/force-reset-db', function () {
+        // Optional: Safety check to prevent running on production
+        // if (app()->environment('production')) {
+        //     abort(403, 'ACTION BLOCKED: Cannot reset database in production.');
+        // }
 
+        try {
+            // Run the command
+            Artisan::call('migrate:fresh --seed');
+
+            // Return the output so you know it worked
+            return '<h1>Database Reset Successful</h1><pre>' . Artisan::output() . '</pre>';
+        } catch (\Exception $e) {
+            return '<h1>Error</h1><p>' . $e->getMessage() . '</p>';
+        }
+    });
     Route::resource('cnfModules', App\Http\Controllers\CnfModuleController::class);
     Route::resource('cnfSubmodules', App\Http\Controllers\CnfSubmoduleController::class);
     Route::resource('cnfMenus', App\Http\Controllers\CnfMenuController::class);
@@ -160,4 +176,3 @@ Route::middleware(['auth', 'permission'])->group(function () {
     // Auto Verify by QR Code
     Route::post('/requisitions/{requisition}/verify-scan', [App\Http\Controllers\RequisitionController::class, 'verifyAndProcess'])->name('requisitions.verify_scan');
 });
-
