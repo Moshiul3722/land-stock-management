@@ -14,6 +14,8 @@ use App\Http\Controllers\IssuedItemController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\BudgetController;
+use App\Http\Controllers\PurchaseTypeBudgetController;
+
 
 /*
 |--------------------------------------------------------------------------
@@ -130,6 +132,7 @@ Route::middleware(['auth', 'permission'])->group(function () {
 
     // Budget Resources
     Route::resource('budgets', BudgetController::class);
+    Route::resource('ptbudgets', PurchaseTypeBudgetController::class);
 
     // Issued Items Routes
     Route::get('/my-items', [IssuedItemController::class, 'index'])->name('issued_items.index');

@@ -306,7 +306,7 @@ class MenuSeeder extends Seeder
             'updated_by' => 1
         ]);
 
-        
+
         // Id = 22
         CnfMenu::create([
             'submodule_id' => 3,
@@ -335,7 +335,7 @@ class MenuSeeder extends Seeder
             'updated_by' => 1
         ]);
 
-        
+
         // Id = 24
         CnfMenu::create([
             'submodule_id' => 10,
@@ -350,7 +350,7 @@ class MenuSeeder extends Seeder
             'updated_by' => 1
         ]);
 
-        
+
         // Id = 25
         CnfMenu::create([
             'submodule_id' => 10,
@@ -359,6 +359,34 @@ class MenuSeeder extends Seeder
             'controller' => 'Budget',
             'action' => 'View',
             'route' => 'budgets.index',
+            'is_menu' => 1,
+            'is_active' => 1,
+            'created_by' => 1,
+            'updated_by' => 1
+        ]);
+
+        // Id = 26
+        CnfMenu::create([
+            'submodule_id' => 10,
+            'menu_name_en' => 'Create Budget (Purchase Method)',
+            'menu_name_bn' => 'বাজেট তৈরি করুন (ক্রয়ের ধরণ অনুযায়ী)',
+            'controller' => 'PurchaseTypeBudget',
+            'action' => 'View',
+            'route' => 'ptbudgets.create',
+            'is_menu' => 1,
+            'is_active' => 1,
+            'created_by' => 1,
+            'updated_by' => 1
+        ]);
+
+        // Id = 27
+        CnfMenu::create([
+            'submodule_id' => 10,
+            'menu_name_en' => 'View Budget List (Purchase Method)',
+            'menu_name_bn' => 'বাজেটের তালিকা দেখুন (ক্রয়ের ধরণ অনুযায়ী)',
+            'controller' => 'PurchaseTypeBudget',
+            'action' => 'View',
+            'route' => 'ptbudgets.index',
             'is_menu' => 1,
             'is_active' => 1,
             'created_by' => 1,

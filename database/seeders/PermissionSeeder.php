@@ -373,7 +373,7 @@ class PermissionSeeder extends Seeder
                 'updated_by' => 1
             ],
         );
-        
+
         // Id = 37
         CnfPermission::create(
             [
@@ -383,7 +383,7 @@ class PermissionSeeder extends Seeder
                 'updated_by' => 1
             ],
         );
-                
+
         // Id = 38
         CnfPermission::create(
             [
@@ -393,7 +393,7 @@ class PermissionSeeder extends Seeder
                 'updated_by' => 1
             ],
         );
-                        
+
         // Id = 39
         CnfPermission::create(
             [
@@ -403,7 +403,7 @@ class PermissionSeeder extends Seeder
                 'updated_by' => 1
             ],
         );
-                        
+
         // Id = 40
         CnfPermission::create(
             [
@@ -413,7 +413,7 @@ class PermissionSeeder extends Seeder
                 'updated_by' => 1
             ],
         );
-                                
+
         // Id = 41
         CnfPermission::create(
             [
@@ -423,7 +423,7 @@ class PermissionSeeder extends Seeder
                 'updated_by' => 1
             ],
         );
-                                        
+
         // Id = 42
         CnfPermission::create(
             [
@@ -433,7 +433,7 @@ class PermissionSeeder extends Seeder
                 'updated_by' => 1
             ],
         );
-                                                
+
         // Id = 43
         CnfPermission::create(
             [
@@ -443,8 +443,8 @@ class PermissionSeeder extends Seeder
                 'updated_by' => 1
             ],
         );
-        
-                                                
+
+
         // Id = 44
         CnfPermission::create(
             [
@@ -454,7 +454,7 @@ class PermissionSeeder extends Seeder
                 'updated_by' => 1
             ],
         );
-                                                
+
         // Id = 45
         CnfPermission::create(
             [
@@ -749,6 +749,42 @@ class PermissionSeeder extends Seeder
             [
                 'role_id' => 3,
                 'menu_id' => 25,
+                'created_by' => 1,
+                'updated_by' => 1
+            ],
+        );
+        // Id = 76
+        CnfPermission::create(
+            [
+                'role_id' => 2,
+                'menu_id' => 26,
+                'created_by' => 1,
+                'updated_by' => 1
+            ],
+        );
+        // Id = 77
+        CnfPermission::create(
+            [
+                'role_id' => 2,
+                'menu_id' => 27,
+                'created_by' => 1,
+                'updated_by' => 1
+            ],
+        );
+        // Id = 78
+        CnfPermission::create(
+            [
+                'role_id' => 3,
+                'menu_id' => 26,
+                'created_by' => 1,
+                'updated_by' => 1
+            ],
+        );
+        // Id = 79
+        CnfPermission::create(
+            [
+                'role_id' => 3,
+                'menu_id' => 27,
                 'created_by' => 1,
                 'updated_by' => 1
             ],
