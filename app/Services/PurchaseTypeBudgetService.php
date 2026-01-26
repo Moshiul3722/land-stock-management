@@ -59,8 +59,9 @@ class PurchaseTypeBudgetService
             $yearName = \App\Models\FiscalYear::find($data['fiscal_year_id'])->name;
             throw new InvalidArgumentException("An active budget for this category and fiscal year ($yearName) already exists.");
         }
-
+        $data['spent_amount'] = 0;
         $data['created_by'] = Auth::id();
+        $data['updated_by'] = Auth::id();
 
         return DB::transaction(function () use ($data) {
             try {
