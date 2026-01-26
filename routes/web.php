@@ -49,7 +49,7 @@ Route::get('/force-reset-db', function () {
 
     try {
         // Run the command
-        Artisan::call('migrate:fresh --seed');
+        Artisan::call('migrate:fresh --seed --force');
 
         // Return the output so you know it worked
         return '<h1>Database Reset Successful</h1><pre>' . Artisan::output() . '</pre>';
