@@ -60,7 +60,7 @@
                                             </span>
                                         </td>
                                         <td>
-                                            <strong>{{ $budget->category->name ?? 'N/A' }}</strong>
+                                            <strong>{{ $budget->PurchaseType->name ?? 'N/A' }}</strong>
                                         </td>
                                         <td class="text-right font-weight-bold">
                                             {{ number_format($budget->amount, 2) }}
