@@ -99,9 +99,8 @@
                             <i class="fas fa-lock me-1"></i> Authorized Login
                         </div>
                         <div class="card-body text-center">
-                            <p class="small text-muted">Access is restricted to Ministry officials.</p>
+                            <p class="small text-muted">Access is restricted to Ministry of Land officials.</p>
                             <a href="{{ route('login') }}" class="btn btn-danger w-100 mb-2">Login to System</a>
-                            <a href="#" class="small text-decoration-none">Forgot Password?</a>
                         </div>
                     </div>
                 @else
@@ -126,10 +125,10 @@
                     <ul class="list-group list-group-flush small">
                         <li class="list-group-item"><a href="#" class="text-decoration-none text-dark"><i
                                     class="fas fa-caret-right text-success me-2"></i> User Manual</a></li>
-                        <li class="list-group-item"><a href="#" class="text-decoration-none text-dark"><i
+                        {{-- <li class="list-group-item"><a href="#" class="text-decoration-none text-dark"><i
                                     class="fas fa-caret-right text-success me-2"></i> Requisition Policy</a></li>
                         <li class="list-group-item"><a href="#" class="text-decoration-none text-dark"><i
-                                    class="fas fa-caret-right text-success me-2"></i> Support Ticket</a></li>
+                                    class="fas fa-caret-right text-success me-2"></i> Support Ticket</a></li> --}}
                     </ul>
                 </div>
 

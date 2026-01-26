@@ -182,16 +182,13 @@
                         <div class="row">
                             <div class="col-sm-4">
                                 <h6 class="text-uppercase fw-bold text-success mb-3">Important Links</h6>
-                                <a href="#" class="footer-link">President's Office</a>
-                                <a href="#" class="footer-link">Prime Minister's Office</a>
-                                <a href="#" class="footer-link">Cabinet Division</a>
-                                <a href="#" class="footer-link">Ministry of Public Administration</a>
+                                <a href="https://mopa.gov.bd/" target="_blank" class="footer-link">Ministry of Public Administration</a>
+                                <a href="https://minland.gov.bd/" target="_blank" class="footer-link">Ministry of Land</a>
                             </div>
                             <div class="col-sm-4">
                                 <h6 class="text-uppercase fw-bold text-success mb-3">Internal Services</h6>
-                                <a href="#" class="footer-link">Land Development Tax</a>
-                                <a href="#" class="footer-link">E-Mutation</a>
-                                <a href="#" class="footer-link">R.S. Khatian</a>
+                                <a href="https://ldtax.gov.bd/" target="_blank" class="footer-link">Land Development Tax</a>
+                                <a href="https://mutation.land.gov.bd/" target="_blank" class="footer-link">E-Mutation</a>
                                 <a href="#" class="footer-link">Inventory Management</a>
                             </div>
                             <div class="col-sm-4">
@@ -213,7 +210,7 @@
                 <div class="container">
                     <span class="small">
                         © {{ date('Y') }} Ministry of Land, All Rights Reserved. |
-                        Technical Assistance: <strong>UltraCore Creatives Ltd.</strong>
+                        Developed and Maintained By: <strong><a href="https://ultracorecreatives.com/" target="_blank">Ultracore Creatives Ltd.</a></strong>
                     </span>
                 </div>
             </div>
@@ -221,11 +218,11 @@
                 <div class="container">
                     <div class="d-flex justify-content-center align-items-center gap-2">
                         <span class="small">
-                            © {{ date('Y') }} Ministry of Land, All Rights Reserved. | 
+                            © {{ date('Y') }} Ministry of Land, All Rights Reserved. |
                             Technical Assistance:
                         </span>
-                        <img src="{{ asset('theme/assets/img/uc-logo.png') }}" 
-                             alt="Ultracore Creatives" 
+                        <img src="{{ asset('theme/assets/img/uc-logo.png') }}"
+                             alt="Ultracore Creatives"
                              style="height: 30px; width: auto; opacity: 0.8;">
                     </div>
                 </div>
