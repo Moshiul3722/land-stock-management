@@ -289,9 +289,9 @@
                 <b>{{ __('footer.version') }}</b> v1.0
             </div>
             <strong>
-                {{ __('footer.copyright') }} &copy; <?php echo date('Y'); ?> Inventory Management System | Ministry of Land
-            </strong>
-            {{ __('footer.reserved') }}
+                {{ __('footer.copyright') }} &copy; <?php echo date('Y'); ?> {{ __('common.app_name') }} | {{ __('common.ministry') }}
+            </strong> |
+            {{ __('common.footer_copyright') }}
         </footer>
     </div>
 
@@ -312,7 +312,7 @@
 
     <script src="{{ asset('js/bootstrap4-toggle.min.js') }}"></script>
 
-    <script src="{{ asset('js/select2.min.js') }}"></script> 
+    <script src="{{ asset('js/select2.min.js') }}"></script>
 
     {{-- <script src="{{ asset('js/select2.ajax.min.js') }}"></script> --}}
 
