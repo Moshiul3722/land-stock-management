@@ -12,6 +12,7 @@ return new class extends Migration {
             $table->foreignId('pt_id')->constrained('product_purchase_types')->onDelete('cascade');
             $table->foreignId('fiscal_year_id')->constrained('fiscal_years')->onDelete('cascade');
             $table->decimal('amount', 15, 2);
+            $table->decimal('spent_amount', 15, 2);
             $table->text('remarks')->nullable();
 
             // Standard audit columns

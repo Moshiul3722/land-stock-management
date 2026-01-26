@@ -118,7 +118,7 @@ class ApprovalService
             if ($nextStep->role_id == 4 && $model instanceof Requisition) {
                 // 1. Enable Print Flag
                 $model->update(['is_print_enabled' => true]);
-                
+
                 // 2. Notify Requestor that slip is ready
                 $this->notifyRequestorReadyForPrint($model);
             }
@@ -132,7 +132,11 @@ class ApprovalService
             if ($model instanceof Lot) {
                 // 1. NEW: Check Budget Availability & Deduct
                 // This will throw an exception if budget is insufficient, rolling back the transaction
+                // $this->processBudgetForLot($model);
+                // 1. DEDUCT CATEGORY BUDGET (Existing)
                 $this->processBudgetForLot($model);
+                // 2. DEDUCT PURCHASE TYPE BUDGET (New)
+                $this->processPurchaseTypeBudgetForLot($model);
                 // 2. Stock In (If budget check passed)
                 $model->update(['status' => 'approved']);
                 $this->addLotItemsToStock($model);
@@ -308,9 +312,9 @@ class ApprovalService
                 })
                     // OR the task is a Requisition task AND its serial matches the max serial for that requisition
                     ->orWhere(function ($q) {
-                        $q->whereNotNull('approval_details.requistion_id')
-                            ->whereColumn('approval_details.serial', '=', 'req_max.max_serial');
-                    });
+                    $q->whereNotNull('approval_details.requistion_id')
+                        ->whereColumn('approval_details.serial', '=', 'req_max.max_serial');
+                });
             })
 
             ->with(['lot', 'requisition', 'fromUser']) // Eager load relationships
@@ -353,118 +357,6 @@ class ApprovalService
         }
     }
 
-    /**
-     * Helper to consume stock for a single product using FIFO.
-     */
-    // private function consumeStockFifo($productId, $quantityNeeded, Requisition $requisition)
-    // {
-    //     // 1. Find all Lots that have stock for this product, ordered by oldest entry date first (FIFO)
-    //     // We group by lot_id and sum the quantity to find the CURRENT balance of that lot.
-    //     $lotBalances = Stock::query()
-    //         ->join('lots', 'stocks.lot_id', '=', 'lots.id')
-    //         ->where('stocks.product_id', $productId)
-    //         ->whereNull('stocks.deleted_at')
-    //         ->select('stocks.lot_id', 'lots.entry_date', DB::raw('SUM(stocks.quantity) as balance'))
-    //         ->groupBy('stocks.lot_id', 'lots.entry_date')
-    //         ->having('balance', '>', 0)
-    //         ->orderBy('lots.entry_date', 'asc')
-    //         ->get();
-
-
-    //     $remainingToDeduct = $quantityNeeded;
-
-    //     foreach ($lotBalances as $lotData) {
-    //         if ($remainingToDeduct <= 0) break;
-
-    //         $amountToTake = min($remainingToDeduct, $lotData->balance);
-
-    //         // A. WAREHOUSE UPDATE: Create NEGATIVE stock entry (Reduces Warehouse Stock)
-    //         $this->stockRepository->create([
-    //             'product_id' => $productId,
-    //             'quantity' => - ($amountToTake),
-    //             'lot_id' => $lotData->lot_id
-    //         ]);
-
-    //         // B. USER UPDATE: Create ISSUED ITEM entry (Increases User's Asset List)
-    //         IssuedItem::create([
-    //             'user_id' => $requisition->requested_by_user_id, // Mr. X
-    //             'requisition_id' => $requisition->id,
-    //             'product_id' => $productId, // Product Z
-    //             'lot_id' => $lotData->lot_id, // The specific Lot
-    //             'quantity' => $amountToTake, // Quantity Y (from this specific lot)
-    //             'issued_date' => now(),
-    //             'created_by' => Auth::id(),
-    //             'updated_by' => Auth::id(),
-    //         ]);
-
-    //         $remainingToDeduct -= $amountToTake;
-    //     }
-
-    //     // Optional: Safety check
-    //     if ($remainingToDeduct > 0) {
-    //         // This implies a data race condition occurred where stock disappeared during approval.
-    //         // You might want to log this or throw an exception.
-    //         throw new Exception("Insufficient stock to fulfill requisition for Product ID: $productId");
-    //     }
-    // }
-
-    /**
-     * Helper to consume stock from a specific Lot.
-     */
-    // 
-    // private function consumeStock($productId, $quantityNeeded, Requisition $requisition, $assignedLotId)
-    // {
-    //     if (!$assignedLotId) {
-    //         // If Store Admin didn't assign a lot, we cannot proceed securely.
-    //         // In a real app, you might fall back to FIFO, but per requirement 2, assignment is manual.
-    //         $productName = \App\Models\Product::find($productId)->name ?? 'Item';
-    //         throw new Exception("Product '{$productName}' has no assigned Brand/Spec (Lot). Store Admin must assign stock before completion.");
-    //     }
-
-    //     // 1. Get Current Balance of the Assigned Lot
-    //     // We use the StockRepository query style or direct DB query to get current balance
-    //     $currentBalance = Stock::where('product_id', $productId)
-    //         ->where('lot_id', $assignedLotId)
-    //         ->whereNull('deleted_at')
-    //         ->sum('quantity');
-
-    //     if ($currentBalance < $quantityNeeded) {
-    //         $productName = \App\Models\Product::find($productId)->name ?? 'Item';
-    //         throw new Exception("Insufficient stock in the selected Lot for '{$productName}'. Available: {$currentBalance}, Requested: {$quantityNeeded}.");
-    //     }
-
-    //     // 2. Fetch Brand/Spec from the Source (Lot Details)
-    //     // This ensures the negative entry matches the original entry details
-    //     // WAREHOUSE UPDATE: Create NEGATIVE stock entry linked to this Lot
-
-    //     $lotDetail = \App\Models\LotDetail::where('lot_id', $assignedLotId)
-    //         ->where('product_id', $productId)
-    //         ->first();
-
-    //     $brand = $lotDetail ? $lotDetail->brand : null;
-    //     $spec = $lotDetail ? $lotDetail->specification : null;
-
-    //     $this->stockRepository->create([
-    //         'product_id' => $productId,
-    //         'quantity' => - ($quantityNeeded),
-    //         'lot_id' => $assignedLotId,
-    //         'brand' => $brand,
-    //         'specification' => $spec
-    //     ]);
-
-    //     // 3. USER UPDATE: Record Issuance
-    //     IssuedItem::create([
-    //         'user_id' => $requisition->requested_by_user_id,
-    //         'requisition_id' => $requisition->id,
-    //         'product_id' => $productId,
-    //         'lot_id' => $assignedLotId,
-    //         'quantity' => $quantityNeeded,
-    //         'issued_date' => now(),
-    //         'created_by' => Auth::id(),
-    //         'updated_by' => Auth::id(),
-    //     ]);
-    // }
-
     private function consumeStock($productId, $quantityNeeded, Requisition $requisition, $reqItem)
     {
         // 1. Get the Specific Lot Detail assigned
@@ -490,7 +382,7 @@ class ApprovalService
         // 3. Deduct
         $this->stockRepository->create([
             'product_id' => $productId,
-            'quantity' => - ($quantityNeeded),
+            'quantity' => -($quantityNeeded),
             'lot_id' => $lotDetail->lot_id,
             'brand' => $lotDetail->brand,           // Taken from LotDetail
             'specification' => $lotDetail->specification // Taken from LotDetail
@@ -528,13 +420,13 @@ class ApprovalService
     {
         // Load product categories to group costs
         $lot->load('lotDetails.product.category');
-        
+
         $fiscalYearId = $lot->fiscal_year_id;
         if (!$fiscalYearId) {
             throw new Exception("Lot #{$lot->lot_number} does not have a Fiscal Year assigned. Cannot process budget.");
         }
 
-        // Group details by Category ID to sum costs (Quantity * Unit Price)
+        // Group details by Category ID to sum costs (Price)
         $categoryCosts = [];
 
         foreach ($lot->lotDetails as $detail) {
@@ -552,7 +444,7 @@ class ApprovalService
             // We use lockForUpdate() to prevent race conditions during concurrent approvals
             $budget = \App\Models\Budget::where('category_id', $catId)
                 ->where('fiscal_year_id', $fiscalYearId)
-                ->lockForUpdate() 
+                ->lockForUpdate()
                 ->first();
 
             if (!$budget) {
@@ -572,6 +464,64 @@ class ApprovalService
             // Deduct (Update Spent Amount)
             $budget->increment('spent_amount', $totalCost);
         }
+    }
+
+    /**
+     * DEDUCT FROM PURCHASE TYPE BUDGET
+     * Calculates the total value of the lot and deducts it from the specific Purchase Type Budget.
+     *
+     * @param Lot $lot
+     * @throws Exception
+     */
+    private function processPurchaseTypeBudgetForLot(Lot $lot): void
+    {
+        $fiscalYearId = $lot->fiscal_year_id;
+        $purchaseTypeId = $lot->product_purchase_type_id;
+
+        // 1. Validation: Ensure Lot has necessary metadata
+        if (!$fiscalYearId) {
+            throw new Exception("Lot #{$lot->lot_number} does not have a Fiscal Year assigned. Cannot process Purchase Type budget.");
+        }
+        if (!$purchaseTypeId) {
+            throw new Exception("Lot #{$lot->lot_number} does not have a Purchase Type assigned.");
+        }
+
+        // 2. Calculate Total Cost of the Lot
+        // Note: Purchase Type Budget applies to the TOTAL value of the lot (sum of all items)
+        $totalLotCost = 0;
+        foreach ($lot->lotDetails as $detail) {
+            $totalLotCost += $detail->unit_price;
+        }
+
+        // If cost is 0, no need to deduct
+        if ($totalLotCost <= 0) {
+            return;
+        }
+
+        // 3. Find the specific Purchase Type Budget record
+        // Use lockForUpdate() to prevent race conditions during concurrent approvals
+        $ptBudget = \App\Models\PurchaseTypeBudget::where('pt_id', $purchaseTypeId)
+            ->where('fiscal_year_id', $fiscalYearId)
+            ->lockForUpdate()
+            ->first();
+
+        if (!$ptBudget) {
+            $ptName = $lot->purchaseType->name ?? 'Unknown';
+            throw new Exception("No budget defined for Purchase Type: '{$ptName}' in this Fiscal Year.");
+        }
+
+        // 4. Check Availability
+        $available = $ptBudget->amount - $ptBudget->spent_amount;
+
+        if ($totalLotCost > $available) {
+            $ptName = $ptBudget->PurchaseType->name;
+            $formattedCost = number_format($totalLotCost, 2);
+            $formattedAvail = number_format($available, 2);
+            throw new Exception("Purchase Type Budget exceeded for '{$ptName}'. Cost: {$formattedCost}, Available: {$formattedAvail}.");
+        }
+
+        // 5. Deduct (Update Spent Amount)
+        $ptBudget->increment('spent_amount', $totalLotCost);
     }
 
     /**
