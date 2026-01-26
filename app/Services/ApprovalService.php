@@ -486,6 +486,11 @@ class ApprovalService
             throw new Exception("Lot #{$lot->lot_number} does not have a Purchase Type assigned.");
         }
 
+        // If it's not 1 or 2, we skip this entire budget check
+        if (!in_array($purchaseTypeId, [1, 2])) {
+            return;
+        }
+
         // 2. Calculate Total Cost of the Lot
         // Note: Purchase Type Budget applies to the TOTAL value of the lot (sum of all items)
         $totalLotCost = 0;
