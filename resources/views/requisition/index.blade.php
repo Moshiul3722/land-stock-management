@@ -450,7 +450,8 @@
             @endif
 
             @if (session('error'))
-                toastr.error("রিকুইজিশন জমা হয়নি। সমস্যা হয়েছে");
+                // toastr.error("রিকুইজিশন জমা হয়নি। সমস্যা হয়েছে");
+                toastr.error("{{ session('error') }}");
             @endif
         });
     </script>
