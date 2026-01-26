@@ -385,7 +385,14 @@ class RequisitionController extends Controller
         }
 
         // 2. Security: Ensure the logged-in user is the actual requestor
-        if ($requisition->requested_by_user_id !== Auth::id()) {
+        if ((int)$requisition->requested_by_user_id !== (int)Auth::id()) {
+            // dd([
+            //     'My ID (Auth)' => Auth::id(),
+            //     'My ID Type' => gettype(Auth::id()),
+            //     'Requisition Owner ID' => $requisition->requested_by_user_id,
+            //     'Owner ID Type' => gettype($requisition->requested_by_user_id),
+            //     'Match Status' => 'FAILED'
+            // ]);
             return redirect()->back()->with('error', 'You are not authorized to acknowledge this requisition.');
         }
 
