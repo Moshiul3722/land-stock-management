@@ -26,9 +26,12 @@
                             <i class="fas fa-coins mr-1"></i> {{ __('budget.budget_list') }}
                         </h3>
                         <div class="card-tools">
-                            <a href="{{ route('budgets.create') }}" class="btn btn-success btn-sm" title="{{ __('buttons.create') }}">
-                                <i class="fas fa-plus"></i> {{ __('budget.define_new_budget') }}
-                            </a>
+                            @if (Auth::user()->role_id == 2 || Auth::user()->role_id == 1)
+                                <a href="{{ route('budgets.create') }}" class="btn btn-success btn-sm"
+                                    title="{{ __('buttons.create') }}">
+                                    <i class="fas fa-plus"></i> {{ __('budget.define_new_budget') }}
+                                </a>
+                            @endif
                         </div>
                     </div>
                     <div class="card-body">
@@ -46,7 +49,7 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                @foreach($budgets as $budget)
+                                @foreach ($budgets as $budget)
                                     @php
                                         $remaining = $budget->amount - $budget->spent_amount;
                                         // Highlight red if negative (over budget), green if positive
@@ -73,10 +76,12 @@
                                         </td>
                                         <td>{{ $budget->remarks ?? '-' }}</td>
                                         <td class="text-center">
-                                            <a href="{{ route('budgets.edit', $budget->id) }}" class="btn btn-warning btn-sm" title="{{ __('buttons.edit') }}">
+                                            <a href="{{ route('budgets.edit', $budget->id) }}"
+                                                class="btn btn-warning btn-sm" title="{{ __('buttons.edit') }}">
                                                 <i class="fas fa-edit"></i>
                                             </a>
-                                            <button class="btn btn-danger btn-sm delete-btn" data-id="{{ $budget->id }}" title="{{ __('buttons.delete') }}">
+                                            <button class="btn btn-danger btn-sm delete-btn" data-id="{{ $budget->id }}"
+                                                title="{{ __('buttons.delete') }}">
                                                 <i class="fas fa-trash"></i>
                                             </button>
                                         </td>
@@ -92,61 +97,64 @@
 @endsection
 
 @push('js')
-<script>
-    $(document).ready(function() {
-        var table = $('#budget-table').DataTable({
-            "responsive": true,
-            "autoWidth": false,
-            "columnDefs": [
-                { "orderable": false, "targets": [7] } // Disable sorting on Action column (Index 7)
-            ]
-        });
+    <script>
+        $(document).ready(function() {
+            var table = $('#budget-table').DataTable({
+                "responsive": true,
+                "autoWidth": false,
+                "columnDefs": [{
+                        "orderable": false,
+                        "targets": [7]
+                    } // Disable sorting on Action column (Index 7)
+                ]
+            });
 
-        // 1. Handle Flash Messages
-        @if(session('success'))
-            toastr.success("{{ session('success') }}");
-        @endif
+            // 1. Handle Flash Messages
+            @if (session('success'))
+                toastr.success("{{ session('success') }}");
+            @endif
 
-        @if(session('error'))
-            toastr.error("{{ session('error') }}");
-        @endif
+            @if (session('error'))
+                toastr.error("{{ session('error') }}");
+            @endif
 
-        // 2. Handle Delete
-        $('#budget-table').on('click', '.delete-btn', function() {
-            var id = $(this).data('id');
-            var row = table.row($(this).parents('tr'));
-            var url = "{{ route('budgets.destroy', ':id') }}".replace(':id', id);
+            // 2. Handle Delete
+            $('#budget-table').on('click', '.delete-btn', function() {
+                var id = $(this).data('id');
+                var row = table.row($(this).parents('tr'));
+                var url = "{{ route('budgets.destroy', ':id') }}".replace(':id', id);
 
-            Swal.fire({
-                title: "{{ __('sweetalert.confirmation') }}",
-                text: "{{ __('sweetalert.delete_revert_text') }}",
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonColor: '#d33',
-                cancelButtonColor: '#3085d6',
-                cancelButtonText: "{{ __('sweetalert.cancel') }}",
-                confirmButtonText: "{{ __('sweetalert.delete_notice') }}"
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    $.ajax({
-                        url: url,
-                        type: 'POST',
-                        data: {
-                            _method: 'DELETE',
-                            _token: '{{ csrf_token() }}'
-                        },
-                        success: function(res) {
-                            toastr.success(res.message);
-                            row.remove().draw(false);
-                        },
-                        error: function(xhr) {
-                            let msg = xhr.responseJSON ? xhr.responseJSON.message : "{{ __('sweetalert.toastr_delete') }}";
-                            toastr.error(msg);
-                        }
-                    });
-                }
+                Swal.fire({
+                    title: "{{ __('sweetalert.confirmation') }}",
+                    text: "{{ __('sweetalert.delete_revert_text') }}",
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#d33',
+                    cancelButtonColor: '#3085d6',
+                    cancelButtonText: "{{ __('sweetalert.cancel') }}",
+                    confirmButtonText: "{{ __('sweetalert.delete_notice') }}"
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        $.ajax({
+                            url: url,
+                            type: 'POST',
+                            data: {
+                                _method: 'DELETE',
+                                _token: '{{ csrf_token() }}'
+                            },
+                            success: function(res) {
+                                toastr.success(res.message);
+                                row.remove().draw(false);
+                            },
+                            error: function(xhr) {
+                                let msg = xhr.responseJSON ? xhr.responseJSON.message :
+                                    "{{ __('sweetalert.toastr_delete') }}";
+                                toastr.error(msg);
+                            }
+                        });
+                    }
+                });
             });
         });
-    });
-</script>
+    </script>
 @endpush
