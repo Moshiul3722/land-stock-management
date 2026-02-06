@@ -110,9 +110,9 @@
                 <img src="{{ asset('theme/assets/img/gov.png') }}" class="logo">
             </td>
             <td width="60%" class="text-center">
-                <div class="title">Ministry of Land</div>
-                <div class="subtitle">Inventory Management System</div>
-                <div class="subtitle">Bangladesh Secretariat, Dhaka</div>
+                <div class="title">গণপ্রজাতন্ত্রী বাংলাদেশ সরকার</div>
+                <div class="subtitle">ভূমি মন্ত্রনালয়</div>
+                <div class="subtitle">সচিবের অথিদপ্তর</div>
             </td>
             <td width="25%" class="text-right">
                 {{-- 2. QR Code (Contains link to view this requisition) --}}
@@ -121,11 +121,16 @@
                 <small>Scan to View</small>
             </td>
         </tr>
+        <tr>
+            <td colspan="3">
+                বিষয়ঃ মনিহারী দ্রব্যাদি/বিবিধ মালামালের অধিযাচন ফরম। তারিখঃ {{ $requisition->requisition_date->format('d M, Y') }}।
+            </td>
+        </tr>
     </table>
 
     <div class="text-center" style="margin-bottom: 20px;">
         <h3 style="border: 1px solid #000; display: inline-block; padding: 5px 15px; text-transform: uppercase;">
-            Store Requisition Slip
+            Inventory Requisition Slip
         </h3>
     </div>
 
@@ -148,11 +153,11 @@
     <table class="items-table">
         <thead>
             <tr>
-                <th width="5%" class="text-center">SL</th>
-                <th width="30%">Product</th>
-                <th width="20%">Category</th>
-                <th width="30%">Assigned Brand/Spec</th>
-                <th width="15%" class="text-center">Quantity</th>
+                <th width="5%" class="text-center">ক্রমিক নং</th>
+                <th width="30%">মালামালের বিবরণ</th>
+                <th width="20%">ক্যাটাগরি</th>
+                <th width="30%">ব্র্যান্ড/স্পেসিফিকেশন</th>
+                <th width="15%" class="text-center">পরিমাণ</th>
             </tr>
         </thead>
         <tbody>
@@ -181,15 +186,15 @@
     {{-- 5. Footer / Signatures --}}
     <div class="signatures">
         <div class="signature-box" style="float: left;">
-            Requested By<br>
-            <small>(Signature & Date)</small>
+            অধিযাচনকারী কর্মকর্তা<br>
+            <small>(স্বাক্ষর এবং তারিখ)</small>
         </div>
 
         <div class="spacer" style="width: 35%"></div> {{-- Spacer --}}
 
         <div class="signature-box" style="float: right;">
-            Issued By<br>
-            <small>(Signature & Date)</small>
+            প্রতিপক্ষ কর্মকর্তা<br>
+            <small>(স্বাক্ষর এবং তারিখ)</small>
         </div>
     </div>
 
