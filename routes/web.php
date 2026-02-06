@@ -123,10 +123,14 @@ Route::middleware(['auth', 'permission'])->group(function () {
     Route::post('/subcategories/edit/{id}', [CategoryController::class, 'subcategoryStore'])->name('subcategories.edit');
     Route::post('/subcategories/delete/{id}', [CategoryController::class, 'subcategoryStore'])->name('subcategories.destroy');
 
-    Route::resource('products', ProductController::class);
-    Route::get('/products/by-category/{categoryId}', [App\Http\Controllers\ProductController::class, 'getByCategory'])->name('products.by_category');
     // Product Unit Management Routes
     Route::get('/products/autocomplete-unit', [App\Http\Controllers\ProductController::class, 'autocompleteUnit'])->name('products.autocomplete_unit');
+
+
+    Route::resource('products', ProductController::class);
+    Route::get('/products/by-category/{categoryId}', [App\Http\Controllers\ProductController::class, 'getByCategory'])->name('products.by_category');
+
+
     // Lot Resources
     Route::get('/lots/autocomplete', [LotController::class, 'autocomplete'])->name('lots.autocomplete');
     Route::resource('lots', LotController::class);

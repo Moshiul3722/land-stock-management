@@ -35,11 +35,22 @@
                         <form action="{{ route('products.update', $product) }}" method="POST">
                             @csrf
                             @method('PUT')
-                            <div class="form-group mb-3">
-                                <label for="name">{{ __('product.product_name') }}</label> <span
-                                    style="color: red;">*</span>
-                                <input type="text" class="form-control" id="name" name="name"
-                                    value="{{ old('name', $product->name) }}" required>
+                            <div class="row">
+                                {{-- Product Name --}}
+                                <div class="col-md-6 form-group mb-3">
+                                    <label for="name">{{ __('product.product_name') }} <span
+                                            style="color: red;">*</span></label>
+                                    <input type="text" class="form-control" id="name" name="name"
+                                        value="{{ old('name', $product->name) }}" required>
+                                </div>
+
+                                {{-- Product Unit (Autocomplete) --}}
+                                <div class="col-md-6 form-group mb-3">
+                                    <label for="product_unit">Product Unit <span style="color: red;">*</span></label>
+                                    <input type="text" class="form-control autocomplete-unit" id="product_unit"
+                                        name="product_unit" value="{{ old('product_unit', $product->product_unit) }}"
+                                        placeholder="e.g. Pcs, Box, Kg" required>
+                                </div>
                             </div>
                             <div class="form-group mb-3">
                                 <label for="category_id">{{ __('product.cateogory') }}</label> <span
@@ -71,3 +82,21 @@
         </div>
     </div>
 @endsection
+@push('js')
+    <script>
+        $(document).ready(function() {
+            // Initialize Select2
+            $('.js-example-basic-single').select2();
+
+            // --- Autocomplete for Unit ---
+            $('.autocomplete-unit').autocomplete({
+                source: function(request, response) {
+                    $.getJSON("{{ route('products.autocomplete_unit') }}", {
+                        term: request.term
+                    }, response);
+                },
+                minLength: 1
+            });
+        });
+    </script>
+@endpush

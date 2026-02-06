@@ -34,13 +34,28 @@
                     <div class="card-body">
                         <form action="{{ route('products.store') }}" method="POST">
                             @csrf
-                            <div class="form-group mb-3">
+                            {{-- <div class="form-group mb-3">
                                 <label for="name">{{ __('product.product_name') }}</label> <span
                                     style="color: red;">*</span>
                                 <input type="text" class="form-control" id="name" name="name"
                                     value="{{ old('name') }}" required>
-                            </div>
+                            </div> --}}
+                            <div class="row">
+                                <div class="col-md-6 form-group mb-3">
+                                    <label for="name">{{ __('product.product_name') }} <span
+                                            style="color: red;">*</span></label>
+                                    <input type="text" class="form-control" id="name" name="name"
+                                        value="{{ old('name') }}" required>
+                                </div>
 
+                                {{-- NEW: Product Unit (Autocomplete) --}}
+                                <div class="col-md-6 form-group mb-3">
+                                    <label for="product_unit">Product Unit <span style="color: red;">*</span></label>
+                                    <input type="text" class="form-control autocomplete-unit" id="product_unit"
+                                        name="product_unit" value="{{ old('product_unit') }}"
+                                        placeholder="e.g. Pcs, Box, Kg" required>
+                                </div>
+                            </div>
                             <div class="form-group mb-3">
                                 <label for="category_id">{{ __('product.cateogory') }}</label> <span
                                     style="color: red;">*</span>
@@ -120,6 +135,16 @@
                 } else {
                     subCategorySelect.html('<option value="">Select Category First</option>');
                 }
+            });
+
+            // --- Autocomplete for Unit ---
+            $('.autocomplete-unit').autocomplete({
+                source: function(request, response) {
+                    $.getJSON("{{ route('products.autocomplete_unit') }}", {
+                        term: request.term
+                    }, response);
+                },
+                minLength: 1
             });
         });
     </script>
