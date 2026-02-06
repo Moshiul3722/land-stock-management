@@ -42,7 +42,7 @@ class ProductController extends Controller
             }
 
             $products = $query->get();
-            
+
             return view('product._product_list', compact('products'));
         }
 
@@ -137,5 +137,17 @@ class ProductController extends Controller
             return response()->json($products);
         }
         abort(403, 'This action is unauthorized.');
+    }
+
+    /**
+     * Autocomplete for Product Unit.
+     * Returns a JSON array of matching units.
+     */
+    public function autocompleteUnit(Request $request)
+    {
+        $term = $request->input('term');
+        $results = $this->productService->getUnitSuggestions($term);
+
+        return response()->json($results);
     }
 }
