@@ -3,51 +3,61 @@ name: Deploy to cPanel
 on:
   push:
     branches:
-      - main  # Triggers on push to stage branch
+      - main
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v3
+      - name: Checkout code
+        uses: actions/checkout@v3
 
-    - name: Deploy to server
-      uses: appleboy/ssh-action@master
-      with:
-        host: ${{ secrets.SSH_HOST }}
-        username: ${{ secrets.SSH_USERNAME }}
-        key: ${{ secrets.SSH_PRIVATE_KEY }}
-        port: ${{ secrets.SSH_PORT }}
-        script: |
-          cd /home/texpdyjc/demo.ultracorecreatives.com
-          set -e  # Exit immediately if any command fails
-          git fetch https://${{ secrets.GH_TOKEN }}@github.com/ultracorecreatives/inv-land.git
-          git reset --hard FETCH_HEAD
+      - name: Deploy to cPanel via SSH
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.SSH_HOST_NEW }}
+          username: ${{ secrets.SSH_USERNAME_NEW }}
+          key: ${{ secrets.SSH_PRIVATE_KEY_NEW }}
+          port: 22
+          script: |
+            set -e
 
-          # Install composer dependencies
-          if command -v composer &> /dev/null; then
-            composer install --no-dev --optimize-autoloader --no-interaction
-          elif [ -f "/opt/cpanel/composer/bin/composer" ]; then
-            /usr/local/bin/ea-php82 /opt/cpanel/composer/bin/composer install --no-dev --optimize-autoloader --no-interaction
-          fi
+            echo "🚀 Starting deployment..."
 
-          # Migration
-          php artisan migrate --force
+            cd /home/inventory/inv-land
 
-          # Clear caches first
-          php artisan view:clear
-          php artisan config:clear
-          php artisan route:clear
-          php artisan cache:clear
+            # Fetch latest code using GitHub token
+            git fetch https://${{ secrets.GH_TOKEN }}@github.com/ultracorecreatives/inv-land.git main
+            git reset --hard FETCH_HEAD
 
-          # Rebuild caches
-          php artisan config:cache
-          php artisan route:cache
-          php artisan view:cache
+            # Maintenance mode (optional)
+            php artisan down || true
 
-          # Set permissions
-          chmod -R 755 storage bootstrap/cache
+            # Install dependencies
+            composer install \
+              --no-dev \
+              --optimize-autoloader \
+              --no-interaction
 
-          echo "✅ Deployment completed!"
+            # Run migrations
+            php artisan migrate --force
+
+            # Clear caches
+            php artisan view:clear
+            php artisan route:clear
+            php artisan config:clear
+            php artisan cache:clear
+
+            # Rebuild caches
+            php artisan config:cache
+            php artisan route:cache
+            php artisan view:cache
+
+            # Fix permissions
+            chmod -R 775 storage bootstrap/cache
+
+            # Bring app back online
+            php artisan up
+
+            echo "✅ Deployment completed successfully!"
