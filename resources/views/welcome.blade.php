@@ -75,7 +75,7 @@
                 <!-- About Section -->
                 <div class="card border-0">
                     <div class="card-body">
-                        <h4 class="text-success fw-bold border-bottom pb-2 mb-3">About This System Aha</h4>
+                        <h4 class="text-success fw-bold border-bottom pb-2 mb-3">About This System</h4>
                         <p class="text-justify">
                             The <strong>Ministry of Land Inventory Management System</strong> is a secure, internal platform
                             designed to streamline the procurement, storage, and distribution of office supplies and assets.
