@@ -1,36 +1,106 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Requisition Slip #{{ $requisition->id }}</title>
     <style>
-        body { font-family: 'Arial', sans-serif; font-size: 14px; margin: 0; padding: 20px; }
-        .header-table { width: 100%; border-bottom: 2px solid #000; padding-bottom: 10px; margin-bottom: 20px; }
-        .logo { width: 60px; height: auto; }
-        .title { font-size: 20px; font-weight: bold; text-transform: uppercase; }
-        .subtitle { font-size: 14px; }
-        
-        .info-table { width: 100%; margin-bottom: 20px; }
-        .info-table td { padding: 5px; vertical-align: top; }
-        
-        .items-table { width: 100%; border-collapse: collapse; margin-bottom: 30px; }
-        .items-table th, .items-table td { border: 1px solid #000; padding: 8px; text-align: left; }
-        .items-table th { background-color: #f0f0f0; }
-        .text-right { text-align: right; }
-        .text-center { text-align: center; }
-        
-        .signatures { margin-top: 50px; width: 100%; }
-        .signature-box { width: 30%; float: left; text-align: center; border-top: 1px solid #000; padding-top: 5px; }
-        .spacer { width: 5%; float: left; }
-        
+        body {
+            font-family: 'Arial', sans-serif;
+            font-size: 14px;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .header-table {
+            width: 100%;
+            border-bottom: 2px solid #000;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+
+        .logo {
+            width: 60px;
+            height: auto;
+        }
+
+        .title {
+            font-size: 20px;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+
+        .subtitle {
+            font-size: 14px;
+        }
+
+        .info-table {
+            width: 100%;
+            margin-bottom: 20px;
+        }
+
+        .info-table td {
+            padding: 5px;
+            vertical-align: top;
+        }
+
+        .items-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 30px;
+        }
+
+        .items-table th,
+        .items-table td {
+            border: 1px solid #000;
+            padding: 8px;
+            text-align: left;
+        }
+
+        .items-table th {
+            background-color: #f0f0f0;
+        }
+
+        .text-right {
+            text-align: right;
+        }
+
+        .text-center {
+            text-align: center;
+        }
+
+        .signatures {
+            margin-top: 50px;
+            width: 100%;
+        }
+
+        .signature-box {
+            width: 30%;
+            float: left;
+            text-align: center;
+            border-top: 1px solid #000;
+            padding-top: 5px;
+        }
+
+        .spacer {
+            width: 5%;
+            float: left;
+        }
+
         /* Print Styles */
         @media print {
-            @page { margin: 1cm; }
-            body { -webkit-print-color-adjust: exact; }
+            @page {
+                margin: 1cm;
+            }
+
+            body {
+                -webkit-print-color-adjust: exact;
+            }
         }
     </style>
 </head>
+
 <body onload="window.print()">
 
     {{-- 1. Header --}}
@@ -86,21 +156,22 @@
             </tr>
         </thead>
         <tbody>
-            @foreach($requisition->items as $item)
+            @foreach ($requisition->items as $item)
                 <tr>
                     <td class="text-center">{{ $loop->iteration }}</td>
                     <td>{{ $item->product->name }}</td>
                     <td>{{ $item->product->category->name }}</td>
                     <td>
-                        @if($item->lot)
-                            {{ $item->lot->lotDetails->where('product_id', $item->product_id)->first()->brand ?? 'N/A' }} <br>
+                        @if ($item->lot)
+                            {{ $item->lot->lotDetails->where('product_id', $item->product_id)->first()->brand ?? 'N/A' }}
+                            <br>
                             <small>{{ $item->lot->lotDetails->where('product_id', $item->product_id)->first()->specification ?? '' }}</small>
                         @else
                             <span style="color:red">Not Assigned</span>
                         @endif
                     </td>
                     <td class="text-center">
-                        <strong>{{ $item->quantity }}</strong>
+                        <strong>{{ $item->quantity }}</strong> {{ $item->product->product_unit }}
                     </td>
                 </tr>
             @endforeach
@@ -113,7 +184,7 @@
             Requested By<br>
             <small>(Signature & Date)</small>
         </div>
-        
+
         <div class="spacer" style="width: 35%"></div> {{-- Spacer --}}
 
         <div class="signature-box" style="float: right;">
@@ -123,4 +194,5 @@
     </div>
 
 </body>
+
 </html>

@@ -347,8 +347,16 @@
                         // Items
                         let itemsHtml = '';
                         res.requisition.items.forEach(item => {
-                            itemsHtml +=
-                                `<tr><td>${item.product.name}</td><td>${item.product.category.name}</td><td class="text-center">${item.quantity}</td></tr>`;
+                            let unit = item.product.product_unit || '';
+                            itemsHtml += `
+                                        <tr>
+                                            <td>${item.product.name}</td>
+                                            <td>${item.product.category.name}</td>
+                                            <td class="text-center">
+                                                <strong>${item.quantity}</strong>
+                                                <small class="text-muted ml-1">${unit}</small>
+                                            </td>
+                                        </tr>`;
                         });
                         $('#modal-items-body').html(itemsHtml);
 

@@ -506,7 +506,8 @@
                             let assignmentHtml =
                                 '<span class="text-muted small font-italic">Pending Assignment</span>';
                             let isUnavailable = false;
-
+                            // Product Unit
+                            let unit = item.product.product_unit || '';
                             if (isStoreAdmin) {
                                 // STORE ADMIN (Role 3): Editable Dropdowns
                                 let options =
@@ -576,7 +577,7 @@
                                 <td>${item.product.name}</td>
                                 <td>${categoryDisplay}</td>
                                 <td>${assignmentHtml}</td>
-                                <td class="text-center font-weight-bold text-muted">${item.original_quantity || item.quantity}</td>
+                                <td class="text-center font-weight-bold text-muted">${item.original_quantity || item.quantity} <small>${unit}</small></td>
                                 <td>
                                     <input type="number"
                                            class="${inputClass}"
