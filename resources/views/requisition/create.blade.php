@@ -159,8 +159,12 @@
                     type: 'GET',
                     success: function(products) {
                         $.each(products, function(key, value) {
-                            productSelect.append('<option value="' + value.id + '">' +
-                                value.name + '</option>');
+                            // productSelect.append('<option value="' + value.id + '">' +
+                            //     value.name + '</option>');
+                            let unit = value.product_unit || '';
+                            productSelect.append(
+                                `<option value="${value.id}" data-unit="${unit}">${value.name}</option>`
+                            );
                         });
                         productSelect.prop('disabled', false);
                     },
@@ -190,8 +194,12 @@
                             type: 'GET',
                             success: function(products) {
                                 $.each(products, function(key, value) {
-                                    productSelect.append('<option value="' + value.id +
-                                        '">' + value.name + '</option>');
+                                    // productSelect.append('<option value="' + value.id + '">' +
+                                    //     value.name + '</option>');
+                                    let unit = value.product_unit || '';
+                                    productSelect.append(
+                                        `<option value="${value.id}" data-unit="${unit}">${value.name}</option>`
+                                    );
                                 });
                                 productSelect.prop('disabled', false);
                             }
@@ -208,8 +216,12 @@
                     type: 'GET',
                     success: function(products) {
                         $.each(products, function(key, value) {
-                            productSelect.append('<option value="' + value.id + '">' +
-                                value.name + '</option>');
+                            // productSelect.append('<option value="' + value.id + '">' +
+                            //     value.name + '</option>');
+                            let unit = value.product_unit || '';
+                            productSelect.append(
+                                `<option value="${value.id}" data-unit="${unit}">${value.name}</option>`
+                            );
                         });
                         productSelect.prop('disabled', false);
                     },
@@ -231,6 +243,7 @@
 
                 const productName = productSelect.find('option:selected').text();
                 const categoryName = $('#category_filter').find('option:selected').text();
+                const unit = productSelect.find('option:selected').data('unit') || '';
 
                 // Handle Sub Category Name display
                 let subCategoryName = $('#sub_category_filter').find('option:selected').text();
@@ -240,12 +253,28 @@
 
                 rowCounter++;
 
+                // requisitionTable.row.add([
+                //     categoryName,
+                //     subCategoryName, // Added Sub Cat column data
+                //     productName +
+                //     `<input type="hidden" name="details[${rowCounter}][product_id]" value="${productId}">`,
+                //     `<input type="number" class="form-control" name="details[${rowCounter}][quantity]" min="1" value="1" required>`,
+                //     `<button type="button" class="btn btn-danger btn-sm remove-row"><i class="fa fa-trash"></i></button>`
+                // ]).draw(false);
                 requisitionTable.row.add([
                     categoryName,
-                    subCategoryName, // Added Sub Cat column data
+                    subCategoryName,
                     productName +
                     `<input type="hidden" name="details[${rowCounter}][product_id]" value="${productId}">`,
-                    `<input type="number" class="form-control" name="details[${rowCounter}][quantity]" min="1" value="1" required>`,
+
+                    // NEW: Wrapped input in input-group to show unit
+                    `<div class="input-group input-group-sm">
+                        <input type="number" class="form-control" name="details[${rowCounter}][quantity]" min="1" value="1" required>
+                        <div class="input-group-append">
+                            <span class="input-group-text">${unit}</span>
+                        </div>
+                    </div>`,
+
                     `<button type="button" class="btn btn-danger btn-sm remove-row"><i class="fa fa-trash"></i></button>`
                 ]).draw(false);
             });
