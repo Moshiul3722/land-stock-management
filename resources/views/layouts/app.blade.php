@@ -216,7 +216,7 @@
                             <span class="badge badge-warning navbar-badge">{{ $unreadCount }}</span>
                         @endif
                     </a>
-                    <div class="dropdown-menu dropdown-menu-lg dropdown-menu-right">
+                    <div class="dropdown-menu dropdown-menu-xl dropdown-menu-right" style="min-width: 450px;">
                         <span class="dropdown-item dropdown-header">{{ $unreadCount ?? 0 }} Notifications</span>
                         <div class="dropdown-divider"></div>
 
@@ -224,9 +224,9 @@
                             @foreach ($recentNotifications as $notification)
                                 <a href="{{ route('notifications.read', $notification->id) }}" class="dropdown-item">
                                     <i class="fas fa-envelope mr-2"></i>
-                                    {{ Str::limit($notification->notification_text, 20) }}
+                                    {{ Str::limit($notification->notification_text, 80) }}
                                     <span
-                                        class="float-right text-muted text-sm">{{ $notification->created_at->diffForHumans(null, true, true) }}</span>
+                                        class="float-right text-muted text-sm">{{ $notification->created_at->timezone('Asia/Dhaka')->format('d M, Y h:i A') }}</span>
                                 </a>
                                 <div class="dropdown-divider"></div>
                             @endforeach
