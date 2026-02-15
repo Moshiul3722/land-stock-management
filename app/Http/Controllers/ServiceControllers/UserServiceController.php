@@ -9,7 +9,6 @@ use Illuminate\Http\Request;
 
 class UserServiceController extends AppBaseController
 {
-    /** @var CnfBankRepository $cnfBankRepository*/
     private $roleService;
     /** @var UserService $userService*/
     private $userService;

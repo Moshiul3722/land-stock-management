@@ -2,19 +2,17 @@
 
 namespace App\Http\Controllers;
 
-use Log;
 use Flash;
 use Response;
-use App\Mail\WelcomeEmail;
+use App\Models\Department;
 use Illuminate\Http\Request;
-use App\Services\EmailService;
 use Illuminate\Validation\Rule;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Mail;
 use App\Http\Controllers\AppBaseController;
-use App\Http\Requests\CreateCnfRoleRequest;
 use App\Http\Controllers\ServiceControllers\RoleServiceController;
 use App\Http\Controllers\ServiceControllers\UserServiceController;
+use Illuminate\Support\Facades\Log;
+use App\Models\CnfRole;
 
 class UserController extends AppBaseController
 {
@@ -23,8 +21,10 @@ class UserController extends AppBaseController
     /** @var UserServiceController $userServiceController*/
     private $userServiceController;
 
-    public function __construct(RoleServiceController $roleServiceController, UserServiceController $userServiceController)
-    {
+    public function __construct(
+        RoleServiceController $roleServiceController,
+        UserServiceController $userServiceController
+    ) {
         $this->roleServiceController = $roleServiceController;
         $this->userServiceController = $userServiceController;
     }
@@ -53,7 +53,9 @@ class UserController extends AppBaseController
      */
     public function create()
     {
-        return view('users.create');
+        // Fetch all departments for the dropdown
+        $departments = Department::orderBy('name')->get();
+        return view('users.create', compact('departments'));
     }
 
     /**
@@ -66,6 +68,8 @@ class UserController extends AppBaseController
             'name' => 'required|max:255',
             'email' => 'required|unique:users,email|max:255',
             'password' => 'required|max:255',
+            'role_id' => 'required|exists:cnf_role,id',
+            'department_id' => 'required_if:role_id,5|exists:departments,id',
         ]);
 
         try {
@@ -74,14 +78,6 @@ class UserController extends AppBaseController
             if (!$user) {
                 throw new \Exception("Failed to create user.");
             }
-            
-            $emailService = new EmailService;
-            $emailService -> sendWelcomeEmail(
-                $request->input('email'),
-                $request->input('name'),
-                $request->input('email'),
-                $request->input('password')
-            );
 
             return response()->json($user);
         } catch (\Exception $e) {
@@ -99,8 +95,6 @@ class UserController extends AppBaseController
     public function edit($id)
     {
         try {
-
-
             $user = $this->userServiceController->find($id);
             // dd($user->getOriginalContent());
             // If not found return to list with error
@@ -109,7 +103,14 @@ class UserController extends AppBaseController
                 return redirect(route('users.index'));
             }
 
-            return view('users.edit')->with('user', $user->getOriginalContent());
+            $roles = CnfRole::all();
+            // Fetch all departments for the dropdown
+            $departments = Department::orderBy('name')->get();
+
+            return view('users.edit')
+                ->with('user', $user->getOriginalContent())
+                ->with('roles', $roles)
+                ->with('departments', $departments);
         } catch (\Exception $e) {
             Flash::error('User not found');
             return redirect(route('users.index'));

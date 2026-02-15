@@ -12,7 +12,8 @@ class UserRepository extends BaseRepository
         'name',
         'email',
         'role_id',
-        'usertype_id'
+        'usertype_id',
+        'department_id',
     ];
 
     public function getFieldsSearchable(): array

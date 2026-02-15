@@ -78,6 +78,18 @@
                                 </div>
                             </div>
                         </div>
+                        <div class="row" visible="false" id="department_row">
+                            <div class="form-group col-sm-6">
+                                <label for="department_id">Section/Department <span
+                                            style="color: red;">*</span></label>
+                                <select name="department_id" id="department_id" class="form-control select2">
+                                    <option value="">Select Department (Required for General User)</option>
+                                    @foreach ($departments as $dept)
+                                        <option value="{{ $dept->id }}">{{ $dept->name }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+                        </div>
                         <div class="row">
                             <div class="col-md-6">
                                 <div class="form-group">
@@ -129,6 +141,17 @@
 @push('js')
     <script>
         $(document).ready(function() {
+            $('#department_row').hide();
+            $('#role').on('change', function() {
+                var selectedRoleId = $(this).val();
+                // if Role Id = 5 (Normal User), show the department dropdown, otherwise hide it
+                if (selectedRoleId == 5) {
+                    $('#department_row').show();
+                } else {
+                    $('#department_row').hide();
+                    $('#department_row select').val(''); // Clear department selection
+                }
+            });
             $('#user_save').click(function(event) {
                 event.preventDefault();
                 // Get the values
@@ -136,10 +159,11 @@
                 var userNameBn = $('#name_bn').val();
                 var email = $('#email').val();
                 var role = $('#role').val();
-                var district = $('#districts').val();
+                var department = $('#department_id').val();
                 var password = $('#password').val();
                 var confirm_password = $('#confirm_password').val();
 
+                console.log(department);
 
                 //Validations
                 if (userNameEn == undefined || userNameEn == "" ||
@@ -164,7 +188,15 @@
                     });
                     return;
                 }
-
+                // Department Validation for Normal User Role
+                if (role == 5 && (department == undefined || department == "")) {
+                    Swal.fire({
+                        title: "{{ __('sweetalert.error') }}",
+                        text: "Please select a department for Normal User role.",
+                        icon: 'warning'
+                    });
+                    return;
+                }
                 // Email Validation
                 if (!emailRegex.test(email)) {
                     Swal.fire({
@@ -174,19 +206,6 @@
                     });
                     return;
                 }
-
-                // Email Validation
-                if (role == 2 || role == 3) {
-                    if (district == 0) {
-                        Swal.fire({
-                            title: "{{ __('sweetalert.error') }}",
-                            text: "District Must Be Selected!",
-                            icon: 'warning'
-                        });
-                        return;
-                    }
-                }
-
                 Swal.fire({
                     title: "{{ __('sweetalert.confirmation') }}",
                     text: "{{ __('sweetalert.about_to_save') }}",
@@ -208,7 +227,7 @@
                                 name_bn: userNameBn,
                                 email: email,
                                 role_id: role,
-                                district_id: district,
+                                department_id: department,
                                 password: password,
                             },
                             beforeSend: function() {

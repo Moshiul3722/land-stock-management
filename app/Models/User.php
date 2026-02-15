@@ -25,7 +25,7 @@ class User extends Authenticatable
         'email',
         'role_id',
         'usertype_id',
-        'district_id',
+        'department_id',
         'password',
         'profile_photo_path',
         'created_by',
