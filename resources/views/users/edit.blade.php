@@ -97,7 +97,7 @@
                         <div class="col-sm-6">
                             <div class="form-group">
                                 {!! Form::label('department_id', 'Section/Department:') !!}
-                                <select name="department_id" class="form-control select2">
+                                <select name="department_id" id="department_id" class="form-control select2">
                                     <option value="">Select Department (Optional)</option>
                                     @foreach ($departments as $dept)
                                         <option value="{{ $dept->id }}"
@@ -249,7 +249,7 @@
                         name_bn: userNameBn,
                         email: email,
                         role_id: role,
-                        district_id: district_id,
+                        department_id: department_id,
                     };
                     // Password Confirmation Validation
                     if (password != "") {
