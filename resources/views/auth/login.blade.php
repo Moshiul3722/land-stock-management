@@ -272,7 +272,7 @@
     <footer class="gov-footer">
         <div class="container">
             <span>
-                © {{ date('Y') }} Ministry of Land. All Rights Reserveds. |
+                © {{ date('Y') }} Ministry of Land. All Rights Reserved. |
                 Developed by <a href="#" class="text-decoration-none fw-bold" style="color: #006a4e;">UltraCore Creatives Ltd.</a>
             </span>
         </div>
