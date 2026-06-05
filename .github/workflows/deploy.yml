@@ -26,7 +26,7 @@ jobs:
 
             echo "🚀 Starting deployment..."
 
-            cd /home/inventory/inv-land
+            cd ${{ github.ref == 'refs/heads/demo' && '/home/texpdyjc/demo.ultracorecreatives.com' || '/home/inventory/inv-land' }}
 
             # Fetch latest code using GitHub token
             git fetch https://${{ secrets.GH_TOKEN }}@github.com/ultracorecreatives/inv-land.git ${{ github.ref_name }}
