@@ -5,13 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login | {{ config('app.name') }}</title>
     <link rel="icon" href="{{ asset('favicon.ico') }}" type="image/x-icon" />
-    
+
     <!-- Fonts: SolaimanLipi / Nunito -->
     <link href="https://fonts.bunny.net/css?family=Nunito" rel="stylesheet">
-    
+
     <!-- Bootstrap 5 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-    
+
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
 
@@ -80,7 +80,7 @@
             text-align: center;
             position: relative;
         }
-        
+
         /* Background image overlay for left side */
         .login-banner::before {
             content: "";
@@ -90,7 +90,7 @@
             opacity: 0.2;
             z-index: 0;
         }
-        
+
         .banner-content { position: relative; z-index: 1; }
 
         /* Right Side (Form) */
@@ -172,7 +172,7 @@
     <header class="gov-header">
         <div class="container">
             <div class="d-flex align-items-center justify-content-center justify-content-md-start">
-                <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/8/84/Government_Seal_of_Bangladesh.svg/1200px-Government_Seal_of_Bangladesh.svg.png" 
+                <img src="{{ asset('Government_Seal_of_Bangladesh.svg') }}"
                      alt="BD Gov Logo" class="gov-logo me-3">
                 <div>
                     <h1 class="ministry-name">Ministry of Land</h1>
@@ -214,19 +214,19 @@
                     {{-- Mobile Logo --}}
                     <img src="{{ asset('img/bd-logo-trans.png') }}" height="60" alt="Logo">
                 </div>
-                
+
                 <h2 class="login-title">Sign In</h2>
                 <p class="login-subtitle">Enter your credentials to access the dashboard.</p>
 
                 <form method="post" action="{{ url('/login') }}">
                     @csrf
-                    
+
                     <!-- Email -->
                     <div class="mb-3">
                         <label class="form-label small fw-bold text-secondary">Email / Username</label>
                         <div class="input-group">
                             <span class="input-group-text"><i class="fas fa-envelope"></i></span>
-                            <input type="email" name="email" class="form-control @error('email') is-invalid @enderror" 
+                            <input type="email" name="email" class="form-control @error('email') is-invalid @enderror"
                                    value="{{ old('email') }}" placeholder="admin@land.gov.bd" required autofocus>
                         </div>
                         @error('email')
@@ -243,7 +243,7 @@
                         </div>
                         <div class="input-group">
                             <span class="input-group-text"><i class="fas fa-lock"></i></span>
-                            <input type="password" name="password" class="form-control @error('password') is-invalid @enderror" 
+                            <input type="password" name="password" class="form-control @error('password') is-invalid @enderror"
                                    placeholder="Enter your password" required>
                         </div>
                         @error('password')
@@ -272,7 +272,7 @@
     <footer class="gov-footer">
         <div class="container">
             <span>
-                © {{ date('Y') }} Ministry of Land. All Rights Reserved. | 
+                © {{ date('Y') }} Ministry of Land. All Rights Reserved. |
                 Developed by <a href="#" class="text-decoration-none fw-bold" style="color: #006a4e;">UltraCore Creatives Ltd.</a>
             </span>
         </div>

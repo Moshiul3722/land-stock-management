@@ -128,7 +128,7 @@
                 <div class="row align-items-center">
                     <div class="col-md-1 col-2 text-center">
                         <!-- Use asset() for your local logo -->
-                        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/8/84/Government_Seal_of_Bangladesh.svg/1200px-Government_Seal_of_Bangladesh.svg.png"
+                        <img src="{{ asset('Government_Seal_of_Bangladesh.svg') }}"
                              alt="BD Gov Logo" class="gov-logo">
                     </div>
                     <div class="col-md-6 col-10">
