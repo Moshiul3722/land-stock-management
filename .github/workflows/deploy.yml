@@ -23,6 +23,7 @@ jobs:
           port: ${{ github.ref == 'refs/heads/demo' && secrets.SSH_PORT || 22 }}
           script: |
             set -e
+            BRANCH="${{ github.ref_name }}"
 
             echo "🚀 Starting deployment..."
 
@@ -36,7 +37,12 @@ jobs:
             php artisan down || true
 
             # Install dependencies
-            if command -v composer &> /dev/null; then
+            if [ "$BRANCH" = "main" ]; then
+              composer install \
+                --no-dev \
+                --optimize-autoloader \
+                --no-interaction
+            elif command -v composer &> /dev/null; then
               composer install --no-dev --optimize-autoloader --no-interaction
             elif [ -f "/opt/cpanel/composer/bin/composer" ]; then
               /usr/local/bin/ea-php82 /opt/cpanel/composer/bin/composer install --no-dev --optimize-autoloader --no-interaction
