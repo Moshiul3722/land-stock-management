@@ -65,6 +65,9 @@ jobs:
             # Fix permissions
             chmod -R 775 storage bootstrap/cache
 
+            # Force OPcache to pick up new files
+            touch public/index.php
+
             # Bring app back online
             php artisan up
 
