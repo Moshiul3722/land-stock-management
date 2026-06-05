@@ -36,10 +36,11 @@ jobs:
             php artisan down || true
 
             # Install dependencies
-            composer install \
-              --no-dev \
-              --optimize-autoloader \
-              --no-interaction
+            if command -v composer &> /dev/null; then
+              composer install --no-dev --optimize-autoloader --no-interaction
+            elif [ -f "/opt/cpanel/composer/bin/composer" ]; then
+              /usr/local/bin/ea-php82 /opt/cpanel/composer/bin/composer install --no-dev --optimize-autoloader --no-interaction
+            fi
 
             # Run migrations
             php artisan migrate --force
