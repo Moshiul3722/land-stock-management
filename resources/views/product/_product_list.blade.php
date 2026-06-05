@@ -13,6 +13,7 @@
                 <th>SL</th>
                 <th>Name</th>
                 <th>Category</th>
+                <th>Sub Category</th> {{-- NEW COLUMN HEADER --}}
                 <th>Action</th>
             </tr>
         </thead>
@@ -22,6 +23,7 @@
                     <td>{{ $loop->iteration }}</td>
                     <td>{{ $product->name }}</td>
                     <td>{{ $product->category->name ?? 'N/A' }}</td>
+                    <td>{{ $product->subCategory->name ?? 'N/A' }}</td> {{-- NEW COLUMN DATA --}}
                     <td>
                         <a href="{{ route('products.show', $product) }}" class="btn btn-info btn-sm" title="View"><i
                                 class="fa fa-eye"></i></a>

@@ -31,9 +31,12 @@ class DatabaseSeeder extends Seeder
             YearSeeder::class,
             PurchaseTypeSeeder::class,
             CategorySeeder::class,
+            SubCategorySeeder::class,
+            ProductSeeder::class,
             ApprovalEntitySeeder::class,
             ApprovalProcessSeeder::class,
-            TestSeeder::class,
+            FiscalYearSeeder::class,
+            // TestSeeder::class,
         ]);
     }
 }

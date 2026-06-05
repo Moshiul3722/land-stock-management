@@ -38,7 +38,9 @@ class StockRepository extends BaseRepository
         $query = Stock::query()
             ->join('products', 'stocks.product_id', '=', 'products.id')
             ->join('product_categories', 'products.category_id', '=', 'product_categories.id')
-            // Join Lots and Purchase Types to allow grouping
+            // Join Sub Categories (Left Join because it's optional)
+            ->leftJoin('product_sub_categories', 'products.sub_category_id', '=', 'product_sub_categories.id')
+            
             ->leftJoin('lots', 'stocks.lot_id', '=', 'lots.id')
             ->leftJoin('product_purchase_types', 'lots.product_purchase_type_id', '=', 'product_purchase_types.id')
 
@@ -46,17 +48,19 @@ class StockRepository extends BaseRepository
                 'products.id as product_id',
                 'products.name as product_name',
                 'product_categories.name as category_name',
+                'product_sub_categories.name as sub_category_name', // <--- NEW
                 'product_purchase_types.name as purchase_type_name',
                 'stocks.brand',
                 'stocks.specification',
                 DB::raw('SUM(stocks.quantity) as total_quantity')
             )
             ->whereNull('stocks.deleted_at')
-            // Group by Product AND Purchase Type
+            
             ->groupBy(
-                'products.id',
-                'products.name',
+                'products.id', 
+                'products.name', 
                 'product_categories.name',
+                'product_sub_categories.name', // <--- NEW
                 'product_purchase_types.id',
                 'product_purchase_types.name',
                 'stocks.brand',
@@ -68,7 +72,7 @@ class StockRepository extends BaseRepository
             $query->where('products.category_id', $filters['category_id']);
         }
 
-        // Apply purchase type filter (conditionally add the join)
+        // Apply purchase type filter
         if (!empty($filters['purchase_type_id'])) {
             $query->where('lots.product_purchase_type_id', $filters['purchase_type_id']);
         }

@@ -14,6 +14,7 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
 use InvalidArgumentException;
 use Illuminate\Support\Facades\Auth;
+use App\Services\NotificationService;
 
 class RequisitionService
 {
@@ -21,6 +22,7 @@ class RequisitionService
     protected $itemRepository;
     protected $approvalService;
     protected $stockService;
+    protected $notificationService;
 
     /**
      * RequisitionService constructor.
@@ -29,17 +31,20 @@ class RequisitionService
      * @param RequisitionItemRepository $itemRepository
      * @param ApprovalService $approvalService
      * @param StockService $stockService
+     * @param NotificationService $notificationService
      */
     public function __construct(
         RequisitionRepository $requisitionRepository,
         RequisitionItemRepository $itemRepository,
         ApprovalService $approvalService,
-        StockService $stockService
+        StockService $stockService,
+        NotificationService $notificationService
     ) {
         $this->requisitionRepository = $requisitionRepository;
         $this->itemRepository = $itemRepository;
         $this->approvalService = $approvalService;
         $this->stockService = $stockService;
+        $this->notificationService = $notificationService;
     }
 
     /**
@@ -152,6 +157,7 @@ class RequisitionService
                         'requisition_id' => $requisition->id,
                         'product_id' => $item['product_id'],
                         'quantity' => $item['quantity'],
+                        'original_quantity' => $item['quantity'],
                     ]);
                 }
 
@@ -258,6 +264,8 @@ class RequisitionService
                 'requisition_id' => $requisitionId,
                 'product_id' => $item['product_id'],
                 'quantity' => $item['quantity'],
+                // Save the snapshot of the original request
+                'original_quantity' => $item['quantity'],
             ]);
         }
     }
@@ -297,7 +305,10 @@ class RequisitionService
     {
         $pendingTask = $requisition->approvalDetails()
             ->where('status', 'pending')
-            ->firstOrFail();
+            ->first();
+        if (!$pendingTask) {
+            throw new InvalidArgumentException('No pending approval task found for this requisition.');
+        }
 
         $this->approvalService->approve($pendingTask, $comments);
     }
@@ -313,7 +324,10 @@ class RequisitionService
 
         $pendingTask = $requisition->approvalDetails()
             ->where('status', 'pending')
-            ->firstOrFail();
+            ->first();
+        if (!$pendingTask) {
+            throw new InvalidArgumentException('No pending approval task found for this requisition.');
+        }
 
         $this->approvalService->reject($pendingTask, $comments);
     }
@@ -331,5 +345,81 @@ class RequisitionService
 
         return $this->requisitionRepository->countByStatus('processed');
         // If you explicitly used 'processed' in your database for the final step, change 'approved' to 'processed'.
+    }
+
+
+    /**
+     * Split specific items into a new requisition and notify Store Keepers.
+     * * @param Requisition $originalReq
+     * @param array $itemIds
+     * @return Requisition
+     */
+    public function splitAndNotify(Requisition $originalReq, array $itemIds)
+    {
+        return DB::transaction(function () use ($originalReq, $itemIds) {
+
+            // 1. Check if we are selecting ALL items
+            $totalItemCount = $originalReq->items()->count();
+            $isFullSelection = count($itemIds) >= $totalItemCount;
+
+            // Common: Get names for notification
+            $selectedItems = \App\Models\RequisitionItem::whereIn('id', $itemIds)
+                ->where('requisition_id', $originalReq->id)
+                ->with('product')
+                ->get();
+
+            if ($selectedItems->isEmpty()) {
+                throw new InvalidArgumentException("Selected items not found in the original requisition.");
+            }
+
+            $missingProductNames = $selectedItems->pluck('product.name')->unique()->toArray();
+            $productList = implode(', ', $missingProductNames);
+            $storeKeepers = User::where('role_id', 4)->get();
+            $url = route('lots.create'); // Link to Stock Entry
+
+            // --- CASE A: FULL SELECTION (Notify Only) ---
+            if ($isFullSelection) {
+                $text = "Stock Required! All items unavailable for Requisition #{$originalReq->id}: {$productList}";
+
+                foreach ($storeKeepers as $keeper) {
+                    $this->notificationService->createNotification($keeper->id, $text, $url, Auth::id());
+                }
+
+                return null; // Indicate no new requisition created
+            }
+
+            // --- CASE B: PARTIAL SPLIT (Create New Req) ---
+            
+            // 2. Create New Requisition
+            $newReq = $this->requisitionRepository->create([
+                'requisition_date' => $originalReq->requisition_date,
+                'remarks' => "Split from Requisition #{$originalReq->id}. " . $originalReq->remarks,
+                'status' => 'pending', 
+                'current_serial' => 1, 
+                'requested_by_user_id' => $originalReq->requested_by_user_id,
+            ]);
+
+            // 3. Move Items
+            foreach ($selectedItems as $item) {
+                $item->update(['requisition_id' => $newReq->id]);
+            }
+
+            // 4. Auto-Submit New Req
+            $this->approvalService->submitForApproval(
+                $newReq, 
+                'Requisition Approval', 
+                'Auto-generated split requisition for out-of-stock items.'
+            );
+
+            
+            // 5. Notify
+            $text = "Stock Required! Items moved to Split Requisition #{$newReq->id}: {$productList}";
+            
+            foreach ($storeKeepers as $keeper) {
+                $this->notificationService->createNotification($keeper->id, $text, $url, Auth::id());
+            }
+
+            return $newReq;
+        });
     }
 }

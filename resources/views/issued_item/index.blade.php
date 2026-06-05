@@ -34,7 +34,10 @@
                                     <th style="width: 10%">Req. ID</th>
                                     <th style="width: 25%">Product Details</th>
                                     <th style="width: 15%">Purchase Type</th>
-                                    <th style="width: 10%" class="text-center">Quantity</th>
+                                    {{-- NEW: Requested Column --}}
+                                    <th style="width: 10%" class="text-center">Requested</th>
+                                    {{-- Renamed Quantity to Issued --}}
+                                    <th style="width: 10%" class="text-center">Issued</th>
                                     <th style="width: 15%">Req. Date</th>
                                     <th style="width: 15%">Issued Date</th>
                                 </tr>
@@ -55,6 +58,16 @@
                                             <br>
                                             <small class="text-muted">Lot: {{ $item->lot->lot_number ?? 'N/A' }}</small>
                                         </td>
+                                        <td class="text-center text-muted">
+                                            @php
+                                                // Find the specific line item from the parent requisition
+                                                // to get what was originally asked for.
+                                                $reqItem = $item->requisition->items->firstWhere('product_id', $item->product_id);
+                                                $requestedQty = $reqItem ? ($reqItem->original_quantity ?? $reqItem->quantity) : '-';
+                                            @endphp
+                                            {{ $requestedQty }}
+                                        </td>
+
                                         <td class="text-center font-weight-bold text-primary">
                                             {{ $item->quantity }}
                                         </td>

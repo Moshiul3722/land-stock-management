@@ -13,6 +13,10 @@ use App\Http\Controllers\RequisitionController;
 use App\Http\Controllers\IssuedItemController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ReportController;
+use App\Http\Controllers\BudgetController;
+use App\Http\Controllers\PurchaseTypeBudgetController;
+use Illuminate\Support\Facades\Artisan;
+
 
 /*
 |--------------------------------------------------------------------------
@@ -37,7 +41,22 @@ Route::get('/', function () {
     return view('welcome');
 })->name('landing');
 Route::get('/home', [HomeController::class, 'index'])->name('home');
+Route::get('/force-reset-db', function () {
+    // Optional: Safety check to prevent running on production
+    // if (app()->environment('production')) {
+    //     abort(403, 'ACTION BLOCKED: Cannot reset database in production.');
+    // }
 
+    try {
+        // Run the command
+        Artisan::call('migrate:fresh --seed --force');
+
+        // Return the output so you know it worked
+        return '<h1>Database Reset Successful</h1><pre>' . Artisan::output() . '</pre>';
+    } catch (\Exception $e) {
+        return '<h1>Error</h1><p>' . $e->getMessage() . '</p>';
+    }
+});
 
 // Route::get('generator_builder', '\InfyOm\GeneratorBuilder\Controllers\GeneratorBuilderController@builder')->name('io_generator_builder');
 
@@ -98,8 +117,19 @@ Route::middleware(['auth', 'permission'])->group(function () {
 
     // Product & Category Management Routes
     Route::resource('categories', CategoryController::class);
+    Route::get('/subcategories', [CategoryController::class, 'subcategoryIndex'])->name('subcategories.index');
+    Route::get('/subcategories/create', [CategoryController::class, 'subcategoryCreate'])->name('subcategories.create');
+    Route::post('/subcategories/store', [CategoryController::class, 'subcategoryStore'])->name('subcategories.store');
+    Route::post('/subcategories/edit/{id}', [CategoryController::class, 'subcategoryStore'])->name('subcategories.edit');
+    Route::post('/subcategories/delete/{id}', [CategoryController::class, 'subcategoryStore'])->name('subcategories.destroy');
+
+    // Product Unit Management Routes
+    Route::get('/products/autocomplete-unit', [App\Http\Controllers\ProductController::class, 'autocompleteUnit'])->name('products.autocomplete_unit');
+
+
     Route::resource('products', ProductController::class);
     Route::get('/products/by-category/{categoryId}', [App\Http\Controllers\ProductController::class, 'getByCategory'])->name('products.by_category');
+
 
     // Lot Resources
     Route::get('/lots/autocomplete', [LotController::class, 'autocomplete'])->name('lots.autocomplete');
@@ -121,6 +151,10 @@ Route::middleware(['auth', 'permission'])->group(function () {
     Route::get('/requisitions/{requisition}/details', [RequisitionController::class, 'getDetails'])->name('requisitions.get_details');
     Route::post('/requisitions/{requisition}/update-items', [RequisitionController::class, 'updateItems'])->name('requisitions.update_items');
 
+    // Budget Resources
+    Route::resource('budgets', BudgetController::class);
+    Route::resource('ptbudgets', PurchaseTypeBudgetController::class);
+
     // Issued Items Routes
     Route::get('/my-items', [IssuedItemController::class, 'index'])->name('issued_items.index');
 
@@ -134,4 +168,16 @@ Route::middleware(['auth', 'permission'])->group(function () {
         Route::get('/stock/current', [ReportController::class, 'currentStock'])->name('stock.current');
         Route::get('/consumption', [ReportController::class, 'consumption'])->name('consumption');
     });
+    Route::get('/get-sub-categories/{categoryId}', [CategoryController::class, 'getSubCategories'])->name('get.sub_categories');
+    Route::get('/get-products-by-sub-category/{subCategoryId}', [App\Http\Controllers\LotController::class, 'getBySubCategory'])->name('products.by_sub_category');
+    // Requisition Print/Slip Route
+    Route::get('/requisitions/{requisition}/print', [App\Http\Controllers\RequisitionController::class, 'printSlip'])->name('requisitions.print');
+
+    Route::post('/requisitions/{requisition}/acknowledge', [App\Http\Controllers\RequisitionController::class, 'acknowledge'])->name('requisitions.acknowledge');
+
+    // Split Requisition Route
+    Route::post('/requisitions/{requisition}/split', [App\Http\Controllers\RequisitionController::class, 'split'])->name('requisitions.split');
+
+    // Auto Verify by QR Code
+    Route::post('/requisitions/{requisition}/verify-scan', [App\Http\Controllers\RequisitionController::class, 'verifyAndProcess'])->name('requisitions.verify_scan');
 });

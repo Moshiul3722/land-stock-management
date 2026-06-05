@@ -70,13 +70,16 @@ class LotService
     {
         $validator = Validator::make($data, [
             'lot_number' => 'required|string|max:255|unique:lots',
+            'fiscal_year_id' => 'required|exists:fiscal_years,id',
             'product_purchase_type_id' => 'required|exists:product_purchase_types,id',
             'entry_date' => 'required|date',
             'remarks' => 'nullable|string',
             'details' => 'required|array|min:1',
             'details.*.product_id' => 'required|exists:products,id',
             'details.*.quantity' => 'required|integer|min:1',
-            'details.*.unit_price' => 'nullable|numeric|min:0',
+            'details.*.unit_price' => 'required|numeric|min:0',
+            'details.*.brand' => 'nullable|string',
+            'details.*.specification' => 'nullable|string',
         ]);
 
         if ($validator->fails()) {
@@ -90,6 +93,7 @@ class LotService
                 // 1. Create the main Lot record with the correct status
                 $lot = $this->lotRepository->create([
                     'lot_number' => $data['lot_number'],
+                    'fiscal_year_id' => $data['fiscal_year_id'],
                     'product_purchase_type_id' => $data['product_purchase_type_id'],
                     'entry_date' => $data['entry_date'],
                     'remarks' => $data['remarks'],
@@ -106,7 +110,7 @@ class LotService
 
                 // 3. ONLY submit to the workflow if the action is 'submit'
                 if ($action === 'submit') {
-                    $this->approvalService->submitForApproval($lot, 'Lot Approval');
+                    $this->approvalService->submitForApproval($lot, 'Lot Approval',  $data['remarks'] ?? null);
                 }
 
                 return $lot;
@@ -130,21 +134,20 @@ class LotService
     {
         $validator = Validator::make($data, [
             'lot_number' => 'required|string|max:255|unique:lots,lot_number,' . $id,
+            'fiscal_year_id' => 'required|exists:fiscal_years,id',
             'product_purchase_type_id' => 'required|exists:product_purchase_types,id',
             'entry_date' => 'required|date',
             'remarks' => 'nullable|string',
             'details' => 'required|array|min:1',
             'details.*.product_id' => 'required|exists:products,id',
             'details.*.quantity' => 'required|integer|min:1',
-            'details.*.unit_price' => 'nullable|numeric|min:0',
+            'details.*.unit_price' => 'required|numeric|min:0',
         ]);
-
         if ($validator->fails()) {
             throw new InvalidArgumentException($validator->errors()->first());
         }
 
         $lot = $this->lotRepository->find($id);
-
         if ($lot->status !== 'draft') {
             throw new InvalidArgumentException('This lot cannot be edited as it is already in the approval process.');
         }
@@ -156,6 +159,7 @@ class LotService
                 // 1. Update the main Lot record
                 $updatedLot = $this->lotRepository->update([
                     'lot_number' => $data['lot_number'],
+                    'fiscal_year_id' => $data['fiscal_year_id'],
                     'product_purchase_type_id' => $data['product_purchase_type_id'],
                     'entry_date' => $data['entry_date'],
                     'remarks' => $data['remarks'],
@@ -173,7 +177,7 @@ class LotService
 
                 // 4. ONLY submit to the workflow if the action is 'submit'
                 if ($action === 'submit') {
-                    $this->approvalService->submitForApproval($updatedLot, 'Lot Approval');
+                    $this->approvalService->submitForApproval($updatedLot, 'Lot Approval',  $data['remarks'] ?? null);
                 }
 
                 return $updatedLot;
@@ -253,7 +257,10 @@ class LotService
         // This business logic now lives in the service
         $pendingTask = $lot->approvalDetails()
             ->where('status', 'pending')
-            ->firstOrFail(); // Fails if no pending task
+            ->first();
+        if (!$pendingTask) {
+            throw new InvalidArgumentException('No pending approval task found for this lot.');
+        }
 
         // Call the approval service with the specific task
         $this->approvalService->approve($pendingTask, $comments);
@@ -274,7 +281,10 @@ class LotService
 
         $pendingTask = $lot->approvalDetails()
             ->where('status', 'pending')
-            ->firstOrFail();
+            ->first();
+        if (!$pendingTask) {
+            throw new InvalidArgumentException('No pending approval task found for this lot.');
+        }
 
         $this->approvalService->reject($pendingTask, $comments);
     }

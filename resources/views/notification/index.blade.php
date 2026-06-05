@@ -54,7 +54,7 @@
                                                 <td class="mailbox-subject">
                                                     {{ $notification->notification_text }}
                                                 </td>
-                                                <td class="mailbox-date">{{ $notification->created_at->diffForHumans() }}</td>
+                                                <td class="mailbox-date">{{ $notification->created_at->timezone('Asia/Dhaka')->format('d M, Y h:i A') }}</td>
                                             </tr>
                                         @empty
                                             <tr>

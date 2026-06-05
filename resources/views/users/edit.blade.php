@@ -96,10 +96,15 @@
                         </div> --}}
                         <div class="col-sm-6">
                             <div class="form-group">
-                                <label for="districts">{{ __('geolocation.district') }} <span
-                                        style="color: red;">*</span></label>
-                                <select class="js-example-basic-single custom-select form-control-border" id="districts"
-                                    name="districts">
+                                {!! Form::label('department_id', 'Section/Department:') !!}
+                                <select name="department_id" id="department_id" class="form-control select2">
+                                    <option value="">Select Department (Optional)</option>
+                                    @foreach ($departments as $dept)
+                                        <option value="{{ $dept->id }}"
+                                            {{ $user->department_id == $dept->id ? 'selected' : '' }}>
+                                            {{ $dept->name }}
+                                        </option>
+                                    @endforeach
                                 </select>
                             </div>
                         </div>
@@ -215,48 +220,6 @@
                     }
                 });
 
-                // Getting the list of all districts
-                $.ajax({
-                    url: "{{ route('geolocation.get.all.districts') }}",
-                    type: 'POST',
-                    dataType: 'json',
-                    beforeSend: function() {
-                        $('#wait').show();
-                    },
-                    success: function(data) {
-                        var dropdown = $('#districts');
-                        dropdown.empty();
-                        dropdown.append($('<option></option>').attr('value', '0').text(
-                            "-- NONE --"));
-                        $.each(data, function(key, value) {
-
-                            if(district_id) {
-                                dropdown.append($('<option></option>').attr('value', value.id).text(
-                                selectedLocale === 'en' ? value.name : value
-                                .name_bn).prop('selected', value.id == district_id));
-                            } else {
-                                dropdown.append($('<option></option>').attr('value', value.id).text(
-                                selectedLocale === 'en' ? value.name : value
-                                .name_bn));
-                            }
-
-                        });
-                    },
-                    error: function(err) {
-                        $('#wait').hide();
-                        // Display Sweet Alert for error
-                        Swal.fire({
-                            icon: 'error',
-                            title: "{{ __('sweetalert.error') }}",
-                            text: "{{ __('sweetalert.error_title') }}",
-                            showCloseButton: true,
-                        });
-                    },
-                    complete: function() {
-                        $('#wait').hide();
-                    }
-                });
-
                 $('#user_update').click(function(event) {
                     event.preventDefault();
                     // Get the values
@@ -266,7 +229,7 @@
                     var role = $('#role').val();
                     var password = $('#password').val();
                     var confirm_password = $('#confirm_password').val();
-                    var district_id = $('#districts').val();
+                    var department_id = $('#department_id').val();
 
 
                     //Validations
@@ -286,7 +249,7 @@
                         name_bn: userNameBn,
                         email: email,
                         role_id: role,
-                        district_id: district_id,
+                        department_id: department_id,
                     };
                     // Password Confirmation Validation
                     if (password != "") {
@@ -318,6 +281,17 @@
                         Swal.fire({
                             title: "{{ __('sweetalert.error') }}",
                             text: "{{ __('sweetalert.not_valid_email') }}",
+                            icon: 'warning'
+                        });
+                        return;
+                    }
+
+                    // Department Validation
+                    // Department must be required if role id is 5
+                    if (role == 5 && (department_id == undefined || department_id == "")) {
+                        Swal.fire({
+                            title: "{{ __('sweetalert.error') }}",
+                            text: "Please select department for the selected role.",
                             icon: 'warning'
                         });
                         return;

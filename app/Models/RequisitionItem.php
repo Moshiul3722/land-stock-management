@@ -27,7 +27,9 @@ class RequisitionItem extends Model
         'requisition_id',
         'product_id',
         'quantity',
+        'original_quantity',
         'lot_id',
+        'lot_detail_id',
         'created_by',
         'updated_by',
         'deleted_by',
@@ -47,5 +49,21 @@ class RequisitionItem extends Model
     public function product(): BelongsTo
     {
         return $this->belongsTo(Product::class, 'product_id');
+    }
+
+    /**
+     * Get the assigned lot for this requisition item.
+     */
+    public function lot(): BelongsTo
+    {
+        return $this->belongsTo(Lot::class, 'lot_id');
+    }
+
+    /**
+     * Get the specific lot detail (Source of Truth for Brand/Spec).
+     */
+    public function lotDetail(): BelongsTo
+    {
+        return $this->belongsTo(LotDetail::class, 'lot_detail_id');
     }
 }

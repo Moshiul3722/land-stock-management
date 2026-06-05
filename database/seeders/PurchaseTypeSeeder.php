@@ -14,16 +14,31 @@ class PurchaseTypeSeeder extends Seeder
     {
         // Id = 1
         ProductPurchaseType::create([
-            'name' => 'Tender-based',
-            'description' => 'These items are tender-based',
+            'name' => 'RFQ',
+            'description' => 'These items are RFQ based',
             'created_by' => 1,
             'updated_by' => 1
         ]);
 
         // Id = 2
         ProductPurchaseType::create([
-            'name' => 'Direct',
-            'description' => 'These items are directly purchased',
+            'name' => 'DPM',
+            'description' => 'These items are DPM based',
+            'created_by' => 1,
+            'updated_by' => 1
+        ]);
+        // Id = 3
+        ProductPurchaseType::create([
+            'name' => 'OTM',
+            'description' => 'These items are OTM based',
+            'created_by' => 1,
+            'updated_by' => 1
+        ]);
+
+        // Id = 4
+        ProductPurchaseType::create([
+            'name' => 'LTM',
+            'description' => 'These items are LTM based',
             'created_by' => 1,
             'updated_by' => 1
         ]);

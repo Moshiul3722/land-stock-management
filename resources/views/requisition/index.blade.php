@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('page_css')
+@push('page_css')
     <style>
         /* Timeline CSS */
         .timeline-container {
@@ -14,7 +14,6 @@
             top: 15px;
             bottom: 0;
             left: 15px;
-            /* Center line through numbers */
             width: 2px;
             background: #e9ecef;
             z-index: 0;
@@ -24,11 +23,9 @@
             position: relative;
             margin-bottom: 25px;
             padding-left: 50px;
-            /* Space for number */
             z-index: 1;
         }
 
-        /* Numbered Circle */
         .timeline-number {
             position: absolute;
             left: 0;
@@ -38,7 +35,6 @@
             border-radius: 50%;
             text-align: center;
             line-height: 28px;
-            /* Center text vertically */
             font-weight: bold;
             font-size: 14px;
             color: #fff;
@@ -47,7 +43,6 @@
             z-index: 2;
         }
 
-        /* Colors for Timeline Steps */
         .bg-primary {
             background-color: #007bff !important;
         }
@@ -60,12 +55,16 @@
             background-color: #dc3545 !important;
         }
 
+        /* Custom Orange for Pending */
         .bg-warning {
-            background-color: #ffc107 !important;
-            color: #333 !important;
+            background-color: #fd7e14 !important;
+            color: #fff !important;
         }
 
-        /* Content Box */
+        .bg-info {
+            background-color: #17a2b8 !important;
+        }
+
         .timeline-content {
             background: #fff;
             border: 1px solid #dee2e6;
@@ -74,7 +73,6 @@
             position: relative;
         }
 
-        /* Little arrow pointing to number */
         .timeline-content::after {
             content: '';
             position: absolute;
@@ -118,16 +116,14 @@
         .timeline-comment {
             margin-top: 8px;
             background-color: #f8f9fa;
-            /* Light grey background */
             border-left: 4px solid #17a2b8;
-            /* Info color accent */
             padding: 8px 12px;
             font-size: 0.9rem;
             color: #495057;
             border-radius: 0 4px 4px 0;
         }
     </style>
-@endsection
+@endpush
 
 @section('content')
     <section class="content-header">
@@ -163,18 +159,12 @@
                             @endforeach
                         </select>
                     </div>
-                    <div class="col-md-3">
-                        <label>{{ __('requisition.start_date') }}</label>
-                        <input type="date" class="form-control" id="start_date">
-                    </div>
-                    <div class="col-md-3">
-                        <label>{{ __('requisition.end_date') }}</label>
-                        <input type="date" class="form-control" id="end_date">
-                    </div>
-                    <div class="col-md-3 d-flex align-items-end">
-                        <button id="filter-btn" class="btn btn-primary w-100"><i class="fas fa-search"></i>
-                            {{ __('buttons.search') }}</button>
-                    </div>
+                    <div class="col-md-3"><label>{{ __('requisition.start_date') }}</label><input type="date"
+                            class="form-control" id="start_date"></div>
+                    <div class="col-md-3"><label>{{ __('requisition.end_date') }}</label><input type="date"
+                            class="form-control" id="end_date"></div>
+                    <div class="col-md-3 d-flex align-items-end"><button id="filter-btn" class="btn btn-primary w-100"><i
+                                class="fas fa-search"></i> {{ __('buttons.search') }}</button></div>
                 </div>
             </div>
         </div>
@@ -196,10 +186,10 @@
 
     {{-- DETAILS MODAL --}}
     <div class="modal fade" id="detailsModal" tabindex="-1" role="dialog" aria-hidden="true">
-        <div class="modal-dialog modal-xl" role="document"> {{-- Extra Large Modal --}}
+        <div class="modal-dialog modal-xl" role="document">
             <div class="modal-content">
                 <div class="modal-header bg-info text-white">
-                    <h5 class="modal-title">Requisition Details & History</h5>
+                    <h5 class="modal-title">Requisition Details</h5>
                     <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close"
                         onclick="$('#detailsModal').modal('hide')">
                         <span aria-hidden="true">&times;</span>
@@ -211,7 +201,8 @@
                         <div class="col-md-7 border-right">
                             <div class="mb-3">
                                 <strong>Requestor:</strong> <span id="modal-requestor"></span><br>
-                                <strong>Date:</strong> <span id="modal-date"></span>
+                                <strong>Date:</strong> <span id="modal-date"></span><br>
+                                <strong>Status:</strong> <span id="modal-status-badge" class="badge"></span>
                             </div>
                             <h6 class="font-weight-bold text-info">Items</h6>
                             <table class="table table-sm table-bordered">
@@ -229,13 +220,24 @@
                         {{-- Right: Timeline --}}
                         <div class="col-md-5">
                             <h6 class="font-weight-bold text-info mb-3 pl-2">Approval History</h6>
-                            <div class="timeline-container" id="modal-timeline">
-                                {{-- Timeline loaded via JS --}}
-                            </div>
+                            <div class="timeline-container" id="modal-timeline"></div>
                         </div>
                     </div>
                 </div>
                 <div class="modal-footer bg-light">
+                    {{-- NEW: Print Slip Button (Visible for Requestor) --}}
+                    <a href="#" id="btn-print-slip" target="_blank" class="btn btn-default mr-auto">
+                        <i class="fas fa-print"></i> {{ __('requisition.print_invoice') }}
+                    </a>
+
+                    {{-- ACKNOWLEDGE FORM --}}
+                    <form id="ack-form" method="POST" style="display: none;">
+                        @csrf
+                        <button type="button" id="btn-acknowledge" class="btn btn-success">
+                            <i class="fas fa-check-double"></i> Confirm Receipt
+                        </button>
+                    </form>
+
                     <button type="button" class="btn btn-secondary" data-dismiss="modal"
                         onclick="$('#detailsModal').modal('hide')">Close</button>
                 </div>
@@ -272,8 +274,7 @@
                 });
             }
 
-            loadRequisitions(); // Initial load
-
+            loadRequisitions();
             $('#filter-btn').click(function() {
                 loadRequisitions();
             });
@@ -281,11 +282,19 @@
             // 2. VIEW (MODAL) LOGIC
             $(document).on('click', '.view-req-btn', function() {
                 let url = $(this).data('url');
+                let id = $(this).data('id'); // Get ID directly
 
                 // Reset Modal
                 $('#modal-requestor').text('Loading...');
                 $('#modal-items-body').html('');
                 $('#modal-timeline').html('<div class="text-center p-3">Loading history...</div>');
+                $('#ack-form').hide();
+
+                // Set Print Button URL
+                let printUrl = "{{ route('requisitions.print', ':id') }}".replace(':id', id);
+
+                $('#btn-print-slip').attr('href', printUrl);
+
                 $('#detailsModal').modal('show');
 
                 $.ajax({
@@ -295,43 +304,91 @@
                         $('#modal-requestor').text(res.requestor);
                         $('#modal-date').text(res.formatted_date);
 
+                        // Update Status Badge
+                        let status = res.requisition.status;
+                        let badgeClass = 'bg-secondary';
+                        if (status === 'approved') badgeClass = 'bg-primary';
+                        if (status === 'delivered') badgeClass = 'bg-info';
+                        if (status === 'completed') badgeClass = 'bg-success';
+                        if (status === 'rejected') badgeClass = 'bg-danger';
+                        if (status === 'pending') badgeClass = 'bg-warning text-dark';
+
+                        $('#modal-status-badge')
+                            .removeClass()
+                            .addClass('badge ' + badgeClass)
+                            .text(status.toUpperCase());
+
+                        // ============================================================
+                        // PRINT SLIP VISIBILITY LOGIC
+                        // ============================================================
+                        // Show button if flag is true OR if status suggests it's already done
+                        let canPrint = res.is_print_enabled ||
+                            status === 'delivered' ||
+                            status === 'completed';
+
+                        if (canPrint) {
+                            let printUrl = "{{ route('requisitions.print', ':id') }}".replace(
+                                ':id', res.requisition.id);
+                            $('#btn-print-slip').attr('href', printUrl).show();
+                        } else {
+                            $('#btn-print-slip').hide();
+                        }
+                        // ============================================================
+
+                        // SHOW ACKNOWLEDGE BUTTON IF DELIVERED
+                        if (status === 'delivered') {
+                            let ackUrl = "{{ route('requisitions.acknowledge', ':id') }}"
+                                .replace(':id', res.requisition.id);
+                            $('#ack-form').attr('action', ackUrl).show();
+                        } else {
+                            $('#ack-form').hide();
+                        }
+
                         // Items
                         let itemsHtml = '';
                         res.requisition.items.forEach(item => {
-                            itemsHtml +=
-                                `<tr><td>${item.product.name}</td><td>${item.product.category.name}</td><td class="text-center">${item.quantity}</td></tr>`;
+                            let unit = item.product.product_unit || '';
+                            itemsHtml += `
+                                        <tr>
+                                            <td>${item.product.name}</td>
+                                            <td>${item.product.category.name}</td>
+                                            <td class="text-center">
+                                                <strong>${item.quantity}</strong>
+                                                <small class="text-muted ml-1">${unit}</small>
+                                            </td>
+                                        </tr>`;
                         });
                         $('#modal-items-body').html(itemsHtml);
 
-                        // Timeline (Using the new Numbered Style)
+                        // Timeline
                         let timelineHtml = '';
-                        res.timeline.forEach(item => {
-                            // Determine badge color based on status
-                            let bgClass = 'bg-' + item.color;
-                            // (Assuming your controller sends 'primary', 'success', 'danger', 'warning' in item.color)
+                        res.timeline.forEach(log => {
+                            let badgeClass = 'bg-primary';
+                            if (log.status_raw === 'approved' || log.status_raw ===
+                                'processed') badgeClass = 'bg-primary';
+                            if (log.status_raw === 'delivered') badgeClass = 'bg-info';
+                            if (log.status_raw === 'completed') badgeClass =
+                                'bg-success';
+                            if (log.status_raw === 'rejected') badgeClass = 'bg-danger';
+                            if (log.status_raw === 'pending') badgeClass = 'bg-warning';
 
-                            let commentHtml = '';
-                            if (item.comments) {
-                                commentHtml =
-                                    `<div class="timeline-comment">"${item.comments}"</div>`;
-                            }
+                            let commentHtml = log.comments ?
+                                `<div class="timeline-comment">"${log.comments}"</div>` :
+                                '';
 
                             timelineHtml += `
                                 <div class="timeline-entry">
-                                    <div class="timeline-number ${bgClass}">
-                                        ${item.step}
-                                    </div>
+                                    <div class="timeline-number ${badgeClass}">${log.step}</div>
                                     <div class="timeline-content">
                                         <div class="timeline-header">
-                                            <span class="user-name">${item.user}</span>
-                                            <span class="action-date">${item.date}</span>
+                                            <span class="user-name">${log.user}</span>
+                                            <span class="action-date">${log.date}</span>
                                         </div>
-                                        <span class="role-badge">${item.role}</span> 
-                                        <span class="text-${item.color} font-weight-bold small ml-1">(${item.title})</span>
+                                        <span class="role-badge">${log.role}</span>
+                                        <span class="text-${log.color} font-weight-bold small ml-1">(${log.title})</span>
                                         ${commentHtml}
                                     </div>
-                                </div>
-                            `;
+                                </div>`;
                         });
                         $('#modal-timeline').html(timelineHtml);
                     },
@@ -341,7 +398,23 @@
                 });
             });
 
-            // 3. DELETE LOGIC
+            // 3. ACKNOWLEDGE ACTION
+            $('#btn-acknowledge').click(function() {
+                Swal.fire({
+                    title: 'Confirm Receipt?',
+                    text: "I confirm that I have physically received these items.",
+                    icon: 'question',
+                    showCancelButton: true,
+                    confirmButtonColor: '#28a745',
+                    confirmButtonText: 'Yes, Received'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        $('#ack-form').submit();
+                    }
+                });
+            });
+
+            // 4. DELETE LOGIC
             $(document).on('click', '.delete-req-btn', function() {
                 let id = $(this).data('id');
                 let url = "{{ route('requisitions.destroy', ':id') }}".replace(':id', id);
@@ -364,7 +437,7 @@
                             },
                             success: function(res) {
                                 toastr.success(res.message);
-                                loadRequisitions(); // Refresh list
+                                loadRequisitions();
                             },
                             error: function(xhr) {
                                 toastr.error(xhr.responseJSON.message ||
@@ -374,6 +447,20 @@
                     }
                 });
             });
+
+            // 5.  Toastr Logic for Success/Error (Bangla Messages)
+            @if (session('success'))
+                @if (session('new_requisition_id'))
+                    toastr.success("আপনার রিকুইজিশন জমা হয়েছে");
+                @else
+                    toastr.success("{{ session('success') }}");
+                @endif
+            @endif
+
+            @if (session('error'))
+                // toastr.error("রিকুইজিশন জমা হয়নি। সমস্যা হয়েছে");
+                toastr.error("{{ session('error') }}");
+            @endif
         });
     </script>
 @endpush

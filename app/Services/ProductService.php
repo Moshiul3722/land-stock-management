@@ -59,7 +59,8 @@ class ProductService
         $validator = Validator::make($data, [
             'name' => 'required|string|max:255|unique:products',
             'description' => 'nullable|string',
-            'category_id' => 'required|exists:product_categories,id'
+            'category_id' => 'required|exists:product_categories,id',
+            'product_unit' => 'required|string|max:50',
         ]);
 
         if ($validator->fails()) {
@@ -92,7 +93,8 @@ class ProductService
         $validator = Validator::make($data, [
             'name' => 'required|string|max:255|unique:products,name,' . $id,
             'description' => 'nullable|string',
-            'category_id' => 'required|exists:product_categories,id'
+            'category_id' => 'required|exists:product_categories,id',
+            'product_unit' => 'required|string|max:50',
         ]);
 
         if ($validator->fails()) {
@@ -153,5 +155,19 @@ class ProductService
     public function findByCategoryId($categoryId)
     {
         return $this->productRepository->findBy('category_id', $categoryId);
+    }
+
+    /**
+     * Get suggestions for product units for autocomplete.
+     */
+    public function getUnitSuggestions(?string $term)
+    {
+        return DB::table('products')
+            ->where('product_unit', 'LIKE', '%' . $term . '%')
+            ->whereNotNull('product_unit')
+            ->distinct()
+            ->orderBy('product_unit')
+            ->limit(10)
+            ->pluck('product_unit');
     }
 }

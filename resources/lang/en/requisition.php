@@ -6,6 +6,8 @@ return [
     'create_title' => 'Create Requisition',
     'my_title' => 'My Requisitions',
     'pending_title' => 'List of Pending Requisitions for Approval',
+    'pending_list' => 'List of Pending Requisitions for Approval',
+
     'requestor_name' => 'Requestor Name',
     'select_product' => 'Select Product',
     'list_title' => 'List of Products for Requisition',
@@ -13,6 +15,17 @@ return [
     'end_date' => 'End Date',
     'requisition_date' => 'Requisition Date',
     'items_count' => 'Items Count',
+    'product' => 'Product',
+    'cat_sub_cat' => 'Category / Sub-Category',
+    'assigned_lot' => 'Assigned Lot (Brand/Specification)',
+    'requested_quantity' => 'Requested Quantity',
+    'approved_quantity' => 'Approved Quantity',
+    'approval_comments' => 'Approval Comments',
+    'enter_comments' => 'Enter comments...',
+    'approval_history' => 'Approval History',
+    'print_invoice' => 'Print Invoice',
+
+    'scan_qr' => 'Scan QR',
 
     'stock_status' => 'Stock Status',
     'required_amount' => 'Required Amount',
