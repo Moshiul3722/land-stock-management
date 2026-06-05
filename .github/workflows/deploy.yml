@@ -20,7 +20,7 @@ jobs:
           host: ${{ github.ref == 'refs/heads/demo' && secrets.SSH_HOST || secrets.SSH_HOST_NEW }}
           username: ${{ github.ref == 'refs/heads/demo' && secrets.SSH_USERNAME || secrets.SSH_USERNAME_NEW }}
           key: ${{ github.ref == 'refs/heads/demo' && secrets.SSH_PRIVATE_KEY || secrets.SSH_PRIVATE_KEY_NEW }}
-          port: 22
+          port: ${{ secrets.SSH_PORT }}
           script: |
             set -e
 
