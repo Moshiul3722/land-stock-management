@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - main
+      - demo
 
 jobs:
   deploy:
@@ -16,9 +17,9 @@ jobs:
       - name: Deploy to cPanel via SSH
         uses: appleboy/ssh-action@master
         with:
-          host: ${{ secrets.SSH_HOST_NEW }}
-          username: ${{ secrets.SSH_USERNAME_NEW }}
-          key: ${{ secrets.SSH_PRIVATE_KEY_NEW }}
+          host: ${{ github.ref == 'refs/heads/demo' && secrets.SSH_HOST || secrets.SSH_HOST_NEW }}
+          username: ${{ github.ref == 'refs/heads/demo' && secrets.SSH_USERNAME || secrets.SSH_USERNAME_NEW }}
+          key: ${{ github.ref == 'refs/heads/demo' && secrets.SSH_PRIVATE_KEY || secrets.SSH_PRIVATE_KEY_NEW }}
           port: 22
           script: |
             set -e
@@ -28,7 +29,7 @@ jobs:
             cd /home/inventory/inv-land
 
             # Fetch latest code using GitHub token
-            git fetch https://${{ secrets.GH_TOKEN }}@github.com/ultracorecreatives/inv-land.git main
+            git fetch https://${{ secrets.GH_TOKEN }}@github.com/ultracorecreatives/inv-land.git ${{ github.ref_name }}
             git reset --hard FETCH_HEAD
 
             # Maintenance mode (optional)
