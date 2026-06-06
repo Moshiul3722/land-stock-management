@@ -21,7 +21,7 @@
                 <div class="small-box bg-info">
                     <div class="inner">
                         <h3>{{ $userCount }}</h3>
-                        <p>Users</p>
+                        <p>ব্যবহারকারী</p>
                     </div>
                     <div class="icon">
                         <i class="fas fa-users"></i>
@@ -34,7 +34,7 @@
                 <div class="small-box bg-success">
                     <div class="inner">
                         <h3>{{ $roleCount }}</h3>
-                        <p>Roles</p>
+                        <p>রোল</p>
                     </div>
                     <div class="icon">
                         <i class="fas fa-user-tie"></i>
@@ -47,7 +47,7 @@
                 <div class="small-box bg-danger">
                     <div class="inner">
                         <h3>{{ $categoryCount }}</h3>
-                        <p>Product Categories</p>
+                        <p>প্রোডাক্ট ক্যাটাগরী</p>
                     </div>
                     <div class="icon">
                         <i class="fas fa-chart-line"></i>
@@ -60,7 +60,7 @@
                 <div class="small-box bg-primary">
                     <div class="inner">
                         <h3>{{ $productCount }}</h3>
-                        <p>Products</p>
+                        <p>প্রোডাক্ট</p>
                     </div>
                     <div class="icon">
                         <i class="fas fa-users-cog"></i>
