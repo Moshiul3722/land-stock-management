@@ -112,25 +112,33 @@
             <td width="60%" class="text-center">
                 <div class="title">গণপ্রজাতন্ত্রী বাংলাদেশ সরকার</div>
                 <div class="subtitle">ভূমি মন্ত্রনালয়</div>
-                <div class="subtitle">সচিবের অথিদপ্তর</div>
+                <div class="subtitle">বাংলাদেশ সচিবালয়, ঢাকা</div>
             </td>
             <td width="25%" class="text-right">
                 {{-- 2. QR Code (Contains link to view this requisition) --}}
                 {{-- NOTE: We use route('requisitions.show') so scanning it opens the details --}}
                 {!! DNS2D::getBarcodeHTML(route('requisitions.show', $requisition->id), 'QRCODE', 4, 4) !!}
-                <small>Scan to View</small>
             </td>
         </tr>
         <tr>
-            <td colspan="3">
-                বিষয়ঃ মনিহারী দ্রব্যাদি/বিবিধ মালামালের অধিযাচন ফরম। তারিখঃ {{ $requisition->requisition_date->format('d M, Y') }}।
+            <td colspan="2"></td>
+            <td>
+                <small>স্ক্যান করুন</small>
+            </td>
+        </tr>
+        <tr>
+            <td colspan="2">
+                বিষয়ঃ মনিহারী দ্রব্যাদি/বিবিধ মালামালের অধিযাচন ফরম।
+            </td>
+            <td class="text-right">
+                তারিখঃ {{ $requisition->requisition_date->format('d M, Y') }}
             </td>
         </tr>
     </table>
 
     <div class="text-center" style="margin-bottom: 20px;">
         <h3 style="border: 1px solid #000; display: inline-block; padding: 5px 15px; text-transform: uppercase;">
-            Inventory Requisition Slip
+            মালামাল অধিযাচন ফরম
         </h3>
     </div>
 
