@@ -21,4 +21,5 @@ return [
     'reset_password' => 'পাসওয়ার্ড রিসেট',
     'reset_password_confirm' => 'কনফার্ম রিসেট পাসওয়ার্ড',
     'confirm_password_empty' => 'কনফার্ম রিসেট পাসওয়ার্ড ফিল্ডটি পূরণ করতে হবে!',
+    'section_department' => 'সেকশন/ডিপার্টমেন্ট',
 ];

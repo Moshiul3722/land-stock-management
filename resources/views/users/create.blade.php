@@ -80,8 +80,7 @@
                         </div>
                         <div class="row" visible="false" id="department_row">
                             <div class="form-group col-sm-6">
-                                <label for="department_id">Section/Department <span
-                                            style="color: red;">*</span></label>
+                                <label for="department_id">Section/Department <span style="color: red;">*</span></label>
                                 <select name="department_id" id="department_id" class="form-control select2">
                                     <option value="">Select Department (Required for General User)</option>
                                     @foreach ($departments as $dept)
@@ -292,9 +291,12 @@
                     dropdown.append($('<option></option>').attr('value', '0').text(
                         "--{{ __('dropdown.default_select') }}--"));
                     $.each(data.original, function(key, value) {
-                        dropdown.append($('<option></option>').attr('value', value.id).text(
-                            selectedLocale === 'en' ? value.role_name_en : value
-                            .role_name_bn));
+                        if (value.id != 1 && value.id != 2 && value.id != 3 && value.id != 4) { // Exclude Super Admin, Admin, Store Admin, and Store Keeper roles
+                            dropdown.append($('<option></option>').attr('value', value.id).text(
+                                selectedLocale === 'en' ? value.role_name_en : value
+                                .role_name_bn));
+                        }
+
                     });
                 },
                 error: function(err) {

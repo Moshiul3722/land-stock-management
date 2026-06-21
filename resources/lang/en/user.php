@@ -21,5 +21,5 @@ return [
     'reset_password' => 'Reset Password',
     'reset_password_confirm' => 'Confirm Reset Password',
     'confirm_password_empty' => 'Confirm Reset Password Field must be filled up!',
-
+    'section_department' => 'Section/Department',
 ];

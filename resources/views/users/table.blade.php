@@ -15,6 +15,7 @@
                             <th>{{ __('user.user_name_en') }}</th>
                             <th>{{ __('user.user_name_bn') }}</th>
                             <th>{{ __('user.email') }}</th>
+                            <th>{{ __('user.section_department') }}</th>
                             <th>{{ __('commontable.created_at') }}</th>
                             <th>{{ __('commontable.action') }}</th>
                         </tr>
@@ -32,6 +33,7 @@
                                 <td>
                                     {{ $user->email }}
                                 </td>
+                                <td>{{ app()->getLocale() === 'en' ? $user->department->name ?? 'N/A' : $user->department->name_bn ?? 'প্রযোজ্য নয়' }}</td>
                                 <td>
                                     {{ app()->getLocale() === 'en' ? $user->created_at->format('d-m-Y') : bangla_date($user->created_at->timestamp, 'en') }}
                                 </td>
