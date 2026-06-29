@@ -35,7 +35,7 @@
                                     @endforeach
                                 </select>
                             </div>
-                            <div class="form-group col-md-4">
+                            <div class="form-group col-md-4" style="display: none;">
                                 <label for="sub_category_filter">{{ __('lot.table_sub_category') }}</label>
                                 <select class="form-control select2" id="sub_category_filter" disabled>
                                     <option value="">Select Sub Category</option>
@@ -72,7 +72,7 @@
                                 <thead>
                                     <tr>
                                         <th>{{ __('stock.table_category') }}</th>
-                                        <th>{{ __('lot.table_sub_category') }}</th>
+                                        {{-- <th>{{ __('lot.table_sub_category') }}</th> --}}
                                         <th>{{ __('stock.table_product') }}</th>
                                         <th width="15%">{{ __('requisition.required_amount') }}</th>
                                         <th width="10%">{{ __('stock.table_action') }}</th>
@@ -263,7 +263,7 @@
                 // ]).draw(false);
                 requisitionTable.row.add([
                     categoryName,
-                    subCategoryName,
+                    // subCategoryName,
                     productName +
                     `<input type="hidden" name="details[${rowCounter}][product_id]" value="${productId}">`,
 

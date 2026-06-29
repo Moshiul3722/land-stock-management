@@ -37,7 +37,7 @@
                                     @endforeach
                                 </select>
                             </div>
-                            <div class="form-group col-md-4">
+                            <div class="form-group col-md-4" style="display: none;">
                                 <label for="sub_category_filter">Sub Category</label>
                                 <select class="form-control select2" id="sub_category_filter" disabled>
                                     <option value="">Select Sub Category</option>
@@ -82,7 +82,7 @@
                                 <thead>
                                     <tr>
                                         <th>{{ __('stock.table_category') }}</th>
-                                        <th>Sub Category</th> {{-- New Column --}}
+                                        {{-- <th>Sub Category</th> --}}
                                         <th>{{ __('stock.table_product') }}</th>
                                         <th width="15%">{{ __('requisition.required_amount') }}</th>
                                         <th width="10%">{{ __('stock.table_action') }}</th>
@@ -93,7 +93,7 @@
                                     @foreach ($requisition->items as $index => $item)
                                         <tr>
                                             <td>{{ $item->product->category->name }}</td>
-                                            <td>{{ optional($item->product->subCategory)->name ?? 'N/A' }}</td>
+                                            {{-- <td>{{ optional($item->product->subCategory)->name ?? 'N/A' }}</td> --}}
                                             {{-- New Column Data --}}
                                             <td>
                                                 {{ $item->product->name }}
@@ -274,7 +274,7 @@
 
                 requisitionTable.row.add([
                     categoryName,
-                    subCategoryName, // Added Sub Cat column data
+                    // subCategoryName,
                     productName +
                     `<input type="hidden" name="details[${rowCounter}][product_id]" value="${productId}">`,
                     `<input type="number" class="form-control" name="details[${rowCounter}][quantity]" min="1" value="1" required>`,
