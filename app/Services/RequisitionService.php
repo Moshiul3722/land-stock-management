@@ -310,6 +310,17 @@ class RequisitionService
             throw new InvalidArgumentException('No pending approval task found for this requisition.');
         }
 
+        // --- NEW BACKEND CHECK: Ensure Store Admin (Role 3) has assigned stock ---
+        if (Auth::user()->role_id == 3) {
+            // Lazy load items if they aren't loaded yet
+            foreach ($requisition->items as $item) {
+                if (empty($item->lot_detail_id)) {
+                    throw new InvalidArgumentException('Validation failed: All items must be assigned a Brand/Spec and saved before approval.');
+                }
+            }
+        }
+        // -----------------------------------------------------------------------
+
         $this->approvalService->approve($pendingTask, $comments);
     }
 
@@ -389,13 +400,13 @@ class RequisitionService
             }
 
             // --- CASE B: PARTIAL SPLIT (Create New Req) ---
-            
+
             // 2. Create New Requisition
             $newReq = $this->requisitionRepository->create([
                 'requisition_date' => $originalReq->requisition_date,
                 'remarks' => "Split from Requisition #{$originalReq->id}. " . $originalReq->remarks,
-                'status' => 'pending', 
-                'current_serial' => 1, 
+                'status' => 'pending',
+                'current_serial' => 1,
                 'requested_by_user_id' => $originalReq->requested_by_user_id,
             ]);
 
@@ -406,15 +417,15 @@ class RequisitionService
 
             // 4. Auto-Submit New Req
             $this->approvalService->submitForApproval(
-                $newReq, 
-                'Requisition Approval', 
+                $newReq,
+                'Requisition Approval',
                 'Auto-generated split requisition for out-of-stock items.'
             );
 
-            
+
             // 5. Notify
             $text = "Stock Required! Items moved to Split Requisition #{$newReq->id}: {$productList}";
-            
+
             foreach ($storeKeepers as $keeper) {
                 $this->notificationService->createNotification($keeper->id, $text, $url, Auth::id());
             }

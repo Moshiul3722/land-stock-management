@@ -12,6 +12,8 @@ use App\Services\StockService;
 use Illuminate\Support\Facades\Auth;
 use App\Models\RequisitionItem;
 use Illuminate\Support\Facades\DB;
+use Flash;
+use InvalidArgumentException;
 
 class RequisitionController extends Controller
 {
@@ -132,9 +134,17 @@ class RequisitionController extends Controller
         try {
             $this->requisitionService->approveRequisition($requisition, $request->input('comments'));
             return redirect()->route('requisitions.pending')->with('success', 'Requisition approved successfully.');
-        } catch (Exception $e) {
+        } catch (InvalidArgumentException $e) {
+            // CATCHES OUR CUSTOM VALIDATION ERROR AND SENDS IT TO THE UI
             Log::error($e->getMessage());
-            return redirect()->back()->with('error', $e->getMessage());
+            Flash::error($e->getMessage());
+            return redirect()->back();
+
+        } catch (\Exception $e) {
+            // Catches any other unexpected system errors
+            Log::error($e->getMessage());
+            Flash::error('An unexpected error occurred: ' . $e->getMessage());
+            return redirect()->back();
         }
     }
 
@@ -401,7 +411,7 @@ class RequisitionController extends Controller
             $requisition->update([
                 'status' => 'completed',
                 // If you added a 'received_at' column to your table, update it here:
-                // 'received_at' => now(), 
+                // 'received_at' => now(),
             ]);
 
             return redirect()->back()->with('success', 'Requisition acknowledged. Process completed successfully.');
@@ -476,7 +486,7 @@ class RequisitionController extends Controller
             $this->requisitionService->approveRequisition($requisition, 'Physically Verified via QR Scan');
 
             return response()->json([
-                'success' => true, 
+                'success' => true,
                 'message' => 'Requisition #' . $requisition->id . ' verified and processed successfully.'
             ]);
 

@@ -327,6 +327,37 @@
 @endsection
 
 @push('js')
+    {{-- NEW: Catch backend Flash messages and display them in Toastr --}}
+    <script>
+        $(document).ready(function() {
+            // Check for Laracasts Flash messages
+            @if (session()->has('flash_notification'))
+                @foreach (session('flash_notification', collect()) as $message)
+                    let flashLevel = "{{ $message['level'] }}";
+                    let flashMsg = "{!! $message['message'] !!}";
+
+                    if (flashLevel === 'danger' || flashLevel === 'error') {
+                        toastr.error(flashMsg);
+                    } else if (flashLevel === 'success') {
+                        toastr.success(flashMsg);
+                    } else if (flashLevel === 'warning') {
+                        toastr.warning(flashMsg);
+                    } else {
+                        toastr.info(flashMsg);
+                    }
+                @endforeach
+                {{ session()->forget('flash_notification') }}
+            @endif
+
+            // Check for standard Laravel session errors (just in case)
+            @if (session('error'))
+                toastr.error("{{ session('error') }}");
+            @endif
+            @if (session('success'))
+                toastr.success("{{ session('success') }}");
+            @endif
+        });
+    </script>
     @if (Auth::user()->role_id == 4)
         <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
     @endif
