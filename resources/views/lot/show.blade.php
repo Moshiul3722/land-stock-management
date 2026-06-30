@@ -68,7 +68,7 @@
                             <thead>
                                 <tr>
                                     <th width="20%">{{ __('lot.table_category') }}</th>
-                                    <th width="15%">{{ __('lot.table_sub_category') }}</th>
+                                    <th width="15%" style="display: none;">{{ __('lot.table_sub_category') }}</th>
                                     <th width="20%">{{ __('lot.table_product') }}</th>
                                     <th width="15%">{{ __('lot.brand') }}</th>
                                     <th width="15%">{{ __('lot.specification') }}</th>
@@ -80,7 +80,7 @@
                                 @foreach ($lot->lotDetails as $detail)
                                     <tr>
                                         <td>{{ $detail->product->category->name ?? 'N/A' }}</td>
-                                        <td>
+                                        <td style="display: none;">
                                             {{-- Sub Category Logic --}}
                                             {{ $detail->product->subCategory->name ?? ($detail->product->sub_category->name ?? 'N/A') }}
                                         </td>

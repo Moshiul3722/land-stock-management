@@ -81,7 +81,7 @@
                                 <thead>
                                     <tr>
                                         <th width="15%">{{ __('lot.table_category') }} <span class="text-danger">*</span></th>
-                                        <th width="15%">{{ __('lot.table_sub_category') }} <span class="text-danger">*</span></th>
+                                        <th width="15%" style="display:none;">{{ __('lot.table_sub_category') }} <span class="text-danger">*</span></th>
                                         <th width="15%">{{ __('lot.table_product') }} <span class="text-danger">*</span></th>
                                         <th width="15%">{{ __('lot.brand') }}<span class="text-danger">*</span></th>
                                         <th width="15%">{{ __('lot.specification') }} <span class="text-danger">*</span></th>
@@ -168,7 +168,7 @@
                         @endforeach
                     </select>
                 </td>
-                <td>
+                <td style="display:none;">
                     <select class="form-control sub-category-select select2-dynamic" name="details[${rowIdx}][sub_category_id]" disabled>
                         <option value="">Select Sub Category</option>
                     </select>

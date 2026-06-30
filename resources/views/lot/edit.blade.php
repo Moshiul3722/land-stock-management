@@ -87,7 +87,7 @@
                                 <thead>
                                     <tr>
                                         <th width="15%">{{ __('lot.table_category') }}</th>
-                                        <th width="15%">Sub Category</th>
+                                        <th width="15%" style="display: none;">Sub Category</th>
                                         <th width="15%">{{ __('lot.table_product') }}</th>
                                         <th width="15%">Brand</th>
                                         <th width="15%">Specification</th>
@@ -112,7 +112,7 @@
                                                     @endforeach
                                                 </select>
                                             </td>
-                                            <td>
+                                            <td style="display: none;">
                                                 {{-- Sub Category (Will be loaded via JS based on data attributes) --}}
                                                 {{-- Check both sub_category_id (direct on product) or subCategory relationship --}}
                                                 @php
