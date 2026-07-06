@@ -264,11 +264,6 @@
                             </select>
                         </td>
                         <td>
-                            <select class="form-control sub-category-select select2-dynamic" name="details[${rowIdx}][sub_category_id]" disabled>
-                                <option value="">Select Sub Category</option>
-                            </select>
-                        </td>
-                        <td>
                             <select class="form-control product-select select2-dynamic" name="details[${rowIdx}][product_id]" required disabled>
                                 <option value="">Select Product</option>
                             </select>
