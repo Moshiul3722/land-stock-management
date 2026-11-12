@@ -172,7 +172,10 @@
                 <form id="user_form" method="POST" novalidate autocomplete="off">
                     @csrf
                     <div class="modal-header">
-                        <h5 class="modal-title" id="userFormModalLabel"></h5>
+                        <div class="modal-heading">
+                            <h5 class="modal-title" id="userFormModalLabel"></h5>
+                            <p class="modal-hint">{{ __('user.form_hint') }}</p>
+                        </div>
                         <button type="button" class="close" data-dismiss="modal" aria-label="{{ __('buttons.cancel') }}">
                             <span aria-hidden="true">&times;</span>
                         </button>
@@ -288,27 +291,20 @@
         </div>
     </div>
 
-    {{-- Delete confirmation modal --}}
+    {{-- Delete confirmation: same layout as the lot / product delete dialog --}}
     <div class="modal fade" id="userDeleteModal" tabindex="-1" role="dialog" aria-labelledby="userDeleteModalLabel"
         aria-describedby="userDeleteModalText" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered" role="document">
             <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="userDeleteModalLabel">
-                        <i class="fas fa-exclamation-triangle text-danger mr-1" aria-hidden="true"></i>
-                        {{ __('user.delete_user') }}
-                    </h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="{{ __('buttons.cancel') }}">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-                <div class="modal-body">
+                <div class="modal-confirm">
                     <div class="alert alert-danger d-none" id="user_delete_error" role="alert"></div>
-                    <p class="mb-2" id="userDeleteModalText">{{ __('user.delete_confirm_text') }}</p>
-                    <p class="mb-0 font-weight-bold user-wrap-cell" id="user_delete_name"></p>
-                    <p class="mb-0 text-muted user-wrap-cell" id="user_delete_email"></p>
+                    <div class="modal-confirm-icon" aria-hidden="true"><i class="fas fa-trash-alt"></i></div>
+                    <h5 class="modal-title" id="userDeleteModalLabel">{{ __('user.delete_user') }}</h5>
+                    <p class="modal-confirm-text" id="userDeleteModalText">{{ __('user.delete_confirm_text') }}</p>
+                    <p class="modal-confirm-name" id="user_delete_name"></p>
+                    <p class="modal-confirm-sub" id="user_delete_email"></p>
                 </div>
-                <div class="modal-footer user-modal-footer">
+                <div class="modal-actions">
                     <button type="button" class="btn btn-secondary" data-dismiss="modal" id="user_delete_cancel">
                         {{ __('sweetalert.cancel') }}
                     </button>
@@ -355,20 +351,20 @@
 
         /* Searchable section/department box, sized and coloured like the other fields */
         #userFormModal .select2-container .select2-selection--single {
-            height: calc(2.25rem + 2px);
+            height: 2.75rem;
             border: 1px solid #ced4da;
             border-radius: 0.25rem;
         }
 
         #userFormModal .select2-container .select2-selection--single .select2-selection__rendered {
-            line-height: 2.25rem;
+            line-height: calc(2.75rem - 2px);
             padding-left: 0.75rem;
             padding-right: 3.9rem;
             color: #495057;
         }
 
         #userFormModal .select2-container .select2-selection--single .select2-selection__arrow {
-            height: 2.25rem;
+            height: calc(2.75rem - 2px);
             right: 0.4rem;
         }
 

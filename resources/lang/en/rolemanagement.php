@@ -22,5 +22,6 @@ return [
     'am' => 'AM',
     'pm' => 'PM',
     'search_placeholder' => 'Search by role name or creator',
+    'form_hint' => 'Give the role its English and Bangla names.',
 
 ];

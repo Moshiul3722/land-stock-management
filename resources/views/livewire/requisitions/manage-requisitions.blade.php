@@ -246,7 +246,7 @@
         </section>
 
         {{-- ============ Create / edit modal ============ --}}
-        <x-ui.modal wire:model="showForm" max-width="4xl" labelledby="req-form-title">
+        <x-ui.modal wire:model="showForm" max-width="5xl" labelledby="req-form-title">
             <form wire:submit="save('submit')" class="tw-m-0 tw-flex tw-min-h-0 tw-flex-1 tw-flex-col" novalidate>
                 <div class="tw-flex tw-items-start tw-justify-between tw-gap-4 tw-border-0 tw-border-b tw-border-solid tw-border-slate-200 tw-px-5 tw-py-4 sm:tw-px-6">
                     <div class="tw-min-w-0">
@@ -268,50 +268,37 @@
                         </div>
                     @enderror
 
-                    {{-- Item picker --}}
+                    {{-- Item picker: same fields and layout as the lot entry modal --}}
                     <fieldset class="tw-m-0 tw-rounded-xl tw-border tw-border-solid tw-border-slate-200 tw-bg-slate-50/70 tw-p-4">
                         <legend class="tw-sr-only">{{ __('requisition.select_product') }}</legend>
-                        <div class="tw-grid tw-grid-cols-1 tw-gap-3 sm:tw-grid-cols-2 lg:tw-grid-cols-[1fr_1.4fr_8rem_auto] lg:tw-items-start">
+                        <div class="tw-grid tw-grid-cols-1 tw-gap-3 sm:tw-grid-cols-2 lg:tw-grid-cols-[1fr_1.6fr_9.5rem_auto]">
                             <div>
                                 <label for="req-category" class="{{ $label }}">{{ __('requisition.manage.category') }}</label>
-                                <select id="req-category" wire:model.live="categoryId"
-                                    class="{{ $input }} @error('categoryId') {{ $inputError }} @enderror"
-                                    @error('categoryId') aria-invalid="true" aria-describedby="req-category-error" @enderror>
-                                    <option value="">{{ __('requisition.manage.select_category') }}</option>
-                                    @foreach ($this->categories as $category)
-                                        <option value="{{ $category->id }}" wire:key="cat-{{ $category->id }}">{{ $category->name }}</option>
-                                    @endforeach
-                                </select>
+                                <x-ui.search-select id="req-category" wire:model.live="categoryId"
+                                    :options="$this->categories->map(fn ($category) => ['value' => $category->id, 'label' => $category->name])"
+                                    :placeholder="__('requisition.manage.select_category')"
+                                    :invalid="$errors->has('categoryId')" />
                                 @error('categoryId') <p id="req-category-error" class="{{ $errorText }}"><i class="fas fa-exclamation-circle tw-mt-0.5" aria-hidden="true"></i>{{ $message }}</p> @enderror
                             </div>
 
                             <div>
                                 <label for="req-product" class="{{ $label }}">{{ __('requisition.manage.product') }}</label>
-                                <div class="tw-relative">
-                                    <select id="req-product" wire:model="productId" @disabled(! $categoryId)
-                                        wire:loading.attr="disabled" wire:target="categoryId"
-                                        class="{{ $input }} @error('productId') {{ $inputError }} @enderror"
-                                        @error('productId') aria-invalid="true" aria-describedby="req-product-error" @enderror>
-                                        <option value="">{{ $categoryId ? __('requisition.manage.select_product') : __('requisition.manage.select_category_first') }}</option>
-                                        @foreach ($this->productOptions as $product)
-                                            <option value="{{ $product->id }}" wire:key="prod-{{ $product->id }}">{{ $product->name }}{{ $product->product_unit ? ' (' . $product->product_unit . ')' : '' }}</option>
-                                        @endforeach
-                                    </select>
-                                    <i wire:loading wire:target="categoryId" class="fas fa-circle-notch fa-spin tw-absolute tw-right-9 tw-top-1/2 tw--translate-y-1/2 tw-text-slate-400" aria-hidden="true"></i>
-                                </div>
+                                <x-ui.search-select id="req-product" wire:model="productId" :disabled="! $categoryId"
+                                    :options="$this->productOptions->map(fn ($product) => ['value' => $product->id, 'label' => $product->name . ($product->product_unit ? ' (' . $product->product_unit . ')' : '')])"
+                                    :placeholder="$categoryId ? __('requisition.manage.select_product') : __('requisition.manage.select_category_first')"
+                                    :invalid="$errors->has('productId')" />
                                 @error('productId') <p id="req-product-error" class="{{ $errorText }}"><i class="fas fa-exclamation-circle tw-mt-0.5" aria-hidden="true"></i>{{ $message }}</p> @enderror
                             </div>
 
                             <div>
                                 <label for="req-quantity" class="{{ $label }}">{{ __('requisition.manage.quantity') }}</label>
-                                <input id="req-quantity" type="number" inputmode="numeric" min="1" max="100000" step="1" wire:model="quantity"
-                                    x-on:keydown.enter.prevent="$wire.addItem()"
-                                    class="{{ $input }} tw-tabular-nums @error('quantity') {{ $inputError }} @enderror"
-                                    @error('quantity') aria-invalid="true" aria-describedby="req-quantity-error" @enderror>
+                                <x-ui.number-field id="req-quantity" wire:model="quantity" stepper :min="1" :max="100000" :invalid="$errors->has('quantity')"
+                                    x-on:keydown.enter.prevent="$wire.addItem()" />
                                 @error('quantity') <p id="req-quantity-error" class="{{ $errorText }}"><i class="fas fa-exclamation-circle tw-mt-0.5" aria-hidden="true"></i>{{ $message }}</p> @enderror
                             </div>
 
-                            <div class="lg:tw-pt-[26px]">
+                            <div class="sm:tw-col-span-2 lg:tw-col-span-1">
+                                <span class="{{ $label }} tw-hidden lg:tw-block" aria-hidden="true">&nbsp;</span>
                                 <button type="button" wire:click="addItem" wire:loading.attr="disabled" wire:target="addItem"
                                     class="{{ $btnSecondary }} tw-w-full tw-border-brand-200 tw-bg-brand-50 tw-text-brand-700 hover:tw-bg-brand-100 hover:tw-text-brand-700">
                                     <i class="fas fa-plus" aria-hidden="true" wire:loading.remove wire:target="addItem"></i>

@@ -22,4 +22,6 @@ return [
     'delete_failed' => 'The record could not be deleted. Please try again.',
     'am' => 'AM',
     'pm' => 'PM',
+    'form_hint' => 'Give the English and Bangla names; the code is optional.',
+
 ];

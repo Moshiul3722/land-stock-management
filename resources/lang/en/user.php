@@ -54,5 +54,6 @@ return [
     'no_department_found' => 'No section/department found',
     'searching' => 'Searching…',
     'clear_department' => 'Clear selection',
+    'form_hint' => 'Give the user\'s name, e-mail, role and section/department.',
 
 ];

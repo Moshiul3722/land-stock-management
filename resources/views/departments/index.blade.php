@@ -147,7 +147,10 @@
                 <form id="dept_form" method="POST" novalidate autocomplete="off">
                     @csrf
                     <div class="modal-header">
-                        <h5 class="modal-title" id="deptFormModalLabel"></h5>
+                        <div class="modal-heading">
+                            <h5 class="modal-title" id="deptFormModalLabel"></h5>
+                            <p class="modal-hint">{{ __('department.form_hint') }}</p>
+                        </div>
                         <button type="button" class="close" data-dismiss="modal" aria-label="{{ __('buttons.cancel') }}">
                             <span aria-hidden="true">&times;</span>
                         </button>
@@ -187,26 +190,19 @@
         </div>
     </div>
 
-    {{-- Delete confirmation modal --}}
+    {{-- Delete confirmation: same layout as the lot / product delete dialog --}}
     <div class="modal fade" id="deptDeleteModal" tabindex="-1" role="dialog" aria-labelledby="deptDeleteModalLabel"
         aria-describedby="deptDeleteModalText" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered" role="document">
             <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="deptDeleteModalLabel">
-                        <i class="fas fa-exclamation-triangle text-danger mr-1" aria-hidden="true"></i>
-                        {{ __('department.delete') }}
-                    </h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="{{ __('buttons.cancel') }}">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-                <div class="modal-body">
+                <div class="modal-confirm">
                     <div class="alert alert-danger d-none" id="dept_delete_error" role="alert"></div>
-                    <p class="mb-2" id="deptDeleteModalText">{{ __('department.delete_confirm_text') }}</p>
-                    <p class="mb-0 font-weight-bold dept-wrap-cell" id="dept_delete_name"></p>
+                    <div class="modal-confirm-icon" aria-hidden="true"><i class="fas fa-trash-alt"></i></div>
+                    <h5 class="modal-title" id="deptDeleteModalLabel">{{ __('department.delete') }}</h5>
+                    <p class="modal-confirm-text" id="deptDeleteModalText">{{ __('department.delete_confirm_text') }}</p>
+                    <p class="modal-confirm-name" id="dept_delete_name"></p>
                 </div>
-                <div class="modal-footer dept-modal-footer">
+                <div class="modal-actions">
                     <button type="button" class="btn btn-secondary" data-dismiss="modal" id="dept_delete_cancel">
                         {{ __('sweetalert.cancel') }}
                     </button>
