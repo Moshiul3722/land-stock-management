@@ -30,6 +30,8 @@
     <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
     <![endif]-->
 
+    {{-- Site-wide responsive base font size (17px desktop, 16px tablet, 15px phone) --}}
+    <link rel="stylesheet" href="{{ asset('css/base-font.css') }}?v={{ @filemtime(public_path('css/base-font.css')) }}">
 </head>
 <body class="hold-transition login-page">
 <div class="login-box">

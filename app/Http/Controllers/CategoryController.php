@@ -36,20 +36,20 @@ class CategoryController extends Controller
     }
 
     /**
-     * Display a listing of the resource.
+     * Category management screen: categories with their sub-categories, modal CRUD
+     * (Livewire: App\Livewire\Catalog\CategoryManager).
      */
     public function index()
     {
-        $categories = $this->productCategoryService->fetchAll();
-        return view('category.index', compact('categories'));
+        return view('crud.host', ['component' => 'catalog.category-manager']);
     }
 
     /**
-     * Show the form for creating a new resource.
+     * Sidebar "add category" menu: the same management screen.
      */
     public function create()
     {
-        return view('category.create');
+        return view('crud.host', ['component' => 'catalog.category-manager']);
     }
 
     /**
@@ -114,24 +114,16 @@ class CategoryController extends Controller
     // ==========================================
 
     /**
-     * Display a listing of the sub categories.
+     * Sub-categories are managed on the category screen now; old links land there.
      */
     public function subcategoryIndex()
     {
-        // Use the SubCategory service to fetch all
-        $subCategories = $this->productSubCategoryService->fetchAll();
-        // Assuming view location is 'product_sub_category.index' based on previous context
-        return view('sub_category.index', compact('subCategories'));
+        return redirect()->route('categories.create');
     }
 
-    /**
-     * Show the form for creating a new sub category.
-     */
     public function subcategoryCreate()
     {
-        // We need parent categories for the dropdown
-        $categories = $this->productCategoryService->fetchAll();
-        return view('sub_category.create', compact('categories'));
+        return redirect()->route('categories.create');
     }
 
     /**

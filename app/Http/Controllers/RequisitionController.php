@@ -32,12 +32,27 @@ class RequisitionController extends Controller
     }
 
     /**
-     * Show the form for creating a new resource.
+     * Get create form via AJAX for modal.
      */
-    public function create()
+    public function createAjax()
     {
         $categories = $this->productCategoryService->fetchAll();
-        return view('requisition.create', compact('categories'));
+        return view('requisition._form_modal', compact('categories'))->render();
+    }
+
+    /**
+     * Get edit form via AJAX for modal.
+     */
+    public function editAjax(Requisition $requisition)
+    {
+        if ($requisition->status !== 'draft') {
+            return response()->json(['error' => 'This requisition cannot be edited.'], 403);
+        }
+
+        $categories = $this->productCategoryService->fetchAll();
+        $requisition->load('items.product.category');
+
+        return view('requisition._form_modal', compact('requisition', 'categories'))->render();
     }
 
     /**
@@ -65,17 +80,27 @@ class RequisitionController extends Controller
         }
     }
 
+    /**
+     * Requisition management screen (Livewire: App\Livewire\Requisitions\ManageRequisitions).
+     * The AJAX branch is kept for any caller of the previous jQuery list.
+     */
     public function index(Request $request)
     {
-        $statuses = ['draft', 'pending', 'approved', 'rejected', 'processed'];
-
-        if ($request->ajax()) {
+        if ($request->ajax() && ! $request->hasHeader('X-Livewire')) {
             $filters = $request->only(['status', 'start_date', 'end_date']);
             $requisitions = $this->requisitionService->fetchAllForUser(Auth::user(), $filters);
             return view('requisition._my_list', compact('requisitions'));
         }
 
-        return view('requisition.index', compact('statuses'));
+        return view('requisition.manage');
+    }
+
+    /**
+     * Sidebar "Create Requisition" menu: opens the create modal on the management screen.
+     */
+    public function create()
+    {
+        return redirect()->route('requisitions.index', ['create' => 1]);
     }
     /**
      * Show the form for editing the specified resource.

@@ -37,4 +37,15 @@ class LoginController extends Controller
     {
         $this->middleware('guest')->except('logout');
     }
+
+    /**
+     * Only active users that have not been removed may sign in.
+     */
+    protected function credentials(\Illuminate\Http\Request $request)
+    {
+        return array_merge($request->only($this->username(), 'password'), [
+            'is_active' => 1,
+            'deleted_at' => null,
+        ]);
+    }
 }

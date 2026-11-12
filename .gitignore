@@ -14,3 +14,12 @@ yarn-error.log
 /.idea
 /.vscode
 .github/
+
+# local secrets and data dumps
+/env
+*.sql.backup
+/inventory_land_store.sql
+
+# macOS junk
+.DS_Store
+._*

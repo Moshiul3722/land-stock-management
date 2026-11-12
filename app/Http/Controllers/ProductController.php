@@ -27,8 +27,8 @@ class ProductController extends Controller
      */
     public function index(Request $request)
     {
-        // For AJAX requests (filtering)
-        if ($request->ajax()) {
+        // For AJAX requests (filtering) from the older jQuery screens
+        if ($request->ajax() && ! $request->hasHeader('X-Livewire')) {
             $query = Product::with(['category', 'subCategory']);
 
             // Filter by Category
@@ -46,9 +46,8 @@ class ProductController extends Controller
             return view('product._product_list', compact('products'));
         }
 
-        // For initial page load
-        $categories = $this->productCategoryService->fetchAll();
-        return view('product.index', compact('categories'));
+        // Product management screen: list + modal CRUD (Livewire: App\Livewire\Catalog\ProductManager)
+        return view('crud.host', ['component' => 'catalog.product-manager']);
     }
 
     /**
@@ -56,8 +55,8 @@ class ProductController extends Controller
      */
     public function create()
     {
-        $categories = $this->productCategoryService->fetchAll();
-        return view('product.create', compact('categories'));
+        // Sidebar "add product" menu: the same management screen.
+        return view('crud.host', ['component' => 'catalog.product-manager']);
     }
 
     /**

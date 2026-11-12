@@ -165,6 +165,8 @@
             .login-form-container { width: 100%; padding: 30px 20px; }
         }
     </style>
+    {{-- Site-wide responsive base font size (17px desktop, 16px tablet, 15px phone) --}}
+    <link rel="stylesheet" href="{{ asset('css/base-font.css') }}?v={{ @filemtime(public_path('css/base-font.css')) }}">
 </head>
 <body>
 

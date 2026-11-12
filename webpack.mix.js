@@ -13,4 +13,9 @@ const mix = require('laravel-mix');
 
 mix.js('resources/js/app.js', 'public/js')
     .sass('resources/sass/app.scss', 'public/css')
+    // Tailwind (prefixed `tw-`, no preflight) for the Livewire screens. See tailwind.config.js.
+    .postCss('resources/css/tailwind.css', 'public/css', [
+        require('tailwindcss'),
+        require('autoprefixer'),
+    ])
     .sourceMaps();

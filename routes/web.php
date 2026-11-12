@@ -102,7 +102,18 @@ Route::middleware(['auth', 'permission'])->group(function () {
     Route::post('/storeusers', 'App\Http\Controllers\UserController@store')->name('users.store');
     Route::get('/user/{id}/edit', 'App\Http\Controllers\UserController@edit')->name('users.edit');
     Route::put('/users/{user}', 'App\Http\Controllers\UserController@update')->name('users.update');
+    Route::delete('/users/{user}', 'App\Http\Controllers\UserController@destroy')->name('users.destroy');
     // User Module Routes END
+
+    // Section / Department Routes START
+    Route::get('/departments', 'App\Http\Controllers\DepartmentController@index')->name('departments.index');
+    Route::post('/departments', 'App\Http\Controllers\DepartmentController@store')->name('departments.store');
+    Route::put('/departments/{department}', 'App\Http\Controllers\DepartmentController@update')->name('departments.update');
+    Route::delete('/departments/{department}', 'App\Http\Controllers\DepartmentController@destroy')->name('departments.destroy');
+    // Section / Department Routes END
+
+    // Product Unit (Livewire: App\Livewire\Catalog\UnitManager)
+    Route::view('/product-units', 'crud.host', ['component' => 'catalog.unit-manager'])->name('product-units.index');
 
     Route::resource('years', App\Http\Controllers\YearController::class);
 
@@ -180,4 +191,8 @@ Route::middleware(['auth', 'permission'])->group(function () {
 
     // Auto Verify by QR Code
     Route::post('/requisitions/{requisition}/verify-scan', [App\Http\Controllers\RequisitionController::class, 'verifyAndProcess'])->name('requisitions.verify_scan');
+
+    // Additional AJAX endpoints for Modal CRUD
+    Route::get('/requisitions-create-modal', [App\Http\Controllers\RequisitionController::class, 'createAjax'])->name('requisitions.create_modal');
+    Route::get('/requisitions-edit-modal/{requisition}', [App\Http\Controllers\RequisitionController::class, 'editAjax'])->name('requisitions.edit_modal');
 });

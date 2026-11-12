@@ -23,5 +23,31 @@ return [
 
     'lot_sa_submit_notice_text' => 'Once submitted, you will not be able to edit this lot. Are you sure you want to submit?',
 
+    // Product management screen (Livewire)
+    'manage' => [
+        'add' => 'Add New Product',
+        'category' => 'Category',
+        'sub_category' => 'Sub-Category',
+        'unit' => 'Unit',
+        'all_categories' => 'All categories',
+        'select_category' => 'Select a category',
+        'select_sub_category' => 'Select a sub-category',
+        'select_category_first' => 'Select a category first',
+        'select_unit' => 'Select a unit',
+        'search_category' => 'Type to search categories',
+        'search_sub_category' => 'Type to search sub-categories',
+        'search_unit' => 'Type to search units',
+        'search_placeholder' => 'Search by product, category, sub-category or unit',
+        'hint' => 'Give the product a name, category and unit; sub-category and description are optional.',
+        'exists' => 'A product with this name already exists.',
+        'created' => 'New product added successfully.',
+        'updated' => 'Product updated successfully.',
+        'deleted' => 'Product deleted successfully.',
+        'delete_title' => 'Delete product?',
+        'delete_text' => 'Are you sure you want to delete this product?',
+        'in_use' => 'This product is used in stock, lots or requisitions and cannot be deleted.',
+        'save_failed' => 'The product could not be saved. Please try again.',
+        'delete_failed' => 'The product could not be deleted. Please try again.',
+    ],
 
 ];

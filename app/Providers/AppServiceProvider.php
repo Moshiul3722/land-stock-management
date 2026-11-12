@@ -77,6 +77,8 @@ class AppServiceProvider extends ServiceProvider
                 'route' => $menu->route,
                 'is_menu' => $menu->is_menu,
                 'active' => Request::is($menu->route . '*') ? 'active' : '',
+                // Position inside its submodule: an explicit sort_order, else the menu id.
+                'sort' => $menu->sort_order ?? $menu->id * 10,
             ];
 
             // Group menu items by module, submodule
@@ -86,6 +88,16 @@ class AppServiceProvider extends ServiceProvider
                 $menuItems[$module->module_name_en][$submodule->submodule_name_en][] = $menuItem;
             }
         }
+
+        // Order the menus inside each submodule (modules and submodules keep their order).
+        foreach ($menuItems as &$submodules) {
+            foreach ($submodules as &$menus) {
+                usort($menus, fn($first, $second) => $first['sort'] <=> $second['sort']);
+            }
+            unset($menus);
+        }
+        unset($submodules);
+
         return $menuItems;
     }
 }

@@ -1,0 +1,33 @@
+/*
+ * Site-wide base font size.
+ *
+ * Bootstrap / AdminLTE (and the Tailwind screens) size text in `rem`, so setting the
+ * root font size scales the whole interface together: headings, tables, buttons, forms.
+ *
+ *   phones   (< 576px)    15px
+ *   tablets  (576–991px)  16px
+ *   desktops (>= 992px)   17px
+ *
+ * Loaded last in every page layout so it wins over framework defaults.
+ */
+html {
+    font-size: 15px;
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+}
+
+@media (min-width: 576px) {
+    html {
+        font-size: 16px;
+    }
+}
+
+@media (min-width: 992px) {
+    html {
+        font-size: 17px;
+    }
+}
+
+body {
+    font-size: 1rem;
+}

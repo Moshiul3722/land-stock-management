@@ -192,7 +192,7 @@ return [
         /**
          * InfyOm Service Provider
          */
-        InfyOm\GeneratorBuilder\GeneratorBuilderServiceProvider::class,
+        // InfyOm\GeneratorBuilder\GeneratorBuilderServiceProvider::class,
         CaptchaServiceProvider::class,
 
     ],

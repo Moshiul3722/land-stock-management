@@ -37,13 +37,15 @@ class LotController extends Controller
      */
     public function index(Request $request)
     {
-        $statuses = ['draft', 'pending', 'approved', 'rejected'];
-        if ($request->ajax()) {
+        // Older jQuery list (kept for any remaining caller)
+        if ($request->ajax() && ! $request->hasHeader('X-Livewire')) {
             $statusFilter = $request->input('status');
             $lots = $this->lotService->fetchAll($statusFilter);
             return view('lot._lot_list', compact('lots'));
         }
-        return view('lot.index', compact('statuses'));
+
+        // Lot management screen: list + modal CRUD (Livewire: App\Livewire\Stock\LotManager)
+        return view('crud.host', ['component' => 'stock.lot-manager']);
     }
 
     /**
@@ -60,20 +62,8 @@ class LotController extends Controller
      */
     public function create()
     {
-        $categories = $this->productCategoryService->fetchAll();
-        $purchaseTypes = $this->productPurchaseTypeService->fetchAll();
-
-        // Fetch Active Fiscal Years sorted descending
-        $fiscalYears = FiscalYear::where('is_active', true)->orderBy('name', 'desc')->get();
-
-        // Determine Current Fiscal Year ID based on today's date
-        $today = date('Y-m-d');
-        $currentFiscalYear = $fiscalYears->first(function ($year) use ($today) {
-            return $today >= $year->start_date && $today <= $year->end_date;
-        });
-        $currentFiscalYearId = $currentFiscalYear ? $currentFiscalYear->id : null;
-
-        return view('lot.create', compact('categories', 'purchaseTypes', 'fiscalYears', 'currentFiscalYearId'));
+        // Sidebar "create" menu: opens the create modal on the management screen.
+        return redirect()->route('lots.index', ['create' => 1]);
     }
 
     /**
@@ -111,12 +101,8 @@ class LotController extends Controller
         if ($lot->status !== 'draft') {
             return redirect()->route('lots.show', $lot)->with('error', 'This lot cannot be edited as it is already in process.');
         }
-        $categories = $this->productCategoryService->fetchAll();
-        $purchaseTypes = $this->productPurchaseTypeService->fetchAll();
-        $fiscalYears = FiscalYear::where('is_active', true)->orderBy('name', 'desc')->get();
-
-        $lot->load('lotDetails.product.category');
-        return view('lot.edit', compact('lot', 'categories', 'purchaseTypes', 'fiscalYears'));
+        // Old edit URL: opens the edit modal on the management screen.
+        return redirect()->route('lots.index', ['edit' => $lot->id]);
     }
 
     /**

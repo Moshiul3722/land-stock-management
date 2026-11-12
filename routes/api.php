@@ -15,12 +15,7 @@ Route::prefix('notifications')->group(function () {
     Route::post('send', [NotificationController::class, 'sendNotification']);
 });
 
-Route::post('file/store', 'App\Http\Controllers\TestController@index');
-
-
-Route::post('file/store', 'App\Http\Controllers\TestController@index');
-
-
-Route::get('/email-managements', [EmailManagementController::class, 'index'])->name('email-managements.index');
-Route::post('/email-managements/toggle-active/{id}', [EmailManagementController::class, 'toggleActive'])->name('email-managements.toggle-active');
-Route::post('/email-managements', [EmailManagementController::class, 'store'])->name('email-managements.store');
+// Route::post('file/store', 'App\Http\Controllers\TestController@index');
+// Route::get('/email-managements', [EmailManagementController::class, 'index'])->name('email-managements.index');
+// Route::post('/email-managements/toggle-active/{id}', [EmailManagementController::class, 'toggleActive'])->name('email-managements.toggle-active');
+// Route::post('/email-managements', [EmailManagementController::class, 'store'])->name('email-managements.store');

@@ -80,7 +80,7 @@ class CnfRoleController extends AppBaseController
             'role_name_bn' => 'required|unique:cnf_role,role_name_bn|max:255',
         ]);
         try {
-            $input = $request->all();
+            $input = $request->only(['role_name_en', 'role_name_bn']);
             $role = $this->cnfRoleRepository->create($input);
             return response()->json($role);
         } catch (\Exception $e) {
@@ -158,7 +158,7 @@ class CnfRoleController extends AppBaseController
         }
 
         try {
-            $cnfRole = $this->cnfRoleRepository->update($request->all(), $id);
+            $cnfRole = $this->cnfRoleRepository->update($request->only(['role_name_en', 'role_name_bn']), $id);
             return response()->json($cnfRole);
         } catch (\Exception $e) {
             return response()->json(['error' => $e->getMessage()], 500);
@@ -180,6 +180,13 @@ class CnfRoleController extends AppBaseController
 
         if (empty($cnfRole)) {
             return response()->json(['error' => trans('flash.no_record_found')], 500);
+        }
+
+        // A role that is still assigned to users must not be removed: those users
+        // would lose every menu permission and be locked out.
+        $inUse = \App\Models\User::where('role_id', $id)->exists();
+        if ($inUse) {
+            return response()->json(['error' => trans('rolemanagement.cannot_delete_in_use')], 422);
         }
 
         $this->cnfRoleRepository->delete($id);

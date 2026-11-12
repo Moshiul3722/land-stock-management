@@ -6,13 +6,13 @@
 </div>
 <div class="card-body">
     <div class="row">
-        <div class="table-responsive">
+        <div class="table-responsive col-12">
             @if (collect($menuItems)->isEmpty())
                 <p>{{ __('rolemanagement.no_record_found') }}</p>
             @else
                 <form id="permission_form" name="permission_form">
                     <input type="hidden" id="role_id" name="role_id" value="{{ $roleId }}">
-                    <table class="table table-bordered" id="permission_table">
+                    <table class="table table-bordered" id="permission_table" style="width: 100%;">
                         <thead>
                             <tr>
                                 <th>{{ __('rolemanagement.module') }}</th>
@@ -31,12 +31,15 @@
                                                 <td rowspan="{{ count($menus) }}">{{ $submodule }}</td>
                                             @endif
                                             <td>{{ $menuItem['menu_name'] }}</td>
-                                            <td>
+                                            <td class="permission-cell">
                                                 <input type="hidden" class="menu-id"
                                                     value="{{ $menuItem['menu_id'] }}">
-                                                <input type="checkbox" class="permission-checkbox"
-                                                    value="{{ $menuItem['menu_id'] }}"
-                                                    {{ $menuItem['has_permission'] == 1 ? 'checked' : '' }}>
+                                                <label class="permission-label">
+                                                    <input type="checkbox" class="permission-checkbox"
+                                                        value="{{ $menuItem['menu_id'] }}"
+                                                        aria-label="{{ __('rolemanagement.permission') }}: {{ $menuItem['menu_name'] }}"
+                                                        {{ $menuItem['has_permission'] == 1 ? 'checked' : '' }}>
+                                                </label>
                                             </td>
                                         </tr>
                                     @endforeach

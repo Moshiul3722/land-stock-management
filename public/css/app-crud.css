@@ -1,0 +1,192 @@
+/*
+ * Shared look of the Livewire CRUD list screens (category, product, unit ...).
+ * Matches the user / role / department tables: compact rows, tinted footer band.
+ */
+.crud-table {
+    width: 100%;
+    margin-bottom: 0;
+}
+
+.crud-table th,
+.crud-table td {
+    vertical-align: middle !important;
+    padding: 0.35rem 0.6rem;
+    line-height: 1.35;
+}
+
+.crud-table thead th {
+    padding-top: 0.5rem;
+    padding-bottom: 0.5rem;
+    text-align: center;
+    white-space: nowrap;
+}
+
+.crud-table .crud-serial {
+    width: 64px;
+    text-align: center;
+    white-space: nowrap;
+}
+
+.crud-table .crud-actions {
+    width: 1%;
+    text-align: center;
+    white-space: nowrap;
+}
+
+.crud-table small {
+    font-size: 0.875rem;
+}
+
+.crud-wrap {
+    overflow-wrap: break-word;
+}
+
+.crud-btn {
+    min-width: 34px;
+    min-height: 34px;
+    padding: 0.2rem 0.45rem;
+}
+
+/* Footer band: entry count + pagination */
+.crud-footer {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+    margin-top: 0.75rem;
+    padding: 0.6rem 0.75rem;
+    background: #e9eefb;
+    border: 1px solid #cfd9f3;
+    border-radius: 0.5rem;
+}
+
+.crud-footer .crud-info {
+    color: #1f2d5a;
+    font-weight: 600;
+}
+
+.crud-footer .pagination {
+    margin: 0;
+    flex-wrap: wrap;
+}
+
+.crud-footer .page-link {
+    cursor: pointer;
+}
+
+/* Loading veil while the list refreshes */
+.crud-loading {
+    position: absolute;
+    inset: 0;
+    z-index: 5;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    background: rgba(255, 255, 255, 0.65);
+}
+
+.crud-empty {
+    padding: 2rem 1rem;
+    text-align: center;
+    color: #6c757d;
+}
+
+/* Nested list (e.g. sub-categories inside a category row) */
+.crud-nested {
+    background: #f8f9fc;
+}
+
+/* Ten rows are visible at a time; the rest scroll. */
+.crud-nested-list {
+    margin: 0;
+    padding: 0 0.25rem 0 0;
+    list-style: none;
+    max-height: 27.5rem;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+}
+
+.crud-nested-list > li {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+    min-height: 2.75rem;
+    padding: 0.2rem 0.25rem;
+    border-bottom: 1px dashed #dee2e6;
+}
+
+.crud-nested-list > li:last-child {
+    border-bottom: 0;
+}
+
+.crud-toggle {
+    border: 0;
+    background: transparent;
+    padding: 0.15rem 0.4rem;
+    border-radius: 0.25rem;
+    color: #3f51b5;
+    font-weight: 600;
+    cursor: pointer;
+    white-space: nowrap;
+}
+
+.crud-toggle:hover,
+.crud-toggle:focus-visible {
+    background: #e9eefb;
+    outline: 0;
+}
+
+@media (max-width: 767.98px) {
+    .crud-footer {
+        justify-content: center;
+        text-align: center;
+    }
+}
+
+@media (max-width: 575.98px) {
+    .crud-table th,
+    .crud-table td {
+        padding-left: 0.3rem;
+        padding-right: 0.3rem;
+    }
+
+    .crud-table thead th {
+        white-space: normal;
+    }
+
+    .crud-table .crud-serial {
+        width: 40px;
+    }
+
+    .crud-wrap {
+        overflow-wrap: anywhere;
+    }
+
+    .crud-toggle-inline .crud-toggle {
+        padding-left: 0;
+        min-height: 32px;
+        white-space: normal;
+        text-align: left;
+    }
+
+    .crud-table .crud-actions {
+        width: 124px;
+    }
+
+    .crud-btn {
+        min-width: 38px;
+        min-height: 38px;
+    }
+
+    .crud-toolbar .custom-select,
+    .crud-toolbar .form-control {
+        min-height: 44px;
+        font-size: 16px; /* stops iOS zooming into the field */
+    }
+
+    .crud-footer .page-link {
+        padding: 0.4rem 0.55rem;
+    }
+}

@@ -1,0 +1,144 @@
+/*
+ * App toast notifications — Sonner-style (https://sonner.emilkowal.ski) look and behaviour
+ * for this jQuery/Blade app. Toasts appear at the top right of the screen. Sonner itself is React-only, so this is a small standalone
+ * equivalent. Used through window.appToast (public/js/app-toast.js).
+ */
+.app-toaster {
+    position: fixed;
+    top: 24px;
+    right: 24px;
+    z-index: 2000;
+    width: 356px;
+    max-width: calc(100vw - 32px);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    pointer-events: none;
+    font-family: kalpurush, 'Hind-Siliguri', 'Nunito', system-ui, -apple-system, 'Segoe UI', sans-serif;
+}
+
+.app-toast {
+    pointer-events: auto;
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 14px 16px;
+    border-radius: 10px;
+    border: 1px solid #e5e7eb;
+    background: #ffffff;
+    color: #171717;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    font-size: 15px;
+    line-height: 1.5;
+    opacity: 0;
+    transform: translateY(-16px) scale(0.98);
+    transition: opacity 0.35s ease, transform 0.35s ease;
+    touch-action: pan-y;
+    overflow-wrap: anywhere;
+}
+
+.app-toast.is-visible {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+}
+
+.app-toast.is-leaving {
+    opacity: 0;
+    transform: translateY(-12px) scale(0.98);
+}
+
+.app-toast__icon {
+    flex: 0 0 auto;
+    width: 20px;
+    height: 20px;
+    margin-top: 1px;
+}
+
+.app-toast__icon svg {
+    display: block;
+    width: 20px;
+    height: 20px;
+}
+
+.app-toast__body {
+    flex: 1 1 auto;
+    min-width: 0;
+}
+
+.app-toast__title {
+    font-weight: 600;
+}
+
+.app-toast__description {
+    margin-top: 2px;
+    font-size: 14px;
+    opacity: 0.85;
+}
+
+.app-toast__close {
+    flex: 0 0 auto;
+    width: 28px;
+    height: 28px;
+    margin: -4px -6px -4px 0;
+    padding: 0;
+    border: 0;
+    border-radius: 6px;
+    background: transparent;
+    color: inherit;
+    opacity: 0.55;
+    font-size: 18px;
+    line-height: 1;
+    cursor: pointer;
+}
+
+.app-toast__close:hover,
+.app-toast__close:focus-visible {
+    opacity: 1;
+    background: rgba(0, 0, 0, 0.06);
+    outline: none;
+}
+
+/* Rich colours per type (Sonner "richColors") */
+.app-toast--success {
+    background: #ecfdf3;
+    border-color: #bffcd9;
+    color: #008a2e;
+}
+
+.app-toast--error {
+    background: #fff0f0;
+    border-color: #ffe0e1;
+    color: #e60000;
+}
+
+.app-toast--warning {
+    background: #fffcf0;
+    border-color: #fdf5d3;
+    color: #b45f06;
+}
+
+.app-toast--info {
+    background: #f0f8ff;
+    border-color: #d3e0fd;
+    color: #0973dc;
+}
+
+@media (max-width: 600px) {
+    .app-toaster {
+        top: 16px;
+        right: 16px;
+        left: 16px;
+        width: auto;
+        max-width: none;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .app-toast {
+        transition: opacity 0.01s linear;
+        transform: none !important;
+    }
+}

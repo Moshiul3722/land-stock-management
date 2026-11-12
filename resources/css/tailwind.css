@@ -1,0 +1,33 @@
+/*
+ * Tailwind entry point. Compiled by Laravel Mix to public/css/tailwind.css.
+ * Preflight is disabled in tailwind.config.js, so `base` only emits Tailwind's
+ * CSS variables (needed by rings, shadows and transforms), not a CSS reset.
+ */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+[x-cloak] {
+    display: none !important;
+}
+
+@layer components {
+    .tw-root {
+        line-height: 1.6;
+    }
+
+    /* Bengali glyphs need a little more vertical room than Latin text. */
+    .tw-root :lang(bn),
+    html[lang='bn'] .tw-root {
+        line-height: 1.75;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .tw-root *,
+    .tw-root *::before,
+    .tw-root *::after {
+        animation-duration: 0.01ms !important;
+        transition-duration: 0.01ms !important;
+    }
+}

@@ -88,7 +88,7 @@
                 // If the user confirms, send an AJAX request to delete the record
                 $('#wait').show(); // Show loading spinner
                 $.ajax({
-                    url: "{{ route('cnfRoles.destroy', ['cnfRole' => ':roleId']) }}"
+                    url: "{{ route('users.destroy', ['user' => ':roleId']) }}"
                         .replace(':roleId', roleId),
                     type: 'DELETE',
                     success: function(response) {
@@ -102,7 +102,7 @@
                         }).then((result) => {
                             $('#wait').show();
                             window.location.href =
-                                "{{ route('cnfRoles.index') }}";
+                                "{{ route('users.index') }}";
                         });
                     },
                     error: function(xhr, status, error) {

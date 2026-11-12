@@ -13,4 +13,14 @@ return [
     'submodule' => 'Sub-Modules',
     'menu' => 'Menu',
     'permission' => 'Permission',
+    'cannot_delete_in_use' => 'This role is assigned to one or more users and cannot be deleted.',
+    'delete_role' => 'Delete Role',
+    'delete_confirm_text' => 'Are you sure you want to delete this role? This cannot be undone from this screen.',
+    'toast_created' => 'New role added successfully.',
+    'toast_updated' => 'Role updated successfully.',
+    'toast_deleted' => 'Role deleted successfully.',
+    'am' => 'AM',
+    'pm' => 'PM',
+    'search_placeholder' => 'Search by role name or creator',
+
 ];
