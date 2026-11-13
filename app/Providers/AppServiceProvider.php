@@ -31,6 +31,8 @@ class AppServiceProvider extends ServiceProvider
     public function boot()
     {
         Schema::defaultStringLength(191);
+        // Every page carries Livewire's script, so menu links can change the page without a reload.
+        \Livewire\Livewire::forceAssetInjection();
         // Pass the permissions to the view composer
         View::composer('layouts.menu', function ($view) {
             // Retrieve the authenticated user's role ID

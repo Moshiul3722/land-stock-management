@@ -18,6 +18,8 @@ module.exports = {
     content: [
         './resources/views/livewire/**/*.blade.php',
         './resources/views/components/ui/**/*.blade.php',
+        // Blade pages that use the Tailwind look outside Livewire
+        './resources/views/requisition/pending.blade.php',
         './app/Livewire/**/*.php',
     ],
     theme: {

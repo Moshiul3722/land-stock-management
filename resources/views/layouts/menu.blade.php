@@ -1,6 +1,6 @@
     <ul class="nav">
         <li class="nav-item">
-        <a href="{{ route('home') }}" class="nav-link dashboard {{ request()->routeIs('home') ? 'active' : '' }}">
+        <a href="{{ route('home') }}" wire:navigate class="nav-link dashboard {{ request()->routeIs('home') ? 'active' : '' }}">
         <i class="fas fa-home custom-icon"></i>
                 <p>{{ app()->getLocale() === 'en' ? 'Dashboard' : 'ড্যাশবোর্ড' }}</p>
             </a>
@@ -49,7 +49,7 @@
                                 @foreach ($menus as $menu)  
                                     @if ($menu['is_menu'] == 1)
                                         <li class="nav-item">
-                                            <a href="{{ route($menu['route']) }}" class="nav-link {{ request()->routeIs($menu['route']) ? 'active' : '' }}" ml-4>
+                                            <a href="{{ route($menu['route']) }}" wire:navigate class="nav-link {{ request()->routeIs($menu['route']) ? 'active' : '' }}" ml-4>
                                             <i class="fas fa-chevron-circle-right custom-icon"></i>
                                                 <p class="ml-3">
                                                     {{ $menu['menu_name'] }}

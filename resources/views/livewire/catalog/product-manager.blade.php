@@ -149,30 +149,28 @@
                             @error('name') <p id="product-name-error" class="{{ $ui::ERROR }}"><i class="fas fa-exclamation-circle tw-mt-0.5" aria-hidden="true"></i>{{ $message }}</p> @enderror
                         </div>
 
-                        <div class="tw-grid tw-grid-cols-1 tw-gap-4 sm:tw-grid-cols-2">
-                            <div>
+                        {{-- Category, sub-category and unit share one row (stacked on phones) --}}
+                        <div class="tw-grid tw-grid-cols-1 tw-gap-4 sm:tw-grid-cols-3">
+                            <div class="tw-min-w-0">
                                 <label for="product-category" class="{{ $ui::LABEL }}">{{ __('product.manage.category') }} <span class="tw-text-rose-600">*</span></label>
-                                <x-ui.search-select id="product-category" wire:model.live="categoryId"
+                                <x-ui.search-select id="product-category" wire:model.live="categoryId" :visible="5"
                                     :options="$this->categoryOptions->map(fn ($option) => ['value' => $option->id, 'label' => $option->name])"
                                     :placeholder="__('product.manage.select_category')" :search-placeholder="__('product.manage.search_category')"
                                     :invalid="$errors->has('categoryId')" />
                                 @error('categoryId') <p id="product-category-error" class="{{ $ui::ERROR }}"><i class="fas fa-exclamation-circle tw-mt-0.5" aria-hidden="true"></i>{{ $message }}</p> @enderror
                             </div>
-                            <div>
+                            <div class="tw-min-w-0">
                                 <label for="product-sub-category" class="{{ $ui::LABEL }}">{{ __('product.manage.sub_category') }}</label>
-                                <x-ui.search-select id="product-sub-category" wire:model="subCategoryId" :disabled="! $categoryId"
+                                <x-ui.search-select id="product-sub-category" wire:model="subCategoryId" :disabled="! $categoryId" :visible="5"
                                     :options="$this->subCategoryOptions->map(fn ($option) => ['value' => $option->id, 'label' => $option->name])"
                                     :placeholder="$categoryId ? __('product.manage.select_sub_category') : __('product.manage.select_category_first')"
                                     :search-placeholder="__('product.manage.search_sub_category')"
                                     :invalid="$errors->has('subCategoryId')" />
                                 @error('subCategoryId') <p class="{{ $ui::ERROR }}">{{ $message }}</p> @enderror
                             </div>
-                        </div>
-
-                        <div class="tw-grid tw-grid-cols-1 tw-gap-4 sm:tw-grid-cols-2">
-                            <div>
+                            <div class="tw-min-w-0">
                                 <label for="product-unit" class="{{ $ui::LABEL }}">{{ __('product.manage.unit') }} <span class="tw-text-rose-600">*</span></label>
-                                <x-ui.search-select id="product-unit" wire:model="unit"
+                                <x-ui.search-select id="product-unit" wire:model="unit" :visible="5"
                                     :options="$this->unitOptions->map(fn ($option) => ['value' => $option, 'label' => $option])"
                                     :placeholder="__('product.manage.select_unit')" :search-placeholder="__('product.manage.search_unit')"
                                     :invalid="$errors->has('unit')" />

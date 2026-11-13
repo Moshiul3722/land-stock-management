@@ -28,8 +28,13 @@ class CategoryManager extends Component
 {
     use ManagesCrudTable, WithPagination;
 
-    /** Category ids whose sub-category list is open. */
+    /** The category whose sub-category list is open (at most one id). */
     public array $expanded = [];
+
+    /** Page of the open category's sub-category list. */
+    public int $subPage = 1;
+
+    public const SUBS_PER_PAGE = 10;
 
     // ---- Category form ----
     public bool $showCategoryForm = false;
@@ -52,6 +57,18 @@ class CategoryManager extends Component
     public string $subName = '';
 
     public string $subCode = '';
+
+    // ---- Products of one sub-category (read-only modal) ----
+    public bool $showProducts = false;
+
+    #[Locked]
+    public ?int $productsSubId = null;
+
+    public int $productsPage = 1;
+
+    public string $productsSearch = '';
+
+    public const PRODUCTS_PER_PAGE = 10;
 
     // ---- Delete confirmation ----
     public bool $showDelete = false;
@@ -102,11 +119,105 @@ class CategoryManager extends Component
             ->paginate($this->perPage);
     }
 
+    /** Only one category is open at a time: opening one closes the other. */
     public function toggle(int $categoryId): void
     {
-        $this->expanded = in_array($categoryId, $this->expanded, true)
-            ? array_values(array_diff($this->expanded, [$categoryId]))
-            : [...$this->expanded, $categoryId];
+        $this->expanded = in_array($categoryId, $this->expanded, true) ? [] : [$categoryId];
+        $this->subPage = 1;
+    }
+
+    /** The view clamps the page to the last one, so only the lower bound matters here. */
+    public function gotoSubPage(int $page): void
+    {
+        $this->subPage = max(1, $page);
+    }
+
+    /** A search opens the first match so a matching sub-category is visible straight away. */
+    public function updatedSearch(): void
+    {
+        $this->resetPage();
+        unset($this->categories);
+        $term = trim($this->search);
+        $first = $term !== '' ? $this->categories->first() : null;
+        $this->expanded = $first ? [$first->id] : [];
+        $this->subPage = 1;
+
+        // Jump to the page of the first matching sub-category so the match is on screen.
+        if ($first) {
+            $index = $first->subCategories->search(fn ($sub) => mb_stripos((string) $sub->name, $term) !== false
+                || mb_stripos((string) $sub->code, $term) !== false);
+            if ($index !== false) {
+                $this->subPage = intdiv($index, self::SUBS_PER_PAGE) + 1;
+            }
+        }
+    }
+
+    /** Moving to another page closes the open category. */
+    public function updatedPage(): void
+    {
+        $this->expanded = [];
+        $this->subPage = 1;
+    }
+
+    // ------------------------------------------------------------------
+    // Products of a sub-category
+    // ------------------------------------------------------------------
+
+    public function showSubProducts(int $subId): void
+    {
+        $this->authorizeAccess();
+        if (! ProductSubCategory::whereKey($subId)->exists()) {
+            $this->notify('error', __('commontable.not_found'));
+
+            return;
+        }
+
+        $this->productsSubId = $subId;
+        $this->productsPage = 1;
+        $this->productsSearch = '';
+        $this->showProducts = true;
+    }
+
+    public function updatedProductsSearch(): void
+    {
+        $this->productsPage = 1;
+    }
+
+    public function gotoProductsPage(int $page): void
+    {
+        $this->productsPage = max(1, $page);
+    }
+
+    /** The sub-category whose products are shown, with its category. */
+    #[Computed]
+    public function productsSub()
+    {
+        return $this->productsSubId
+            ? ProductSubCategory::with('category:id,name')->find($this->productsSubId)
+            : null;
+    }
+
+    #[Computed]
+    public function subProducts()
+    {
+        if (! $this->productsSubId) {
+            return null;
+        }
+
+        $term = trim($this->productsSearch);
+        $query = Product::query()
+            ->where('sub_category_id', $this->productsSubId)
+            ->when($term !== '', function (Builder $query) use ($term) {
+                $like = '%' . addcslashes($term, '%_\\') . '%';
+                $query->where(fn (Builder $inner) => $inner
+                    ->where('name', 'like', $like)
+                    ->orWhere('description', 'like', $like)
+                    ->orWhere('product_unit', 'like', $like));
+            })
+            ->orderBy('name');
+        $last = max(1, (int) ceil((clone $query)->count() / self::PRODUCTS_PER_PAGE));
+
+        return $query->paginate(self::PRODUCTS_PER_PAGE, ['id', 'name', 'description', 'product_unit'], 'productsPage', min($this->productsPage, $last));
     }
 
     // ------------------------------------------------------------------
@@ -275,8 +386,9 @@ class CategoryManager extends Component
         }
 
         // Keep the parent open so the result is visible straight away.
-        if (! in_array($payload['category_id'], $this->expanded, true)) {
-            $this->expanded[] = $payload['category_id'];
+        if ($this->expanded !== [$payload['category_id']]) {
+            $this->expanded = [$payload['category_id']];
+            $this->subPage = 1;
         }
 
         $this->showSubForm = false;
@@ -375,6 +487,9 @@ class CategoryManager extends Component
     {
         return view('livewire.catalog.category-manager', $this->tableViewData() + [
             'rows' => $this->categories,
+            'subsPerPage' => self::SUBS_PER_PAGE,
+            'productsSub' => $this->showProducts ? $this->productsSub : null,
+            'subProducts' => $this->showProducts ? $this->subProducts : null,
         ]);
     }
 

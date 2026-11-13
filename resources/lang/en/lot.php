@@ -86,4 +86,27 @@ return [
         ],
     ],
 
+    // Lot entry requests list
+    'requests' => [
+        'search_placeholder' => 'Search by lot number, purchase type or submitter',
+        'view' => 'View lot items',
+        'approve' => 'Approve',
+        'reject' => 'Reject',
+        'items_title' => 'Lot items',
+        'items_hint' => 'Products submitted for entry in this lot.',
+        'no_items' => 'This lot has no items.',
+        'not_available' => 'N/A',
+        'approve_title' => 'Approve this lot?',
+        'approve_text' => 'Approving adds the items to stock. This cannot be undone.',
+        'approve_yes' => 'Yes, approve',
+        'reject_title' => 'Reject this lot?',
+        'reject_text' => 'Give a reason for the rejection (required):',
+        'reject_placeholder' => 'Type the reason here...',
+        'reject_yes' => 'Yes, reject',
+        'reject_reason_required' => 'A reason for rejection is required.',
+        'approved' => 'Lot approved, items stocked and budget updated.',
+        'rejected' => 'Lot rejected.',
+        'failed_title' => 'Operation failed',
+    ],
+
 ];

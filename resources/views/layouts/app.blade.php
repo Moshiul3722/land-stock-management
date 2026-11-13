@@ -198,111 +198,14 @@
     <link rel="stylesheet" href="{{ asset('css/app-modal.css') }}?v={{ @filemtime(public_path('css/app-modal.css')) }}">
     {{-- Site-wide responsive base font size (17px desktop, 16px tablet, 15px phone) --}}
     <link rel="stylesheet" href="{{ asset('css/base-font.css') }}?v={{ @filemtime(public_path('css/base-font.css')) }}">
-</head>
 
-<body class="hold-transition sidebar-mini layout-fixed">
-    <div id="wait">
-
-    </div>
-    <div class="wrapper">
-        <!-- Main Header -->
-        <nav class="main-header navbar navbar-expand navbar-white navbar-light">
-            <!-- Left navbar links -->
-            <ul class="navbar-nav">
-                <li class="nav-item">
-                    <a class="nav-link" data-widget="pushmenu" href="#" role="button"><i
-                            class="fas fa-bars"></i></a>
-                </li>
-            </ul>
-
-            <ul class="navbar-nav ml-auto">
-                <li class="nav-item dropdown">
-                    <a class="nav-link" data-toggle="dropdown" href="#">
-                        <i class="fa fa-bell"></i>
-                        @if (isset($unreadCount) && $unreadCount > 0)
-                            <span class="badge badge-warning navbar-badge">{{ $unreadCount }}</span>
-                        @endif
-                    </a>
-                    <div class="dropdown-menu dropdown-menu-xl dropdown-menu-right" style="min-width: 450px;">
-                        <span class="dropdown-item dropdown-header">{{ $unreadCount ?? 0 }} Notifications</span>
-                        <div class="dropdown-divider"></div>
-
-                        @if (isset($recentNotifications))
-                            @foreach ($recentNotifications as $notification)
-                                <a href="{{ route('notifications.read', $notification->id) }}" class="dropdown-item">
-                                    <i class="fas fa-envelope mr-2"></i>
-                                    {{ Str::limit($notification->notification_text, 80) }}
-                                    <span
-                                        class="float-right text-muted text-sm">{{ $notification->created_at->timezone('Asia/Dhaka')->format('d M, Y h:i A') }}</span>
-                                </a>
-                                <div class="dropdown-divider"></div>
-                            @endforeach
-                        @endif
-
-                        <a href="{{ route('notifications.index') }}" class="dropdown-item dropdown-footer">See All
-                            Notifications</a>
-                    </div>
-                </li>
-                <li class="nav-item">
-                    <label class="custom-switch">
-                        <input type="checkbox" id="languageToggle" {{ app()->getLocale() === 'en' ? 'checked' : '' }}>
-                        <span class="custom-slider" data-on="EN" data-off="BN" data-offstyle="success"></span>
-                    </label>
-                </li>
-                <li class="nav-item dropdown user-menu">
-                    <a href="#" class="nav-link dropdown-toggle" data-toggle="dropdown">
-                        <img src="{{ asset('theme/assets/img/gov.png') }}" class="user-image" alt="User Image">
-                        <span class="d-none d-md-inline">{{ Auth::user()->name }}</span>
-                    </a>
-                    <ul class="dropdown-menu dropdown-menu-lg dropdown-menu-right">
-                        <!-- User image -->
-                        <li class="user-header bg-primary">
-                            <img src="{{ asset('theme/assets/img/gov.png') }}" class="img-circle elevation-2"
-                                alt="User Image">
-                            <p>
-                                {{ Auth::user()->name }}
-                                <small>Member since {{ Auth::user()->created_at->format('M. Y') }}</small>
-                            </p>
-                        </li>
-                        <!-- Menu Footer-->
-                        <li class="user-footer">
-                            <a href="{{ route('profile.index') }}" class="btn btn-default btn-flat">Profile</a>
-                            <a href="#" class="btn btn-default btn-flat float-right"
-                                onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
-                                Sign out
-                            </a>
-                            <form id="logout-form" action="{{ route('logout') }}" method="POST" class="d-none">
-                                @csrf
-                            </form>
-                        </li>
-                    </ul>
-                </li>
-            </ul>
-        </nav>
-
-        <!-- Left side column. contains the logo and sidebar -->
-        @include('layouts.sidebar')
-
-        <!-- Content Wrapper. Contains page content -->
-        <div class="content-wrapper">
-            <section class="content">
-                @yield('content')
-            </section>
-        </div>
-
-        <!-- Main Footer -->
-        <footer class="main-footer">
-            <div class="float-right d-none d-sm-block">
-                <b>{{ __('footer.version') }}</b> v1.0
-            </div>
-            <strong>
-                {{ __('footer.copyright') }} &copy; <?php echo date('Y'); ?> {{ __('common.app_name') }} | {{ __('common.ministry') }}
-            </strong> |
-            {{ __('common.footer_copyright') }}
-        </footer>
-    </div>
-
+    {{--
+        Libraries live in <head> so they are loaded once: Livewire (wire:navigate) replaces
+        only the <body> when the page changes and runs the page's inline scripts again.
+    --}}
     <script src="{{ asset('js/jquery.min.js') }}"></script>
+    {{-- Keeps jQuery pages working when Livewire changes the page without a reload --}}
+    <script src="{{ asset('js/app-navigate.js') }}?v={{ @filemtime(public_path('js/app-navigate.js')) }}"></script>
 
     <script src="{{ asset('js/popper.min.js') }}"></script>
 
@@ -368,6 +271,115 @@
     {{-- Toastr --}}
     <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
 
+    <script src="{{ asset('js/sweetalert2@11.js') }}"></script>
+    <script src="{{ asset('js/app-toast.js') }}?v={{ @filemtime(public_path('js/app-toast.js')) }}"></script>
+    {{-- Page libraries that must be ready before the page's inline scripts run --}}
+    @stack('head_scripts')
+    <script>AppNav.libsReady();</script>
+</head>
+
+<body class="hold-transition sidebar-mini layout-fixed">
+    <div id="wait">
+
+    </div>
+    <div class="wrapper">
+        <!-- Main Header -->
+        <nav class="main-header navbar navbar-expand navbar-white navbar-light">
+            <!-- Left navbar links -->
+            <ul class="navbar-nav">
+                <li class="nav-item">
+                    <a class="nav-link" data-widget="pushmenu" href="#" role="button"><i
+                            class="fas fa-bars"></i></a>
+                </li>
+            </ul>
+
+            <ul class="navbar-nav ml-auto">
+                <li class="nav-item dropdown">
+                    <a class="nav-link" data-toggle="dropdown" href="#">
+                        <i class="fa fa-bell"></i>
+                        @if (isset($unreadCount) && $unreadCount > 0)
+                            <span class="badge badge-warning navbar-badge">{{ $unreadCount }}</span>
+                        @endif
+                    </a>
+                    <div class="dropdown-menu dropdown-menu-xl dropdown-menu-right" style="min-width: 450px;">
+                        <span class="dropdown-item dropdown-header">{{ $unreadCount ?? 0 }} Notifications</span>
+                        <div class="dropdown-divider"></div>
+
+                        @if (isset($recentNotifications))
+                            @foreach ($recentNotifications as $notification)
+                                <a href="{{ route('notifications.read', $notification->id) }}" class="dropdown-item">
+                                    <i class="fas fa-envelope mr-2"></i>
+                                    {{ Str::limit($notification->notification_text, 80) }}
+                                    <span
+                                        class="float-right text-muted text-sm">{{ $notification->created_at->timezone('Asia/Dhaka')->format('d M, Y h:i A') }}</span>
+                                </a>
+                                <div class="dropdown-divider"></div>
+                            @endforeach
+                        @endif
+
+                        <a href="{{ route('notifications.index') }}" wire:navigate class="dropdown-item dropdown-footer">See All
+                            Notifications</a>
+                    </div>
+                </li>
+                <li class="nav-item">
+                    <label class="custom-switch">
+                        <input type="checkbox" id="languageToggle" {{ app()->getLocale() === 'en' ? 'checked' : '' }}>
+                        <span class="custom-slider" data-on="EN" data-off="BN" data-offstyle="success"></span>
+                    </label>
+                </li>
+                <li class="nav-item dropdown user-menu">
+                    <a href="#" class="nav-link dropdown-toggle" data-toggle="dropdown">
+                        <img src="{{ asset('theme/assets/img/gov.png') }}" class="user-image" alt="User Image">
+                        <span class="d-none d-md-inline">{{ Auth::user()->name }}</span>
+                    </a>
+                    <ul class="dropdown-menu dropdown-menu-lg dropdown-menu-right">
+                        <!-- User image -->
+                        <li class="user-header bg-primary">
+                            <img src="{{ asset('theme/assets/img/gov.png') }}" class="img-circle elevation-2"
+                                alt="User Image">
+                            <p>
+                                {{ Auth::user()->name }}
+                                <small>Member since {{ Auth::user()->created_at->format('M. Y') }}</small>
+                            </p>
+                        </li>
+                        <!-- Menu Footer-->
+                        <li class="user-footer">
+                            <a href="{{ route('profile.index') }}" wire:navigate class="btn btn-default btn-flat">Profile</a>
+                            <a href="#" class="btn btn-default btn-flat float-right"
+                                onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
+                                Sign out
+                            </a>
+                            <form id="logout-form" action="{{ route('logout') }}" method="POST" class="d-none">
+                                @csrf
+                            </form>
+                        </li>
+                    </ul>
+                </li>
+            </ul>
+        </nav>
+
+        <!-- Left side column. contains the logo and sidebar -->
+        @include('layouts.sidebar')
+
+        <!-- Content Wrapper. Contains page content -->
+        <div class="content-wrapper">
+            <section class="content">
+                @yield('content')
+            </section>
+        </div>
+
+        <!-- Main Footer -->
+        <footer class="main-footer">
+            <div class="float-right d-none d-sm-block">
+                <b>{{ __('footer.version') }}</b> v1.0
+            </div>
+            <strong>
+                {{ __('footer.copyright') }} &copy; <?php echo date('Y'); ?> {{ __('common.app_name') }} | {{ __('common.ministry') }}
+            </strong> |
+            {{ __('common.footer_copyright') }}
+        </footer>
+    </div>
+
     <script>
         $(function() {
             bsCustomFileInput.init();
@@ -403,7 +415,6 @@
         };
     </script>
 
-    <script src="{{ asset('js/sweetalert2@11.js') }}"></script>
     <!-- CSRF Token setup script -->
     <script>
         // Get the CSRF token value from the meta tag
@@ -416,7 +427,6 @@
             }
         });
     </script>
-    <script src="{{ asset('js/app-toast.js') }}?v={{ @filemtime(public_path('js/app-toast.js')) }}"></script>
     @stack('third_party_scripts')
     @stack('page_scripts')
     @stack('js')

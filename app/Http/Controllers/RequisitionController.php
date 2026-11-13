@@ -156,9 +156,13 @@ class RequisitionController extends Controller
      */
     public function approve(Request $request, Requisition $requisition)
     {
+        if (! $this->isWaitingForCurrentUser($requisition)) {
+            return redirect()->route('requisitions.pending')->with('error', __('requisition.pending_manage.modal.not_your_turn'));
+        }
+
         try {
             $this->requisitionService->approveRequisition($requisition, $request->input('comments'));
-            return redirect()->route('requisitions.pending')->with('success', 'Requisition approved successfully.');
+            return redirect()->route('requisitions.pending')->with('success', __('requisition.pending_manage.modal.approved'));
         } catch (InvalidArgumentException $e) {
             // CATCHES OUR CUSTOM VALIDATION ERROR AND SENDS IT TO THE UI
             Log::error($e->getMessage());
@@ -178,14 +182,30 @@ class RequisitionController extends Controller
      */
     public function reject(Request $request, Requisition $requisition)
     {
+        if (! $this->isWaitingForCurrentUser($requisition)) {
+            return redirect()->route('requisitions.pending')->with('error', __('requisition.pending_manage.modal.not_your_turn'));
+        }
+
         try {
             $this->requisitionService->rejectRequisition($requisition, $request->input('comments'));
-            return redirect()->route('requisitions.pending')->with('success', 'Requisition rejected successfully.');
+            return redirect()->route('requisitions.pending')->with('success', __('requisition.pending_manage.modal.rejected'));
         } catch (Exception $e) {
             Log::error($e->getMessage());
             return redirect()->back()->with('error', $e->getMessage());
         }
     }
+    /**
+     * Only the approver a pending step is assigned to may decide on it. (Super Admin and Admin
+     * can see every pending requisition, so seeing one is not enough to decide on it.)
+     */
+    private function isWaitingForCurrentUser(Requisition $requisition): bool
+    {
+        return $requisition->approvalDetails()
+            ->where('status', 'pending')
+            ->where('to_user_id', Auth::id())
+            ->exists();
+    }
+
     /**
      * Get requisition details for the modal (AJAX).
      */
@@ -226,6 +246,12 @@ class RequisitionController extends Controller
                 )
                 ->distinct()
                 ->get();
+
+            // Current balance of the product over all lots (the dialog marks items that are out of stock).
+            $item->available_quantity = (int) DB::table('stocks')
+                ->where('product_id', $item->product_id)
+                ->whereNull('deleted_at')
+                ->sum('quantity');
         }
 
         // 2. Timeline Logic
@@ -242,6 +268,7 @@ class RequisitionController extends Controller
             'user' => $requisition->requestedBy->name ?? 'Unknown',
             'role' => 'Requestor',
             'date' => $requisition->created_at->format('d M, Y h:i A'),
+            'date_iso' => $requisition->created_at->toIso8601String(), // lets the page show the date in its own language
             'comments' => $initiationComments,
             'color' => 'primary',
             'status_raw' => 'initiated'
@@ -266,6 +293,7 @@ class RequisitionController extends Controller
                     'user' => $actor->fromUser->name ?? 'System',
                     'role' => $actor->fromUser->role->role_name_en ?? 'Approver',
                     'date' => $actor->updated_at->format('d M, Y h:i A'),
+                    'date_iso' => $actor->updated_at->toIso8601String(),
                     'comments' => $actor->comments,
                     'color' => $actor->status == 'rejected' ? 'danger' : 'success',
                     'status_raw' => $actor->status
@@ -284,6 +312,8 @@ class RequisitionController extends Controller
                     'user' => 'Waiting for: ' . $pendingUsers,
                     'role' => $roleName,
                     'date' => $details->first()->created_at->format('d M, Y h:i A'),
+                    'date_iso' => $details->first()->created_at->toIso8601String(),
+                    'pending_users' => $pendingUsers,
                     'comments' => '',
                     'color' => 'warning',
                     'status_raw' => 'pending'
@@ -296,6 +326,7 @@ class RequisitionController extends Controller
             'is_print_enabled' => $requisition->is_print_enabled,
             'requestor' => $requisition->requestedBy->name,
             'formatted_date' => $requisition->requisition_date->format('d M, Y'),
+            'date_iso' => $requisition->requisition_date->format('Y-m-d'),
             'timeline' => $timeline
         ]);
     }
@@ -354,6 +385,60 @@ class RequisitionController extends Controller
             return response()->json(['success' => false, 'message' => 'Update failed: ' . $e->getMessage()], 500);
         }
     }
+    /**
+     * Remove selected items from a requisition that is waiting for the current user's decision.
+     *
+     * Only the Store Admin (role 3) may do this, only while the requisition is pending with
+     * them, and at least one item has to stay (a requisition without items is rejected instead).
+     * Items are soft-deleted, so nothing is lost for the record.
+     */
+    public function removeItems(Request $request, Requisition $requisition)
+    {
+        $user = Auth::user();
+        $waitingForUser = $requisition->approvalDetails()
+            ->where('status', 'pending')
+            ->where('to_user_id', $user->id)
+            ->exists();
+
+        if ((int) $user->role_id !== 3 || ! $waitingForUser) {
+            return response()->json(['success' => false, 'message' => __('requisition.pending_manage.modal.delete_not_allowed')], 403);
+        }
+
+        $ids = collect($request->input('item_ids', []))
+            ->filter(fn ($id) => is_numeric($id))
+            ->map(fn ($id) => (int) $id)
+            ->unique()
+            ->values();
+
+        $items = RequisitionItem::where('requisition_id', $requisition->id)->whereIn('id', $ids)->get();
+
+        if ($ids->isEmpty() || $items->count() !== $ids->count()) {
+            return response()->json(['success' => false, 'message' => __('requisition.pending_manage.modal.delete_none')], 422);
+        }
+
+        if ($items->count() >= $requisition->items()->count()) {
+            return response()->json(['success' => false, 'message' => __('requisition.pending_manage.modal.delete_all_blocked')], 422);
+        }
+
+        try {
+            DB::transaction(function () use ($items, $user) {
+                foreach ($items as $item) {
+                    $item->forceFill(['deleted_by' => $user->id])->save();
+                    $item->delete();
+                }
+            });
+        } catch (Exception $e) {
+            Log::error('Requisition item removal failed', ['requisition_id' => $requisition->id, 'exception' => $e]);
+
+            return response()->json(['success' => false, 'message' => __('requisition.pending_manage.modal.action_failed')], 500);
+        }
+
+        return response()->json([
+            'success' => true,
+            'message' => __('requisition.pending_manage.modal.items_deleted', ['count' => $items->count()]),
+        ]);
+    }
+
     /**
      * Remove the specified resource from storage.
      */

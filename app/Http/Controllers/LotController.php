@@ -144,7 +144,7 @@ class LotController extends Controller
     {
         try {
             $this->lotService->approveLot($lot, $request->input('comments'));
-            return redirect()->route('lots.entry.index')->with('success', 'Lot approved successfully, items stocked, and budget updated.');
+            return redirect()->route('lots.entry.index')->with('success', __('lot.requests.approved'));
         } catch (Exception $e) {
             Log::error($e->getMessage());
             return redirect()->back()->with('error', $e->getMessage());
@@ -158,7 +158,7 @@ class LotController extends Controller
     {
         try {
             $this->lotService->rejectLot($lot, $request->input('comments'));
-            return redirect()->route('lots.entry.index')->with('success', 'Lot rejected successfully.');
+            return redirect()->route('lots.entry.index')->with('success', __('lot.requests.rejected'));
         } catch (Exception $e) {
             Log::error($e->getMessage());
             return redirect()->back()->with('error', $e->getMessage());

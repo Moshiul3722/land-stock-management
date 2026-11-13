@@ -161,6 +161,8 @@ Route::middleware(['auth', 'permission'])->group(function () {
     Route::resource('requisitions', RequisitionController::class);
     Route::get('/requisitions/{requisition}/details', [RequisitionController::class, 'getDetails'])->name('requisitions.get_details');
     Route::post('/requisitions/{requisition}/update-items', [RequisitionController::class, 'updateItems'])->name('requisitions.update_items');
+    // Store Admin removes selected items from a requisition that is waiting for their decision
+    Route::post('/requisitions/{requisition}/remove-items', [RequisitionController::class, 'removeItems'])->name('requisitions.remove_items');
 
     // Budget Resources
     Route::resource('budgets', BudgetController::class);

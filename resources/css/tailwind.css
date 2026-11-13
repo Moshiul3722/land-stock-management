@@ -31,3 +31,95 @@
         transition-duration: 0.01ms !important;
     }
 }
+
+/*
+ * Requisition create / edit dialog (`.req-form`): every text size is one step larger than
+ * the utility class says. Written after the utilities and with one more class than
+ * `.tw-root .tw-text-*`, so it wins without touching any other screen.
+ */
+.tw-root .req-form .tw-text-xs {
+    font-size: 0.875rem;
+    line-height: 1.25rem;
+}
+
+.tw-root .req-form .tw-text-\[13px\] {
+    font-size: 0.9375rem;
+}
+
+.tw-root .req-form .tw-text-sm {
+    font-size: 1rem;
+    line-height: 1.5rem;
+}
+
+.tw-root .req-form .tw-text-\[15px\],
+.tw-root .req-form .tw-text-base {
+    font-size: 1.0625rem;
+    line-height: 1.6rem;
+}
+
+.tw-root .req-form .tw-text-lg {
+    font-size: 1.25rem;
+    line-height: 1.75rem;
+}
+
+/* Icons keep their size: only the words grow. */
+.tw-root .req-form i.tw-text-xs {
+    font-size: 0.75rem;
+    line-height: 1rem;
+}
+
+/*
+ * Requisition item picker (`.req-picker`): category, product, quantity and the add button
+ * are shorter than the standard 44px field. Phones keep the finger-sized height.
+ */
+@media (min-width: 640px) {
+    .tw-root .req-picker .tw-min-h-11 {
+        min-height: 2.375rem;
+    }
+
+    .tw-root .req-picker .tw-py-2 {
+        padding-top: 0.25rem;
+        padding-bottom: 0.25rem;
+    }
+}
+
+/*
+ * Requisition list filters (`.req-filters`): larger labels, field text and button text.
+ */
+.tw-root .req-filters .tw-text-\[13px\] {
+    font-size: 1rem;
+}
+
+.tw-root .req-filters .tw-text-sm {
+    font-size: 1.0625rem;
+    line-height: 1.6rem;
+}
+
+/* The search icon keeps its size. */
+.tw-root .req-filters i.tw-text-sm {
+    font-size: 0.875rem;
+    line-height: 1.25rem;
+}
+
+/* Selects, date fields, search box and button are all exactly the same height:
+   shorter than a standard field on tablets and up, finger-sized on phones. */
+.tw-root .req-filters .tw-min-h-11 {
+    height: 2.75rem;
+}
+
+@media (min-width: 640px) {
+    .tw-root .req-filters .tw-min-h-11 {
+        min-height: 2.375rem;
+        height: 2.375rem;
+    }
+
+    .tw-root .req-filters .tw-py-2 {
+        padding-top: 0.2rem;
+        padding-bottom: 0.2rem;
+    }
+}
+
+/* Long unbroken text (e-mail addresses) may break anywhere instead of widening a table. */
+.tw-root .tw-wrap-anywhere {
+    overflow-wrap: anywhere;
+}

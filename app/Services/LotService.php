@@ -241,7 +241,7 @@ class LotService
             ['status' => 'pending'], // Filter by 'pending' status
             null,
             null
-        )->with(['purchaseType', 'approvalDetails.fromUser'])
+        )->with(['purchaseType', 'fiscalYear', 'approvalDetails.fromUser', 'lotDetails.product.category'])
             ->orderBy('created_at', 'asc') // Show oldest first
             ->get();
     }

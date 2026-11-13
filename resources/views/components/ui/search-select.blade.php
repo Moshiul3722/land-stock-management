@@ -7,7 +7,7 @@
 
     $options: list of ['value' => ..., 'label' => ...].
     - Type to filter; Up/Down/Enter/Escape work from the keyboard.
-    - Ten options are visible at a time; the rest scroll.
+    - `visible` options (10 by default) are shown at a time; the rest scroll.
     - `wire:model.live` sends the choice at once (use it when another field depends on it).
 --}}
 @props([
@@ -20,6 +20,7 @@
     'disabled' => false,
     'invalid' => false,
     'clearable' => true,
+    'visible' => 10,
 ])
 
 @php
@@ -36,6 +37,9 @@
         query: '',
         active: 0,
         popStyle: '',
+        visible: @js(max(1, (int) $visible)),
+        listCap: @js(max(1, (int) $visible) * 40 + 8),
+        room: 360,
         listMax: 360,
         onScroll: null,
         // The dropdown floats above the page (position: fixed), so opening it never makes
@@ -45,9 +49,10 @@
             const gap = 4, margin = 8, chrome = 64; // chrome = search box + padding
             const below = window.innerHeight - rect.bottom - margin - gap;
             const above = rect.top - margin - gap;
-            const up = below < 220 && above > below;
+            const up = below < this.listCap + chrome && above > below; // open upwards when all rows fit only there
             const room = Math.max(120, (up ? above : below) - chrome);
-            this.listMax = Math.min(360, room);
+            this.room = room;
+            this.listMax = Math.min(this.listCap, room);
             const width = Math.max(rect.width, 200);
             const left = Math.max(margin, Math.min(rect.left, window.innerWidth - width - margin));
             this.popStyle = 'position:fixed;left:' + left + 'px;width:' + width + 'px;'
@@ -58,17 +63,28 @@
             const q = this.query.trim().toLowerCase();
             return q === '' ? this.options : this.options.filter(o => o.label.toLowerCase().includes(q));
         },
+        // Exactly `visible` rows fit: the cap is measured from a real row (the font size is responsive).
+        fit() {
+            const row = this.$refs.list.querySelector('li[role=option]');
+            // Fractional height: offsetHeight rounds, which can hide the last row by a pixel or two.
+            const height = row ? row.getBoundingClientRect().height : 0;
+            if (! height) return;
+            const style = getComputedStyle(this.$refs.list);
+            const padding = parseFloat(style.paddingTop) + parseFloat(style.paddingBottom);
+            this.listCap = Math.ceil(height * this.visible + padding);
+            this.listMax = Math.min(this.listCap, this.room);
+        },
         toggle() { this.open ? this.close() : this.show(); },
         show() {
             if (@js((bool) $disabled)) return;
             this.place();
             this.open = true;
-            this.onScroll = (event) => { if (! this.$refs.pop.contains(event.target)) this.place(); };
+            this.onScroll = (event) => { if (! (event.target instanceof Node) || ! this.$refs.pop.contains(event.target)) this.place(); };
             window.addEventListener('scroll', this.onScroll, true);
             window.addEventListener('resize', this.onScroll);
             this.query = '';
             this.active = Math.max(0, this.filtered.findIndex(o => o.value === String(this.value ?? '')));
-            this.$nextTick(() => { this.$refs.search.focus(); this.scrollToActive(); });
+            this.$nextTick(() => { this.fit(); this.$refs.search.focus(); this.scrollToActive(); });
         },
         close(focusButton = true) {
             if (! this.open) return;
@@ -130,7 +146,7 @@
             </div>
         </div>
 
-        {{-- Up to 10 rows are visible (fewer when the screen is short); the rest scroll --}}
+        {{-- Up to `visible` rows are shown (fewer when the screen is short); the rest scroll --}}
         <ul id="{{ $id }}-list" x-ref="list" role="listbox" tabindex="-1" x-bind:style="'max-height:' + listMax + 'px'"
             class="tw-m-0 tw-list-none tw-overflow-y-auto tw-overscroll-contain tw-p-1">
             <template x-for="(option, index) in filtered" x-bind:key="option.value">

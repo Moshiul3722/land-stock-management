@@ -8,20 +8,30 @@
 
     <x-ui.date-field id="lot-date" wire:model="entryDate" :invalid="$errors->has('entryDate')" />
 
+    Optional, for filters (all off by default, so existing fields are unchanged):
+      compact      short date text ("১৩ নভে ২০২৬"), no chevron — fits a narrow field
+      clearable    a "clear" button in the calendar empties the value
+      placeholder  text shown while empty
+      min / max    YYYY-MM-DD; days outside the range cannot be chosen
+      pop-width    smallest calendar width in px (240)
+
     Keyboard: Enter/Space opens; arrow keys move by day/week; PageUp/PageDown change month;
     Enter chooses; Escape closes.
 --}}
-@props(['id', 'invalid' => false])
+@props(['id', 'invalid' => false, 'compact' => false, 'clearable' => false, 'placeholder' => null, 'min' => null, 'max' => null, 'popWidth' => 240])
 
 @php
     $ui = \App\Livewire\Concerns\Ui::class;
     $locale = app()->getLocale() === 'bn' ? 'bn-BD' : 'en-GB';
 @endphp
 
-<div class="tw-relative"
+{{-- min / max live in data attributes so they follow Livewire updates without rebuilding the field --}}
+<div class="tw-relative" data-min="{{ $min }}" data-max="{{ $max }}"
     x-data="{
         value: @entangle($attributes->wire('model')),
         locale: @js($locale),
+        compact: @js((bool) $compact),
+        minWidth: @js((int) $popWidth),
         open: false,
         popStyle: '',
         onScroll: null,
@@ -30,7 +40,7 @@
         place() {
             const rect = this.$refs.button.getBoundingClientRect();
             const gap = 4, margin = 8;
-            const width = Math.max(rect.width, 240);
+            const width = Math.max(rect.width, this.minWidth);
             const height = this.$refs.pop.offsetHeight || (width + 110);
             const below = window.innerHeight - rect.bottom - margin - gap;
             const above = rect.top - margin - gap;
@@ -53,7 +63,15 @@
         number(n) { return new Intl.NumberFormat(this.locale, { useGrouping: false }).format(n); },
         get label() {
             const date = this.parse(this.value);
-            return date ? new Intl.DateTimeFormat(this.locale, { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }).format(date) : '';
+            if (! date) return '';
+            return new Intl.DateTimeFormat(this.locale, this.compact
+                ? { day: 'numeric', month: 'short', year: 'numeric' }
+                : { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }).format(date);
+        },
+        // ISO dates compare correctly as text.
+        allowed(iso) {
+            const min = this.$root.dataset.min, max = this.$root.dataset.max;
+            return (! min || iso >= min) && (! max || iso <= max);
         },
         get monthLabel() {
             return new Intl.DateTimeFormat(this.locale, { month: 'long', year: 'numeric' }).format(new Date(this.year, this.month, 1));
@@ -75,7 +93,8 @@
                     full: new Intl.DateTimeFormat(this.locale, { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }).format(date),
                     inMonth: date.getMonth() === this.month,
                     today: iso === today,
-                    selected: iso === this.value
+                    selected: iso === this.value,
+                    allowed: this.allowed(iso)
                 };
             });
         },
@@ -100,7 +119,7 @@
             if (refocus) this.$nextTick(() => this.$refs.button.focus());
         },
         toggle() { this.open ? this.close() : this.show(); },
-        choose(iso) { this.value = iso; this.close(); },
+        choose(iso) { if (iso !== '' && ! this.allowed(iso)) return; this.value = iso; this.close(); },
         shiftMonth(step) {
             const date = new Date(this.year, this.month + step, 1);
             this.year = date.getFullYear();
@@ -140,8 +159,10 @@
             <i class="fas fa-calendar-alt tw-text-xs"></i>
         </span>
         <span class="tw-min-w-0 tw-flex-1 tw-truncate tw-font-medium" x-bind:class="label ? '' : 'tw-font-normal tw-text-slate-400'"
-            x-text="label || @js(__('commontable.select_date'))"></span>
-        <i class="fas fa-chevron-down tw-text-xs tw-text-slate-400 tw-transition" x-bind:class="open ? 'tw-rotate-180' : ''" aria-hidden="true"></i>
+            x-text="label || @js($placeholder ?: __('commontable.select_date'))"></span>
+        @unless ($compact)
+            <i class="fas fa-chevron-down tw-text-xs tw-text-slate-400 tw-transition" x-bind:class="open ? 'tw-rotate-180' : ''" aria-hidden="true"></i>
+        @endunless
     </button>
 
     {{-- Calendar --}}
@@ -177,10 +198,12 @@
                     x-bind:tabindex="day.iso === focusIso ? 0 : -1"
                     x-bind:aria-label="day.full" x-bind:aria-pressed="day.selected.toString()"
                     x-bind:aria-current="day.today ? 'date' : null"
+                    x-bind:disabled="! day.allowed"
                     x-bind:class="{
                         'tw-bg-brand-600 tw-text-white tw-font-bold hover:tw-bg-brand-700': day.selected,
-                        'tw-bg-transparent tw-text-slate-900 hover:tw-bg-brand-50': ! day.selected && day.inMonth,
-                        'tw-bg-transparent tw-text-slate-300 hover:tw-bg-slate-50': ! day.selected && ! day.inMonth,
+                        'tw-bg-transparent tw-text-slate-900 hover:tw-bg-brand-50': ! day.selected && day.inMonth && day.allowed,
+                        'tw-bg-transparent tw-text-slate-300 hover:tw-bg-slate-50': ! day.selected && ! day.inMonth && day.allowed,
+                        'tw-cursor-not-allowed tw-bg-transparent tw-text-slate-300 tw-line-through': ! day.selected && ! day.allowed,
                         'tw-ring-1 tw-ring-inset tw-ring-brand-500 tw-font-bold': day.today && ! day.selected
                     }"
                     class="tw-flex tw-aspect-square tw-min-h-8 tw-w-full tw-items-center tw-justify-center tw-rounded-lg tw-border-0 tw-p-0 tw-text-sm tw-tabular-nums tw-transition focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-brand-500"
@@ -190,12 +213,18 @@
 
         <div class="tw-mt-2 tw-flex tw-flex-wrap tw-items-center tw-gap-2 tw-border-0 tw-border-t tw-border-solid tw-border-slate-100 tw-pt-2">
             @foreach ([0 => __('commontable.today'), -1 => __('commontable.yesterday')] as $days => $text)
-                <button type="button" x-on:click="choose(offset({{ $days }}))"
+                <button type="button" x-on:click="choose(offset({{ $days }}))" x-bind:disabled="! allowed(offset({{ $days }}))"
                     x-bind:class="value === offset({{ $days }}) ? 'tw-border-brand-600 tw-bg-brand-600 tw-text-white' : 'tw-border-slate-300 tw-bg-white tw-text-slate-700 hover:tw-bg-slate-50'"
-                    class="tw-min-h-8 tw-rounded-full tw-border tw-border-solid tw-px-3 tw-text-xs tw-font-semibold tw-transition focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-brand-500/40">
+                    class="tw-min-h-8 tw-rounded-full tw-border tw-border-solid tw-px-3 tw-text-xs tw-font-semibold tw-transition focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-brand-500/40 disabled:tw-cursor-not-allowed disabled:tw-opacity-40">
                     {{ $text }}
                 </button>
             @endforeach
+            @if ($clearable)
+                <button type="button" x-show="value" x-on:click="choose('')"
+                    class="tw-ml-auto tw-min-h-8 tw-rounded-full tw-border tw-border-solid tw-border-transparent tw-bg-transparent tw-px-3 tw-text-xs tw-font-semibold tw-text-rose-600 tw-transition hover:tw-bg-rose-50 focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-rose-500/40">
+                    <i class="fas fa-times tw-mr-1" aria-hidden="true"></i>{{ __('commontable.clear_date') }}
+                </button>
+            @endif
         </div>
     </div>
 </div>
