@@ -105,19 +105,19 @@
                                     <td class="crud-actions">
                                         <button type="button" class="btn btn-sm btn-success crud-btn"
                                             wire:click="openSubCreate({{ $category->id }})"
-                                            title="{{ __('category.manage.add_sub') }}"
+                                            data-tip="{{ __('category.manage.add_sub') }}"
                                             aria-label="{{ __('category.manage.add_sub') }}: {{ $category->name }}">
                                             <i class="fas fa-plus" aria-hidden="true"></i>
                                         </button>
                                         <button type="button" class="btn btn-sm btn-primary crud-btn"
                                             wire:click="openCategoryEdit({{ $category->id }})"
-                                            title="{{ __('buttons.edit') }}"
+                                            data-tip="{{ __('buttons.edit') }}"
                                             aria-label="{{ __('buttons.edit') }}: {{ $category->name }}">
                                             <i class="fas fa-edit" aria-hidden="true"></i>
                                         </button>
                                         <button type="button" class="btn btn-sm btn-danger crud-btn"
                                             wire:click="confirmDelete('category', {{ $category->id }})"
-                                            title="{{ __('buttons.delete') }}"
+                                            data-tip="{{ __('buttons.delete') }}"
                                             aria-label="{{ __('buttons.delete') }}: {{ $category->name }}">
                                             <i class="fas fa-trash-alt" aria-hidden="true"></i>
                                         </button>
@@ -142,7 +142,7 @@
                                                         <span class="crud-wrap text-left">
                                                             <i class="fas fa-level-up-alt fa-rotate-90 text-muted mr-2" aria-hidden="true"></i>
                                                             <button type="button" class="crud-sub-link" wire:click="showSubProducts({{ $sub->id }})"
-                                                                title="{{ __('category.manage.view_products') }}"
+                                                                data-tip="{{ __('category.manage.view_products') }}"
                                                                 aria-label="{{ __('category.manage.view_products') }}: {{ $sub->name }}">
                                                                 <span class="crud-sub-name">{{ $sub->name }}</span>
                                                                 @if ($sub->code)
@@ -154,13 +154,13 @@
                                                         <span class="text-nowrap">
                                                             <button type="button" class="btn btn-sm btn-outline-primary crud-btn"
                                                                 wire:click="openSubEdit({{ $sub->id }})"
-                                                                title="{{ __('buttons.edit') }}"
+                                                                data-tip="{{ __('buttons.edit') }}"
                                                                 aria-label="{{ __('buttons.edit') }}: {{ $sub->name }}">
                                                                 <i class="fas fa-edit" aria-hidden="true"></i>
                                                             </button>
                                                             <button type="button" class="btn btn-sm btn-outline-danger crud-btn"
                                                                 wire:click="confirmDelete('sub', {{ $sub->id }})"
-                                                                title="{{ __('buttons.delete') }}"
+                                                                data-tip="{{ __('buttons.delete') }}"
                                                                 aria-label="{{ __('buttons.delete') }}: {{ $sub->name }}">
                                                                 <i class="fas fa-trash-alt" aria-hidden="true"></i>
                                                             </button>
@@ -224,13 +224,14 @@
             <x-ui.modal wire:model="showCategoryForm" max-width="2xl" labelledby="category-form-title">
                 <form wire:submit="saveCategory" class="tw-m-0 tw-flex tw-min-h-0 tw-flex-1 tw-flex-col" novalidate>
                     <div class="{{ $ui::MODAL_HEADER }}">
-                        <div class="tw-min-w-0">
+                        <div class="tw-min-w-0 tw-flex-1">
                             <h2 id="category-form-title" class="{{ $ui::MODAL_TITLE }}">
                                 {{ $categoryId ? __('category.title_edit') : __('category.title_create') }}
                             </h2>
                             <p class="{{ $ui::MODAL_HINT }}">{{ __('category.manage.category_hint') }}</p>
                         </div>
-                        <button type="button" x-on:click="open = false" class="{{ $ui::ICON_BTN }} tw--mr-2 tw--mt-1" aria-label="{{ __('commontable.close') }}">
+                        <x-ui.modal-today />
+                        <button type="button" x-on:click="open = false" class="{{ $ui::MODAL_CLOSE }}" aria-label="{{ __('commontable.close') }}">
                             <i class="fas fa-times" aria-hidden="true"></i>
                         </button>
                     </div>
@@ -273,13 +274,14 @@
             <x-ui.modal wire:model="showSubForm" max-width="2xl" labelledby="sub-form-title">
                 <form wire:submit="saveSub" class="tw-m-0 tw-flex tw-min-h-0 tw-flex-1 tw-flex-col" novalidate>
                     <div class="{{ $ui::MODAL_HEADER }}">
-                        <div class="tw-min-w-0">
+                        <div class="tw-min-w-0 tw-flex-1">
                             <h2 id="sub-form-title" class="{{ $ui::MODAL_TITLE }}">
                                 {{ $subId ? __('category.manage.edit_sub') : __('category.manage.add_sub') }}
                             </h2>
                             <p class="{{ $ui::MODAL_HINT }}">{{ __('category.manage.sub_hint') }}</p>
                         </div>
-                        <button type="button" x-on:click="open = false" class="{{ $ui::ICON_BTN }} tw--mr-2 tw--mt-1" aria-label="{{ __('commontable.close') }}">
+                        <x-ui.modal-today />
+                        <button type="button" x-on:click="open = false" class="{{ $ui::MODAL_CLOSE }}" aria-label="{{ __('commontable.close') }}">
                             <i class="fas fa-times" aria-hidden="true"></i>
                         </button>
                     </div>
@@ -334,7 +336,7 @@
             <x-ui.modal wire:model="showProducts" max-width="3xl" labelledby="sub-products-title">
                 <div class="tw-m-0 tw-flex tw-min-h-0 tw-flex-1 tw-flex-col">
                     <div class="{{ $ui::MODAL_HEADER }} crud-head-wrap">
-                        <div class="tw-min-w-0 crud-head-title">
+                        <div class="tw-min-w-0 tw-flex-1 crud-head-title">
                             <h2 id="sub-products-title" class="{{ $ui::MODAL_TITLE }}">
                                 {{ $productsSub?->name }}
                                 @if ($productsSub?->code)
@@ -353,7 +355,8 @@
                                 title="{{ __('category.manage.search_products_hint') }}"
                                 aria-label="{{ __('category.manage.search_products_hint') }}">
                         </div>
-                        <button type="button" x-on:click="open = false" class="{{ $ui::ICON_BTN }} tw--mr-2 tw--mt-1 crud-head-close" aria-label="{{ __('commontable.close') }}">
+                        <x-ui.modal-today />
+                        <button type="button" x-on:click="open = false" class="{{ $ui::MODAL_CLOSE }} crud-head-close" aria-label="{{ __('commontable.close') }}">
                             <i class="fas fa-times" aria-hidden="true"></i>
                         </button>
                     </div>
@@ -380,7 +383,7 @@
                                                         <small class="d-block text-muted">{{ $product->description }}</small>
                                                     @endif
                                                 </td>
-                                                <td class="text-center">{{ $product->product_unit ?: '—' }}</td>
+                                                <td class="text-center">{{ $product->unit_label ?: '—' }}</td>
                                             </tr>
                                         @endforeach
                                     </tbody>

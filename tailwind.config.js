@@ -20,6 +20,12 @@ module.exports = {
         './resources/views/components/ui/**/*.blade.php',
         // Blade pages that use the Tailwind look outside Livewire
         './resources/views/requisition/pending.blade.php',
+        './resources/views/requisition/_decision_modal.blade.php',
+        './resources/views/stock/index.blade.php',
+        './resources/views/stock/issues.blade.php',
+        './resources/views/stock/show.blade.php',
+        './resources/views/stock/department_issues.blade.php',
+        './resources/views/issued_item/index.blade.php',
         './app/Livewire/**/*.php',
     ],
     theme: {

@@ -45,7 +45,8 @@
                         <thead>
                             <tr>
                                 <th class="crud-serial">{{ __('commontable.serial') }}</th>
-                                <th>{{ __('unit.name') }}</th>
+                                <th>{{ __('unit.name_en') }}</th>
+                                <th>{{ __('unit.name_bn') }}</th>
                                 <th>{{ __('unit.products') }}</th>
                                 <th class="crud-actions">{{ __('commontable.action') }}</th>
                             </tr>
@@ -54,22 +55,23 @@
                             @forelse ($rows as $unit)
                                 <tr wire:key="unit-{{ $unit->id }}">
                                     <td class="crud-serial">{{ $digits($rows->firstItem() + $loop->index) }}</td>
-                                    <td class="text-left crud-wrap font-weight-bold">{{ $unit->name }}</td>
-                                    <td class="text-center">{{ $digits($unit->products_count) }}</td>
+                                    <td class="text-center crud-wrap font-weight-bold">{{ $unit->name }}</td>
+                                    <td class="text-center crud-wrap font-weight-bold">{{ $unit->name_bn ?: '—' }}</td>
+                                    <td class="text-center">{{ $digits($unit->products_count) }}{{ app()->getLocale() === 'bn' ? 'টি' : '' }}</td>
                                     <td class="crud-actions">
                                         <button type="button" class="btn btn-sm btn-primary crud-btn" wire:click="openEdit({{ $unit->id }})"
-                                            title="{{ __('buttons.edit') }}" aria-label="{{ __('buttons.edit') }}: {{ $unit->name }}">
+                                            data-tip="{{ __('buttons.edit') }}" aria-label="{{ __('buttons.edit') }}: {{ $unit->name }}">
                                             <i class="fas fa-edit" aria-hidden="true"></i>
                                         </button>
                                         <button type="button" class="btn btn-sm btn-danger crud-btn" wire:click="confirmDelete({{ $unit->id }})"
-                                            title="{{ __('buttons.delete') }}" aria-label="{{ __('buttons.delete') }}: {{ $unit->name }}">
+                                            data-tip="{{ __('buttons.delete') }}" aria-label="{{ __('buttons.delete') }}: {{ $unit->name }}">
                                             <i class="fas fa-trash-alt" aria-hidden="true"></i>
                                         </button>
                                     </td>
                                 </tr>
                             @empty
                                 <tr wire:key="unit-empty">
-                                    <td colspan="4" class="crud-empty">{{ $searching ? __('commontable.dt_zero_records') : __('commontable.no_record_found') }}</td>
+                                    <td colspan="5" class="crud-empty">{{ $searching ? __('commontable.dt_zero_records') : __('commontable.no_record_found') }}</td>
                                 </tr>
                             @endforelse
                         </tbody>
@@ -86,11 +88,12 @@
             <x-ui.modal wire:model="showForm" max-width="lg" labelledby="unit-form-title">
                 <form wire:submit="save" class="tw-m-0 tw-flex tw-min-h-0 tw-flex-1 tw-flex-col" novalidate>
                     <div class="{{ $ui::MODAL_HEADER }}">
-                        <div class="tw-min-w-0">
+                        <div class="tw-min-w-0 tw-flex-1">
                             <h2 id="unit-form-title" class="{{ $ui::MODAL_TITLE }}">{{ $unitId ? __('unit.edit') : __('unit.add') }}</h2>
                             <p class="{{ $ui::MODAL_HINT }}">{{ __('unit.hint') }}</p>
                         </div>
-                        <button type="button" x-on:click="open = false" class="{{ $ui::ICON_BTN }} tw--mr-2 tw--mt-1" aria-label="{{ __('commontable.close') }}">
+                        <x-ui.modal-today />
+                        <button type="button" x-on:click="open = false" class="{{ $ui::MODAL_CLOSE }}" aria-label="{{ __('commontable.close') }}">
                             <i class="fas fa-times" aria-hidden="true"></i>
                         </button>
                     </div>
@@ -99,12 +102,22 @@
                         @error('form')
                             <div class="{{ $ui::FORM_ALERT }}" role="alert"><i class="fas fa-exclamation-circle tw-mt-0.5" aria-hidden="true"></i><span>{{ $message }}</span></div>
                         @enderror
+                        {{-- English and Bangla name side by side (stacked on phones) --}}
+                        <div class="tw-grid tw-grid-cols-1 tw-gap-4 sm:tw-grid-cols-2">
                         <div>
-                            <label for="unit-name" class="{{ $ui::LABEL }}">{{ __('unit.name') }} <span class="tw-text-rose-600">*</span></label>
+                            <label for="unit-name" class="{{ $ui::LABEL }}">{{ __('unit.name_en') }} <span class="tw-text-rose-600">*</span></label>
                             <input id="unit-name" type="text" maxlength="50" wire:model="name" autocomplete="off" autofocus
                                 class="{{ $ui::INPUT }} @error('name') {{ $ui::INPUT_ERROR }} @enderror"
                                 @error('name') aria-invalid="true" aria-describedby="unit-name-error" @enderror>
                             @error('name') <p id="unit-name-error" class="{{ $ui::ERROR }}"><i class="fas fa-exclamation-circle tw-mt-0.5" aria-hidden="true"></i>{{ $message }}</p> @enderror
+                        </div>
+                        <div>
+                            <label for="unit-name-bn" class="{{ $ui::LABEL }}">{{ __('unit.name_bn') }} <span class="tw-text-rose-600">*</span></label>
+                            <input id="unit-name-bn" type="text" maxlength="50" wire:model="nameBn" autocomplete="off" lang="bn"
+                                class="{{ $ui::INPUT }} @error('nameBn') {{ $ui::INPUT_ERROR }} @enderror"
+                                @error('nameBn') aria-invalid="true" aria-describedby="unit-name-bn-error" @enderror>
+                            @error('nameBn') <p id="unit-name-bn-error" class="{{ $ui::ERROR }}"><i class="fas fa-exclamation-circle tw-mt-0.5" aria-hidden="true"></i>{{ $message }}</p> @enderror
+                        </div>
                         </div>
                     </div>
 

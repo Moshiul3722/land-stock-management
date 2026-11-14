@@ -1,0 +1,215 @@
+/*
+ * Left sidebar: deep navy surface, light text, soft rounded items and a brand-blue pill for the
+ * page that is open. Replaces the older green sidebar colours of land.css (loaded after it).
+ */
+.main-sidebar.main-sidebar {
+    /* Navy at the top running into indigo at the bottom, with a quiet decoration over it:
+       curvy dashed lines, two dashed rings, a faint dot grid and a few points (the same
+       design as the login page's background, kept faint so the menu stays easy to read) */
+    background:
+        url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 270 900%22 preserveAspectRatio=%22xMidYMid slice%22%3E%3Cdefs%3E%3Cpattern id=%22g%22 width=%2226%22 height=%2226%22 patternUnits=%22userSpaceOnUse%22%3E%3Ccircle cx=%222%22 cy=%222%22 r=%221%22 fill=%22%23fff%22 fill-opacity=%22.13%22/%3E%3C/pattern%3E%3ClinearGradient id=%22f%22 x1=%220%22 y1=%220%22 x2=%220%22 y2=%221%22%3E%3Cstop offset=%220%22 stop-color=%22%23fff%22 stop-opacity=%220%22/%3E%3Cstop offset=%22.35%22 stop-color=%22%23fff%22 stop-opacity=%221%22/%3E%3Cstop offset=%221%22 stop-color=%22%23fff%22 stop-opacity=%22.25%22/%3E%3C/linearGradient%3E%3Cmask id=%22m%22%3E%3Crect width=%22270%22 height=%22900%22 fill=%22url(%23f)%22/%3E%3C/mask%3E%3ClinearGradient id=%22a%22 x1=%220%22 y1=%220%22 x2=%220%22 y2=%221%22%3E%3Cstop offset=%220%22 stop-color=%22%23fff%22 stop-opacity=%220%22/%3E%3Cstop offset=%22.3%22 stop-color=%22%23bae6fd%22 stop-opacity=%22.24%22/%3E%3Cstop offset=%22.75%22 stop-color=%22%23fff%22 stop-opacity=%22.2%22/%3E%3Cstop offset=%221%22 stop-color=%22%23fff%22 stop-opacity=%220%22/%3E%3C/linearGradient%3E%3ClinearGradient id=%22b%22 x1=%220%22 y1=%220%22 x2=%221%22 y2=%220%22%3E%3Cstop offset=%220%22 stop-color=%22%23c7d2fe%22 stop-opacity=%220%22/%3E%3Cstop offset=%22.5%22 stop-color=%22%23c7d2fe%22 stop-opacity=%22.24%22/%3E%3Cstop offset=%221%22 stop-color=%22%23a5f3fc%22 stop-opacity=%220%22/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width=%22270%22 height=%22900%22 fill=%22url(%23g)%22 mask=%22url(%23m)%22/%3E%3Cg fill=%22none%22 stroke-linecap=%22round%22%3E%3Ccircle cx=%22262%22 cy=%22150%22 r=%2292%22 stroke=%22%23fff%22 stroke-opacity=%22.16%22 stroke-width=%221.3%22 stroke-dasharray=%223 11%22/%3E%3Ccircle cx=%22262%22 cy=%22150%22 r=%22134%22 stroke=%22%23bae6fd%22 stroke-opacity=%22.12%22 stroke-width=%221.1%22 stroke-dasharray=%2212 13%22/%3E%3Ccircle cx=%2210%22 cy=%22800%22 r=%22104%22 stroke=%22%23c7d2fe%22 stroke-opacity=%22.2%22 stroke-width=%221.3%22 stroke-dasharray=%229 11%22/%3E%3Ccircle cx=%2210%22 cy=%22800%22 r=%22150%22 stroke=%22%23fff%22 stroke-opacity=%22.13%22 stroke-width=%221.1%22 stroke-dasharray=%222 11%22/%3E%3Cpath d=%22M48 -20C-10 150 150 250 86 430S150 720 70 930%22 stroke=%22url(%23a)%22 stroke-width=%221.5%22 stroke-dasharray=%222 11%22/%3E%3Cpath d=%22M214 -20C270 170 120 300 196 480S150 760 226 930%22 stroke=%22url(%23a)%22 stroke-width=%221.7%22 stroke-dasharray=%2210 12%22/%3E%3Cpath d=%22M-30 330C60 280 150 390 300 330%22 stroke=%22url(%23b)%22 stroke-width=%221.4%22 stroke-dasharray=%226 10%22/%3E%3Cpath d=%22M-30 610C70 680 170 560 300 630%22 stroke=%22url(%23b)%22 stroke-width=%221.4%22 stroke-dasharray=%221 9%22/%3E%3C/g%3E%3Cg fill=%22%23fff%22 fill-opacity=%22.4%22%3E%3Ccircle cx=%2286%22 cy=%22430%22 r=%222.4%22/%3E%3Ccircle cx=%22196%22 cy=%22480%22 r=%222.6%22/%3E%3Ccircle cx=%22150%22 cy=%22352%22 r=%222%22/%3E%3Ccircle cx=%22118%22 cy=%22628%22 r=%222%22/%3E%3Ccircle cx=%22232%22 cy=%22262%22 r=%221.8%22/%3E%3C/g%3E%3C/svg%3E") center / cover no-repeat,
+        linear-gradient(180deg, #0f1f4d 0%, #1a2f7a 50%, #3b2f8f 100%) !important;
+    border-right: 1px solid rgba(255, 255, 255, 0.06);
+    box-shadow: 4px 0 24px -12px rgba(15, 23, 42, 0.45) !important;
+    /* No sideways scrollbar along the bottom (the 1px border made the menu 1px too wide) */
+    overflow-x: hidden !important;
+}
+
+/* ---- Logo / application name ---- */
+.main-sidebar .brand-link {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
+    background: transparent;
+}
+
+.main-sidebar .brand-link .brand-text {
+    color: #e2e8f0;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+}
+
+/* ---- Scroll area ---- */
+.main-sidebar .sidebar {
+    padding-left: 0.5rem;
+    padding-right: 0.5rem;
+    overflow-x: hidden;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(255, 255, 255, 0.18) transparent;
+}
+
+.main-sidebar .sidebar::-webkit-scrollbar {
+    width: 6px;
+}
+
+.main-sidebar .sidebar::-webkit-scrollbar-thumb {
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.18);
+}
+
+/* ---- Items ---- */
+.main-sidebar .nav-sidebar .nav-link {
+    margin-bottom: 2px;
+    border-radius: 0.5rem;
+    background: transparent !important;
+    color: #cbd5e1 !important;
+    opacity: 1 !important;
+    box-shadow: none !important;
+    transition: background-color 0.15s, color 0.15s;
+}
+
+.main-sidebar .nav-sidebar .nav-link p {
+    color: inherit;
+    font-weight: 500;
+}
+
+.main-sidebar .nav-sidebar .nav-link .custom-icon,
+.main-sidebar .nav-sidebar .nav-link .right {
+    color: #8ea0c4 !important;
+    transition: color 0.15s;
+}
+
+.main-sidebar .nav-sidebar .nav-link:hover,
+.main-sidebar .nav-sidebar .nav-link:focus-visible {
+    background: rgba(255, 255, 255, 0.07) !important;
+    color: #fff !important;
+    outline: 0;
+}
+
+.main-sidebar .nav-sidebar .nav-link:hover .custom-icon,
+.main-sidebar .nav-sidebar .nav-link:hover .right {
+    color: #dbe5fb !important;
+}
+
+/* An open group (module or sub-module): a quiet highlight, white text */
+.main-sidebar .nav-sidebar .nav-item.has-treeview.menu-open > .nav-link,
+.main-sidebar .nav-sidebar .nav-item.has-treeview.menu-is-opening > .nav-link,
+.main-sidebar .nav-sidebar .nav-item.has-treeview > .nav-link.active {
+    background: rgba(255, 255, 255, 0.08) !important;
+    color: #fff !important;
+}
+
+.main-sidebar .nav-sidebar .nav-item.has-treeview.menu-open > .nav-link p,
+.main-sidebar .nav-sidebar .nav-item.has-treeview > .nav-link.active p {
+    font-weight: 600;
+}
+
+.main-sidebar .nav-sidebar .nav-item.has-treeview.menu-open > .nav-link .custom-icon,
+.main-sidebar .nav-sidebar .nav-item.has-treeview.menu-open > .nav-link .right {
+    color: #dbe5fb !important;
+}
+
+/* The page that is open (and the dashboard link): brand-blue pill */
+.main-sidebar .nav-sidebar .nav-item:not(.has-treeview) > .nav-link.active,
+.main-sidebar .nav-sidebar .nav-item:not(.has-treeview) > .nav-link.active:hover,
+.main-sidebar .nav-sidebar .nav-item:not(.has-treeview) > .nav-link.active:focus {
+    background: linear-gradient(90deg, #2563eb, #1d4fd8) !important;
+    color: #fff !important;
+    box-shadow: 0 6px 14px -6px rgba(37, 99, 235, 0.7) !important;
+}
+
+.main-sidebar .nav-sidebar .nav-item:not(.has-treeview) > .nav-link.active p {
+    font-weight: 600;
+}
+
+.main-sidebar .nav-sidebar .nav-item:not(.has-treeview) > .nav-link.active .custom-icon {
+    color: #fff !important;
+}
+
+/* Nested lists sit slightly inset under their group */
+.main-sidebar .nav-sidebar .nav-treeview {
+    padding-top: 2px;
+}
+
+/* ---- Bigger logo and application name ----
+   The logo area is taller than the default, so the menu below takes whatever height is left. */
+.layout-fixed .main-sidebar.main-sidebar {
+    display: flex;
+    flex-direction: column;
+}
+
+.main-sidebar .brand-link {
+    flex: 0 0 auto;
+    height: auto;
+    padding: 0.7rem 0.75rem 0.65rem;
+}
+
+.main-sidebar .sidebar {
+    flex: 1 1 auto;
+    min-height: 0;
+    height: auto !important;
+    margin-top: 0 !important;
+}
+
+.main-sidebar .brand-link .brand-image {
+    float: none;
+    width: auto;
+    height: 3.5rem;
+    max-height: none;
+    margin: 0 0 0.35rem;
+}
+
+.main-sidebar .brand-link .brand-text.small-size {
+    font-size: 1rem;
+    line-height: 1.3;
+    white-space: normal;
+}
+
+/* Collapsed (icon-only) sidebar: a smaller logo, no name */
+@media (min-width: 992px) {
+    .sidebar-mini.sidebar-collapse .main-sidebar:not(:hover) .brand-link .brand-image {
+        height: 2.5rem;
+        margin-bottom: 0;
+    }
+}
+
+/* ---- A slightly wider sidebar: 270px (the theme's own width is 250px) ----
+   The page beside it, the logo strip, the closed position on phones and tablets and the
+   "open on hover" width of the collapsed sidebar all follow the same figure. */
+.main-sidebar,
+.main-sidebar::before,
+.layout-fixed .brand-link {
+    width: 270px;
+}
+
+.sidebar-collapse .main-sidebar,
+.sidebar-collapse .main-sidebar::before {
+    margin-left: -270px;
+}
+
+@media (max-width: 767.98px) {
+    .main-sidebar,
+    .main-sidebar::before {
+        margin-left: -270px;
+    }
+
+    .sidebar-open .main-sidebar,
+    .sidebar-open .main-sidebar::before {
+        margin-left: 0;
+    }
+}
+
+@media (min-width: 992px) {
+    body:not(.sidebar-mini-md):not(.sidebar-mini-xs):not(.layout-top-nav) .content-wrapper,
+    body:not(.sidebar-mini-md):not(.sidebar-mini-xs):not(.layout-top-nav) .main-footer,
+    body:not(.sidebar-mini-md):not(.sidebar-mini-xs):not(.layout-top-nav) .main-header {
+        margin-left: 270px;
+    }
+
+    /* Collapsed to icons: the theme's own rules (its width and the page's margin) stay as they are */
+    .sidebar-mini.sidebar-collapse .main-sidebar,
+    .sidebar-mini.sidebar-collapse .main-sidebar::before {
+        margin-left: 0;
+        width: 4.6rem;
+    }
+
+    .sidebar-mini.sidebar-collapse.layout-fixed .brand-link {
+        width: 4.6rem;
+    }
+
+    .sidebar-mini.sidebar-collapse .main-sidebar:not(.sidebar-no-expand):hover,
+    .sidebar-mini.sidebar-collapse .main-sidebar:not(.sidebar-no-expand).sidebar-focused,
+    .sidebar-mini.sidebar-collapse .main-sidebar:not(.sidebar-no-expand):hover .brand-link,
+    .sidebar-mini.sidebar-collapse .main-sidebar:not(.sidebar-no-expand).sidebar-focused .brand-link,
+    .sidebar-mini.sidebar-collapse.layout-fixed .main-sidebar:hover .brand-link {
+        width: 270px;
+    }
+}

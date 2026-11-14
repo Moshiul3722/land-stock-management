@@ -113,11 +113,11 @@
                                     <td class="text-center crud-wrap d-none d-xl-table-cell">{{ $budget->remarks ?: '—' }}</td>
                                     <td class="crud-actions">
                                         <button type="button" class="btn btn-sm btn-primary crud-btn" wire:click="openEdit({{ $budget->id }})"
-                                            title="{{ __('buttons.edit') }}" aria-label="{{ __('buttons.edit') }}: {{ $label }}">
+                                            data-tip="{{ __('buttons.edit') }}" aria-label="{{ __('buttons.edit') }}: {{ $label }}">
                                             <i class="fas fa-edit" aria-hidden="true"></i>
                                         </button>
                                         <button type="button" class="btn btn-sm btn-danger crud-btn" wire:click="confirmDelete({{ $budget->id }})"
-                                            title="{{ __('buttons.delete') }}" aria-label="{{ __('buttons.delete') }}: {{ $label }}">
+                                            data-tip="{{ __('buttons.delete') }}" aria-label="{{ __('buttons.delete') }}: {{ $label }}">
                                             <i class="fas fa-trash-alt" aria-hidden="true"></i>
                                         </button>
                                     </td>
@@ -142,13 +142,14 @@
             <x-ui.modal wire:model="showForm" max-width="2xl" labelledby="budget-form-title">
                 <form wire:submit="save" class="tw-m-0 tw-flex tw-min-h-0 tw-flex-1 tw-flex-col" novalidate>
                     <div class="{{ $ui::MODAL_HEADER }}">
-                        <div class="tw-min-w-0">
+                        <div class="tw-min-w-0 tw-flex-1">
                             <h2 id="budget-form-title" class="{{ $ui::MODAL_TITLE }}">
                                 {{ $budgetId ? __('budget.edit_budget_allocation') : __('budget.define_new_budget') }}
                             </h2>
                             <p class="{{ $ui::MODAL_HINT }}">{{ $budgetId ? $labels['edit_hint'] : $labels['hint'] }}</p>
                         </div>
-                        <button type="button" x-on:click="open = false" class="{{ $ui::ICON_BTN }} tw--mr-2 tw--mt-1" aria-label="{{ __('commontable.close') }}">
+                        <x-ui.modal-today />
+                        <button type="button" x-on:click="open = false" class="{{ $ui::MODAL_CLOSE }}" aria-label="{{ __('commontable.close') }}">
                             <i class="fas fa-times" aria-hidden="true"></i>
                         </button>
                     </div>

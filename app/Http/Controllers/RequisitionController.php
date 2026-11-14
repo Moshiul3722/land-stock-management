@@ -157,12 +157,12 @@ class RequisitionController extends Controller
     public function approve(Request $request, Requisition $requisition)
     {
         if (! $this->isWaitingForCurrentUser($requisition)) {
-            return redirect()->route('requisitions.pending')->with('error', __('requisition.pending_manage.modal.not_your_turn'));
+            return $this->backToDecisionPage()->with('error', __('requisition.pending_manage.modal.not_your_turn'));
         }
 
         try {
             $this->requisitionService->approveRequisition($requisition, $request->input('comments'));
-            return redirect()->route('requisitions.pending')->with('success', __('requisition.pending_manage.modal.approved'));
+            return $this->backToDecisionPage()->with('success', __('requisition.pending_manage.modal.approved'));
         } catch (InvalidArgumentException $e) {
             // CATCHES OUR CUSTOM VALIDATION ERROR AND SENDS IT TO THE UI
             Log::error($e->getMessage());
@@ -183,27 +183,44 @@ class RequisitionController extends Controller
     public function reject(Request $request, Requisition $requisition)
     {
         if (! $this->isWaitingForCurrentUser($requisition)) {
-            return redirect()->route('requisitions.pending')->with('error', __('requisition.pending_manage.modal.not_your_turn'));
+            return $this->backToDecisionPage()->with('error', __('requisition.pending_manage.modal.not_your_turn'));
         }
 
         try {
             $this->requisitionService->rejectRequisition($requisition, $request->input('comments'));
-            return redirect()->route('requisitions.pending')->with('success', __('requisition.pending_manage.modal.rejected'));
+            return $this->backToDecisionPage()->with('success', __('requisition.pending_manage.modal.rejected'));
         } catch (Exception $e) {
             Log::error($e->getMessage());
             return redirect()->back()->with('error', $e->getMessage());
         }
     }
     /**
-     * Only the approver a pending step is assigned to may decide on it. (Super Admin and Admin
-     * can see every pending requisition, so seeing one is not enough to decide on it.)
+     * The approver a pending step is assigned to may decide on it. Super Admin and Admin have
+     * full access: they may decide on any requisition that is waiting at a step.
      */
+    /**
+     * After a decision the user returns to the page it was made on: the requisition list when
+     * the dialog was opened there, otherwise the requisition request list.
+     */
+    private function backToDecisionPage()
+    {
+        $previous = (string) url()->previous();
+        $path = (string) parse_url($previous, PHP_URL_PATH);
+
+        return rtrim($path, '/') === parse_url(route('requisitions.index'), PHP_URL_PATH)
+            ? redirect()->to($previous)
+            : redirect()->route('requisitions.pending');
+    }
+
     private function isWaitingForCurrentUser(Requisition $requisition): bool
     {
-        return $requisition->approvalDetails()
-            ->where('status', 'pending')
-            ->where('to_user_id', Auth::id())
-            ->exists();
+        $pending = $requisition->approvalDetails()->where('status', 'pending');
+
+        if ($this->requisitionService->hasFullAccess(Auth::user())) {
+            return $pending->exists();
+        }
+
+        return $pending->where('to_user_id', Auth::id())->exists();
     }
 
     /**
@@ -222,7 +239,14 @@ class RequisitionController extends Controller
 
         // 1. Fetch available lots (Brand/Spec) for each item
         // Replaces the old 'current_stock' calculation
+        $lastReceipts = $this->lastReceiptsFor($requisition);
+
         foreach ($requisition->items as $item) {
+            $item->previous_receipt = $lastReceipts->get($item->product_id);
+
+            // Unit as shown on screen (Bangla name on Bangla pages)
+            $item->product?->append('unit_label');
+
             $item->available_lots = DB::table('stocks')
                 ->join('lots', 'stocks.lot_id', '=', 'lots.id')
                 ->join('lot_details', function ($join) {
@@ -395,12 +419,13 @@ class RequisitionController extends Controller
     public function removeItems(Request $request, Requisition $requisition)
     {
         $user = Auth::user();
-        $waitingForUser = $requisition->approvalDetails()
-            ->where('status', 'pending')
-            ->where('to_user_id', $user->id)
-            ->exists();
+        $waitingForUser = $this->isWaitingForCurrentUser($requisition);
 
-        if ((int) $user->role_id !== 3 || ! $waitingForUser) {
+        // The Store Admin at their own step; Super Admin / Admin at any step (full access).
+        $mayRemove = $this->requisitionService->hasFullAccess($user)
+            || $this->requisitionService->actingRoleFor($user, $requisition) === 3;
+
+        if (! $mayRemove || ! $waitingForUser) {
             return response()->json(['success' => false, 'message' => __('requisition.pending_manage.modal.delete_not_allowed')], 403);
         }
 
@@ -481,6 +506,33 @@ class RequisitionController extends Controller
     /**
      * Display the printable requisition slip with QR Code.
      */
+    /**
+     * When the requester last received each product of this requisition (through an earlier
+     * requisition), and how many: the newest issue per product, keyed by product id.
+     */
+    private function lastReceiptsFor(Requisition $requisition)
+    {
+        return \App\Models\IssuedItem::query()
+            ->where('user_id', $requisition->requested_by_user_id)
+            ->where('requisition_id', '!=', $requisition->id)
+            ->whereIn('product_id', $requisition->items->pluck('product_id'))
+            ->whereNull('deleted_at')
+            ->orderByDesc('issued_date')
+            ->orderByDesc('id')
+            ->get(['product_id', 'requisition_id', 'quantity', 'issued_date'])
+            ->groupBy('product_id')
+            ->map(function ($issues) {
+                $latest = $issues->first();
+
+                return [
+                    'date_iso' => \Illuminate\Support\Carbon::parse($latest->issued_date)->format('Y-m-d'),
+                    // everything received in that requisition for the product
+                    'quantity' => (int) $issues->where('requisition_id', $latest->requisition_id)->sum('quantity'),
+                    'requisition_id' => (int) $latest->requisition_id,
+                ];
+            });
+    }
+
     public function printSlip(Requisition $requisition)
     {
         // Load all necessary relationships for the slip
@@ -490,7 +542,23 @@ class RequisitionController extends Controller
             'items.lot' // To show assigned lot/brand info
         ]);
 
-        return view('requisition.print', compact('requisition'));
+        // Each product's last receipt by the requester (date and quantity)
+        $lastReceipts = $this->lastReceiptsFor($requisition);
+
+        // The officer who approved it: the highest approval step before the store keeper's delivery
+        $approval = \App\Models\ApprovalDetail::query()
+            ->where('requistion_id', $requisition->id)
+            ->where('status', 'approved')
+            ->where('serial', '<', 3)
+            ->orderByDesc('serial')
+            ->orderByDesc('id')
+            ->with('fromUser')
+            ->first();
+        $approver = $approval?->fromUser;
+        $approverRole = $approver ? \App\Models\CnfRole::find($approver->role_id) : null;
+        $approvedAt = $approval?->updated_at;
+
+        return view('requisition.print', compact('requisition', 'lastReceipts', 'approver', 'approverRole', 'approvedAt'));
     }
 
     /**
@@ -577,7 +645,8 @@ class RequisitionController extends Controller
     public function verifyAndProcess(Request $request, Requisition $requisition)
     {
         // 1. Authorization Check (Role 4 = Store Keeper)
-        if (Auth::user()->role_id != 4) {
+        // Super Admin / Admin may do it too, while the requisition is at the Store Keeper step.
+        if ($this->requisitionService->actingRoleFor(Auth::user(), $requisition) !== 4) {
             return response()->json(['success' => false, 'message' => 'Unauthorized. Only Store Keepers can scan.'], 403);
         }
 

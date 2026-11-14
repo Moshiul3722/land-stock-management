@@ -28,7 +28,12 @@ final class Ui
 
     public const ICON_BTN = 'tw-inline-flex tw-h-11 tw-w-11 tw-items-center tw-justify-center tw-rounded-lg tw-border tw-border-solid tw-border-transparent tw-bg-transparent tw-text-slate-500 tw-transition hover:tw-bg-slate-100 hover:tw-text-slate-900 focus:tw-outline-none focus-visible:tw-ring-4 focus-visible:tw-ring-brand-500/25 md:tw-h-9 md:tw-w-9';
 
-    public const MODAL_HEADER = 'tw-flex tw-items-start tw-justify-between tw-gap-4 tw-border-0 tw-border-b tw-border-solid tw-border-slate-200 tw-px-5 tw-py-4 sm:tw-px-6';
+    public const MODAL_HEADER = 'tw-flex tw-flex-wrap tw-items-start tw-justify-between tw-gap-x-4 tw-gap-y-1 tw-border-0 tw-border-b tw-border-solid tw-border-slate-200 tw-px-5 tw-py-4 sm:tw-flex-nowrap sm:tw-px-6';
+
+
+    /** Close button of a dialog header: icon button on a soft tile. */
+
+    public const MODAL_CLOSE = self::ICON_BTN . ' tw--mr-2 tw--mt-1 tw-flex-none !tw-bg-slate-100 !tw-text-slate-600 hover:!tw-bg-slate-200 hover:!tw-text-slate-900';
 
     public const MODAL_TITLE = 'tw-m-0 tw-text-lg tw-font-bold tw-text-slate-900';
 
@@ -36,7 +41,7 @@ final class Ui
 
     public const MODAL_BODY = 'tw-flex-1 tw-space-y-4 tw-overflow-y-auto tw-overscroll-contain tw-px-5 tw-py-5 sm:tw-px-6';
 
-    public const MODAL_FOOTER = 'tw-flex tw-flex-col-reverse tw-gap-2 tw-border-0 tw-border-t tw-border-solid tw-border-slate-200 tw-bg-slate-50/80 tw-px-5 tw-py-3 sm:tw-flex-row sm:tw-justify-end sm:tw-px-6';
+    public const MODAL_FOOTER = 'ui-modal-foot tw-flex tw-flex-col-reverse tw-gap-2 tw-border-0 tw-border-t tw-border-solid tw-border-slate-200 tw-bg-slate-50/80 tw-px-5 tw-py-3 sm:tw-flex-row sm:tw-justify-end sm:tw-px-6';
 
     public const FORM_ALERT = 'tw-flex tw-items-start tw-gap-3 tw-rounded-xl tw-border tw-border-solid tw-border-rose-200 tw-bg-rose-50 tw-px-4 tw-py-3 tw-text-sm tw-text-rose-800';
 }

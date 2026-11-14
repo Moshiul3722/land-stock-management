@@ -123,3 +123,38 @@
 .tw-root .tw-wrap-anywhere {
     overflow-wrap: anywhere;
 }
+
+/*
+ * Buttons in the footer of a dialog (`.ui-modal-foot`): compact, with a soft sheen and shadow.
+ * Phones keep a finger-sized height; the buttons are full width there.
+ */
+.tw-root .ui-modal-foot.ui-modal-foot button,
+.tw-root .ui-modal-foot.ui-modal-foot a {
+    min-height: 2.5rem;
+    padding: 0 0.875rem;
+    gap: 0.4rem;
+    border-radius: 0.5rem;
+    font-size: 0.8125rem;
+    line-height: 1;
+    letter-spacing: 0.01em;
+    background-image: linear-gradient(to bottom, rgba(255, 255, 255, 0.14), rgba(255, 255, 255, 0));
+    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.2);
+}
+
+.tw-root .ui-modal-foot.ui-modal-foot button:not(:disabled):hover,
+.tw-root .ui-modal-foot.ui-modal-foot a:hover {
+    box-shadow: 0 3px 8px -2px rgba(15, 23, 42, 0.22), inset 0 1px 0 rgba(255, 255, 255, 0.2);
+}
+
+.tw-root .ui-modal-foot.ui-modal-foot button i,
+.tw-root .ui-modal-foot.ui-modal-foot a i {
+    font-size: 0.75rem;
+}
+
+@media (min-width: 640px) {
+    .tw-root .ui-modal-foot.ui-modal-foot button,
+    .tw-root .ui-modal-foot.ui-modal-foot a {
+        min-height: 2.125rem;
+        min-width: 5.5rem;
+    }
+}

@@ -91,10 +91,10 @@ class RequisitionService
      */
     public function getPendingRequisitionsForUser(User $user)
     {
-        // Super Admin (1) and Admin (2) oversee the whole queue: they see every requisition that
-        // is waiting for a decision, whoever it is waiting for. Deciding stays with the approver
-        // the step is assigned to (RequisitionController::approve / reject check that).
-        if (in_array((int) $user->role_id, [1, 2], true)) {
+        // Super Admin (1) oversees the whole queue: every requisition that is waiting for a
+        // decision, whoever it is waiting for. Everyone else - Admin (2) included - sees what is
+        // waiting for them: for the Admin that is what the Store Admin has approved and sent on.
+        if ((int) $user->role_id === 1) {
             return $this->allPendingRequisitionTasks($user)
                 ->load('requisition.requestedBy.department', 'requisition.items.product');
         }
@@ -125,7 +125,7 @@ class RequisitionService
                     ->on('approval_details.serial', '=', 'req_max.max_serial');
             })
             ->where('approval_details.status', 'pending')
-            ->with(['requisition', 'fromUser', 'toUser:id,name'])
+            ->with(['requisition', 'fromUser', 'toUser:id,name,role_id'])
             ->select('approval_details.*')
             ->get()
             ->filter(fn ($task) => $task->requisition !== null)
@@ -334,6 +334,33 @@ class RequisitionService
         return $result;
     }
 
+    /** Roles with full access: they may act on any step of the approval workflow. */
+    public const FULL_ACCESS_ROLE_IDS = [1, 2];
+
+    public function hasFullAccess(?User $user): bool
+    {
+        return $user !== null && in_array((int) $user->role_id, self::FULL_ACCESS_ROLE_IDS, true);
+    }
+
+    /**
+     * The role a user acts as on a requisition. Everyone acts as their own role, except
+     * Super Admin and Admin: on a pending requisition they stand in for the role of the
+     * step it is waiting at (Store Admin, Admin or Store Keeper) and get that role's tools.
+     */
+    public function actingRoleFor(User $user, Requisition $requisition): int
+    {
+        if (! $this->hasFullAccess($user)) {
+            return (int) $user->role_id;
+        }
+
+        $pendingTask = $requisition->approvalDetails()
+            ->where('status', 'pending')
+            ->with('toUser:id,role_id')
+            ->first();
+
+        return (int) ($pendingTask?->toUser?->role_id ?? $user->role_id);
+    }
+
     /**
      * Approve a pending requisition.
      */
@@ -350,7 +377,7 @@ class RequisitionService
         // the oldest lot that can cover its quantity (first in, first out). The assignment and
         // the approval succeed or fail together.
         DB::transaction(function () use ($requisition, $pendingTask, $comments) {
-            if (Auth::user()->role_id == 3) {
+            if ($this->actingRoleFor(Auth::user(), $requisition) === 3) {
                 foreach ($requisition->items as $item) {
                     if (empty($item->lot_detail_id)) {
                         $this->assignOldestLotWithStock($item);

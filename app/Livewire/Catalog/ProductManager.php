@@ -39,6 +39,9 @@ class ProductManager extends Component
 
     public string $name = '';
 
+    /** The product's name in Bangla (optional). */
+    public string $nameBn = '';
+
     public string $description = '';
 
     public $categoryId = null;
@@ -83,6 +86,7 @@ class ProductManager extends Component
                 $like = '%' . $term . '%';
                 $query->where(function (Builder $inner) use ($like) {
                     $inner->where('name', 'like', $like)
+                        ->orWhere('name_bn', 'like', $like)
                         ->orWhere('description', 'like', $like)
                         ->orWhere('product_unit', 'like', $like)
                         ->orWhereHas('category', fn (Builder $category) => $category->where('name', 'like', $like))
@@ -116,6 +120,7 @@ class ProductManager extends Component
         $this->resetForm();
         $this->productId = $product->id;
         $this->name = (string) $product->name;
+        $this->nameBn = (string) $product->name_bn;
         $this->description = (string) $product->description;
         $this->categoryId = $product->category_id;
         $this->subCategoryId = $product->sub_category_id;
@@ -134,10 +139,12 @@ class ProductManager extends Component
     {
         $this->authorizeAccess();
         $this->name = trim($this->name);
+        $this->nameBn = trim($this->nameBn);
         $this->subCategoryId = $this->subCategoryId ?: null;
 
         $data = $this->validate([
             'name' => ['required', 'string', 'max:191', Rule::unique('products', 'name')->ignore($this->productId)],
+            'nameBn' => ['nullable', 'string', 'max:191'],
             'description' => ['nullable', 'string', 'max:1000'],
             'categoryId' => ['required', 'integer', Rule::exists('product_categories', 'id')->whereNull('deleted_at')],
             'subCategoryId' => [
@@ -147,12 +154,13 @@ class ProductManager extends Component
             ],
             'unit' => ['required', 'string', 'max:50'],
         ], [
-            'name.required' => __('commontable.required_field', ['attribute' => __('product.product_name')]),
+            'name.required' => __('commontable.required_field', ['attribute' => __('product.manage.name_en')]),
             'name.unique' => __('product.manage.exists'),
             'categoryId.required' => __('commontable.required_field', ['attribute' => __('product.manage.category')]),
             'unit.required' => __('commontable.required_field', ['attribute' => __('product.manage.unit')]),
         ], [
-            'name' => __('product.product_name'),
+            'name' => __('product.manage.name_en'),
+            'nameBn' => __('product.manage.name_bn'),
             'description' => __('product.description'),
             'categoryId' => __('product.manage.category'),
             'subCategoryId' => __('product.manage.sub_category'),
@@ -161,6 +169,7 @@ class ProductManager extends Component
 
         $payload = [
             'name' => $data['name'],
+            'name_bn' => $data['nameBn'] !== '' ? $data['nameBn'] : null,
             'description' => trim((string) $data['description']) !== '' ? trim($data['description']) : null,
             'category_id' => (int) $data['categoryId'],
             'sub_category_id' => $data['subCategoryId'] ? (int) $data['subCategoryId'] : null,
@@ -283,7 +292,7 @@ class ProductManager extends Component
 
     private function resetForm(): void
     {
-        $this->reset('productId', 'name', 'description', 'categoryId', 'subCategoryId', 'unit');
+        $this->reset('productId', 'name', 'nameBn', 'description', 'categoryId', 'subCategoryId', 'unit');
         $this->resetValidation();
     }
 }

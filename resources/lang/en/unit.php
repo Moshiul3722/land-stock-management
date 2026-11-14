@@ -4,6 +4,8 @@ return [
     'title' => 'Product Unit',
     'table_header' => 'List of Product Units',
     'name' => 'Unit Name',
+    'name_en' => 'Unit Name (English)',
+    'name_bn' => 'Unit Name (Bangla)',
     'products' => 'Products',
     'add' => 'Add New Unit',
     'edit' => 'Edit Unit',

@@ -118,13 +118,13 @@
                                             <button type="button" class="btn btn-sm btn-primary dept-touch-btn edit-dept-btn"
                                                 data-id="{{ $department->id }}" data-name="{{ $department->name }}"
                                                 data-name-bn="{{ $department->name_bn }}" data-code="{{ $department->code }}"
-                                                title="{{ __('buttons.edit') }}"
+                                                data-tip="{{ __('buttons.edit') }}"
                                                 aria-label="{{ __('buttons.edit') }}: {{ $label }}">
                                                 <i class="fas fa-edit" aria-hidden="true"></i>
                                             </button>
                                             <button type="button" class="btn btn-sm btn-danger dept-touch-btn delete-dept-btn"
                                                 data-id="{{ $department->id }}" data-label="{{ $label }}"
-                                                title="{{ __('buttons.delete') }}"
+                                                data-tip="{{ __('buttons.delete') }}"
                                                 aria-label="{{ __('buttons.delete') }}: {{ $label }}">
                                                 <i class="fas fa-trash-alt" aria-hidden="true"></i>
                                             </button>
@@ -151,6 +151,7 @@
                             <h5 class="modal-title" id="deptFormModalLabel"></h5>
                             <p class="modal-hint">{{ __('department.form_hint') }}</p>
                         </div>
+                        <x-ui.modal-today variant="bs" />
                         <button type="button" class="close" data-dismiss="modal" aria-label="{{ __('buttons.cancel') }}">
                             <span aria-hidden="true">&times;</span>
                         </button>

@@ -19,7 +19,7 @@
             <p class="tw-mb-0 tw-mt-2 tw-break-words tw-text-sm tw-font-semibold tw-text-slate-900">{{ $name }}</p>
         @endif
     </div>
-    <div class="tw-flex tw-flex-col-reverse tw-gap-2 tw-px-5 tw-pb-5 sm:tw-flex-row sm:tw-justify-center sm:tw-px-6">
+    <div class="ui-modal-foot tw-flex tw-flex-col-reverse tw-gap-2 tw-px-5 tw-pb-5 sm:tw-flex-row sm:tw-justify-center sm:tw-px-6">
         <button type="button" x-on:click="open = false" class="{{ $ui::BTN_SECONDARY }} sm:tw-min-w-[8rem]">{{ __('sweetalert.cancel') }}</button>
         <button type="button" wire:click="{{ $action }}" wire:loading.attr="disabled" wire:target="{{ $action }}" class="{{ $ui::BTN_DANGER }} sm:tw-min-w-[8rem]">
             <i class="fas fa-circle-notch fa-spin" aria-hidden="true" wire:loading wire:target="{{ $action }}"></i>

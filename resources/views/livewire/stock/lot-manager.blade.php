@@ -111,16 +111,16 @@
                                     </td>
                                     <td class="crud-actions">
                                         <button type="button" class="btn btn-sm btn-info crud-btn" wire:click="openView({{ $lot->id }})"
-                                            title="{{ __('lot.manage.view') }}" aria-label="{{ __('lot.manage.view') }}: {{ $lot->lot_number }}">
+                                            data-tip="{{ __('lot.manage.view') }}" aria-label="{{ __('lot.manage.view') }}: {{ $lot->lot_number }}">
                                             <i class="fas fa-eye" aria-hidden="true"></i>
                                         </button>
                                         @if ($lot->status === 'draft')
                                             <button type="button" class="btn btn-sm btn-primary crud-btn" wire:click="openEdit({{ $lot->id }})"
-                                                title="{{ __('buttons.edit') }}" aria-label="{{ __('buttons.edit') }}: {{ $lot->lot_number }}">
+                                                data-tip="{{ __('buttons.edit') }}" aria-label="{{ __('buttons.edit') }}: {{ $lot->lot_number }}">
                                                 <i class="fas fa-edit" aria-hidden="true"></i>
                                             </button>
                                             <button type="button" class="btn btn-sm btn-danger crud-btn" wire:click="confirmDelete({{ $lot->id }})"
-                                                title="{{ __('buttons.delete') }}" aria-label="{{ __('buttons.delete') }}: {{ $lot->lot_number }}">
+                                                data-tip="{{ __('buttons.delete') }}" aria-label="{{ __('buttons.delete') }}: {{ $lot->lot_number }}">
                                                 <i class="fas fa-trash-alt" aria-hidden="true"></i>
                                             </button>
                                         @endif
@@ -147,11 +147,12 @@
             <x-ui.modal wire:model="showForm" max-width="5xl" labelledby="lot-form-title">
                 <form wire:submit="save('submit')" class="tw-m-0 tw-flex tw-min-h-0 tw-flex-1 tw-flex-col" novalidate>
                     <div class="{{ $ui::MODAL_HEADER }}">
-                        <div class="tw-min-w-0">
+                        <div class="tw-min-w-0 tw-flex-1">
                             <h2 id="lot-form-title" class="{{ $ui::MODAL_TITLE }}">{{ $lotId ? __('lot.edit_title') : __('lot.add_title') }}</h2>
                             <p class="{{ $ui::MODAL_HINT }}">{{ __('lot.manage.hint') }}</p>
                         </div>
-                        <button type="button" x-on:click="open = false" class="{{ $ui::ICON_BTN }} tw--mr-2 tw--mt-1" aria-label="{{ __('commontable.close') }}">
+                        <x-ui.modal-today />
+                        <button type="button" x-on:click="open = false" class="{{ $ui::MODAL_CLOSE }}" aria-label="{{ __('commontable.close') }}">
                             <i class="fas fa-times" aria-hidden="true"></i>
                         </button>
                     </div>
@@ -211,7 +212,7 @@
                                 <div>
                                     <label for="lot-pick-product" class="{{ $ui::LABEL }}">{{ __('lot.table_product') }}</label>
                                     <x-ui.search-select id="lot-pick-product" wire:model="pickProductId" :disabled="! $pickCategoryId"
-                                        :options="$this->productOptions->map(fn ($option) => ['value' => $option->id, 'label' => $option->name . ($option->product_unit ? ' (' . $option->product_unit . ')' : '')])"
+                                        :options="$this->productOptions->map(fn ($option) => ['value' => $option->id, 'label' => $option->name . ($option->product_unit ? ' (' . $option->unit_label . ')' : '')])"
                                         :placeholder="$pickCategoryId ? __('lot.manage.select') : __('lot.manage.select_category_first')"
                                         :search-placeholder="__('lot.manage.search_product')"
                                         :invalid="$errors->has('pickProductId')" />
@@ -290,7 +291,7 @@
                                                     <td class="tw-whitespace-nowrap tw-px-2 tw-py-0.5 tw-text-right tw-font-semibold tw-tabular-nums tw-text-slate-900 sm:tw-px-3">
                                                         {{ $digits($item['quantity']) }}
                                                         @if ($product && $product->product_unit && ! is_numeric($product->product_unit))
-                                                            <span class="tw-block tw-text-xs tw-font-normal tw-text-slate-500 sm:tw-inline md:tw-text-[13px]">{{ $product->product_unit }}</span>
+                                                            <span class="tw-block tw-text-xs tw-font-normal tw-text-slate-500 sm:tw-inline md:tw-text-[13px]">{{ $product->unit_label }}</span>
                                                         @endif
                                                     </td>
                                                     <td class="tw-whitespace-nowrap tw-px-0 tw-py-0 tw-text-center sm:tw-px-2">
@@ -345,7 +346,7 @@
                         </div>
                     </div>
 
-                    <div class="tw-flex tw-flex-col-reverse tw-gap-2 tw-border-0 tw-border-t tw-border-solid tw-border-slate-200 tw-bg-slate-50/80 tw-px-5 tw-py-3 sm:tw-flex-row sm:tw-items-center sm:tw-justify-between sm:tw-px-6">
+                    <div class="ui-modal-foot tw-flex tw-flex-col-reverse tw-gap-2 tw-border-0 tw-border-t tw-border-solid tw-border-slate-200 tw-bg-slate-50/80 tw-px-5 tw-py-3 sm:tw-flex-row sm:tw-items-center sm:tw-justify-between sm:tw-px-6">
                         <p class="tw-m-0 tw-hidden tw-text-xs tw-text-slate-500 lg:tw-block">{{ __('lot.manage.submit_hint') }}</p>
                         <div class="tw-flex tw-flex-col-reverse tw-gap-2 sm:tw-ml-auto sm:tw-flex-row">
                             <button type="button" x-on:click="open = false" class="{{ $ui::BTN_SECONDARY }}">{{ __('buttons.cancel') }}</button>
@@ -368,11 +369,12 @@
             <x-ui.modal wire:model="showView" max-width="4xl" labelledby="lot-view-title">
                 @if ($viewed = $this->viewing)
                     <div class="{{ $ui::MODAL_HEADER }}">
-                        <div class="tw-flex tw-min-w-0 tw-flex-wrap tw-items-center tw-gap-x-3 tw-gap-y-1">
+                        <div class="tw-flex tw-min-w-0 tw-flex-1 tw-flex-wrap tw-items-center tw-gap-x-3 tw-gap-y-1">
                             <h2 id="lot-view-title" class="{{ $ui::MODAL_TITLE }} tw-break-words">{{ $viewed->lot_number }}</h2>
                             <span class="badge {{ $badge($viewed->status) }}">{{ $statusLabel($viewed->status) }}</span>
                         </div>
-                        <button type="button" x-on:click="open = false" class="{{ $ui::ICON_BTN }} tw--mr-2 tw--mt-1" aria-label="{{ __('commontable.close') }}">
+                        <x-ui.modal-today />
+                        <button type="button" x-on:click="open = false" class="{{ $ui::MODAL_CLOSE }}" aria-label="{{ __('commontable.close') }}">
                             <i class="fas fa-times" aria-hidden="true"></i>
                         </button>
                     </div>
@@ -398,7 +400,11 @@
                             $hasPrices = $viewed->lotDetails->contains(fn ($detail) => (float) $detail->unit_price > 0);
                             $hasBrands = $viewed->lotDetails->contains(fn ($detail) => filled($detail->brand));
                             $grand = 0;
+                            // More than 10 items: shown 10 per page (the total below still covers every item)
+                            $viewCount = $viewed->lotDetails->count();
+                            $viewPages = (int) ceil($viewCount / 10);
                         @endphp
+                        <div x-data="{ page: 1 }" wire:key="lot-view-items-{{ $viewed->id }}">
                         <div class="tw-overflow-x-auto tw-rounded-xl tw-border tw-border-solid tw-border-slate-200">
                             <table class="tw-m-0 tw-w-full tw-border-collapse tw-text-left tw-text-[15px] md:tw-text-base {{ $hasPrices ? 'tw-min-w-[560px]' : '' }}">
                                 <thead>
@@ -406,7 +412,7 @@
                                         <th scope="col" class="tw-w-9 tw-px-1 tw-py-2 tw-text-center sm:tw-w-14 sm:tw-whitespace-nowrap sm:tw-px-3">{{ __('lot.table_sl') }}</th>
                                         <th scope="col" class="tw-px-3 tw-py-2">{{ __('lot.manage.item_description') }}</th>
                                         <th scope="col" class="tw-hidden tw-px-3 tw-py-2 sm:tw-table-cell">{{ __('lot.manage.category') }}</th>
-                                        <th scope="col" class="tw-whitespace-nowrap tw-px-3 tw-py-2 tw-text-right">{{ __('lot.table_quantity') }}</th>
+                                        <th scope="col" class="tw-px-3 tw-py-2 tw-text-right sm:tw-whitespace-nowrap">{{ __('lot.manage.stored_quantity') }}</th>
                                         @if ($hasPrices)
                                             <th scope="col" class="tw-whitespace-nowrap tw-px-3 tw-py-2 tw-text-right">{{ __('lot.manage.unit_price') }}</th>
                                             <th scope="col" class="tw-whitespace-nowrap tw-px-3 tw-py-2 tw-text-right">{{ __('lot.manage.line_total') }}</th>
@@ -416,7 +422,8 @@
                                 <tbody>
                                     @foreach ($viewed->lotDetails as $detail)
                                         @php $line = (float) $detail->quantity * (float) $detail->unit_price; $grand += $line; @endphp
-                                        <tr wire:key="lot-view-item-{{ $detail->id }}" class="tw-border-0 tw-border-t tw-border-solid tw-border-slate-100">
+                                        <tr wire:key="lot-view-item-{{ $detail->id }}" class="tw-border-0 tw-border-t tw-border-solid tw-border-slate-100"
+                                            @if ($viewPages > 1) x-show="page === {{ intdiv($loop->index, 10) + 1 }}" @endif>
                                             <td class="tw-px-1 tw-py-0.5 tw-text-center tw-tabular-nums tw-text-slate-600 sm:tw-px-3">{{ $digits($loop->iteration) }}</td>
                                             <td class="tw-px-3 tw-py-0.5">
                                                 <span class="tw-block tw-break-words tw-font-medium tw-leading-snug tw-text-slate-900">{{ $detail->product->name ?? '—' }}</span>
@@ -427,7 +434,12 @@
                                                 <span class="tw-block tw-break-words tw-text-xs tw-leading-snug tw-text-slate-500 md:tw-text-[13px] sm:tw-hidden">{{ $detail->product->category->name ?? '' }}</span>
                                             </td>
                                             <td class="tw-hidden tw-break-words tw-px-3 tw-py-0.5 tw-text-slate-700 sm:tw-table-cell">{{ $detail->product->category->name ?? '—' }}</td>
-                                            <td class="tw-whitespace-nowrap tw-px-3 tw-py-0.5 tw-text-right tw-font-semibold tw-tabular-nums tw-text-slate-900">{{ $digits($detail->quantity) }}</td>
+                                            <td class="tw-whitespace-nowrap tw-px-3 tw-py-0.5 tw-text-right tw-font-semibold tw-tabular-nums tw-text-slate-900">
+                                                {{ $digits($detail->quantity) }}
+                                                @if ($detail->product && $detail->product->product_unit && ! is_numeric($detail->product->product_unit))
+                                                    <span class="tw-font-normal tw-text-slate-600">{{ $detail->product->unit_label }}</span>
+                                                @endif
+                                            </td>
                                             @if ($hasPrices)
                                                 <td class="tw-whitespace-nowrap tw-px-3 tw-py-0.5 tw-text-right tw-tabular-nums">{{ $money($detail->unit_price) }}</td>
                                                 <td class="tw-whitespace-nowrap tw-px-3 tw-py-0.5 tw-text-right tw-font-semibold tw-tabular-nums tw-text-slate-900">{{ $money($line) }}</td>
@@ -446,6 +458,27 @@
                             </table>
                         </div>
 
+                        @if ($viewPages > 1)
+                            <nav class="tw-mt-2 tw-flex tw-flex-wrap tw-items-center tw-justify-between tw-gap-2" aria-label="{{ __('commontable.pagination') }}">
+                                <p class="tw-m-0 tw-text-xs tw-text-slate-500">
+                                    @for ($page = 1; $page <= $viewPages; $page++)
+                                        <span x-show="page === {{ $page }}" @if ($page > 1) x-cloak @endif>{{ strtr(__('commontable.dt_info'), ['_TOTAL_' => $digits($viewCount), '_START_' => $digits(($page - 1) * 10 + 1), '_END_' => $digits(min($page * 10, $viewCount))]) }}</span>
+                                    @endfor
+                                </p>
+                                <div class="tw-flex tw-flex-wrap tw-gap-1">
+                                    @for ($page = 1; $page <= $viewPages; $page++)
+                                        <button type="button" x-on:click="page = {{ $page }}" wire:key="lot-view-page-{{ $viewed->id }}-{{ $page }}"
+                                            x-bind:aria-current="page === {{ $page }} ? 'page' : null"
+                                            x-bind:class="page === {{ $page }} ? 'tw-border-brand-600 tw-bg-brand-600 tw-text-white' : 'tw-border-slate-200 tw-bg-white tw-text-slate-600 hover:tw-bg-slate-50'"
+                                            class="tw-inline-flex tw-h-8 tw-min-w-[2rem] tw-items-center tw-justify-center tw-rounded-md tw-border tw-border-solid tw-px-2 tw-text-xs tw-font-semibold tw-tabular-nums tw-transition focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-brand-500/40">
+                                            {{ $digits($page) }}
+                                        </button>
+                                    @endfor
+                                </div>
+                            </nav>
+                        @endif
+                        </div>
+
                         @if ($viewed->remarks)
                             <div>
                                 <h3 class="tw-mb-1 tw-mt-0 tw-text-sm tw-font-semibold tw-text-slate-700">{{ __('lot.remarks') }}</h3>
@@ -456,6 +489,13 @@
 
                     <div class="{{ $ui::MODAL_FOOTER }}">
                         <button type="button" x-on:click="open = false" class="{{ $ui::BTN_SECONDARY }}">{{ __('commontable.close') }}</button>
+                        {{-- The lot on an A4 sheet in a new tab: a preview first, or straight to the printer --}}
+                        <a href="{{ route('lots.print', ['lot' => $viewed, 'preview' => 1]) }}" target="_blank" rel="noopener" class="{{ $ui::BTN_SECONDARY }}">
+                            <i class="fas fa-eye" aria-hidden="true"></i> {{ __('lot.manage.print_preview') }}
+                        </a>
+                        <a href="{{ route('lots.print', $viewed) }}" target="_blank" rel="noopener" class="{{ $ui::BTN_SECONDARY }}">
+                            <i class="fas fa-print" aria-hidden="true"></i> {{ __('lot.manage.print') }}
+                        </a>
                         @if ($viewed->status === 'draft')
                             <button type="button" wire:click="confirmDelete({{ $viewed->id }})" class="{{ $ui::BTN_SECONDARY }} tw-text-rose-600 hover:tw-text-rose-700">
                                 <i class="fas fa-trash-alt" aria-hidden="true"></i> {{ __('buttons.delete') }}

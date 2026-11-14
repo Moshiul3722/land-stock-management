@@ -81,13 +81,13 @@
                                 <button type="button" class="btn btn-sm btn-primary role-touch-btn edit-role-btn"
                                     data-id="{{ $role->id }}" data-name-en="{{ $role->role_name_en }}"
                                     data-name-bn="{{ $role->role_name_bn }}"
-                                    title="{{ __('buttons.edit') }}"
+                                    data-tip="{{ __('buttons.edit') }}"
                                     aria-label="{{ __('buttons.edit') }}: {{ $roleLabel }}">
                                     <i class="fas fa-edit" aria-hidden="true"></i>
                                 </button>
                                 <button type="button" class="btn btn-sm btn-danger role-touch-btn delete-role-btn"
                                     data-id="{{ $role->id }}" data-label="{{ $roleLabel }}"
-                                    title="{{ __('buttons.delete') }}"
+                                    data-tip="{{ __('buttons.delete') }}"
                                     aria-label="{{ __('buttons.delete') }}: {{ $roleLabel }}">
                                     <i class="fas fa-trash-alt" aria-hidden="true"></i>
                                 </button>
@@ -112,6 +112,7 @@
                         <h5 class="modal-title" id="roleFormModalLabel"></h5>
                         <p class="modal-hint">{{ __('rolemanagement.form_hint') }}</p>
                     </div>
+                    <x-ui.modal-today variant="bs" />
                     <button type="button" class="close" data-dismiss="modal" aria-label="{{ __('buttons.cancel') }}">
                         <span aria-hidden="true">&times;</span>
                     </button>

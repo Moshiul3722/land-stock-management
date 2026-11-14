@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('content')
-    <section class="content-header">
+    <section class="content-header list-page">
         <div class="container-fluid">
             <div class="row mb-2">
                 <div class="col-sm-6">
@@ -21,7 +21,7 @@
         </div>
     </section>
 
-    <div class="content px-3">
+    <div class="content list-page px-3">
 
         @include('flash::message')
 
@@ -167,6 +167,12 @@
                             selectedLocale === 'en' ? value.role_name_en : value
                             .role_name_bn));
                     });
+                    // Open with the signed-in user's own role chosen and its permissions shown
+                    var ownRole = @json((string) (auth()->user()->role_id ?? ''));
+                    if (ownRole !== '' && dropdown.find('option[value="' + ownRole + '"]').length) {
+                        dropdown.val(ownRole).trigger('change');
+                        $('#getPermissionButton').trigger('click');
+                    }
                 },
                 error: function(err) {
                     $('#wait').hide();

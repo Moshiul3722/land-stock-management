@@ -82,6 +82,15 @@ class StockRepository extends BaseRepository
             $query->where('products.id', $filters['product_id']);
         }
 
+        // Period (stock report): only the stock entries made from / up to these dates count.
+        // Dates are YYYY-MM-DD; anything else is ignored.
+        foreach (['stock_date_from' => '>=', 'stock_date_to' => '<='] as $key => $operator) {
+            $date = $filters[$key] ?? null;
+            if (is_string($date) && preg_match('/^\d{4}-\d{2}-\d{2}$/', $date)) {
+                $query->whereDate('stocks.created_at', $operator, $date);
+            }
+        }
+
         return $query->get();
     }
 }

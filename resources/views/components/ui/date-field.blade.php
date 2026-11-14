@@ -15,20 +15,27 @@
       min / max    YYYY-MM-DD; days outside the range cannot be chosen
       pop-width    smallest calendar width in px (240)
 
+    Without Livewire (a plain Blade page): leave out wire:model. The chosen date is then kept in
+    a hidden input with the id "{id}-value" (and the given `name`), which fires a normal
+    `change` event whenever the date changes:
+      <x-ui.date-field id="report-from" name="date_from" value="2026-11-13" compact clearable />
+
     Keyboard: Enter/Space opens; arrow keys move by day/week; PageUp/PageDown change month;
     Enter chooses; Escape closes.
 --}}
-@props(['id', 'invalid' => false, 'compact' => false, 'clearable' => false, 'placeholder' => null, 'min' => null, 'max' => null, 'popWidth' => 240])
+@props(['id', 'invalid' => false, 'compact' => false, 'clearable' => false, 'placeholder' => null, 'min' => null, 'max' => null, 'popWidth' => 240, 'name' => null, 'value' => ''])
 
 @php
     $ui = \App\Livewire\Concerns\Ui::class;
     $locale = app()->getLocale() === 'bn' ? 'bn-BD' : 'en-GB';
+    // Bound to a Livewire property, or standing alone with a hidden input
+    $wired = (bool) $attributes->wire('model')->value();
 @endphp
 
 {{-- min / max live in data attributes so they follow Livewire updates without rebuilding the field --}}
 <div class="tw-relative" data-min="{{ $min }}" data-max="{{ $max }}"
     x-data="{
-        value: @entangle($attributes->wire('model')),
+        value: @if ($wired) @entangle($attributes->wire('model')) @else @js((string) $value) @endif,
         locale: @js($locale),
         compact: @js((bool) $compact),
         minWidth: @js((int) $popWidth),
@@ -148,8 +155,15 @@
             });
         }
     }"
+    @unless ($wired)
+        x-init="$watch('value', v => { $refs.plain.value = v || ''; $refs.plain.dispatchEvent(new Event('change', { bubbles: true })); })"
+    @endunless
     x-on:keydown.escape.stop="close()"
     x-on:click.outside="close(false)">
+
+    @unless ($wired)
+        <input type="hidden" x-ref="plain" id="{{ $id }}-value" @if ($name) name="{{ $name }}" @endif value="{{ $value }}">
+    @endunless
 
     <button type="button" id="{{ $id }}" x-ref="button" x-on:click="toggle()"
         aria-haspopup="dialog" x-bind:aria-expanded="open.toString()" aria-controls="{{ $id }}-calendar"

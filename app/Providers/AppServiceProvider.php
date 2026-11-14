@@ -63,6 +63,8 @@ class AppServiceProvider extends ServiceProvider
     private function processMenuItems($permissions)
     {
         $menuItems = [];
+        // Sidebar group (submodule) names by id, to place one group after another below.
+        $submoduleNames = [];
         foreach ($permissions as $permission) {
             $menu = $permission->menu;
             $submodule = $menu->submodule;
@@ -83,6 +85,11 @@ class AppServiceProvider extends ServiceProvider
                 'sort' => $menu->sort_order ?? $menu->id * 10,
             ];
 
+            $submoduleNames[$submodule->id] = [
+                'module' => $locale === 'bn' ? $module->module_name_bn : $module->module_name_en,
+                'name' => $menuItem['submodule'],
+            ];
+
             // Group menu items by module, submodule
             if ($locale == 'bn') {
                 $menuItems[$module->module_name_bn][$submodule->submodule_name_bn][] = $menuItem;
@@ -99,6 +106,41 @@ class AppServiceProvider extends ServiceProvider
             unset($menus);
         }
         unset($submodules);
+
+        // "Product Management" is listed right below "Product Unit" (all other groups keep their order).
+        $menuItems = $this->moveSubmoduleAfter($menuItems, $submoduleNames, self::PRODUCT_SUBMODULE_ID, self::PRODUCT_UNIT_SUBMODULE_ID);
+
+        return $menuItems;
+    }
+
+    private const PRODUCT_SUBMODULE_ID = 4;
+    private const PRODUCT_UNIT_SUBMODULE_ID = 11;
+
+    /**
+     * Moves one sidebar group right below another group of the same module.
+     * Nothing changes when the role cannot see both groups.
+     */
+    private function moveSubmoduleAfter(array $menuItems, array $names, int $moveId, int $afterId): array
+    {
+        $move = $names[$moveId] ?? null;
+        $after = $names[$afterId] ?? null;
+
+        if (! $move || ! $after || $move['module'] !== $after['module']) {
+            return $menuItems;
+        }
+
+        $submodules = $menuItems[$move['module']];
+        $moved = $submodules[$move['name']];
+        unset($submodules[$move['name']]);
+
+        $ordered = [];
+        foreach ($submodules as $name => $menus) {
+            $ordered[$name] = $menus;
+            if ($name === $after['name']) {
+                $ordered[$move['name']] = $moved;
+            }
+        }
+        $menuItems[$move['module']] = $ordered;
 
         return $menuItems;
     }

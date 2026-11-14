@@ -73,6 +73,7 @@ class UserController extends AppBaseController
                 'name' => $data['name'],
                 'name_bn' => $data['name_bn'] ?? null,
                 'email' => $data['email'],
+                'mobile' => $data['mobile'] ?? null,
                 'role_id' => $data['role_id'],
                 'department_id' => $data['department_id'] ?? null,
                 'password' => Hash::make($data['password']),
@@ -137,6 +138,7 @@ class UserController extends AppBaseController
             $user->name = $data['name'];
             $user->name_bn = $data['name_bn'] ?? null;
             $user->email = $data['email'];
+            $user->mobile = $data['mobile'] ?? null;
             $user->role_id = $data['role_id'];
             $user->department_id = $data['department_id'] ?? null;
             $user->updated_by = Auth::id();
@@ -190,6 +192,13 @@ class UserController extends AppBaseController
      */
     private function validateUser(Request $request, ?User $user = null): array
     {
+        // Stored as 01XXXXXXXXX whatever way it was typed (Bangla digits, +88, spaces); an
+        // empty field clears the number.
+        $mobile = trim((string) $request->input('mobile'));
+        $request->merge(['mobile' => $mobile === ''
+            ? null
+            : (\App\Http\Controllers\Auth\OtpLoginController::normaliseMobile($mobile) ?? $mobile)]);
+
         return $request->validate([
             'name' => ['required', 'string', 'max:191'],
             'name_bn' => ['nullable', 'string', 'max:191'],
@@ -217,6 +226,29 @@ class UserController extends AppBaseController
                     $fail(trans($existing->deleted_at ? 'user.email_taken_deleted' : 'user.email_taken'));
                 },
             ],
+            // The number the user signs in with (a login code is sent to it): optional, a
+            // Bangladeshi mobile number, and not shared with another user.
+            'mobile' => [
+                'nullable',
+                'string',
+                'max:20',
+                function (string $attribute, mixed $value, \Closure $fail) use ($user) {
+                    if (\App\Http\Controllers\Auth\OtpLoginController::normaliseMobile((string) $value) === null) {
+                        $fail(trans('user.mobile_invalid'));
+
+                        return;
+                    }
+
+                    $taken = User::where('mobile', $value)
+                        ->whereNull('deleted_at')
+                        ->when($user, fn($query) => $query->where('id', '!=', $user->id))
+                        ->exists();
+
+                    if ($taken) {
+                        $fail(trans('user.mobile_taken'));
+                    }
+                },
+            ],
             'role_id' => ['required', 'integer', Rule::exists('cnf_role', 'id')->whereNull('deleted_at')],
             'department_id' => [
                 'nullable',
@@ -237,6 +269,7 @@ class UserController extends AppBaseController
             'name' => trans('user.user_name_en'),
             'name_bn' => trans('user.user_name_bn'),
             'email' => trans('user.email'),
+            'mobile' => trans('user.mobile'),
             'role_id' => trans('user.role'),
             'department_id' => trans('user.section_department'),
             'password' => trans('user.password'),

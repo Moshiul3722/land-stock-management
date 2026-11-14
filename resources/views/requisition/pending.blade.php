@@ -132,6 +132,79 @@
             border-radius: 8px;
         }
     </style>
+    <style>
+        /* ---------- Scanner dialog ---------- */
+        #scannerModal .scan-dialog { max-width: 30rem; }
+        #scannerModal .modal-content { overflow: hidden; border: 0; border-radius: 1rem; box-shadow: 0 24px 60px -20px rgba(15, 23, 42, 0.45); }
+        #scannerModal .scan-header { align-items: center; gap: 0.75rem; padding: 1rem 1.25rem; border-bottom: 1px solid #eef2f7; }
+        #scannerModal .scan-header-icon { display: inline-flex; flex: 0 0 auto; align-items: center; justify-content: center; width: 2.75rem; height: 2.75rem; border-radius: 0.85rem; background: linear-gradient(135deg, #1d65db, #4f46e5); color: #fff; font-size: 1.25rem; box-shadow: 0 8px 16px -8px rgba(37, 99, 235, 0.7); }
+        #scannerModal .scan-header .modal-title { font-size: 1.125rem; }
+        /* A narrow dialog: today's date sits on its own line under the title */
+        #scannerModal .scan-header { flex-wrap: wrap; }
+        #scannerModal .scan-header .modal-today { order: 3; flex: 1 1 100%; margin: 0.15rem 0 0; white-space: normal; }
+        #scannerModal .scan-header .close { margin-left: auto; }
+        #scannerModal .scan-header .modal-hint { font-size: 0.8125rem; line-height: 1.45; }
+        #scannerModal .scan-body { padding: 1rem 1.25rem 1.1rem; }
+
+        /* Camera | File */
+        #scannerModal .scan-tabs { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; margin-bottom: 0.9rem; padding: 4px; border-radius: 0.75rem; background: #f1f5f9; }
+        #scannerModal .scan-tab { display: inline-flex; align-items: center; justify-content: center; gap: 0.45rem; min-height: 2.5rem; padding: 0 0.75rem; border: 0; border-radius: 0.55rem; background: transparent; color: #64748b; font-size: 0.9375rem; font-weight: 600; cursor: pointer; transition: background-color 0.15s, color 0.15s, box-shadow 0.15s; }
+        #scannerModal .scan-tab:hover { color: #0f172a; }
+        #scannerModal .scan-tab.is-active { background: #fff; color: #1d4fd8; box-shadow: 0 1px 3px rgba(15, 23, 42, 0.14); }
+        #scannerModal .scan-tab:focus-visible { outline: 0; box-shadow: 0 0 0 3px rgba(47, 124, 246, 0.35); }
+
+        /* Camera view */
+        #scannerModal .scan-view { position: relative; display: flex; align-items: center; justify-content: center; min-height: 17rem; overflow: hidden; border-radius: 0.9rem; background: radial-gradient(circle at 50% 35%, #1e2b55, #0b1430 75%); }
+        #scannerModal #reader { width: 100%; border: 0 !important; }
+        #scannerModal #reader video { display: block; width: 100% !important; border-radius: 0.9rem; }
+        #scannerModal .scan-view[data-state="idle"] #reader,
+        #scannerModal .scan-view[data-state="starting"] #reader { display: none; }
+        #scannerModal .scan-idle { position: relative; z-index: 2; display: flex; flex-direction: column; align-items: center; gap: 0.65rem; padding: 1.5rem 1.25rem; text-align: center; }
+        #scannerModal .scan-view[data-state="live"] .scan-idle { display: none; }
+        #scannerModal .scan-idle-icon { display: inline-flex; align-items: center; justify-content: center; width: 3.5rem; height: 3.5rem; border-radius: 999px; background: rgba(255, 255, 255, 0.1); color: #dbe5fb; font-size: 1.4rem; }
+        #scannerModal .scan-idle-text { max-width: 20rem; margin: 0; color: #cbd5e1; font-size: 0.9rem; font-weight: 500; line-height: 1.5; }
+        #scannerModal .scan-view[data-state="error"] .scan-idle-text { color: #fecaca; }
+        #scannerModal .scan-view[data-state="starting"] #scan-camera-start { display: none; }
+
+        /* Corner marks and a moving line while the camera is on */
+        #scannerModal .scan-frame { position: absolute; top: 50%; left: 50%; z-index: 1; display: none; width: min(62%, 15rem); aspect-ratio: 1; transform: translate(-50%, -50%); pointer-events: none; }
+        #scannerModal .scan-view[data-state="live"] .scan-frame { display: block; }
+        #scannerModal .scan-frame span { position: absolute; width: 2rem; height: 2rem; border: 3px solid #fff; }
+        #scannerModal .scan-frame span:nth-child(1) { top: 0; left: 0; border-right: 0; border-bottom: 0; border-top-left-radius: 0.6rem; }
+        #scannerModal .scan-frame span:nth-child(2) { top: 0; right: 0; border-bottom: 0; border-left: 0; border-top-right-radius: 0.6rem; }
+        #scannerModal .scan-frame span:nth-child(3) { bottom: 0; left: 0; border-top: 0; border-right: 0; border-bottom-left-radius: 0.6rem; }
+        #scannerModal .scan-frame span:nth-child(4) { right: 0; bottom: 0; border-top: 0; border-left: 0; border-bottom-right-radius: 0.6rem; }
+        #scannerModal .scan-frame i { position: absolute; right: 6%; left: 6%; top: 8%; height: 2px; border-radius: 2px; background: linear-gradient(90deg, transparent, #60a5fa, transparent); box-shadow: 0 0 12px 2px rgba(96, 165, 250, 0.7); animation: scan-line 2.2s ease-in-out infinite; }
+        @keyframes scan-line { 0%, 100% { top: 8%; } 50% { top: 90%; } }
+        @media (prefers-reduced-motion: reduce) { #scannerModal .scan-frame i { animation: none; top: 50%; } }
+        #scannerModal .scan-live-hint { position: absolute; right: 0; bottom: 0.6rem; left: 0; z-index: 2; display: none; margin: 0; color: #fff; font-size: 0.8125rem; font-weight: 600; text-align: center; text-shadow: 0 1px 3px rgba(0, 0, 0, 0.7); }
+        #scannerModal .scan-view[data-state="live"] .scan-live-hint { display: block; }
+
+        /* Buttons */
+        #scannerModal .scan-btn { display: inline-flex; align-items: center; justify-content: center; gap: 0.45rem; min-height: 2.5rem; padding: 0 1rem; border: 1px solid transparent; border-radius: 0.6rem; font-size: 0.9rem; font-weight: 600; line-height: 1; cursor: pointer; transition: background-color 0.15s, border-color 0.15s, box-shadow 0.15s, color 0.15s; }
+        #scannerModal .scan-btn-primary { border-color: #1d65db; background: #1d65db linear-gradient(to bottom, rgba(255, 255, 255, 0.14), rgba(255, 255, 255, 0)); color: #fff; box-shadow: 0 6px 14px -6px rgba(37, 99, 235, 0.7); }
+        #scannerModal .scan-btn-primary:hover { border-color: #1a51b0; background-color: #1a51b0; }
+        #scannerModal .scan-btn-quiet { width: 100%; margin-top: 0.65rem; border-color: #e2e8f0; background: #fff; color: #475569; }
+        #scannerModal .scan-btn-quiet:hover { background: #f8fafc; color: #0f172a; }
+        #scannerModal .scan-btn:focus-visible { outline: 0; box-shadow: 0 0 0 4px rgba(47, 124, 246, 0.3); }
+        #scannerModal .scan-btn:disabled { opacity: 0.55; cursor: not-allowed; }
+
+        /* File drop area */
+        #scannerModal .scan-drop { display: flex; flex-direction: column; align-items: center; gap: 0.35rem; min-height: 17rem; justify-content: center; padding: 1.5rem 1.25rem; border: 2px dashed #cbd5e1; border-radius: 0.9rem; background: #f8fafc; text-align: center; transition: border-color 0.15s, background-color 0.15s; }
+        #scannerModal .scan-drop.is-over { border-color: #2f7cf6; background: #eef4ff; }
+        #scannerModal .scan-drop-icon { display: inline-flex; align-items: center; justify-content: center; width: 3.5rem; height: 3.5rem; margin-bottom: 0.3rem; border-radius: 999px; background: #e0eaff; color: #1d65db; font-size: 1.5rem; }
+        #scannerModal .scan-drop-title { margin: 0; color: #0f172a; font-size: 0.975rem; font-weight: 600; }
+        #scannerModal .scan-drop-or { margin: 0; color: #94a3b8; font-size: 0.8125rem; }
+        #scannerModal .scan-drop-types { margin: 0.35rem 0 0; color: #64748b; font-size: 0.75rem; font-weight: 600; letter-spacing: 0.04em; }
+        #scannerModal .scan-file-status { margin: 0.5rem 0 0; color: #1d4fd8; font-size: 0.875rem; font-weight: 600; }
+
+        #scannerModal .scan-note { display: flex; align-items: flex-start; gap: 0.5rem; margin: 0.85rem 0 0; padding: 0.6rem 0.75rem; border-radius: 0.6rem; background: #fffbeb; color: #92400e; font-size: 0.8125rem; line-height: 1.5; }
+        #scannerModal .scan-note > i { margin-top: 0.2rem; }
+
+        @media (max-width: 575.98px) {
+            #scannerModal .scan-view, #scannerModal .scan-drop { min-height: 14rem; }
+        }
+    </style>
 @endpush
 
 @php
@@ -141,7 +214,13 @@
     $showDate = fn ($date) => $date
         ? $digits($date->copy()->locale($isEn ? 'en' : 'bn')->translatedFormat($isEn ? 'd M Y' : 'j F Y'))
         : '—';
-    $isApprover = in_array(Auth::user()->role_id, [2, 3]);
+    // Super Admin (1) and Admin (2) have full access: on every pending requisition they get the
+    // tools of the role its current step belongs to (Store Admin, Admin or Store Keeper).
+    $hasFullAccess = in_array((int) Auth::user()->role_id, [1, 2], true);
+    $isApprover = $hasFullAccess || (int) Auth::user()->role_id === 3;
+    $canUseStoreAdminTools = $hasFullAccess || (int) Auth::user()->role_id === 3;
+    // The QR box is for the Store Keeper's account only
+    $canScan = (int) Auth::user()->role_id === 4;
     $card = 'tw-rounded-2xl tw-border tw-border-solid tw-border-slate-200/80 tw-bg-white tw-shadow-surface';
     $label = 'tw-mb-1.5 tw-block tw-text-[13px] tw-font-semibold tw-text-slate-600';
     $input = 'tw-block tw-min-h-11 tw-w-full tw-rounded-lg tw-border tw-border-solid tw-border-slate-300 tw-bg-white tw-px-3 tw-py-2 tw-text-sm tw-text-slate-900 tw-shadow-sm tw-transition placeholder:tw-text-slate-400 hover:tw-border-slate-400 focus:tw-border-brand-500 focus:tw-outline-none focus:tw-ring-4 focus:tw-ring-brand-500/15';
@@ -175,21 +254,25 @@
                             <h1 class="tw-m-0 tw-text-xl tw-font-bold tw-leading-snug tw-tracking-tight tw-text-slate-900 sm:tw-text-2xl">
                                 {{ __('requisition.pending_title') }}
                             </h1>
-                            {{-- Super Admin and Admin see the whole queue, not only what waits for them --}}
-                            <p class="tw-mb-0 tw-mt-1 tw-text-sm tw-text-slate-500">{{ in_array((int) Auth::user()->role_id, [1, 2], true) ? __('requisition.pending_manage.subtitle_all') : __('requisition.pending_manage.subtitle') }}</p>
+                            {{-- The Super Admin sees the whole queue; everyone else what waits for them --}}
+                            <p class="tw-mb-0 tw-mt-1 tw-text-sm tw-text-slate-500">{{ (int) Auth::user()->role_id === 1 ? __('requisition.pending_manage.subtitle_all') : __('requisition.pending_manage.subtitle') }}</p>
                         </div>
 
-                        {{-- SCANNER TOOLS (ONLY FOR STORE KEEPER - Role 4) --}}
-                        @if (Auth::user()->role_id == 4)
-                            <div class="tw-flex tw-w-full tw-items-stretch sm:tw-w-80">
+                        {{-- SCANNER TOOLS (Store Keeper - Role 4; Super Admin / Admin have full access) --}}
+                        @if ($canScan)
+                            {{-- One pill: QR mark, the field, and the camera button inside it --}}
+                            <div class="tw-group tw-flex tw-w-full tw-items-center tw-gap-2 tw-rounded-2xl tw-border tw-border-solid tw-border-slate-200 tw-bg-white tw-p-1.5 tw-shadow-sm tw-transition focus-within:tw-border-brand-500 focus-within:tw-ring-4 focus-within:tw-ring-brand-500/15 hover:tw-border-slate-300 sm:tw-w-96 sm:tw-flex-none">
                                 <label for="scan-qr-input" class="tw-sr-only">{{ __('requisition.pending_manage.scan_placeholder') }}</label>
+                                <span class="tw-inline-flex tw-h-10 tw-w-10 tw-flex-none tw-items-center tw-justify-center tw-rounded-xl tw-bg-brand-50 tw-text-brand-600 tw-transition group-focus-within:tw-bg-brand-600 group-focus-within:tw-text-white" aria-hidden="true">
+                                    <i class="fas fa-qrcode"></i>
+                                </span>
                                 <input type="text" id="scan-qr-input" autocomplete="off"
-                                    class="{{ $input }} tw-rounded-r-none"
+                                    class="tw-m-0 tw-h-10 tw-min-w-0 tw-flex-1 tw-border-0 tw-bg-transparent tw-p-0 tw-text-sm tw-font-medium tw-text-slate-900 tw-shadow-none tw-outline-none placeholder:tw-font-normal placeholder:tw-text-slate-400 focus:tw-outline-none focus:tw-ring-0"
                                     placeholder="{{ __('requisition.pending_manage.scan_placeholder') }}">
                                 <button type="button" id="btn-open-camera"
-                                    class="tw--ml-px tw-inline-flex tw-min-h-11 tw-flex-none tw-items-center tw-justify-center tw-rounded-r-lg tw-border tw-border-solid tw-border-amber-400 tw-bg-amber-400 tw-px-3.5 tw-text-slate-900 tw-transition hover:tw-bg-amber-500 focus:tw-outline-none focus-visible:tw-ring-4 focus-visible:tw-ring-amber-400/40"
+                                    class="tw-inline-flex tw-h-10 tw-w-11 tw-flex-none tw-items-center tw-justify-center tw-rounded-xl tw-border-0 tw-bg-gradient-to-br tw-from-sky-500 tw-to-indigo-600 tw-text-white tw-shadow-md tw-shadow-indigo-600/30 tw-transition hover:tw-brightness-110 active:tw-scale-95 focus:tw-outline-none focus-visible:tw-ring-4 focus-visible:tw-ring-brand-500/40"
                                     title="{{ __('requisition.pending_manage.scan_camera') }}" aria-label="{{ __('requisition.pending_manage.scan_camera') }}">
-                                    <i class="fas fa-camera" aria-hidden="true"></i>
+                                    <i class="fas fa-camera tw-text-xl" aria-hidden="true"></i>
                                 </button>
                             </div>
                         @endif
@@ -251,8 +334,10 @@
                                             $itemsText = __('requisition.manage.items_summary', ['count' => $digits($req->items->count())]);
                                             $productNames = $req->items->pluck('product.name')->filter();
                                             $productsShort = $productNames->take(3)->join(', ') . ($productNames->count() > 3 ? ' …' : '');
-                                            // Super Admin / Admin also see requisitions that wait for someone else: those are view-only.
-                                            $canAct = $isApprover && (int) $task->to_user_id === (int) Auth::id();
+                                            // Super Admin / Admin can decide on every requisition, whoever it waits for.
+                                            $canAct = $hasFullAccess || ($isApprover && (int) $task->to_user_id === (int) Auth::id());
+                                            // Role of the step the requisition is waiting at.
+                                            $stepRole = (int) ($task->toUser->role_id ?? 0);
                                             $actionLabel = $canAct ? __('requisition.pending_manage.view_action') : __('requisition.manage.view');
                                         @endphp
                                         <tr data-id="{{ $req->id }}"
@@ -288,14 +373,14 @@
                                             </td>
                                             <td class="tw-whitespace-nowrap tw-px-3 tw-py-1 tw-text-right sm:tw-px-5">
                                                 {{-- Opens the details / decision dialog below --}}
-                                                <button type="button" class="view-action-btn tw-inline-flex tw-min-h-8 tw-items-center tw-justify-center tw-gap-2 tw-rounded-lg tw-border tw-border-solid tw-border-brand-200 tw-bg-brand-50 tw-px-3 tw-text-sm tw-font-semibold tw-text-brand-700 tw-transition hover:tw-bg-brand-100 focus:tw-outline-none focus-visible:tw-ring-4 focus-visible:tw-ring-brand-500/25"
+                                                <button type="button" class="view-action-btn tw-inline-flex tw-h-9 tw-w-9 tw-items-center tw-justify-center tw-rounded-lg tw-border tw-border-solid tw-border-brand-200 tw-bg-brand-50 tw-text-sm tw-text-brand-700 tw-transition hover:tw-bg-brand-100 focus:tw-outline-none focus-visible:tw-ring-4 focus-visible:tw-ring-brand-500/25"
                                                     data-id="{{ $req->id }}"
                                                     data-can-act="{{ $canAct ? 1 : 0 }}"
+                                                    data-step-role="{{ $stepRole }}"
                                                     data-url="{{ route('requisitions.get_details', $req->id) }}"
-                                                    title="{{ $actionLabel }}"
+                                                    data-tip="{{ $actionLabel }}"
                                                     aria-label="{{ $actionLabel }} #{{ $req->id }}">
                                                     <i class="fas fa-eye" aria-hidden="true"></i>
-                                                    <span class="tw-hidden xl:tw-inline">{{ $actionLabel }}</span>
                                                 </button>
                                             </td>
                                         </tr>
@@ -330,175 +415,93 @@
         </div>
     </div>
 
-    {{-- ACTION MODAL: details, lot assignment and the decision.
-         Bootstrap opens and closes it (the page script relies on that); the inside is built with the
-         same Tailwind blocks as the requisition view dialog, so both dialogs look and read alike. --}}
-    <div class="modal fade tw-root" id="actionModal" tabindex="-1" role="dialog" aria-labelledby="actionModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable" role="document">
-            <div class="modal-content tw-font-sans tw-text-slate-800">
-                {{-- Header: title, status, today's date, close --}}
-                <div class="tw-flex tw-flex-none tw-flex-wrap tw-items-start tw-justify-between tw-gap-x-4 tw-gap-y-1 tw-border-0 tw-border-b tw-border-solid tw-border-slate-200 tw-px-5 tw-py-3 sm:tw-flex-nowrap sm:tw-px-6">
-                    <div class="tw-flex tw-min-w-0 tw-flex-1 tw-flex-wrap tw-items-center tw-gap-x-3 tw-gap-y-1">
-                        <h2 id="actionModalLabel" class="tw-m-0 tw-text-lg tw-font-bold tw-text-slate-900">
-                            {{ __('requisition.pending_manage.modal.title_short') }} <span id="modal-req-no"></span>
-                        </h2>
-                        <span class="tw-inline-flex tw-items-center tw-gap-1.5 tw-whitespace-nowrap tw-rounded-full tw-bg-amber-50 tw-px-2.5 tw-py-1 tw-text-xs tw-font-semibold tw-text-amber-800 tw-ring-1 tw-ring-inset tw-ring-amber-300">
-                            <span class="tw-h-1.5 tw-w-1.5 tw-rounded-full tw-bg-amber-500" aria-hidden="true"></span>{{ __('requisition.manage.status.pending') }}
-                        </span>
-                    </div>
-                    <p class="tw-order-last tw-m-0 tw-flex tw-w-full tw-items-center tw-gap-2 tw-text-sm tw-font-medium tw-text-slate-600 sm:tw-order-none sm:tw-ml-auto sm:tw-w-auto sm:tw-self-center sm:tw-whitespace-nowrap"
-                        title="{{ __('requisition.manage.today') }}">
-                        <i class="fas fa-calendar-day tw-text-brand-600" aria-hidden="true"></i>
-                        <span class="tw-sr-only">{{ __('requisition.manage.today') }}:</span>
-                        <time datetime="{{ now()->format('Y-m-d') }}">{{ $todayLabel }}</time>
-                    </p>
-                    <button type="button" data-dismiss="modal" aria-label="{{ __('commontable.close') }}"
-                        class="tw--mr-2 tw--mt-1 tw-inline-flex tw-h-11 tw-w-11 tw-flex-none tw-items-center tw-justify-center tw-rounded-lg tw-border tw-border-solid tw-border-transparent tw-bg-slate-100 tw-text-slate-600 tw-transition hover:tw-bg-slate-200 hover:tw-text-slate-900 focus:tw-outline-none focus-visible:tw-ring-4 focus-visible:tw-ring-brand-500/25 md:tw-h-9 md:tw-w-9">
-                        <i class="fas fa-times" aria-hidden="true"></i>
-                    </button>
-                </div>
+    {{-- Details / decision dialog (shared with the requisition list) --}}
+    @include('requisition._decision_modal')
 
-                {{-- Body --}}
-                <div class="tw-min-h-0 tw-flex-1 tw-space-y-4 tw-overflow-y-auto tw-overscroll-contain tw-px-5 tw-py-4 sm:tw-px-6">
-                    <dl class="tw-m-0 tw-grid tw-grid-cols-1 tw-gap-3 sm:tw-grid-cols-3">
-                        <div class="tw-rounded-xl tw-bg-slate-50 tw-px-4 tw-py-2.5">
-                            <dt class="tw-text-xs tw-font-medium tw-leading-tight tw-text-slate-500">{{ __('requisition.manage.requested_on') }}</dt>
-                            <dd id="modal-date" class="tw-m-0 tw-font-semibold tw-leading-snug tw-text-slate-900"></dd>
-                        </div>
-                        <div class="tw-rounded-xl tw-bg-slate-50 tw-px-4 tw-py-2.5">
-                            <dt class="tw-text-xs tw-font-medium tw-leading-tight tw-text-slate-500">{{ __('requisition.manage.requested_by') }}</dt>
-                            <dd id="modal-requestor" class="tw-m-0 tw-font-semibold tw-leading-snug tw-text-slate-900 tw-wrap-anywhere"></dd>
-                        </div>
-                        <div class="tw-rounded-xl tw-bg-slate-50 tw-px-4 tw-py-2.5">
-                            <dt class="tw-text-xs tw-font-medium tw-leading-tight tw-text-slate-500">{{ __('requisition.manage.items') }}</dt>
-                            <dd id="modal-items-count" class="tw-m-0 tw-font-semibold tw-leading-snug tw-text-slate-900"></dd>
-                        </div>
-                    </dl>
-
-                    {{-- Items & assignment --}}
-                    <div>
-                        <div class="tw-mb-2 tw-flex tw-flex-wrap tw-items-center tw-justify-between tw-gap-2">
-                            <h3 class="tw-m-0 tw-text-sm tw-font-semibold tw-leading-snug tw-text-slate-700">{{ __('requisition.manage.item_list') }}</h3>
-
-                            {{-- BUTTONS: ONLY FOR STORE ADMIN (3) --}}
-                            @if (Auth::user()->role_id == 3)
-                                <div class="tw-flex tw-flex-wrap tw-gap-2">
-                                    {{-- Appears when rows are ticked: removes those items from the requisition --}}
-                                    <button type="button" id="btn-delete-items" class="{{ $btnSmall }} tw-border-rose-300 tw-bg-white tw-text-rose-700 hover:tw-bg-rose-50" style="display: none;">
-                                        <i class="fas fa-trash-alt" aria-hidden="true"></i> <span id="btn-delete-items-text"></span>
-                                    </button>
-                                    <button type="button" id="btn-split-notify" class="{{ $btnSmall }}" style="display: none;">
-                                        <i class="fas fa-random" aria-hidden="true"></i> {{ __('requisition.pending_manage.modal.split') }}
-                                    </button>
-                                    <button type="button" id="btn-update-qty" class="{{ $btnSmall }}">
-                                        <i class="fas fa-save" aria-hidden="true"></i> {{ __('requisition.pending_manage.modal.save_assignments') }}
-                                    </button>
-                                </div>
-                            @endif
-                        </div>
-
-                        <form id="items-form" class="tw-m-0">
-                            <div class="tw-overflow-x-auto tw-rounded-xl tw-border tw-border-solid tw-border-slate-200">
-                                <table class="tw-m-0 tw-w-full tw-border-collapse tw-text-left tw-text-base">
-                                    <thead>
-                                        <tr class="tw-bg-slate-50 tw-text-base tw-font-semibold tw-text-slate-600">
-                                            <th scope="col" class="tw-w-12 tw-px-2 tw-py-2 tw-text-center sm:tw-w-20 sm:tw-whitespace-nowrap">{{ __('lot.table_sl') }}</th>
-                                            {{-- Checkbox: Only for Store Admin (3) --}}
-                                            @if (Auth::user()->role_id == 3)
-                                                <th scope="col" class="tw-w-10 tw-px-2 tw-py-2 tw-text-center">
-                                                    <input type="checkbox" id="select-all-items" class="tw-h-4 tw-w-4 tw-cursor-pointer"
-                                                        title="{{ __('requisition.pending_manage.modal.select_all') }}" aria-label="{{ __('requisition.pending_manage.modal.select_all') }}">
-                                                </th>
-                                            @endif
-                                            <th scope="col" class="tw-px-4 tw-py-2">{{ __('requisition.manage.product') }}</th>
-                                            <th scope="col" class="tw-px-3 tw-py-2 tw-text-right sm:tw-whitespace-nowrap">{{ __('requisition.requested_quantity') }}</th>
-                                            <th scope="col" class="tw-px-4 tw-py-2 tw-text-right sm:tw-whitespace-nowrap">{{ __('requisition.approved_quantity') }}</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody id="modal-items-body"></tbody>
-                                </table>
-                            </div>
-
-                            {{-- More than ten items: the rest are on further pages (the rows stay in the form) --}}
-                            <nav id="modal-items-pager" class="tw-mt-2 tw-hidden tw-flex-wrap tw-items-center tw-justify-between tw-gap-2" aria-label="{{ __('commontable.pagination') }}">
-                                <p id="modal-items-info" class="tw-m-0 tw-text-xs tw-font-medium tw-text-slate-600" aria-live="polite"></p>
-                                <div id="modal-items-pages" class="tw-flex tw-flex-wrap tw-gap-1"></div>
-                            </nav>
-                        </form>
-                    </div>
-
-                    {{-- Comment that goes with the decision --}}
-                    <div>
-                        <label for="action-comments" class="{{ $label }}">{{ __('requisition.approval_comments') }}</label>
-                        <textarea id="action-comments" rows="2" class="{{ $input }} tw-resize-y disabled:tw-cursor-not-allowed disabled:tw-bg-slate-100"
-                            placeholder="{{ __('requisition.enter_comments') }}"></textarea>
-                    </div>
-
-                    {{-- Approval history --}}
-                    <div>
-                        <h3 class="tw-mb-2.5 tw-mt-0 tw-text-sm tw-font-semibold tw-leading-snug tw-text-slate-700">{{ __('requisition.approval_history') }}</h3>
-                        <ol id="modal-timeline" class="tw-relative tw-m-0 tw-list-none tw-space-y-3 tw-border-0 tw-border-l-2 tw-border-solid tw-border-slate-200 tw-py-0 tw-pl-5 tw-pr-0"></ol>
-                    </div>
-                </div>
-
-                {{-- Footer --}}
-                <div class="tw-flex tw-flex-none tw-flex-col-reverse tw-gap-2 tw-border-0 tw-border-t tw-border-solid tw-border-slate-200 tw-bg-slate-50/80 tw-px-5 tw-py-2.5 sm:tw-flex-row sm:tw-justify-end sm:tw-px-6">
-                    {{-- Print: Visible for Admin (2) & Store Admin (3) --}}
-                    @if (in_array(Auth::user()->role_id, [2, 3]))
-                        <a href="#" id="btn-print" target="_blank" rel="noopener" class="{{ $btnSecondary }} sm:tw-mr-auto" style="display: none;">
-                            <i class="fas fa-print" aria-hidden="true"></i> {{ __('requisition.print_invoice') }}
-                        </a>
-                    @endif
-
-                    <button type="button" data-dismiss="modal" class="{{ $btnSecondary }}">{{ __('commontable.close') }}</button>
-
-                    {{-- Actions: Visible for Admin (2) & Store Admin (3) --}}
-                    @if (in_array(Auth::user()->role_id, [2, 3]))
-                        <button type="button" id="btn-reject" class="{{ $btnDanger }}">
-                            <i class="fas fa-times" aria-hidden="true"></i> {{ __('buttons.reject') }}
-                        </button>
-                        <button type="button" id="btn-approve" class="{{ $btnSuccess }}">
-                            <i class="fas fa-check" aria-hidden="true"></i> {{ __('buttons.approve') }}
-                        </button>
-                    @endif
-                </div>
-            </div>
-        </div>
-    </div>
-
-    {{-- SCANNER MODAL (Only for Store Keeper) --}}
-    @if (Auth::user()->role_id == 4)
+    {{-- SCANNER MODAL (Store Keeper; Super Admin / Admin have full access) --}}
+    @if ($canScan)
+        @php $scanT = __('requisition.pending_manage.modal'); @endphp
         <div class="modal fade" id="scannerModal" tabindex="-1" role="dialog" aria-labelledby="scannerModalLabel" aria-hidden="true">
-            <div class="modal-dialog modal-md modal-dialog-centered" role="document">
+            <div class="modal-dialog modal-dialog-centered scan-dialog" role="document">
                 <div class="modal-content">
-                    <div class="modal-header">
+                    <div class="modal-header scan-header">
+                        <span class="scan-header-icon" aria-hidden="true"><i class="fas fa-qrcode"></i></span>
                         <div class="modal-heading">
-                            <h5 class="modal-title" id="scannerModalLabel"><i class="fas fa-camera" aria-hidden="true"></i> {{ __('requisition.scan_qr') }}</h5>
-                            <p class="modal-hint">{{ __('requisition.pending_manage.modal.scan_hint') }}</p>
+                            <h5 class="modal-title" id="scannerModalLabel">{{ $scanT['scan_title'] }}</h5>
+                            <p class="modal-hint">{{ $scanT['scan_subtitle'] }}</p>
                         </div>
-                        <button type="button" class="close" data-dismiss="modal" aria-label="{{ __('commontable.close') }}"
-                            onclick="stopScanner()">
+                        <x-ui.modal-today variant="bs" />
+                        <button type="button" class="close" data-dismiss="modal" aria-label="{{ __('commontable.close') }}">
                             <span aria-hidden="true">&times;</span>
                         </button>
                     </div>
-                    <div class="modal-body p-0">
-                        <div id="reader" style="width: 100%;"></div>
+
+                    <div class="modal-body scan-body">
+                        {{-- Camera or file --}}
+                        <div class="scan-tabs" role="tablist" aria-label="{{ $scanT['scan_title'] }}">
+                            <button type="button" class="scan-tab is-active" id="scan-tab-camera" role="tab" aria-selected="true" aria-controls="scan-panel-camera" data-panel="camera">
+                                <i class="fas fa-camera" aria-hidden="true"></i> {{ $scanT['scan_tab_camera'] }}
+                            </button>
+                            <button type="button" class="scan-tab" id="scan-tab-file" role="tab" aria-selected="false" aria-controls="scan-panel-file" data-panel="file" tabindex="-1">
+                                <i class="fas fa-file-upload" aria-hidden="true"></i> {{ $scanT['scan_tab_file'] }}
+                            </button>
+                        </div>
+
+                        {{-- Camera (phone or PC) --}}
+                        <div class="scan-panel" id="scan-panel-camera" role="tabpanel" aria-labelledby="scan-tab-camera">
+                            <div class="scan-view" id="scan-view" data-state="idle">
+                                {{-- The video is put in here by the QR library --}}
+                                <div id="reader"></div>
+                                <div class="scan-frame" aria-hidden="true"><span></span><span></span><span></span><span></span><i></i></div>
+                                <div class="scan-idle">
+                                    <span class="scan-idle-icon" aria-hidden="true"><i class="fas fa-camera"></i></span>
+                                    <p class="scan-idle-text" id="scan-camera-message" role="status" aria-live="polite">{{ $scanT['scan_camera_idle'] }}</p>
+                                    <button type="button" class="scan-btn scan-btn-primary" id="scan-camera-start">
+                                        <i class="fas fa-play" aria-hidden="true"></i> {{ $scanT['scan_camera_start'] }}
+                                    </button>
+                                </div>
+                                <p class="scan-live-hint">{{ $scanT['scan_camera_hint'] }}</p>
+                            </div>
+                            <button type="button" class="scan-btn scan-btn-quiet" id="scan-camera-stop" hidden>
+                                <i class="fas fa-stop" aria-hidden="true"></i> {{ $scanT['scan_camera_stop'] }}
+                            </button>
+                        </div>
+
+                        {{-- A file of the slip: a PDF or an image. A QR code found in it is handled
+                             exactly like one seen by the camera. --}}
+                        <div class="scan-panel" id="scan-panel-file" role="tabpanel" aria-labelledby="scan-tab-file" hidden>
+                            <input type="file" id="scan-file-input" class="d-none" accept="application/pdf,image/png,image/jpeg,image/webp,image/gif,image/bmp">
+                            <div class="scan-drop" id="scan-drop">
+                                <span class="scan-drop-icon" aria-hidden="true"><i class="fas fa-cloud-upload-alt"></i></span>
+                                <p class="scan-drop-title">{{ $scanT['scan_drop_title'] }}</p>
+                                <p class="scan-drop-or">{{ $scanT['scan_drop_or'] }}</p>
+                                <button type="button" class="scan-btn scan-btn-primary" id="scan-file-btn">
+                                    <i class="fas fa-folder-open" aria-hidden="true"></i> {{ $scanT['scan_drop_browse'] }}
+                                </button>
+                                <p class="scan-drop-types">{{ $scanT['scan_drop_types'] }}</p>
+                                <p class="scan-file-status" id="scan-file-status" role="status" aria-live="polite" hidden>
+                                    <i class="fas fa-circle-notch fa-spin" aria-hidden="true"></i> {{ $scanT['scan_reading_file'] }}
+                                </p>
+                            </div>
+                        </div>
+
+                        <p class="scan-note"><i class="fas fa-info-circle" aria-hidden="true"></i> {{ $scanT['scan_note'] }}</p>
+
+                        {{-- Work area the QR library needs for decoding a file (never shown) --}}
+                        <div id="scan-file-work" class="d-none"></div>
                     </div>
+
                     <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" onclick="stopScanner()"
-                            data-dismiss="modal">{{ __('buttons.cancel') }}</button>
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">{{ __('buttons.cancel') }}</button>
                     </div>
                 </div>
             </div>
         </div>
     @endif
 
-    {{-- Hidden Forms --}}
-    <form id="approve-form" method="POST" style="display:none;">@csrf</form>
-    <form id="reject-form" method="POST" style="display:none;">@csrf</form>
 @endsection
 
-@if (Auth::user()->role_id == 4)
+@if (in_array((int) Auth::user()->role_id, [1, 2, 4], true))
     @push('head_scripts')
         <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
     @endpush
@@ -558,7 +561,26 @@
             }
         }
 
+        // A scan (camera, uploaded file or a number typed in the box) never takes stock out by
+        // itself: the user is asked first.
         function processRequisitionViaScan(id) {
+            Swal.fire({
+                title: @json(__('requisition.pending_manage.modal.scan_confirm_title')).replace(':id', id),
+                text: @json(__('requisition.pending_manage.modal.scan_confirm_text')),
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonColor: '#28a745',
+                confirmButtonText: @json(__('requisition.pending_manage.modal.scan_confirm_yes')),
+                cancelButtonText: @json(__('buttons.cancel')),
+                focusCancel: true
+            }).then(function(result) {
+                if (result.isConfirmed) {
+                    takeStockOutForScan(id);
+                }
+            });
+        }
+
+        function takeStockOutForScan(id) {
             Swal.fire({
                 title: @json(__('requisition.pending_manage.modal.scan_processing')).replace(':id', id),
                 text: @json(__('requisition.pending_manage.modal.scan_processing_text')),
@@ -596,32 +618,160 @@
 
         function onScanFailure(error) {}
 
-        function startScanner() {
-            $('#scannerModal').modal('show');
-            if (html5QrcodeScanner === null) {
-                if (typeof Html5QrcodeScanner !== 'undefined') {
-                    html5QrcodeScanner = new Html5QrcodeScanner("reader", {
-                        fps: 10,
-                        qrbox: {
-                            width: 250,
-                            height: 250
-                        }
-                    }, false);
-                    html5QrcodeScanner.render(onScanSuccess, onScanFailure);
-                } else {
-                    console.error("Scanner library not loaded.");
+        // ---- QR code from an uploaded file (PDF or image) ----
+        @php
+            $scanFileTexts = \Illuminate\Support\Arr::only(__('requisition.pending_manage.modal'), ['scan_file_no_qr', 'scan_file_type', 'scan_file_failed']);
+        @endphp
+        var scanText = @json($scanFileTexts);
+        @php
+            $scanCameraTexts = \Illuminate\Support\Arr::only(__('requisition.pending_manage.modal'), ['scan_camera_idle', 'scan_camera_starting', 'scan_camera_denied']);
+        @endphp
+
+        // pdf.js is only needed for PDF files, so it is fetched the first time one is chosen.
+        var pdfJsLoading = null;
+        function loadPdfJs() {
+            if (window.pdfjsLib) { return Promise.resolve(window.pdfjsLib); }
+            if (!pdfJsLoading) {
+                pdfJsLoading = new Promise(function(resolve, reject) {
+                    var script = document.createElement('script');
+                    script.src = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js';
+                    script.onload = function() {
+                        window.pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+                        resolve(window.pdfjsLib);
+                    };
+                    script.onerror = function() { pdfJsLoading = null; reject(new Error('pdf.js could not be loaded')); };
+                    document.head.appendChild(script);
+                });
+            }
+            return pdfJsLoading;
+        }
+
+        // Reads the QR code of one image file; rejects when there is none.
+        function decodeQrImage(file) {
+            var reader = new Html5Qrcode('scan-file-work');
+            return reader.scanFile(file, false).finally(function() {
+                try { reader.clear(); } catch (error) { /* nothing to clear */ }
+            });
+        }
+
+        // A PDF: each page (the first five at most) is drawn as an image and searched for a QR code.
+        async function decodeQrPdf(file) {
+            var pdfjs = await loadPdfJs();
+            var pdf = await pdfjs.getDocument({ data: await file.arrayBuffer() }).promise;
+            for (var number = 1; number <= Math.min(pdf.numPages, 5); number++) {
+                var page = await pdf.getPage(number);
+                var viewport = page.getViewport({ scale: 2.5 });
+                var canvas = document.createElement('canvas');
+                canvas.width = Math.ceil(viewport.width);
+                canvas.height = Math.ceil(viewport.height);
+                var context = canvas.getContext('2d');
+                context.fillStyle = '#fff';
+                context.fillRect(0, 0, canvas.width, canvas.height);
+                await page.render({ canvasContext: context, viewport: viewport }).promise;
+                var blob = await new Promise(function(resolve) { canvas.toBlob(resolve, 'image/png'); });
+                try {
+                    return await decodeQrImage(new File([blob], 'page-' + number + '.png', { type: 'image/png' }));
+                } catch (error) {
+                    // no QR code on this page: try the next one
                 }
+            }
+            throw new Error('no-qr');
+        }
+
+        async function scanUploadedFile(file) {
+            if (!file) { return; }
+            var isPdf = file.type === 'application/pdf' || /\.pdf$/i.test(file.name);
+            var isImage = /^image\//.test(file.type);
+            if (!isPdf && !isImage) {
+                toastr.warning(scanText.scan_file_type);
+                return;
+            }
+            if (typeof Html5Qrcode === 'undefined') {
+                toastr.error(scanText.scan_file_failed);
+                return;
+            }
+
+            $('#scan-file-status').prop('hidden', false);
+            $('#scan-file-btn').prop('disabled', true);
+            try {
+                var text = isPdf ? await decodeQrPdf(file) : await decodeQrImage(file);
+                // The same path as a camera scan: the requisition is verified and its stock is taken out.
+                onScanSuccess(text, null);
+            } catch (error) {
+                var noQr = isImage || (error && error.message === 'no-qr');
+                toastr.warning(noQr ? scanText.scan_file_no_qr : scanText.scan_file_failed);
+            } finally {
+                $('#scan-file-status').prop('hidden', true);
+                $('#scan-file-btn').prop('disabled', false);
+                $('#scan-file-input').val('');
             }
         }
 
-        function stopScanner() {
-            if (html5QrcodeScanner) {
-                html5QrcodeScanner.clear().then(_ => {
-                    html5QrcodeScanner = null;
-                }).catch(error => {
-                    console.error("Failed to clear.");
-                });
+        var scanCameraText = @json($scanCameraTexts);
+
+        // Camera state of the dialog: idle | starting | live | error
+        function setScanState(state, message) {
+            $('#scan-view').attr('data-state', state);
+            $('#scan-camera-stop').prop('hidden', state !== 'live');
+            if (message) { $('#scan-camera-message').text(message); }
+        }
+
+        function startScanner() {
+            $('#scannerModal').modal('show');
+        }
+
+        // Turns the camera on (the back camera on a phone) and reads QR codes from it.
+        function startCamera() {
+            if (html5QrcodeScanner) { return; }
+            if (typeof Html5Qrcode === 'undefined') {
+                setScanState('error', scanCameraText.scan_camera_denied);
+                console.error("Scanner library not loaded.");
+                return;
             }
+            setScanState('starting', scanCameraText.scan_camera_starting);
+            var camera = new Html5Qrcode('reader');
+            html5QrcodeScanner = camera;
+            camera.start({ facingMode: 'environment' }, {
+                fps: 10,
+                qrbox: function(width, height) {
+                    var size = Math.floor(Math.min(width, height) * 0.7);
+                    return { width: size, height: size };
+                }
+            }, onScanSuccess, onScanFailure).then(function() {
+                // The dialog may have been closed while the camera was starting
+                if (html5QrcodeScanner !== camera) {
+                    camera.stop().then(function() { camera.clear(); }).catch(function() {});
+                    return;
+                }
+                setScanState('live');
+            }).catch(function() {
+                if (html5QrcodeScanner === camera) { html5QrcodeScanner = null; }
+                setScanState('error', scanCameraText.scan_camera_denied);
+            });
+        }
+
+        function stopScanner() {
+            var camera = html5QrcodeScanner;
+            html5QrcodeScanner = null;
+            setScanState('idle', scanCameraText.scan_camera_idle);
+            if (!camera) { return; }
+            var done = function() { try { camera.clear(); } catch (error) { /* nothing to clear */ } };
+            try {
+                camera.stop().then(done).catch(done);
+            } catch (error) {
+                done(); // the camera had not started yet
+            }
+        }
+
+        // Camera | File
+        function showScanPanel(name) {
+            $('#scannerModal .scan-tab').each(function() {
+                var active = $(this).data('panel') === name;
+                $(this).toggleClass('is-active', active).attr('aria-selected', active ? 'true' : 'false').attr('tabindex', active ? 0 : -1);
+            });
+            $('#scan-panel-camera').prop('hidden', name !== 'camera');
+            $('#scan-panel-file').prop('hidden', name !== 'file');
+            if (name !== 'camera') { stopScanner(); }
         }
 
         $(document).ready(function() {
@@ -709,6 +859,18 @@
                     state.page = 1;
                     render();
                 });
+                // Arriving from a notification (?highlight=169): that requisition's row gets a
+                // background colour and the list opens on the page it is on.
+                var highlight = (window.location.search.match(/[?&]highlight=(\d+)/) || [])[1];
+                if (highlight) {
+                    rows.forEach(function(row, index) {
+                        if (String(row.getAttribute('data-id')) === highlight) {
+                            row.classList.add('tw-bg-amber-100');
+                            row.classList.remove('hover:tw-bg-slate-50/70');
+                            state.page = Math.floor(index / state.perPage) + 1;
+                        }
+                    });
+                }
                 render();
 
                 return {
@@ -721,56 +883,45 @@
                     }
                 };
             })();
-            let currentRequisitionId = null;
-            let totalItemsInModal = 0;
-
-            // Colour states of the two Store Admin buttons in the dialog.
-            const saveCalm = 'tw-border-amber-300 tw-bg-amber-50 tw-text-amber-800 hover:tw-bg-amber-100';
-            const saveDirty = 'tw-border-rose-300 tw-bg-rose-50 tw-text-rose-700 hover:tw-bg-rose-100';
-            const splitRed = 'tw-border-rose-600 tw-bg-rose-600 tw-text-white hover:tw-bg-rose-700';
-            const splitBlue = 'tw-border-sky-600 tw-bg-sky-600 tw-text-white hover:tw-bg-sky-700';
-            $('#btn-split-notify').addClass(splitRed);
-
-            // Texts of the details dialog, in the page language.
+            // Texts and the scanner flag for this page (the details / decision dialog has its own
+            // script: resources/views/requisition/_decision_modal.blade.php).
             const T = @json(__('requisition.pending_manage.modal'));
-            const useBanglaDigits = @json(app()->getLocale() !== 'en');
-            const dateLocale = useBanglaDigits ? 'bn-BD' : 'en-GB';
+            const canScan = {{ $canScan ? 'true' : 'false' }};
 
-            function localDigits(value) {
-                const text = String(value);
-                return useBanglaDigits ? text.replace(/[0-9]/g, d => '০১২৩৪৫৬৭৮৯'[d]) : text;
-            }
-
-            // Text that goes into HTML built here is escaped first.
-            function esc(value) {
-                return $('<div>').text(value == null ? '' : String(value)).html();
-            }
-
-            // ISO date from the server, written in the page language; falls back to the server's own text.
-            function showDate(iso, fallback, withTime) {
-                const date = iso ? new Date(iso.length === 10 ? iso + 'T00:00:00' : iso) : null;
-                if (!date || isNaN(date)) return fallback || '';
-                const options = withTime ?
-                    { day: 'numeric', month: 'long', year: 'numeric', hour: 'numeric', minute: '2-digit' } :
-                    { day: 'numeric', month: 'long', year: 'numeric' };
-                return new Intl.DateTimeFormat(dateLocale, options).format(date);
-            }
-
-            // Flag to track if user touched inputs
-            let hasUnsavedChanges = false;
-
-            // Roles
-            const isStoreAdmin = {{ Auth::user()->role_id == 3 ? 'true' : 'false' }};
-            const isStoreKeeper = {{ Auth::user()->role_id == 4 ? 'true' : 'false' }};
-            const isApprover = {{ in_array(Auth::user()->role_id, [2, 3]) ? 'true' : 'false' }};
-
-            // --- BIND SCANNER EVENTS (Only for Store Keeper) ---
-            if (isStoreKeeper) {
+            // --- BIND SCANNER EVENTS (Store Keeper; Super Admin / Admin) ---
+            if (canScan) {
                 $('#btn-open-camera').click(function() {
                     startScanner();
                 });
+                // Closing the dialog always turns the camera off; it opens on the camera tab again
                 $('#scannerModal').on('hidden.bs.modal', function() {
                     stopScanner();
+                    showScanPanel('camera');
+                });
+                $('#scan-camera-start').on('click', startCamera);
+                $('#scan-camera-stop').on('click', stopScanner);
+                $('#scannerModal .scan-tab').on('click', function() {
+                    showScanPanel($(this).data('panel'));
+                });
+
+                // A file may also be dropped on the upload area
+                $('#scan-drop').on('dragenter dragover', function(e) {
+                    e.preventDefault();
+                    $(this).addClass('is-over');
+                }).on('dragleave drop', function(e) {
+                    e.preventDefault();
+                    $(this).removeClass('is-over');
+                }).on('drop', function(e) {
+                    var files = e.originalEvent.dataTransfer && e.originalEvent.dataTransfer.files;
+                    scanUploadedFile(files && files[0]);
+                });
+
+                // Upload a PDF / image of the slip instead of using the camera
+                $('#scan-file-btn').on('click', function() {
+                    $('#scan-file-input').trigger('click');
+                });
+                $('#scan-file-input').on('change', function() {
+                    scanUploadedFile(this.files && this.files[0]);
                 });
 
                 $('#scan-qr-input').on('keyup', function(e) {
@@ -792,481 +943,6 @@
                 });
             }
 
-            // ---- Items of the dialog: ten per page ----
-            // Every row stays in the table (only hidden), so saving, splitting and deleting
-            // still see the quantities and ticks of all pages.
-            const ITEMS_PER_PAGE = 10;
-            let itemsPage = 1;
-            const itemsInfoText = @json(__('commontable.dt_info'));
-            const pageBtnBase = 'tw-inline-flex tw-h-8 tw-min-w-[2rem] tw-items-center tw-justify-center tw-rounded-md tw-border tw-border-solid tw-px-2 tw-text-xs tw-font-semibold tw-tabular-nums tw-transition focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-brand-500/40 disabled:tw-cursor-not-allowed disabled:tw-opacity-40';
-            const pageBtnIdle = pageBtnBase + ' tw-border-slate-200 tw-bg-white tw-text-slate-600 hover:tw-bg-slate-50';
-            const pageBtnActive = pageBtnBase + ' tw-border-brand-600 tw-bg-brand-600 tw-text-white';
-
-            function renderItemsPage() {
-                const rows = $('#modal-items-body tr.modal-item-row');
-                const total = rows.length;
-                const last = Math.max(1, Math.ceil(total / ITEMS_PER_PAGE));
-                itemsPage = Math.min(Math.max(1, itemsPage), last);
-                const start = (itemsPage - 1) * ITEMS_PER_PAGE;
-
-                rows.each(function(index) {
-                    $(this).toggle(index >= start && index < start + ITEMS_PER_PAGE);
-                });
-
-                const pager = $('#modal-items-pager');
-                pager.toggleClass('tw-hidden', last <= 1).toggleClass('tw-flex', last > 1);
-                if (last <= 1) return;
-
-                $('#modal-items-info').text(itemsInfoText
-                    .replace('_TOTAL_', localDigits(total))
-                    .replace('_START_', localDigits(start + 1))
-                    .replace('_END_', localDigits(Math.min(start + ITEMS_PER_PAGE, total))));
-
-                const pages = $('#modal-items-pages').empty();
-                const add = (html, page, options) => {
-                    const button = $('<button type="button">').html(html).addClass(options.active ? pageBtnActive : pageBtnIdle)
-                        .attr('data-page', page).prop('disabled', !!options.disabled);
-                    if (options.label) button.attr('aria-label', options.label).attr('title', options.label);
-                    if (options.active) button.attr('aria-current', 'page');
-                    pages.append(button);
-                };
-                add('<i class="fas fa-chevron-left tw-text-xs" aria-hidden="true"></i>', itemsPage - 1, { disabled: itemsPage === 1, label: @json(__('commontable.dt_previous')) });
-                for (let page = 1; page <= last; page++) {
-                    add(localDigits(page), page, { active: page === itemsPage });
-                }
-                add('<i class="fas fa-chevron-right tw-text-xs" aria-hidden="true"></i>', itemsPage + 1, { disabled: itemsPage === last, label: @json(__('commontable.dt_next')) });
-            }
-
-            $('#modal-items-pages').on('click', 'button', function() {
-                itemsPage = parseInt($(this).attr('data-page'), 10) || 1;
-                renderItemsPage();
-            });
-
-            // --- VIEW MODAL ---
-            $('#pending-req-table tbody').on('click', '.view-action-btn', function() {
-                let url = $(this).data('url');
-                currentRequisitionId = $(this).data('id');
-
-                $('#modal-req-no').text('#' + localDigits(currentRequisitionId));
-                $('#actionModal').modal('show');
-                $('#btn-split-notify, #btn-delete-items').hide();
-                $('#select-all-items').prop('checked', false).prop('indeterminate', false);
-
-                hasUnsavedChanges = false;
-                updateSaveButtonUI();
-
-                // A requisition that waits for another approver is view-only: no decision buttons.
-                const canAct = String($(this).data('can-act')) === '1';
-                $('#btn-approve, #btn-reject').toggle(canAct);
-
-                // Read-Only for Store Keeper (Role 4) and for view-only requisitions
-                if (isStoreKeeper || !canAct) {
-                    $('#action-comments').prop('disabled', true).val('');
-                } else {
-                    $('#action-comments').prop('disabled', false).val('');
-                }
-
-                $('#modal-timeline').html('<li class="tw-text-sm tw-text-slate-500">' + esc(T.loading) + '</li>');
-                $('#modal-items-body').html(
-                    '<tr><td colspan="5" class="tw-px-4 tw-py-6 tw-text-center tw-text-sm tw-text-slate-500">' + esc(T.loading_items) + '</td></tr>');
-                $('#modal-requestor, #modal-date, #modal-items-count').text('…');
-                $('#modal-items-pager').addClass('tw-hidden').removeClass('tw-flex');
-
-                $.ajax({
-                    url: url,
-                    type: 'GET',
-                    success: function(res) {
-                        $('#modal-requestor').text(res.requestor);
-                        $('#modal-date').text(showDate(res.date_iso, res.formatted_date, false));
-                        totalItemsInModal = res.requisition.items.length;
-                        if (!isStoreKeeper) {
-                            let printUrl = "{{ route('requisitions.print', ':id') }}".replace(
-                                ':id', currentRequisitionId);
-                            $('#btn-print').attr('href', printUrl);
-                            if (res.is_print_enabled === true) {
-                                $('#btn-print').fadeIn(); // Show button
-                            } else {
-                                $('#btn-print').hide(); // Ensure it stays hidden
-                            }
-                        }
-                        $('#modal-items-count').text(T.items_count.replace(':count', localDigits(totalItemsInModal)));
-
-                        // ---- Item rows (same row style as the requisition view dialog) ----
-                        const cell = 'tw-px-3 tw-py-1.5';
-                        const fieldBase = 'tw-min-h-9 tw-rounded-lg tw-border tw-border-solid tw-border-slate-300 tw-bg-white tw-text-sm tw-text-slate-900 tw-shadow-sm tw-transition hover:tw-border-slate-400 focus:tw-border-brand-500 focus:tw-outline-none focus:tw-ring-4 focus:tw-ring-brand-500/15';
-                        let itemsHtml = '';
-                        res.requisition.items.forEach((item, itemIndex) => {
-                            // Product Unit
-                            let unit = item.product.product_unit || '';
-                            // Lots are assigned automatically on approval; the Store Admin only needs
-                            // to know when a product is out of stock (those items can be split off).
-                            const available = item.available_quantity != null ? Number(item.available_quantity) : null;
-                            const isUnavailable = isStoreAdmin && available !== null && available <= 0;
-                            const isShort = isStoreAdmin && ! isUnavailable && available !== null && available < Number(item.quantity);
-                            let stockNote = '';
-                            if (isUnavailable) {
-                                stockNote = `<span class="stock-unavailable tw-inline-flex tw-items-center tw-gap-1 tw-text-sm tw-font-semibold tw-text-rose-700"><span class="tw-h-1.5 tw-w-1.5 tw-rounded-full tw-bg-rose-500" aria-hidden="true"></span>${esc(T.stock_unavailable)}</span>`;
-                            } else if (isShort) {
-                                stockNote = `<span class="tw-inline-flex tw-items-center tw-gap-1 tw-text-sm tw-font-semibold tw-text-amber-700"><span class="tw-h-1.5 tw-w-1.5 tw-rounded-full tw-bg-amber-500" aria-hidden="true"></span>${esc(T.stock_short.replace(':qty', localDigits(available)))}</span>`;
-                            }
-
-                            let subCatName = '';
-                            if (item.product.sub_category) subCatName = item.product.sub_category.name;
-                            else if (item.product.subCategory) subCatName = item.product.subCategory.name;
-                            let categoryDisplay = esc(item.product.category ? item.product.category.name : '');
-                            if (subCatName) categoryDisplay += ' · ' + esc(subCatName);
-
-                            // Checkbox Logic (Role 3 Only)
-                            let checkboxHtml = '';
-                            if (isStoreAdmin) {
-                                // Every row can be ticked (to delete it); only out-of-stock rows can be split off.
-                                checkboxHtml =
-                                    `<td class="tw-px-2 tw-py-1.5 tw-text-center"><input type="checkbox" class="split-item-checkbox tw-h-4 tw-w-4 tw-cursor-pointer" value="${item.id}" data-unavailable="${isUnavailable ? 1 : 0}" aria-label="${esc(T.select_item)}: ${esc(item.product.name)}"></td>`;
-                            }
-
-                            // Approved quantity: a field for the Store Admin, plain text for everyone else.
-                            // The unit follows the number in both cases.
-                            const unitHtml = unit ? `<span class="tw-text-sm tw-text-slate-500">${esc(unit)}</span>` : '';
-                            let approvedHtml = isStoreAdmin ?
-                                `<span class="tw-inline-flex tw-items-center tw-justify-end tw-gap-2"><input type="number" class="item-qty-input tw-block tw-w-20 tw-px-2 tw-py-1 tw-text-center tw-font-semibold tw-tabular-nums ${fieldBase}" data-id="${item.id}" value="${item.quantity}" min="1" aria-label="${esc(T.approved_quantity)}: ${esc(item.product.name)}">${unitHtml}</span>` :
-                                `<span class="tw-font-semibold tw-tabular-nums tw-text-slate-900">${localDigits(item.quantity)}</span> ${unitHtml}`;
-
-                            itemsHtml += `
-                            <tr class="modal-item-row tw-border-0 tw-border-t tw-border-solid tw-border-slate-100">
-                                <td class="tw-px-2 tw-py-1.5 tw-text-center tw-tabular-nums tw-text-slate-600">${localDigits(itemIndex + 1)}</td>
-                                ${checkboxHtml}
-                                <td class="tw-px-4 tw-py-1.5">
-                                    <span class="tw-block tw-break-words tw-font-medium tw-leading-tight tw-text-slate-900">${esc(item.product.name)}</span>
-                                    <span class="tw-block tw-text-sm tw-leading-tight tw-text-slate-500">${categoryDisplay}</span>
-                                    ${stockNote}
-                                </td>
-                                <td class="tw-whitespace-nowrap ${cell} tw-text-right tw-tabular-nums">
-                                    <span class="tw-font-semibold tw-text-slate-900">${localDigits(item.original_quantity || item.quantity)}</span>
-                                    ${unitHtml}
-                                </td>
-                                <td class="tw-whitespace-nowrap tw-px-4 tw-py-1.5 tw-text-right">${approvedHtml}</td>
-                            </tr>`;
-                        });
-                        $('#modal-items-body').html(itemsHtml);
-                        itemsPage = 1;
-                        renderItemsPage();
-
-                        if (isStoreAdmin) evaluateApproveButtonFromUI();
-
-                        // ---- Timeline (same look as the requisition view dialog) ----
-                        const dotColor = {
-                            initiated: 'tw-bg-brand-500',
-                            approved: 'tw-bg-emerald-500',
-                            processed: 'tw-bg-emerald-500',
-                            rejected: 'tw-bg-rose-500',
-                            pending: 'tw-bg-amber-400'
-                        };
-                        let timelineHtml = '';
-                        res.timeline.forEach(item => {
-                            // The server sends English labels; show them in the page language.
-                            const raw = item.status_raw || '';
-                            const stepTitle = T.status[raw] || item.title;
-                            const who = raw === 'pending' && item.pending_users ?
-                                T.waiting_for.replace(':name', item.pending_users) :
-                                T.by.replace(':name', item.user);
-                            const stepRole = raw === 'initiated' ? T.requestor_role : item.role;
-                            const stepDate = showDate(item.date_iso, item.date, true);
-                            const commentHtml = item.comments ?
-                                `<p class="tw-mb-0 tw-mt-1.5 tw-rounded-lg tw-bg-slate-50 tw-px-3 tw-py-2 tw-text-sm tw-text-slate-700">${esc(item.comments)}</p>` :
-                                '';
-                            timelineHtml += `
-                            <li class="tw-relative">
-                                <span class="tw-absolute tw--left-[27px] tw-top-1 tw-flex tw-h-3 tw-w-3 tw-rounded-full tw-ring-4 tw-ring-white ${dotColor[raw] || 'tw-bg-brand-500'}" aria-hidden="true"></span>
-                                <p class="tw-m-0 tw-text-sm tw-font-semibold tw-leading-snug tw-text-slate-900">${esc(stepTitle)}</p>
-                                <p class="tw-m-0 tw-text-xs tw-leading-snug tw-text-slate-500">${esc(who)} (${esc(stepRole)}) · ${esc(stepDate)}</p>
-                                ${commentHtml}
-                            </li>`;
-                        });
-                        $('#modal-timeline').html(timelineHtml);
-                    },
-                    error: function() {
-                        toastr.error(T.load_failed);
-                    }
-                });
-            });
-
-            // --- STORE ADMIN SPECIFIC ACTIONS (Role 3) ---
-            if (isStoreAdmin) {
-                // Ticked rows: "delete" is offered for any selection, "split / notify" only when
-                // every ticked item is out of stock (that is what splitting is for).
-                function refreshSelectionButtons() {
-                    const boxes = $('.split-item-checkbox');
-                    const checked = boxes.filter(':checked');
-                    const checkedCount = checked.length;
-                    const allUnavailable = checkedCount > 0 &&
-                        checked.filter((_, el) => String($(el).data('unavailable')) === '1').length === checkedCount;
-
-                    $('#select-all-items')
-                        .prop('checked', boxes.length > 0 && checkedCount === boxes.length)
-                        .prop('indeterminate', checkedCount > 0 && checkedCount < boxes.length);
-
-                    const deleteBtn = $('#btn-delete-items');
-                    if (checkedCount > 0) {
-                        $('#btn-delete-items-text').text(T.delete_selected.replace(':count', localDigits(checkedCount)));
-                        deleteBtn.show();
-                    } else {
-                        deleteBtn.hide();
-                    }
-
-                    const btn = $('#btn-split-notify');
-                    if (allUnavailable) {
-                        btn.show();
-                        if (checkedCount === totalItemsInModal) {
-                            btn.removeClass(splitRed).addClass(splitBlue).html(
-                                '<i class="fas fa-bell" aria-hidden="true"></i> ' + esc(T.notify_only));
-                        } else {
-                            btn.removeClass(splitBlue).addClass(splitRed).html(
-                                '<i class="fas fa-random" aria-hidden="true"></i> ' + esc(T.split));
-                        }
-                    } else {
-                        btn.hide();
-                    }
-                }
-
-                $(document).on('change', '.split-item-checkbox', refreshSelectionButtons);
-                $('#select-all-items').on('change', function() {
-                    $('.split-item-checkbox').prop('checked', this.checked);
-                    refreshSelectionButtons();
-                });
-
-                // Delete the ticked items
-                $('#btn-delete-items').on('click', function() {
-                    const ids = $('.split-item-checkbox:checked').map((_, el) => $(el).val()).get();
-                    if (ids.length === 0) return;
-                    if (ids.length >= totalItemsInModal) {
-                        toastr.warning(T.delete_all_blocked);
-                        return;
-                    }
-                    const url = "{{ route('requisitions.remove_items', ':id') }}".replace(':id', currentRequisitionId);
-
-                    Swal.fire({
-                        title: T.delete_title.replace(':count', localDigits(ids.length)),
-                        text: T.delete_text,
-                        icon: 'warning',
-                        showCancelButton: true,
-                        confirmButtonColor: '#d33',
-                        confirmButtonText: T.delete_yes,
-                        cancelButtonText: T.cancel
-                    }).then((res) => {
-                        if (!res.isConfirmed) return;
-                        $.ajax({
-                            url: url,
-                            type: 'POST',
-                            data: {
-                                _token: "{{ csrf_token() }}",
-                                item_ids: ids
-                            },
-                            success: function(response) {
-                                toastr.success(response.message);
-                                $('#actionModal').modal('hide');
-                                setTimeout(() => {
-                                    location.reload();
-                                }, 1000);
-                            },
-                            error: function(xhr) {
-                                toastr.error(xhr.responseJSON && xhr.responseJSON.message ? xhr.responseJSON.message : T.action_failed);
-                            }
-                        });
-                    });
-                });
-
-                // Split Action
-                $('#btn-split-notify').click(function() {
-                    let selectedItemIds = [];
-                    $('.split-item-checkbox:checked').each(function() {
-                        selectedItemIds.push($(this).val());
-                    });
-                    if (selectedItemIds.length === 0) return;
-
-                    let isFull = (selectedItemIds.length === totalItemsInModal);
-                    let title = isFull ? T.notify_title : T.split_title;
-                    let text = isFull ? T.notify_text : T.split_text;
-                    let btnText = isFull ? T.notify_yes : T.split_yes;
-                    let url = "{{ route('requisitions.split', ':id') }}".replace(':id',
-                        currentRequisitionId);
-
-                    Swal.fire({
-                            title: title,
-                            text: text,
-                            icon: 'warning',
-                            showCancelButton: true,
-                            confirmButtonColor: '#d33',
-                            confirmButtonText: btnText,
-                            cancelButtonText: T.cancel
-                        })
-                        .then((res) => {
-                            if (res.isConfirmed) {
-                                $.ajax({
-                                    url: url,
-                                    type: 'POST',
-                                    data: {
-                                        _token: "{{ csrf_token() }}",
-                                        item_ids: selectedItemIds
-                                    },
-                                    success: function(response) {
-                                        toastr.success(response.message);
-                                        $('#actionModal').modal('hide');
-                                        setTimeout(() => {
-                                            location.reload();
-                                        }, 1000);
-                                    },
-                                    error: function(xhr) {
-                                        toastr.error(xhr.responseJSON && xhr.responseJSON.message ? xhr.responseJSON.message : T.action_failed);
-                                    }
-                                });
-                            }
-                        });
-                });
-
-                // DETECT CHANGES TO INPUTS
-                $(document).on('change input', '.item-lot-select, .item-qty-input', function() {
-                    hasUnsavedChanges = true;
-                    evaluateApproveButtonFromUI();
-                    updateSaveButtonUI();
-                });
-
-                // Update Qty
-                $('#btn-update-qty').click(function() {
-                    let itemsData = {};
-                    $('.item-qty-input').each(function() {
-                        let id = $(this).data('id');
-                        let lotSelect = $(`.item-lot-select[data-id="${id}"]`);
-                        itemsData[id] = {
-                            quantity: $(this).val(),
-                            lot_detail_id: lotSelect.length ? lotSelect.val() : null
-                        };
-                    });
-                    let url = "{{ route('requisitions.update_items', ':id') }}".replace(':id',
-                        currentRequisitionId);
-                    let btn = $(this);
-                    btn.text(T.saving).prop('disabled', true);
-
-                    $.ajax({
-                        url: url,
-                        type: 'POST',
-                        data: {
-                            _token: "{{ csrf_token() }}",
-                            items: itemsData
-                        },
-                        success: function(res) {
-                            toastr.success(T.assignments_saved);
-                            // RESET DIRTY FLAG ON SUCCESS
-                            hasUnsavedChanges = false;
-                            updateSaveButtonUI();
-                            evaluateApproveButtonFromUI();
-                        },
-                        error: function() {
-                            toastr.error(T.assignments_failed);
-                        },
-                        complete: function() {
-                            btn.prop('disabled', false);
-                            updateSaveButtonUI();
-                        }
-                    });
-                });
-
-                $(document).on('change', '.item-lot-select', function() {
-                    evaluateApproveButtonFromUI();
-                });
-            }
-
-            // --- APPROVER ACTIONS (Role 2 & 3) ---
-            if (isApprover) {
-                // Approve
-                $('#btn-approve').click(function() {
-                    let url = "{{ route('requisitions.approve', ':id') }}".replace(':id',
-                        currentRequisitionId);
-                    let comments = $('#action-comments').val();
-
-                    // Store Admin Validation (Must Assign)
-                    if (isStoreAdmin) {
-                        if ($('.stock-unavailable').length > 0) {
-                            toastr.warning(T.unavailable_block);
-                            return;
-                        }
-                    }
-
-                    Swal.fire({
-                        title: T.approve_title,
-                        text: T.approve_text,
-                        icon: 'question',
-                        showCancelButton: true,
-                        confirmButtonColor: '#28a745',
-                        confirmButtonText: T.approve_yes,
-                        cancelButtonText: T.cancel
-                    }).then((res) => {
-                        if (res.isConfirmed) {
-                            let form = $('#approve-form');
-                            form.attr('action', url);
-                            // .val() keeps quotes in the comment from breaking the field
-                            form.html(`@csrf`).append($('<input type="hidden" name="comments">').val(comments));
-                            $('#wait').show();
-                            form.submit();
-                        }
-                    });
-                });
-
-                // Reject
-                $('#btn-reject').click(function() {
-                    let url = "{{ route('requisitions.reject', ':id') }}".replace(':id',
-                        currentRequisitionId);
-                    let comments = $('#action-comments').val();
-                    if (!comments || !comments.trim()) {
-                        toastr.error(T.reject_reason_required);
-                        $('#action-comments').trigger('focus');
-                        return;
-                    }
-                    Swal.fire({
-                        title: T.reject_title,
-                        text: T.reject_text,
-                        icon: 'warning',
-                        showCancelButton: true,
-                        confirmButtonColor: '#d33',
-                        confirmButtonText: T.reject_yes,
-                        cancelButtonText: T.cancel
-                    }).then((res) => {
-                        if (res.isConfirmed) {
-                            let form = $('#reject-form');
-                            form.attr('action', url);
-                            form.html(`@csrf`).append($('<input type="hidden" name="comments">').val(comments));
-                            $('#wait').show();
-                            form.submit();
-                        }
-                    });
-                });
-            }
-            // Helper to update Save Button Appearance
-            function updateSaveButtonUI() {
-                if (!isStoreAdmin) return;
-                const btn = $('#btn-update-qty');
-                if (hasUnsavedChanges) {
-                    btn.removeClass(saveCalm).addClass(saveDirty);
-                    btn.html('<i class="fas fa-save" aria-hidden="true"></i> ' + esc(T.save_assignments) + ' *');
-                } else {
-                    btn.removeClass(saveDirty).addClass(saveCalm);
-                    btn.html('<i class="fas fa-save" aria-hidden="true"></i> ' + esc(T.save_assignments));
-                }
-            }
-
-            function evaluateApproveButtonFromUI() {
-                if (!isStoreAdmin) return;
-                let canApprove = true;
-                if ($('.stock-unavailable').length > 0) canApprove = false;
-                $('.item-lot-select').each(function() {
-                    if (!$(this).val()) canApprove = false;
-                });
-                const btn = $('#btn-approve');
-                if (canApprove) {
-                    btn.prop('disabled', false).attr('title', T.ready_to_approve);
-                } else {
-                    btn.prop('disabled', true).attr('title', T.resolve_first);
-                }
-            }
         });
     </script>
 @endpush

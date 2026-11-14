@@ -1,0 +1,568 @@
+/*
+ * Top bar: the signed-in user's section / department in the middle (gradient text, the size of a
+ * page title) with today's date in a coloured pill to its right.
+ */
+.main-header .app-topbar-context {
+    display: flex;
+    flex: 1 1 auto;
+    align-items: center;
+    justify-content: center;
+    gap: 0.9rem;
+    min-width: 0;
+    padding: 0 0.75rem;
+}
+
+.main-header .app-topbar-dept {
+    min-width: 0;
+    overflow: hidden;
+    font-size: 1.5rem;
+    font-weight: 700;
+    line-height: 1.5;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    color: #1d4fd8; /* shown where gradient text is not supported */
+    background: linear-gradient(90deg, #1d65db 0%, #4f46e5 50%, #c2410c 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.main-header .app-topbar-date {
+    display: inline-flex;
+    flex: 0 0 auto;
+    align-items: center;
+    gap: 0.45rem;
+    padding: 0.35rem 0.8rem;
+    border-radius: 999px;
+    background: linear-gradient(90deg, #1d65db, #4f46e5);
+    color: #fff;
+    font-size: 0.875rem;
+    font-weight: 600;
+    line-height: 1.2;
+    white-space: nowrap;
+    box-shadow: 0 4px 10px -4px rgba(37, 99, 235, 0.55);
+}
+
+.main-header .app-topbar-date time {
+    color: inherit;
+}
+
+/* Small laptops and tablets: a smaller name so it and the date still fit */
+@media (max-width: 1199.98px) {
+    .main-header .app-topbar-dept {
+        font-size: 1.2rem;
+    }
+
+    .main-header .app-topbar-context {
+        gap: 0.6rem;
+        padding: 0 0.5rem;
+    }
+}
+
+/* Phones: only the name (shortened with "…" when it does not fit); the date is left out */
+@media (max-width: 767.98px) {
+    .main-header .app-topbar-dept {
+        font-size: 1rem;
+    }
+
+    .main-header .app-topbar-date {
+        display: none;
+    }
+}
+
+/* ---------- Right side of the top bar ---------- */
+.main-header .navbar-nav.ml-auto {
+    align-items: center;
+    gap: 0.5rem;
+}
+
+/* Notification bell: a round tile with a larger icon and a red count */
+.main-header .app-bell {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.5rem;
+    height: 2.5rem;
+    padding: 0;
+    border-radius: 999px;
+    background: #f1f5f9;
+    color: #475569 !important;
+    transition: background-color 0.15s, color 0.15s, box-shadow 0.15s;
+}
+
+.main-header .app-bell > i {
+    font-size: 1.2rem;
+    line-height: 1;
+}
+
+.main-header .app-bell:hover,
+.main-header .app-bell:focus-visible,
+.main-header .show > .app-bell {
+    background: #e0eaff;
+    color: #1d65db !important;
+    outline: 0;
+    box-shadow: 0 0 0 4px rgba(47, 124, 246, 0.14);
+}
+
+/* Unread: tinted tile, and the bell rings once when the page opens */
+.main-header .app-bell.has-unread {
+    background: #eef4ff;
+    color: #1d65db !important;
+}
+
+.main-header .app-bell.has-unread > i {
+    transform-origin: 50% 0;
+    animation: app-bell-ring 1.1s ease-in-out 0.4s 1;
+}
+
+@keyframes app-bell-ring {
+    0%, 100% { transform: rotate(0); }
+    15% { transform: rotate(14deg); }
+    30% { transform: rotate(-12deg); }
+    45% { transform: rotate(9deg); }
+    60% { transform: rotate(-6deg); }
+    75% { transform: rotate(3deg); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .main-header .app-bell.has-unread > i {
+        animation: none;
+    }
+}
+
+.main-header .app-bell .app-bell-count {
+    position: absolute;
+    top: -0.2rem;
+    right: -0.3rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 1.25rem;
+    height: 1.25rem;
+    padding: 0 0.3rem;
+    border: 2px solid #fff;
+    border-radius: 999px;
+    background: linear-gradient(180deg, #f43f5e, #e11d48);
+    color: #fff;
+    font-size: 0.7rem;
+    font-weight: 700;
+    line-height: 1;
+    box-shadow: 0 2px 6px -1px rgba(225, 29, 72, 0.55);
+}
+
+/* Language switch: two labels, a sliding highlight under the active one */
+.main-header .app-lang {
+    display: inline-flex;
+    margin: 0;
+    cursor: pointer;
+    user-select: none;
+}
+
+.main-header .app-lang input {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    opacity: 0;
+}
+
+.main-header .app-lang-track {
+    position: relative;
+    display: inline-grid;
+    grid-template-columns: 1fr 1fr;
+    align-items: center;
+    width: 5.5rem;
+    height: 2.25rem;
+    padding: 3px;
+    border: 1px solid #e2e8f0;
+    border-radius: 999px;
+    background: #f1f5f9;
+    transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.main-header .app-lang:hover .app-lang-track {
+    border-color: #cbd5e1;
+}
+
+.main-header .app-lang input:focus-visible + .app-lang-track {
+    border-color: #2f7cf6;
+    box-shadow: 0 0 0 4px rgba(47, 124, 246, 0.18);
+}
+
+.main-header .app-lang-thumb {
+    position: absolute;
+    top: 3px;
+    bottom: 3px;
+    left: 3px;
+    width: calc(50% - 3px);
+    border-radius: 999px;
+    background: linear-gradient(90deg, #1d65db, #4f46e5);
+    box-shadow: 0 2px 6px -1px rgba(37, 99, 235, 0.55);
+    transition: transform 0.22s ease;
+}
+
+.main-header .app-lang input:checked + .app-lang-track .app-lang-thumb {
+    transform: translateX(100%);
+}
+
+.main-header .app-lang-opt {
+    position: relative;
+    z-index: 1;
+    color: #64748b;
+    font-size: 0.8125rem;
+    font-weight: 700;
+    line-height: 1;
+    text-align: center;
+    transition: color 0.2s;
+}
+
+.main-header .app-lang input:not(:checked) + .app-lang-track .app-lang-bn,
+.main-header .app-lang input:checked + .app-lang-track .app-lang-en {
+    color: #fff;
+}
+
+@media (max-width: 575.98px) {
+    .main-header .navbar-nav.ml-auto {
+        gap: 0.3rem;
+    }
+
+    .main-header .app-lang-track {
+        width: 4.75rem;
+    }
+}
+
+/* ---------- Notification panel ---------- */
+.main-header .app-notify {
+    width: 24rem;
+    max-width: calc(100vw - 1rem);
+    margin-top: 0.6rem;
+    padding: 0;
+    overflow: hidden;
+    border: 1px solid #e2e8f0;
+    border-radius: 0.9rem;
+    box-shadow: 0 20px 45px -18px rgba(15, 23, 42, 0.4);
+}
+
+.main-header .app-notify-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    padding: 0.8rem 1rem;
+    border-bottom: 1px solid #eef2f7;
+}
+
+.main-header .app-notify-title {
+    color: #0f172a;
+    font-size: 1rem;
+    font-weight: 700;
+}
+
+.main-header .app-notify-count {
+    padding: 0.2rem 0.6rem;
+    border-radius: 999px;
+    background: #eef4ff;
+    color: #1d4fd8;
+    font-size: 0.75rem;
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+.main-header .app-notify-list {
+    max-height: min(22rem, 60vh);
+    overflow-y: auto;
+    overscroll-behavior: contain;
+}
+
+.main-header .app-notify-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+    padding: 0.75rem 1rem;
+    border-bottom: 1px solid #f1f5f9;
+    color: inherit;
+    text-decoration: none;
+    transition: background-color 0.15s;
+}
+
+.main-header .app-notify-item:last-child {
+    border-bottom: 0;
+}
+
+.main-header .app-notify-item:hover,
+.main-header .app-notify-item:focus-visible {
+    background: #f8fafc;
+    outline: 0;
+}
+
+.main-header .app-notify-icon {
+    display: inline-flex;
+    flex: 0 0 auto;
+    align-items: center;
+    justify-content: center;
+    width: 2.25rem;
+    height: 2.25rem;
+    border-radius: 0.7rem;
+    font-size: 0.95rem;
+}
+
+.main-header .app-notify-icon.is-success { background: #ecfdf5; color: #059669; }
+.main-header .app-notify-icon.is-info { background: #eef4ff; color: #1d65db; }
+.main-header .app-notify-icon.is-danger { background: #fff1f2; color: #e11d48; }
+.main-header .app-notify-icon.is-warning { background: #fffbeb; color: #d97706; }
+.main-header .app-notify-icon.is-neutral { background: #f1f5f9; color: #475569; }
+
+.main-header .app-notify-body {
+    display: flex;
+    flex: 1 1 auto;
+    flex-direction: column;
+    gap: 0.2rem;
+    min-width: 0;
+}
+
+/* The whole message is readable: it wraps instead of being cut off */
+.main-header .app-notify-text {
+    color: #1e293b;
+    font-size: 0.875rem;
+    font-weight: 500;
+    line-height: 1.4;
+    white-space: normal;
+    overflow-wrap: anywhere;
+}
+
+.main-header .app-notify-time {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.3rem;
+    color: #64748b;
+    font-size: 0.75rem;
+}
+
+.main-header .app-notify-date {
+    color: #94a3b8;
+}
+
+.main-header .app-notify-dot {
+    flex: 0 0 auto;
+    width: 0.5rem;
+    height: 0.5rem;
+    margin-top: 0.45rem;
+    border-radius: 999px;
+    background: #2f7cf6;
+    box-shadow: 0 0 0 3px rgba(47, 124, 246, 0.18);
+}
+
+.main-header .app-notify-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 1.75rem 1rem;
+    text-align: center;
+}
+
+.main-header .app-notify-empty-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 3rem;
+    height: 3rem;
+    border-radius: 999px;
+    background: #f1f5f9;
+    color: #94a3b8;
+    font-size: 1.2rem;
+}
+
+.main-header .app-notify-empty p {
+    margin: 0;
+    color: #64748b;
+    font-size: 0.875rem;
+    font-weight: 500;
+}
+
+.main-header .app-notify-foot {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.4rem;
+    padding: 0.7rem 1rem;
+    border-top: 1px solid #eef2f7;
+    background: #f8fafc;
+    color: #1d4fd8;
+    font-size: 0.875rem;
+    font-weight: 600;
+    text-decoration: none;
+    transition: background-color 0.15s;
+}
+
+.main-header .app-notify-foot:hover,
+.main-header .app-notify-foot:focus-visible {
+    background: #eef4ff;
+    color: #1a51b0;
+    outline: 0;
+}
+
+.main-header .app-notify-foot > i {
+    font-size: 0.75rem;
+}
+
+.main-header .app-notify-time > i {
+    font-size: 0.7rem;
+}
+
+/* Smaller screens: the panel is pinned to the right edge under the top bar, so it never
+   slides under the sidebar or off the screen, wherever the bell sits */
+@media (max-width: 1199.98px) {
+    .main-header .app-notify {
+        position: fixed !important;
+        top: 3.9rem !important;
+        right: 0.75rem !important;
+        left: auto !important;
+        margin-top: 0;
+        transform: none !important;
+    }
+}
+
+/* Phones: the panel spans the screen */
+@media (max-width: 575.98px) {
+    .main-header .app-notify {
+        position: fixed !important;
+        top: 3.6rem !important;
+        right: 0.5rem !important;
+        left: 0.5rem !important;
+        width: auto;
+        max-width: none;
+        margin-top: 0;
+        transform: none !important;
+    }
+
+    .main-header .app-notify-list {
+        max-height: 65vh;
+    }
+}
+
+/* ---- User menu (the panel under the name at the top right) ----
+   Styling only: the markup and its texts are unchanged. */
+.main-header .user-menu > .dropdown-menu {
+    width: 17.5rem;
+    margin-top: 0.6rem;
+    padding: 0;
+    overflow: hidden;
+    border: 1px solid #e2e8f0;
+    border-radius: 1rem;
+    background: #fff;
+    box-shadow: 0 24px 48px -20px rgba(15, 23, 42, 0.4), 0 2px 6px rgba(15, 23, 42, 0.06);
+}
+
+.main-header .user-menu > .dropdown-menu > li.user-header {
+    height: auto;
+    padding: 1.4rem 1rem 1.1rem;
+    background: linear-gradient(135deg, #13244f 0%, #1d65db 60%, #4f46e5 100%) !important;
+    text-align: center;
+}
+
+.main-header .user-menu > .dropdown-menu > li.user-header > img {
+    width: 4.75rem;
+    height: 4.75rem;
+    border: 3px solid rgba(255, 255, 255, 0.9);
+    background: #fff;
+    object-fit: cover;
+    box-shadow: 0 10px 22px -10px rgba(0, 0, 0, 0.6) !important;
+}
+
+.main-header .user-menu > .dropdown-menu > li.user-header > p {
+    margin: 0.7rem 0 0;
+    color: #fff;
+    font-size: 1.05rem;
+    font-weight: 700;
+    line-height: 1.3;
+    overflow-wrap: anywhere;
+}
+
+.main-header .user-menu > .dropdown-menu > li.user-header > p > small {
+    display: table; /* a pill on its own line, as wide as its text */
+    margin: 0.45rem auto 0;
+    padding: 0.2rem 0.7rem;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.16);
+    color: #e2e8f0;
+    font-size: 0.75rem;
+    font-weight: 500;
+}
+
+.main-header .user-menu > .dropdown-menu > .user-footer {
+    display: flex;
+    gap: 0.5rem;
+    padding: 0.75rem;
+    background: #fff;
+}
+
+.main-header .user-menu > .dropdown-menu > .user-footer::after {
+    display: none;
+}
+
+.main-header .user-menu > .dropdown-menu > .user-footer .btn-default {
+    display: inline-flex;
+    flex: 1 1 0;
+    align-items: center;
+    justify-content: center;
+    gap: 0.45rem;
+    float: none !important;
+    min-height: 2.5rem;
+    padding: 0 0.75rem;
+    border: 1px solid #e2e8f0;
+    border-radius: 0.6rem;
+    background: #f8fafc;
+    color: #334155;
+    font-size: 0.9rem;
+    font-weight: 600;
+    box-shadow: none;
+    transition: background-color 0.15s, border-color 0.15s, color 0.15s;
+}
+
+.main-header .user-menu > .dropdown-menu > .user-footer .btn-default::before {
+    font-family: "Font Awesome 5 Free";
+    font-size: 0.85rem;
+    font-weight: 900;
+    content: "\f007"; /* user */
+}
+
+.main-header .user-menu > .dropdown-menu > .user-footer .btn-default:hover,
+.main-header .user-menu > .dropdown-menu > .user-footer .btn-default:focus-visible {
+    border-color: #c7d9fb;
+    background: #eef4ff;
+    color: #1d4fd8;
+    outline: 0;
+}
+
+/* "Sign out": the second button */
+.main-header .user-menu > .dropdown-menu > .user-footer .btn-default.float-right {
+    border-color: #fecdd3;
+    background: #fff1f2;
+    color: #be123c;
+}
+
+.main-header .user-menu > .dropdown-menu > .user-footer .btn-default.float-right::before {
+    content: "\f2f5"; /* sign-out */
+}
+
+.main-header .user-menu > .dropdown-menu > .user-footer .btn-default.float-right:hover,
+.main-header .user-menu > .dropdown-menu > .user-footer .btn-default.float-right:focus-visible {
+    border-color: #e11d48;
+    background: #e11d48;
+    color: #fff;
+}
+
+/* Smaller screens: pinned under the top bar at the right edge, never off the screen */
+@media (max-width: 1199.98px) {
+    .main-header .user-menu > .dropdown-menu {
+        position: fixed !important;
+        top: 3.9rem !important;
+        right: 0.75rem !important;
+        left: auto !important;
+        max-width: calc(100vw - 1.5rem);
+        margin-top: 0;
+        transform: none !important;
+    }
+}

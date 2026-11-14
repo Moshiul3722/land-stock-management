@@ -33,6 +33,15 @@ class CnfPermissionRepository extends BaseRepository
         // Retrieve all menus, submodules, and modules
         $menus = CnfMenu::with('submodule.module')->get();
 
+        // Listed the way the sidebar is built: module by module, group by group ("Product
+        // Management" below "Product Unit"), the pages shown in the sidebar first and the
+        // pages reached from them (create, edit, print ...) after.
+        $groupOrder = fn ($submoduleId) => (int) $submoduleId === 4 ? 11.5 : (float) $submoduleId;
+        $menus = $menus->sort(function ($first, $second) use ($groupOrder) {
+            return [$first->submodule->module_id, $groupOrder($first->submodule_id), -(int) $first->is_menu, $first->sort_order ?? $first->id * 10, $first->id]
+                <=> [$second->submodule->module_id, $groupOrder($second->submodule_id), -(int) $second->is_menu, $second->sort_order ?? $second->id * 10, $second->id];
+        })->values();
+
         // Retrieve permissions for the specific role
         $rolePermissions = CnfPermission::where('role_id', $roleId)->pluck('menu_id')->toArray();
 
@@ -53,16 +62,19 @@ class CnfPermissionRepository extends BaseRepository
                 'menu_id' => $menu->id,
             ];
 
+            // The requisition module has no heading in the sidebar: its groups ("Requisition
+            // Management", "My Products") stand at the top level, so they do here as well.
+            if ((int) $module->id === 4) {
+                $menuItem['module'] = $menuItem['submodule'];
+                $menuItem['submodule'] = '—';
+            }
+
             // Check if the menu has permission for the role
             $hasPermission = in_array($menu->id, $rolePermissions) ? 1 : 0;
             $menuItem['has_permission'] = $hasPermission;
 
             // Group menu items by module, submodule
-            if ($locale == 'bn') {
-                $menuItems[$module->module_name_bn][$submodule->submodule_name_bn][] = $menuItem;
-            } else {
-                $menuItems[$module->module_name_en][$submodule->submodule_name_en][] = $menuItem;
-            }
+            $menuItems[$menuItem['module']][$menuItem['submodule']][] = $menuItem;
         }
         return $menuItems;
     }

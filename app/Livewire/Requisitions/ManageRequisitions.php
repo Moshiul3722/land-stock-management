@@ -109,6 +109,9 @@ class ManageRequisitions extends Component
 
     private const VIEW_ITEMS_PER_PAGE = 5;
 
+    /** Requisition whose row is highlighted (the user came from its notification). */
+    public ?int $highlightId = null;
+
     public function mount(): void
     {
         abort_unless($this->can('requisitions.index'), 403);
@@ -121,6 +124,26 @@ class ManageRequisitions extends Component
         // with ?create=1 and opens the create modal straight away.
         if (request()->boolean('create') && $this->can('requisitions.create')) {
             $this->openCreate();
+        }
+
+        // A link to one requisition (e.g. from a product's issue history: ?view=54) opens its
+        // details dialog straight away.
+        if (is_numeric(request()->query('view'))) {
+            $this->openView((int) request()->query('view'));
+        }
+
+        // Arriving from a notification (?highlight=169): that requisition's row is shown with a
+        // background colour, on whichever page of the list it sits.
+        if (ctype_digit((string) request()->query('highlight'))) {
+            $this->highlightId = (int) request()->query('highlight');
+            $target = $this->ownRequisitions()->find($this->highlightId, ['id', 'created_at']);
+            if ($target) {
+                $before = $this->ownRequisitions()
+                    ->where(fn (Builder $q) => $q->where('created_at', '>', $target->created_at)
+                        ->orWhere(fn (Builder $same) => $same->where('created_at', $target->created_at)->where('id', '>', $target->id)))
+                    ->count();
+                $this->setPage(intdiv($before, (int) $this->perPage) + 1);
+            }
         }
     }
 
@@ -420,7 +443,7 @@ class ManageRequisitions extends Component
 
     public function openView(int $id): void
     {
-        $requisition = $this->ownRequisitions()->find($id);
+        $requisition = $this->viewableRequisitions()->find($id);
         if (! $requisition) {
             $this->notify('error', __('requisition.manage.not_found'));
 
@@ -447,7 +470,7 @@ class ManageRequisitions extends Component
             return null;
         }
 
-        return $this->ownRequisitions()
+        return $this->viewableRequisitions()
             ->with([
                 'items.product.category',
                 'items.product.subCategory',
@@ -637,7 +660,7 @@ class ManageRequisitions extends Component
         return Product::query()
             ->where('category_id', $this->categoryId)
             ->orderBy('name')
-            ->get(['id', 'name', 'product_unit']);
+            ->get(['id', 'name', 'name_bn', 'product_unit']);
     }
 
     /** Product details and live stock for the rows in the form, keyed by product id. */
@@ -739,10 +762,14 @@ class ManageRequisitions extends Component
             'viewItemsPerPage' => self::VIEW_ITEMS_PER_PAGE,
             // Today's weekday and date, shown in the header of the view dialog.
             'todayLabel' => $this->localDigits(now()->locale(app()->getLocale() === 'bn' ? 'bn' : 'en')->translatedFormat(app()->getLocale() === 'bn' ? 'l, j F Y' : 'l, d M Y')),
-            // Everyone sees how many are in stock except the General User role, who only sees whether it is.
+            // Stock information in the form (in stock with the count / out of stock) is for every
+            // role except the General User, who sees none of it.
             'showStockCount' => (int) Auth::user()?->role_id !== self::GENERAL_USER_ROLE_ID,
             'hasFilters' => $this->hasFilters(),
             'canEdit' => fn (Requisition $r) => $this->canEdit($r),
+            // Requisitions of this page the signed-in user can decide on: id => role of the step
+            // they are waiting at. Their "view" button opens the decision dialog instead.
+            'decidable' => $this->decidableRequisitions(),
             'formatDate' => fn ($date, bool $withTime = false) => $this->formatDate($date, $withTime),
             'digits' => fn ($value) => $this->localDigits($value),
             'statusLabel' => fn (?string $status) => $this->statusLabel($status),
@@ -753,10 +780,57 @@ class ManageRequisitions extends Component
     // Internals
     // ------------------------------------------------------------------
 
-    /** Only the signed-in user's own requisitions are ever reachable (prevents IDOR). */
+    /**
+     * Pending requisitions of the current list page that the signed-in user may decide on:
+     * Super Admin / Admin on any of them, everyone else only where the pending step is assigned
+     * to them (the same rule RequisitionController::approve applies).
+     *
+     * @return array<int, int> requisition id => role id of the approval step it is waiting at
+     */
+    private function decidableRequisitions(): array
+    {
+        $user = Auth::user();
+        $fullAccess = $user && in_array((int) $user->role_id, \App\Services\RequisitionService::FULL_ACCESS_ROLE_IDS, true);
+        // This list holds the user's own requisitions. Once the Admin has approved one (its slip
+        // can be printed, it waits for the Store Keeper), a Super Admin / Admin sees their own
+        // requisition like every other requester: the plain details with the print buttons.
+        $ids = collect($this->requisitions->items())->where('status', 'pending')
+            ->reject(fn ($requisition) => $fullAccess && $requisition->is_print_enabled)
+            ->pluck('id');
+        if (! $user || $ids->isEmpty()) {
+            return [];
+        }
+
+        return \App\Models\ApprovalDetail::query()
+            ->whereIn('requistion_id', $ids)
+            ->where('status', 'pending')
+            ->when(! $fullAccess, fn ($query) => $query->where('to_user_id', $user->id))
+            ->with('toUser:id,role_id')
+            ->get(['id', 'requistion_id', 'to_user_id'])
+            ->mapWithKeys(fn ($task) => [(int) $task->requistion_id => (int) ($task->toUser->role_id ?? 0)])
+            ->all();
+    }
+
+    /** Only the signed-in user's own requisitions can be listed, edited, submitted or deleted (prevents IDOR). */
     private function ownRequisitions(): Builder
     {
         return Requisition::query()->where('requested_by_user_id', Auth::id());
+    }
+
+    /**
+     * Requisitions whose details may be opened (read only): the user's own, and for the store
+     * and admin roles any requisition that has been submitted - they already handle those in the
+     * requisition request list. Drafts of other people stay private; general users see only their own.
+     */
+    private function viewableRequisitions(): Builder
+    {
+        if ((int) Auth::user()?->role_id === self::GENERAL_USER_ROLE_ID || ! Auth::user()?->role_id) {
+            return $this->ownRequisitions();
+        }
+
+        return Requisition::query()->where(fn (Builder $query) => $query
+            ->where('requested_by_user_id', Auth::id())
+            ->orWhere('status', '!=', 'draft'));
     }
 
     /** Own + draft + allowed, or null after telling the user why not. */

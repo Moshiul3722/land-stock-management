@@ -86,7 +86,7 @@
                                                 'note' => collect([$detail->brand, $detail->specification])->filter()->join(' · '),
                                                 'category' => $detail->product->category->name ?? '—',
                                                 'quantity' => $digits($detail->quantity + 0),
-                                                'unit' => $detail->product && ! is_numeric($detail->product->product_unit) ? (string) $detail->product->product_unit : '',
+                                                'unit' => $detail->product && ! is_numeric($detail->product->product_unit) ? (string) $detail->product->unit_label : '',
                                             ])->values(),
                                         ];
                                     @endphp
@@ -110,19 +110,19 @@
                                         <td class="text-center text-nowrap lot-req-actions">
                                             <button type="button" class="btn btn-sm btn-info lot-req-btn view-lot-btn"
                                                 data-lot='@json($payload, JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP)'
-                                                title="{{ __('lot.requests.view') }}"
+                                                data-tip="{{ __('lot.requests.view') }}"
                                                 aria-label="{{ __('lot.requests.view') }}: {{ $digits($lot->lot_number) }}">
                                                 <i class="fas fa-eye" aria-hidden="true"></i>
                                             </button>
                                             <button type="button" class="btn btn-sm btn-success lot-req-btn approve-btn"
                                                 data-action="{{ route('lots.approve', $lot) }}"
-                                                title="{{ __('lot.requests.approve') }}"
+                                                data-tip="{{ __('lot.requests.approve') }}"
                                                 aria-label="{{ __('lot.requests.approve') }}: {{ $digits($lot->lot_number) }}">
                                                 <i class="fas fa-check" aria-hidden="true"></i>
                                             </button>
                                             <button type="button" class="btn btn-sm btn-danger lot-req-btn reject-btn"
                                                 data-action="{{ route('lots.reject', $lot) }}"
-                                                title="{{ __('lot.requests.reject') }}"
+                                                data-tip="{{ __('lot.requests.reject') }}"
                                                 aria-label="{{ __('lot.requests.reject') }}: {{ $digits($lot->lot_number) }}">
                                                 <i class="fas fa-times" aria-hidden="true"></i>
                                             </button>
@@ -149,6 +149,7 @@
                         </h5>
                         <p class="modal-hint">{{ __('lot.requests.items_hint') }}</p>
                     </div>
+                    <x-ui.modal-today variant="bs" />
                     <button type="button" class="close" data-dismiss="modal" aria-label="{{ __('commontable.close') }}">
                         <span aria-hidden="true">&times;</span>
                     </button>

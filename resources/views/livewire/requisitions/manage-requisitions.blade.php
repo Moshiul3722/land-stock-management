@@ -5,6 +5,10 @@
     $btn = 'tw-inline-flex tw-min-h-11 tw-select-none tw-items-center tw-justify-center tw-gap-2 tw-whitespace-nowrap tw-rounded-lg tw-border tw-border-solid tw-px-4 tw-text-sm tw-font-semibold tw-leading-none tw-transition hover:tw-no-underline focus:tw-outline-none focus-visible:tw-ring-4 active:tw-translate-y-px disabled:tw-cursor-not-allowed disabled:tw-opacity-60';
     $btnPrimary = $btn . ' tw-border-brand-600 tw-bg-brand-600 tw-text-white tw-shadow-sm hover:tw-border-brand-700 hover:tw-bg-brand-700 hover:tw-text-white focus-visible:tw-ring-brand-500/30';
     $btnSecondary = $btn . ' tw-border-slate-300 tw-bg-white tw-text-slate-700 tw-shadow-sm hover:tw-bg-slate-50 hover:tw-text-slate-900 focus-visible:tw-ring-slate-400/30';
+    // Footer of the details dialog: close, print preview and print each have their own colour
+    $btnClose = $btn . ' tw-border-rose-600 tw-bg-rose-600 tw-text-white tw-shadow-sm hover:tw-border-rose-700 hover:tw-bg-rose-700 hover:tw-text-white focus-visible:tw-ring-rose-500/30';
+    $btnPreview = $btn . ' tw-border-sky-600 tw-bg-sky-600 tw-text-white tw-shadow-sm hover:tw-border-sky-700 hover:tw-bg-sky-700 hover:tw-text-white focus-visible:tw-ring-sky-500/30';
+    $btnPrint = $btn . ' tw-border-emerald-600 tw-bg-emerald-600 tw-text-white tw-shadow-sm hover:tw-border-emerald-700 hover:tw-bg-emerald-700 hover:tw-text-white focus-visible:tw-ring-emerald-500/30';
     $btnDanger = $btn . ' tw-border-rose-600 tw-bg-rose-600 tw-text-white tw-shadow-sm hover:tw-border-rose-700 hover:tw-bg-rose-700 hover:tw-text-white focus-visible:tw-ring-rose-500/30';
     $iconBtn = 'tw-inline-flex tw-h-11 tw-w-11 tw-items-center tw-justify-center tw-rounded-lg tw-border tw-border-solid tw-border-transparent tw-bg-transparent tw-text-slate-500 tw-transition hover:tw-bg-slate-100 hover:tw-text-slate-900 focus:tw-outline-none focus-visible:tw-ring-4 focus-visible:tw-ring-brand-500/25 md:tw-h-9 md:tw-w-9';
     $card = 'tw-rounded-2xl tw-border tw-border-solid tw-border-slate-200/80 tw-bg-white tw-shadow-surface';
@@ -42,10 +46,10 @@
                     <nav aria-label="breadcrumb" class="tw-mb-1 tw-text-xs tw-text-slate-500">
                         <a href="{{ route('home') }}" class="tw-text-slate-500 hover:tw-text-brand-600">{{ __('breadcrumb.home') }}</a>
                         <span class="tw-mx-1.5 tw-text-slate-300" aria-hidden="true">/</span>
-                        <span aria-current="page">{{ __('requisition.manage.title') }}</span>
+                        <span aria-current="page">{{ __('requisition.manage.list_title') }}</span>
                     </nav>
                     <h1 class="tw-m-0 tw-text-xl tw-font-bold tw-leading-snug tw-tracking-tight tw-text-slate-900 sm:tw-text-2xl">
-                        {{ __('requisition.manage.title') }}
+                        {{ __('requisition.manage.list_title') }}
                     </h1>
                     <p class="tw-mb-0 tw-mt-1 tw-text-sm tw-text-slate-500">{{ __('requisition.manage.subtitle') }}</p>
                 </div>
@@ -147,11 +151,18 @@
                         </thead>
                         <tbody>
                             @foreach ($rows as $req)
-                                <tr wire:key="req-row-{{ $req->id }}" class="tw-border-0 tw-border-b tw-border-solid tw-border-slate-100 tw-transition hover:tw-bg-slate-50/70 last:tw-border-b-0">
+                                <tr wire:key="req-row-{{ $req->id }}" class="tw-border-0 tw-border-b tw-border-solid tw-border-slate-100 tw-transition last:tw-border-b-0 {{ $highlightId === $req->id ? 'tw-bg-amber-100' : 'hover:tw-bg-slate-50/70' }}">
                                     <td class="tw-whitespace-nowrap tw-px-5 tw-py-1.5 tw-font-semibold tw-tabular-nums tw-text-slate-900">#{{ $digits($req->id) }}</td>
                                     <td class="tw-whitespace-nowrap tw-px-5 tw-py-1.5 tw-text-slate-600">{{ $formatDate($req->requisition_date) }}</td>
                                     <td class="tw-w-full tw-max-w-0 tw-px-5 tw-py-1.5 xl:tw-w-auto xl:tw-max-w-md">
-                                        <span class="tw-block tw-font-medium tw-leading-tight tw-text-slate-800">{{ __('requisition.manage.items_summary', ['count' => $digits($req->items_count)]) }}</span>
+                                        {{-- Approved and waiting at the store: the requester is told to collect the items
+                                             with the printed invoice. The note goes once the invoice is scanned (delivered). --}}
+                                        <span class="tw-flex tw-flex-wrap tw-items-baseline tw-gap-x-2 tw-font-medium tw-leading-tight tw-text-slate-800">
+                                            <span>{{ __('requisition.manage.items_summary', ['count' => $digits($req->items_count)]) }}</span>
+                                            @if ($req->status === 'pending' && $req->is_print_enabled)
+                                                <span class="tw-font-semibold tw-text-rose-600">{{ __('requisition.manage.collect_note') }}</span>
+                                            @endif
+                                        </span>
                                         <span class="tw-block tw-truncate tw-text-sm tw-leading-tight tw-text-slate-500" title="{{ $req->items->pluck('product.name')->filter()->join(', ') }}">
                                             {{ $req->items->pluck('product.name')->filter()->take(3)->join(', ') }}{{ $req->items_count > 3 ? ' …' : '' }}
                                         </span>
@@ -161,17 +172,28 @@
                                     </td>
                                     <td class="tw-whitespace-nowrap tw-px-5 tw-py-0.5 tw-text-right">
                                         <div class="tw-inline-flex tw-items-center tw-gap-0.5">
-                                            <button type="button" wire:click="openView({{ $req->id }})" class="{{ $iconBtn }}"
-                                                title="{{ __('requisition.manage.view') }}" aria-label="{{ __('requisition.manage.view') }} #{{ $req->id }}">
-                                                <i class="fas fa-eye" aria-hidden="true"></i>
-                                            </button>
+                                            @if (isset($decidable[$req->id]))
+                                                {{-- The signed-in user can decide on this one: the decision dialog opens
+                                                     (resources/views/requisition/_decision_modal.blade.php) --}}
+                                                <button type="button" class="view-action-btn {{ $iconBtn }}"
+                                                    data-id="{{ $req->id }}" data-can-act="1" data-step-role="{{ $decidable[$req->id] }}"
+                                                    data-url="{{ route('requisitions.get_details', $req->id) }}"
+                                                    data-tip="{{ __('requisition.pending_manage.view_action') }}" aria-label="{{ __('requisition.pending_manage.view_action') }} #{{ $req->id }}">
+                                                    <i class="fas fa-eye" aria-hidden="true"></i>
+                                                </button>
+                                            @else
+                                                <button type="button" wire:click="openView({{ $req->id }})" class="{{ $iconBtn }}"
+                                                    data-tip="{{ __('requisition.manage.view') }}" aria-label="{{ __('requisition.manage.view') }} #{{ $req->id }}">
+                                                    <i class="fas fa-eye" aria-hidden="true"></i>
+                                                </button>
+                                            @endif
                                             @if ($canEdit($req))
                                                 <button type="button" wire:click="openEdit({{ $req->id }})" class="{{ $iconBtn }} hover:tw-text-brand-600"
-                                                    title="{{ __('requisition.manage.edit') }}" aria-label="{{ __('requisition.manage.edit') }} #{{ $req->id }}">
+                                                    data-tip="{{ __('requisition.manage.edit') }}" aria-label="{{ __('requisition.manage.edit') }} #{{ $req->id }}">
                                                     <i class="fas fa-pen" aria-hidden="true"></i>
                                                 </button>
                                                 <button type="button" wire:click="confirmDelete({{ $req->id }})" class="{{ $iconBtn }} hover:tw-bg-rose-50 hover:tw-text-rose-600"
-                                                    title="{{ __('requisition.manage.delete') }}" aria-label="{{ __('requisition.manage.delete') }} #{{ $req->id }}">
+                                                    data-tip="{{ __('requisition.manage.delete') }}" aria-label="{{ __('requisition.manage.delete') }} #{{ $req->id }}">
                                                     <i class="fas fa-trash-alt" aria-hidden="true"></i>
                                                 </button>
                                             @endif
@@ -186,7 +208,7 @@
                 {{-- Phones / tablet portrait: cards --}}
                 <ul class="tw-m-0 tw-list-none tw-divide-y tw-divide-slate-100 tw-p-0 md:tw-hidden">
                     @foreach ($rows as $req)
-                        <li wire:key="req-card-{{ $req->id }}" class="tw-px-4 tw-py-4">
+                        <li wire:key="req-card-{{ $req->id }}" class="tw-px-4 tw-py-4 {{ $highlightId === $req->id ? 'tw-bg-amber-100' : '' }}">
                             <div class="tw-flex tw-items-start tw-justify-between tw-gap-3">
                                 <div class="tw-min-w-0">
                                     <p class="tw-m-0 tw-font-semibold tw-tabular-nums tw-text-slate-900">#{{ $digits($req->id) }}</p>
@@ -197,11 +219,22 @@
                             <p class="tw-mb-0 tw-mt-2 tw-text-sm tw-text-slate-700">
                                 <span class="tw-font-medium">{{ __('requisition.manage.items_summary', ['count' => $digits($req->items_count)]) }}</span>
                                 <span class="tw-text-slate-500">· {{ $req->items->pluck('product.name')->filter()->take(3)->join(', ') }}{{ $req->items_count > 3 ? ' …' : '' }}</span>
+                                @if ($req->status === 'pending' && $req->is_print_enabled)
+                                    <span class="tw-block tw-font-semibold tw-text-rose-600">{{ __('requisition.manage.collect_note') }}</span>
+                                @endif
                             </p>
                             <div class="tw-mt-3 tw-flex tw-flex-wrap tw-gap-2">
-                                <button type="button" wire:click="openView({{ $req->id }})" class="{{ $btnSecondary }} tw-flex-1">
-                                    <i class="fas fa-eye" aria-hidden="true"></i> {{ __('requisition.manage.view') }}
-                                </button>
+                                @if (isset($decidable[$req->id]))
+                                    <button type="button" class="view-action-btn {{ $btnSecondary }} tw-flex-1"
+                                        data-id="{{ $req->id }}" data-can-act="1" data-step-role="{{ $decidable[$req->id] }}"
+                                        data-url="{{ route('requisitions.get_details', $req->id) }}">
+                                        <i class="fas fa-eye" aria-hidden="true"></i> {{ __('requisition.pending_manage.view_action') }}
+                                    </button>
+                                @else
+                                    <button type="button" wire:click="openView({{ $req->id }})" class="{{ $btnSecondary }} tw-flex-1">
+                                        <i class="fas fa-eye" aria-hidden="true"></i> {{ __('requisition.manage.view') }}
+                                    </button>
+                                @endif
                                 @if ($canEdit($req))
                                     <button type="button" wire:click="openEdit({{ $req->id }})" class="{{ $btnSecondary }} tw-flex-1">
                                         <i class="fas fa-pen" aria-hidden="true"></i> {{ __('requisition.manage.edit') }}
@@ -252,14 +285,15 @@
         <x-ui.modal wire:model="showForm" max-width="5xl" labelledby="req-form-title">
             {{-- req-form: larger text for everything in this dialog (see resources/css/tailwind.css) --}}
             <form wire:submit="save('submit')" class="req-form tw-m-0 tw-flex tw-min-h-0 tw-flex-1 tw-flex-col" novalidate>
-                <div class="tw-flex tw-items-start tw-justify-between tw-gap-4 tw-border-0 tw-border-b tw-border-solid tw-border-slate-200 tw-px-5 tw-py-4 sm:tw-px-6">
-                    <div class="tw-min-w-0">
+                <div class="tw-flex tw-flex-wrap tw-items-start tw-justify-between tw-gap-x-4 tw-gap-y-1 tw-border-0 tw-border-b tw-border-solid tw-border-slate-200 tw-px-5 tw-py-4 sm:tw-flex-nowrap sm:tw-px-6">
+                    <div class="tw-min-w-0 tw-flex-1">
                         <h2 id="req-form-title" class="tw-m-0 tw-text-lg tw-font-bold tw-text-slate-900">
                             {{ $editingId ? __('requisition.manage.edit_title', ['id' => $digits($editingId)]) : __('requisition.manage.create_title') }}
                         </h2>
                         <p class="tw-mb-0 tw-mt-0.5 tw-text-sm tw-text-slate-500">{{ __('requisition.manage.form_hint') }}</p>
                     </div>
-                    <button type="button" x-on:click="open = false" class="{{ $iconBtn }} tw--mr-2 tw--mt-1" aria-label="{{ __('requisition.manage.close') }}">
+                    <x-ui.modal-today />
+                    <button type="button" x-on:click="open = false" class="{{ $iconBtn }} tw--mr-2 tw--mt-1 tw-flex-none !tw-bg-slate-100 !tw-text-slate-600 hover:!tw-bg-slate-200 hover:!tw-text-slate-900" aria-label="{{ __('requisition.manage.close') }}">
                         <i class="fas fa-times" aria-hidden="true"></i>
                     </button>
                 </div>
@@ -294,7 +328,7 @@
                             <div>
                                 <label for="req-product" class="{{ $label }}">{{ __('requisition.manage.product') }}</label>
                                 <x-ui.search-select id="req-product" wire:model.live="productId" :disabled="! $categoryId" :visible="5"
-                                    :options="$this->productOptions->map(fn ($product) => ['value' => $product->id, 'label' => $product->name . ($product->product_unit ? ' (' . $product->product_unit . ')' : '')])"
+                                    :options="$this->productOptions->map(fn ($product) => ['value' => $product->id, 'label' => $product->name . (trim((string) $product->name_bn) !== '' && $product->name_bn !== $product->name ? ' (' . $product->name_bn . ')' : '')])"
                                     :placeholder="$categoryId ? __('requisition.manage.select_product') : __('requisition.manage.select_category_first')"
                                     :invalid="$errors->has('productId')" />
                                 @error('productId') <p id="req-product-error" class="{{ $errorText }}"><i class="fas fa-exclamation-circle tw-mt-0.5" aria-hidden="true"></i>{{ $message }}</p> @enderror
@@ -359,7 +393,7 @@
                         <div class="tw-mb-2 tw-flex tw-items-center tw-justify-between">
                             <h3 class="tw-m-0 tw-text-sm tw-font-semibold tw-text-slate-700">{{ __('requisition.manage.item_list') }}</h3>
                             @if (count($items))
-                                <span class="tw-inline-flex tw-h-8 tw-min-w-8 tw-items-center tw-justify-center tw-rounded-full tw-bg-brand-600 tw-px-2.5 tw-text-[15px] tw-font-bold tw-leading-none tw-text-white tw-shadow-sm"
+                                <span class="tw-inline-flex tw-h-8 tw-min-w-[2.75rem] tw-items-center tw-justify-center tw-rounded-md tw-bg-brand-600 tw-px-3 tw-text-[15px] tw-font-bold tw-leading-none tw-text-white tw-shadow-sm"
                                     aria-label="{{ __('requisition.manage.items_summary', ['count' => $digits(count($items))]) }}">{{ $digits(count($items)) }}</span>
                             @endif
                         </div>
@@ -382,7 +416,7 @@
                                             @php
                                                 $product = $products->get((int) $item['product_id']);
                                                 $available = $product->available_quantity ?? 0;
-                                                $unit = $product && $product->product_unit && ! is_numeric($product->product_unit) ? $product->product_unit : '';
+                                                $unit = $product && $product->product_unit && ! is_numeric($product->product_unit) ? $product->unit_label : '';
                                                 $qtyInvalid = $errors->has('items.' . $index . '.quantity');
                                                 // Shown only when this user has requested the product before.
                                                 $previousDate = ($product->previous_requisition_date ?? null) ? $formatDate($product->previous_requisition_date) : null;
@@ -393,10 +427,13 @@
                                                 <td class="tw-px-1 tw-py-0.5 tw-text-center tw-tabular-nums tw-text-slate-600 sm:tw-px-3">{{ $digits($index + 1) }}</td>
                                                 <td class="tw-px-2 tw-py-0.5 sm:tw-px-3">
                                                     <span class="tw-block tw-break-words tw-font-medium tw-leading-tight tw-text-slate-900">{{ $product->name ?? '—' }}</span>
-                                                    {{-- Category, then the stock state; the stock count is not shown to the General User role --}}
+                                                    {{-- Category, then the stock state. The General User role sees no stock
+                                                         information at all (neither "in stock" nor "out of stock"). --}}
                                                     <span class="tw-flex tw-flex-wrap tw-items-center tw-gap-x-2 tw-gap-y-1 tw-text-xs tw-leading-snug tw-text-slate-500">
                                                         <span class="tw-leading-tight">{{ $product->category->name ?? '' }}</span>
-                                                        @if ($available > 0)
+                                                        @if (! $showStockCount)
+                                                            {{-- nothing about stock for the General User --}}
+                                                        @elseif ($available > 0)
                                                             <span class="tw-inline-flex tw-items-center tw-gap-1 tw-font-medium tw-leading-tight tw-text-emerald-700"><span class="tw-h-1.5 tw-w-1.5 tw-rounded-full tw-bg-emerald-500" aria-hidden="true"></span>{{ $showStockCount ? __('requisition.manage.in_stock', ['qty' => $digits($available)]) : __('requisition.manage.in_stock_plain') }}</span>
                                                         @else
                                                             <span class="tw-inline-flex tw-items-center tw-gap-1 tw-font-medium tw-leading-tight tw-text-rose-700"><span class="tw-h-1.5 tw-w-1.5 tw-rounded-full tw-bg-rose-500" aria-hidden="true"></span>{{ __('requisition.manage.out_of_stock') }}</span>
@@ -529,7 +566,7 @@
                     @endunless
                 </div>
 
-                <div class="tw-flex tw-flex-col-reverse tw-gap-2 tw-border-0 tw-border-t tw-border-solid tw-border-slate-200 tw-bg-slate-50/80 tw-px-5 tw-py-3 sm:tw-flex-row sm:tw-items-center sm:tw-justify-between sm:tw-px-6">
+                <div class="ui-modal-foot tw-flex tw-flex-col-reverse tw-gap-2 tw-border-0 tw-border-t tw-border-solid tw-border-slate-200 tw-bg-slate-50/80 tw-px-5 tw-py-3 sm:tw-flex-row sm:tw-items-center sm:tw-justify-between sm:tw-px-6">
                     <p class="tw-m-0 tw-hidden tw-text-xs tw-text-slate-500 lg:tw-block">{{ __('requisition.manage.submit_hint') }}</p>
                     <div class="tw-flex tw-flex-col-reverse tw-gap-2 sm:tw-ml-auto sm:tw-flex-row">
                         <button type="button" x-on:click="open = false" class="{{ $btnSecondary }}">{{ __('requisition.manage.cancel') }}</button>
@@ -592,7 +629,6 @@
                             $viewPages = max(1, (int) ceil($viewTotal / $viewItemsPerPage));
                             $viewPage = min(max(1, $viewItemPage), $viewPages);
                             $viewItems = $viewed->items->forPage($viewPage, $viewItemsPerPage);
-                            $previousRequests = $this->previousRequests;
                         @endphp
                         <div class="tw-overflow-x-auto tw-rounded-xl tw-border tw-border-solid tw-border-slate-200">
                             <table class="tw-m-0 tw-w-full tw-border-collapse tw-text-left tw-text-base">
@@ -601,37 +637,20 @@
                                         {{-- Same columns and names as the dialog of the requisition request list --}}
                                         <th scope="col" class="tw-w-12 tw-px-2 tw-py-2 tw-text-center sm:tw-w-20 sm:tw-whitespace-nowrap">{{ __('lot.table_sl') }}</th>
                                         <th scope="col" class="tw-px-4 tw-py-2">{{ __('requisition.manage.product') }}</th>
-                                        <th scope="col" class="tw-hidden tw-px-4 tw-py-2 tw-text-center sm:tw-table-cell">{{ __('requisition.manage.previous_requisition') }}</th>
                                         <th scope="col" class="tw-px-3 tw-py-2 tw-text-right sm:tw-whitespace-nowrap">{{ __('requisition.requested_quantity') }}</th>
-                                        <th scope="col" class="tw-px-4 tw-py-2 tw-text-right sm:tw-whitespace-nowrap">{{ __('requisition.approved_quantity') }}</th>
+                                        <th scope="col" class="tw-px-4 tw-py-2 tw-text-center sm:tw-whitespace-nowrap">{{ __('requisition.approved_quantity') }}</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     @foreach ($viewItems as $item)
                                         @php
-                                            $viewUnit = $item->product && $item->product->product_unit && ! is_numeric($item->product->product_unit) ? $item->product->product_unit : '';
-                                            // The requester's latest earlier requisition for this product, if any.
-                                            $receipt = $previousRequests->get($item->product_id);
-                                            $receiptDate = $receipt ? $formatDate($receipt->last_date) : null;
-                                            $receiptQuantity = $receipt ? __('requisition.manage.previous_quantity', ['qty' => $digits((int) $receipt->last_quantity)]) : null;
+                                            $viewUnit = $item->product && $item->product->product_unit && ! is_numeric($item->product->product_unit) ? $item->product->unit_label : '';
                                         @endphp
                                         <tr wire:key="view-item-{{ $item->id }}" class="tw-border-0 tw-border-t tw-border-solid tw-border-slate-100">
                                             <td class="tw-px-2 tw-py-1.5 tw-text-center tw-tabular-nums tw-text-slate-600">{{ $digits(($viewPage - 1) * $viewItemsPerPage + $loop->iteration) }}</td>
                                             <td class="tw-px-4 tw-py-1.5">
                                                 <span class="tw-block tw-break-words tw-font-medium tw-leading-tight tw-text-slate-900">{{ $item->product->name ?? '—' }}</span>
                                                 <span class="tw-block tw-text-sm tw-leading-tight tw-text-slate-500">{{ collect([$item->product->category->name ?? null, $item->product->subCategory->name ?? null])->filter()->join(' · ') }}</span>
-                                                {{-- Phones: the previous-requisition column is folded in here --}}
-                                                @if ($receiptDate)
-                                                    <span class="tw-block tw-text-sm tw-leading-tight tw-text-slate-500 sm:tw-hidden">{{ __('requisition.manage.previous_requisition') }}: {{ $receiptDate }} ({{ $receiptQuantity }})</span>
-                                                @endif
-                                            </td>
-                                            <td class="tw-hidden tw-px-4 tw-py-1.5 tw-text-center tw-leading-tight tw-text-slate-700 sm:tw-table-cell">
-                                                @if ($receiptDate)
-                                                    <span class="tw-whitespace-nowrap">{{ $receiptDate }}</span>
-                                                    <span class="tw-whitespace-nowrap tw-text-sm tw-font-medium tw-text-slate-500">({{ $receiptQuantity }})</span>
-                                                @else
-                                                    —
-                                                @endif
                                             </td>
                                             <td class="tw-whitespace-nowrap tw-px-4 tw-py-1.5 tw-text-right tw-tabular-nums">
                                                 <span class="tw-font-semibold tw-text-slate-900">{{ $digits($item->original_quantity ?? $item->quantity) }}</span>
@@ -639,8 +658,11 @@
                                                     <span class="tw-text-sm tw-text-slate-500">{{ $viewUnit }}</span>
                                                 @endif
                                             </td>
-                                            <td class="tw-whitespace-nowrap tw-px-4 tw-py-1.5 tw-text-right tw-tabular-nums">
-                                                @if (in_array($viewed->status, ['draft', 'pending'], true))
+                                            {{-- Approved quantity: shown as soon as an approver has approved the requisition
+                                                 (the same figure as in the dialog of the requisition request list); a dash
+                                                 while it is a draft or still waits for its first approval. --}}
+                                            <td class="tw-whitespace-nowrap tw-px-4 tw-py-1.5 tw-text-center tw-tabular-nums">
+                                                @if ($viewed->status === 'draft' || ($viewed->status === 'pending' && ! $viewed->approvalDetails->contains('status', 'approved')))
                                                     <span class="tw-font-semibold tw-text-slate-900">—</span>
                                                 @else
                                                     <span class="tw-font-semibold tw-text-slate-900">{{ $digits($item->quantity) }}</span>
@@ -719,10 +741,22 @@
                     </div>
                 </div>
 
-                <div class="tw-flex tw-flex-col-reverse tw-gap-2 tw-border-0 tw-border-t tw-border-solid tw-border-slate-200 tw-bg-slate-50/80 tw-px-5 tw-py-2.5 sm:tw-flex-row sm:tw-justify-end sm:tw-px-6">
-                    <button type="button" x-on:click="open = false" class="{{ $btnSecondary }}">{{ __('requisition.manage.close') }}</button>
-                    @if ($viewed->is_print_enabled)
-                        <a href="{{ route('requisitions.print', $viewed) }}" target="_blank" rel="noopener" class="{{ $btnSecondary }}">
+                <div class="ui-modal-foot tw-flex tw-flex-col-reverse tw-gap-2 tw-border-0 tw-border-t tw-border-solid tw-border-slate-200 tw-bg-slate-50/80 tw-px-5 tw-py-2.5 sm:tw-flex-row sm:tw-justify-end sm:tw-px-6">
+                    @php
+                        // The slip is for collecting the goods. While the requisition is still pending the
+                        // buttons stay; they go once it is approved and verified by QR scan.
+                        $canPrintSlip = $viewed->is_print_enabled
+                            && ($viewed->status === 'pending' || ! $viewed->is_physically_verified);
+                    @endphp
+                    <button type="button" x-on:click="open = false" class="{{ $btnClose }}">{{ __('requisition.manage.close') }}</button>
+                    @if ($canPrintSlip)
+                        {{-- The slip on an A4 sheet in a new tab, without printing straight away --}}
+                        <a href="{{ route('requisitions.print', ['requisition' => $viewed, 'preview' => 1]) }}" target="_blank" rel="noopener" class="{{ $btnPreview }}">
+                            <i class="fas fa-eye" aria-hidden="true"></i> {{ __('requisition.manage.print_preview') }}
+                        </a>
+                    @endif
+                    @if ($canPrintSlip)
+                        <a href="{{ route('requisitions.print', $viewed) }}" target="_blank" rel="noopener" class="{{ $btnPrint }}">
                             <i class="fas fa-print" aria-hidden="true"></i> {{ __('requisition.manage.print') }}
                         </a>
                     @endif
@@ -754,7 +788,7 @@
                     {{ __('requisition.manage.delete_text', ['id' => $digits($deletingId), 'count' => $digits($deletingItemsCount)]) }}
                 </p>
             </div>
-            <div class="tw-flex tw-flex-col-reverse tw-gap-2 tw-px-5 tw-pb-5 sm:tw-flex-row sm:tw-justify-center sm:tw-px-6">
+            <div class="ui-modal-foot tw-flex tw-flex-col-reverse tw-gap-2 tw-px-5 tw-pb-5 sm:tw-flex-row sm:tw-justify-center sm:tw-px-6">
                 <button type="button" x-on:click="open = false" class="{{ $btnSecondary }} sm:tw-min-w-[8rem]" autofocus>{{ __('requisition.manage.cancel') }}</button>
                 <button type="button" wire:click="delete" wire:loading.attr="disabled" wire:target="delete" class="{{ $btnDanger }} sm:tw-min-w-[8rem]">
                     <i class="fas fa-circle-notch fa-spin" aria-hidden="true" wire:loading wire:target="delete"></i>
