@@ -30,13 +30,14 @@ class ProfileController extends Controller
         $request->validate([
             'name' => 'required|string|max:255',
             'name_bn' => 'nullable|string|max:255',
-            'email' => 'required|string|email|max:255|unique:users,email,' . $user->id,
             'profile_photo' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'designation' => 'nullable|string|max:191',
+            'signature' => 'nullable|image|mimes:jpeg,png,jpg|max:1024',
         ]);
 
         $user->name = $request->name;
         $user->name_bn = $request->name_bn;
-        $user->email = $request->email;
+        // The email address is the sign-in name: it cannot be changed from the profile page.
 
         // Handle Profile Photo Upload
         if ($request->hasFile('profile_photo')) {
@@ -49,9 +50,20 @@ class ProfileController extends Controller
             $user->profile_photo_path = $path;
         }
 
+        // Designation and signature image: printed on the requisition slip
+        $user->designation = $request->filled('designation') ? trim($request->designation) : null;
+
+        if ($request->hasFile('signature')) {
+            if ($user->signature_path) {
+                Storage::disk('public')->delete($user->signature_path);
+            }
+
+            $user->signature_path = $request->file('signature')->store('signatures', 'public');
+        }
+
         $user->save();
 
-        return redirect()->route('profile.index')->with('success', 'Profile updated successfully.');
+        return redirect()->route('profile.index')->with('success', __('profile.updated'));
     }
 
     /**
@@ -67,13 +79,13 @@ class ProfileController extends Controller
         $user = Auth::user();
 
         if (!Hash::check($request->current_password, $user->password)) {
-            return back()->withErrors(['current_password' => 'The provided password does not match your current password.']);
+            return back()->withErrors(['current_password' => __('profile.password_mismatch')]);
         }
 
         $user->update([
             'password' => Hash::make($request->password),
         ]);
 
-        return redirect()->route('profile.index')->with('success', 'Password updated successfully.');
+        return redirect()->route('profile.index')->with('success', __('profile.password_updated'));
     }
 }

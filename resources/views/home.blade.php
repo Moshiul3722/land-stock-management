@@ -115,8 +115,10 @@
         </div>
     </div>
 @endsection
-@push('js')
+@push('head_scripts')
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+@endpush
+@push('js')
     <script>
         $(function() {
             // --- 1. BAR CHART (Monthly) ---

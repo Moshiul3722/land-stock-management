@@ -108,7 +108,7 @@
 
                         {{-- Approve/Reject Buttons (Only if Pending & Store Admin) --}}
                         {{-- Assuming Role ID 3 is Store Admin --}}
-                        @if ($lot->status === 'pending' && (Auth::user()->role_id == 3 || Auth::user()->role_id == 2))
+                        @if ($lot->status === 'pending' && in_array((int) Auth::user()->role_id, [1, 2, 3], true))
                             <button type="button" id="btn-reject" class="btn btn-danger float-right ml-2">
                                 <i class="fas fa-times"></i> {{ __('lot.reject_lot') }}
                             </button>

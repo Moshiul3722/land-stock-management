@@ -22,26 +22,14 @@ class PurchaseTypeBudgetController extends Controller
 
     public function index()
     {
-        $budgets = $this->purchaseTypeBudgetService->fetchAll();
-        $purchaseTypes = $this->productPurchaseTypeService->fetchAll();
-        // Fetch all fiscal years for filtering in the index view
-        $fiscalYears = FiscalYear::orderBy('name', 'desc')->get();
-        return view('ptbudget.index', compact('budgets', 'purchaseTypes', 'fiscalYears'));
+        // The list, with create / edit / delete in modals, is one Livewire screen.
+        return view('crud.host', ['component' => 'budget.purchase-type-budget-manager']);
     }
 
     public function create()
     {
-        $purchaseTypes = $this->productPurchaseTypeService->fetchAll();
-        // Fetch only active fiscal years for creating new budgets
-        $fiscalYears = FiscalYear::where('is_active', true)->orderBy('name', 'desc')->get();
-        // Determine Current Fiscal Year ID based on today's date
-        $today = date('Y-m-d');
-        $currentFiscalYear = $fiscalYears->first(function ($year) use ($today) {
-            return $today >= $year->start_date && $today <= $year->end_date;
-        });
-        $currentFiscalYearId = $currentFiscalYear ? $currentFiscalYear->id : null;
-
-        return view('ptbudget.create', compact('purchaseTypes', 'fiscalYears', 'currentFiscalYearId'));
+        // Sidebar "create" menu: opens the create modal on the management screen.
+        return redirect()->route('ptbudgets.index', ['create' => 1]);
     }
 
     public function store(Request $request)
@@ -56,9 +44,8 @@ class PurchaseTypeBudgetController extends Controller
 
     public function edit($id)
     {
-        $budget = $this->purchaseTypeBudgetService->findById($id);
-        $categories = $this->productPurchaseTypeService->fetchAll();
-        return view('ptbudget.edit', compact('budget', 'categories'));
+        // Old edit URL: opens the edit modal on the management screen.
+        return redirect()->route('ptbudgets.index', ['edit' => (int) $id]);
     }
 
     public function update(Request $request, $id)

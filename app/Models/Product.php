@@ -26,6 +26,7 @@ class Product extends Model
      */
     protected $fillable = [
         'name',
+        'name_bn',
         'description',
         'category_id',
         'sub_category_id',
@@ -56,5 +57,14 @@ class Product extends Model
     public function stocks(): HasMany
     {
         return $this->hasMany(Stock::class, 'product_id');
+    }
+
+    /**
+     * The product's unit as shown on screen (`$product->unit_label`): Bangla when the page is
+     * in Bangla and the unit has a Bangla name, otherwise the stored unit name.
+     */
+    public function getUnitLabelAttribute(): string
+    {
+        return ProductUnit::label($this->product_unit);
     }
 }

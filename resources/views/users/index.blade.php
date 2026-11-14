@@ -138,17 +138,17 @@
                                         <td class="text-center text-nowrap">
                                             <button type="button" class="btn btn-sm btn-primary user-touch-btn edit-user-btn"
                                                 data-id="{{ $user->id }}" data-name="{{ $user->name }}"
-                                                data-name-bn="{{ $user->name_bn }}" data-email="{{ $user->email }}"
+                                                data-name-bn="{{ $user->name_bn }}" data-email="{{ $user->email }}" data-mobile="{{ $user->mobile }}"
                                                 data-role-id="{{ $user->role_id }}"
                                                 data-department-id="{{ $user->department_id }}"
-                                                title="{{ __('buttons.edit') }}"
+                                                data-tip="{{ __('buttons.edit') }}"
                                                 aria-label="{{ __('buttons.edit') }}: {{ $userLabel }}">
                                                 <i class="fas fa-edit" aria-hidden="true"></i>
                                             </button>
                                             <button type="button" class="btn btn-sm btn-danger user-touch-btn delete-user-btn"
                                                 data-id="{{ $user->id }}" data-label="{{ $userLabel }}"
                                                 data-email="{{ $user->email }}"
-                                                title="{{ __('buttons.delete') }}"
+                                                data-tip="{{ __('buttons.delete') }}"
                                                 aria-label="{{ __('buttons.delete') }}: {{ $userLabel }}"
                                                 @disabled($isSelf)>
                                                 <i class="fas fa-trash-alt" aria-hidden="true"></i>
@@ -176,6 +176,7 @@
                             <h5 class="modal-title" id="userFormModalLabel"></h5>
                             <p class="modal-hint">{{ __('user.form_hint') }}</p>
                         </div>
+                        <x-ui.modal-today variant="bs" />
                         <button type="button" class="close" data-dismiss="modal" aria-label="{{ __('buttons.cancel') }}">
                             <span aria-hidden="true">&times;</span>
                         </button>
@@ -207,6 +208,16 @@
                                     <input type="email" name="email" id="user_email" class="form-control"
                                         maxlength="191" required autocomplete="off" inputmode="email">
                                     <span class="invalid-feedback" role="alert"></span>
+                                </div>
+                            </div>
+                            {{-- The number the user signs in with (a login code is sent to it) --}}
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="user_mobile">{{ __('user.mobile') }}</label>
+                                    <input type="tel" name="mobile" id="user_mobile" class="form-control"
+                                        maxlength="17" autocomplete="off" inputmode="numeric" placeholder="01XXXXXXXXX">
+                                    <span class="invalid-feedback" role="alert"></span>
+                                    <small class="form-text text-muted">{{ __('user.mobile_hint') }}</small>
                                 </div>
                             </div>
                             <div class="col-md-6">
@@ -789,6 +800,7 @@
                 $('#user_name').val(user ? user.name : '');
                 $('#user_name_bn').val(user ? user.nameBn : '');
                 $('#user_email').val(user ? user.email : '');
+                $('#user_mobile').val(user ? user.mobile : '');
                 // New users default to the general "User" role.
                 $('#user_role_id').val(user ? String(user.roleId) : DEPARTMENT_REQUIRED_ROLE);
                 if (!$('#user_role_id').val()) {
@@ -818,6 +830,7 @@
                     name: String($btn.attr('data-name') || ''),
                     nameBn: String($btn.attr('data-name-bn') || ''),
                     email: String($btn.attr('data-email') || ''),
+                    mobile: String($btn.attr('data-mobile') || ''),
                     roleId: String($btn.attr('data-role-id') || ''),
                     departmentId: String($btn.attr('data-department-id') || '')
                 };
@@ -889,6 +902,7 @@
                     name: $.trim($('#user_name').val()),
                     name_bn: $.trim($('#user_name_bn').val()),
                     email: $.trim($('#user_email').val()),
+                    mobile: $.trim($('#user_mobile').val()),
                     role_id: $('#user_role_id').val(),
                     department_id: $('#user_department_id').val()
                 };

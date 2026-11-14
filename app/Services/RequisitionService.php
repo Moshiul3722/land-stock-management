@@ -91,12 +91,48 @@ class RequisitionService
      */
     public function getPendingRequisitionsForUser(User $user)
     {
+        // Super Admin (1) oversees the whole queue: every requisition that is waiting for a
+        // decision, whoever it is waiting for. Everyone else - Admin (2) included - sees what is
+        // waiting for them: for the Admin that is what the Store Admin has approved and sent on.
+        if ((int) $user->role_id === 1) {
+            return $this->allPendingRequisitionTasks($user)
+                ->load('requisition.requestedBy.department', 'requisition.items.product');
+        }
+
         $allPendingTasks = $this->approvalService->getPendingTasksForUser($user);
 
         // Filter to get ONLY Requisition tasks and load the original requestor
         return $allPendingTasks->filter(function ($task) {
             return $task->requistion_id !== null;
-        })->load('requisition.requestedBy', 'requisition.items.product');
+        })->load('requisition.requestedBy.department', 'requisition.items.product');
+    }
+
+    /**
+     * One pending task per requisition that is at its current approval step, for all approvers.
+     * When the given user is one of the approvers, their own task is the one returned, so the
+     * list knows the user can act on it.
+     */
+    private function allPendingRequisitionTasks(User $user)
+    {
+        $currentStep = DB::table('approval_details')
+            ->select('requistion_id', DB::raw('MAX(serial) as max_serial'))
+            ->whereNotNull('requistion_id')
+            ->groupBy('requistion_id');
+
+        return \App\Models\ApprovalDetail::query()
+            ->joinSub($currentStep, 'req_max', function ($join) {
+                $join->on('approval_details.requistion_id', '=', 'req_max.requistion_id')
+                    ->on('approval_details.serial', '=', 'req_max.max_serial');
+            })
+            ->where('approval_details.status', 'pending')
+            ->with(['requisition', 'fromUser', 'toUser:id,name,role_id'])
+            ->select('approval_details.*')
+            ->get()
+            ->filter(fn ($task) => $task->requisition !== null)
+            // the user's own task first, so unique() keeps it
+            ->sortBy(fn ($task) => (int) $task->to_user_id === (int) $user->id ? 0 : 1)
+            ->unique('requistion_id')
+            ->values();
     }
 
     /**
@@ -298,6 +334,33 @@ class RequisitionService
         return $result;
     }
 
+    /** Roles with full access: they may act on any step of the approval workflow. */
+    public const FULL_ACCESS_ROLE_IDS = [1, 2];
+
+    public function hasFullAccess(?User $user): bool
+    {
+        return $user !== null && in_array((int) $user->role_id, self::FULL_ACCESS_ROLE_IDS, true);
+    }
+
+    /**
+     * The role a user acts as on a requisition. Everyone acts as their own role, except
+     * Super Admin and Admin: on a pending requisition they stand in for the role of the
+     * step it is waiting at (Store Admin, Admin or Store Keeper) and get that role's tools.
+     */
+    public function actingRoleFor(User $user, Requisition $requisition): int
+    {
+        if (! $this->hasFullAccess($user)) {
+            return (int) $user->role_id;
+        }
+
+        $pendingTask = $requisition->approvalDetails()
+            ->where('status', 'pending')
+            ->with('toUser:id,role_id')
+            ->first();
+
+        return (int) ($pendingTask?->toUser?->role_id ?? $user->role_id);
+    }
+
     /**
      * Approve a pending requisition.
      */
@@ -310,18 +373,61 @@ class RequisitionService
             throw new InvalidArgumentException('No pending approval task found for this requisition.');
         }
 
-        // --- NEW BACKEND CHECK: Ensure Store Admin (Role 3) has assigned stock ---
-        if (Auth::user()->role_id == 3) {
-            // Lazy load items if they aren't loaded yet
-            foreach ($requisition->items as $item) {
-                if (empty($item->lot_detail_id)) {
-                    throw new InvalidArgumentException('Validation failed: All items must be assigned a Brand/Spec and saved before approval.');
+        // The Store Admin (Role 3) no longer picks a lot by hand: every item that has none gets
+        // the oldest lot that can cover its quantity (first in, first out). The assignment and
+        // the approval succeed or fail together.
+        DB::transaction(function () use ($requisition, $pendingTask, $comments) {
+            if ($this->actingRoleFor(Auth::user(), $requisition) === 3) {
+                foreach ($requisition->items as $item) {
+                    if (empty($item->lot_detail_id)) {
+                        $this->assignOldestLotWithStock($item);
+                    }
                 }
             }
-        }
-        // -----------------------------------------------------------------------
 
-        $this->approvalService->approve($pendingTask, $comments);
+            $this->approvalService->approve($pendingTask, $comments);
+        });
+    }
+
+    /**
+     * Gives a requisition item the oldest lot entry whose stock balance covers its quantity.
+     * Stock is consumed from one lot entry (ApprovalService::consumeStock), so a single entry
+     * has to hold the whole quantity.
+     *
+     * @throws InvalidArgumentException when no lot entry has enough stock
+     */
+    private function assignOldestLotWithStock($item): void
+    {
+        $lotDetail = DB::table('lot_details')
+            ->join('lots', 'lots.id', '=', 'lot_details.lot_id')
+            ->join('stocks', function ($join) {
+                $join->on('stocks.lot_id', '=', 'lot_details.lot_id')
+                    ->on('stocks.product_id', '=', 'lot_details.product_id')
+                    // <=> also matches the lots that were entered without a brand / specification
+                    ->whereRaw('stocks.brand <=> lot_details.brand')
+                    ->whereRaw('stocks.specification <=> lot_details.specification');
+            })
+            ->where('lot_details.product_id', $item->product_id)
+            ->whereNull('lot_details.deleted_at')
+            ->whereNull('lots.deleted_at')
+            ->whereNull('stocks.deleted_at')
+            ->groupBy('lot_details.id', 'lot_details.lot_id')
+            ->havingRaw('SUM(stocks.quantity) >= ?', [(int) $item->quantity])
+            ->orderBy('lot_details.lot_id')
+            ->orderBy('lot_details.id')
+            ->select('lot_details.id', 'lot_details.lot_id')
+            ->first();
+
+        if (! $lotDetail) {
+            $name = $item->product->name ?? ('#' . $item->product_id);
+
+            throw new InvalidArgumentException(__('requisition.pending_manage.modal.no_lot_stock', [
+                'name' => $name,
+                'qty' => (int) $item->quantity,
+            ]));
+        }
+
+        $item->update(['lot_detail_id' => $lotDetail->id, 'lot_id' => $lotDetail->lot_id]);
     }
 
     /**

@@ -156,9 +156,13 @@ class RequisitionController extends Controller
      */
     public function approve(Request $request, Requisition $requisition)
     {
+        if (! $this->isWaitingForCurrentUser($requisition)) {
+            return $this->backToDecisionPage()->with('error', __('requisition.pending_manage.modal.not_your_turn'));
+        }
+
         try {
             $this->requisitionService->approveRequisition($requisition, $request->input('comments'));
-            return redirect()->route('requisitions.pending')->with('success', 'Requisition approved successfully.');
+            return $this->backToDecisionPage()->with('success', __('requisition.pending_manage.modal.approved'));
         } catch (InvalidArgumentException $e) {
             // CATCHES OUR CUSTOM VALIDATION ERROR AND SENDS IT TO THE UI
             Log::error($e->getMessage());
@@ -178,14 +182,47 @@ class RequisitionController extends Controller
      */
     public function reject(Request $request, Requisition $requisition)
     {
+        if (! $this->isWaitingForCurrentUser($requisition)) {
+            return $this->backToDecisionPage()->with('error', __('requisition.pending_manage.modal.not_your_turn'));
+        }
+
         try {
             $this->requisitionService->rejectRequisition($requisition, $request->input('comments'));
-            return redirect()->route('requisitions.pending')->with('success', 'Requisition rejected successfully.');
+            return $this->backToDecisionPage()->with('success', __('requisition.pending_manage.modal.rejected'));
         } catch (Exception $e) {
             Log::error($e->getMessage());
             return redirect()->back()->with('error', $e->getMessage());
         }
     }
+    /**
+     * The approver a pending step is assigned to may decide on it. Super Admin and Admin have
+     * full access: they may decide on any requisition that is waiting at a step.
+     */
+    /**
+     * After a decision the user returns to the page it was made on: the requisition list when
+     * the dialog was opened there, otherwise the requisition request list.
+     */
+    private function backToDecisionPage()
+    {
+        $previous = (string) url()->previous();
+        $path = (string) parse_url($previous, PHP_URL_PATH);
+
+        return rtrim($path, '/') === parse_url(route('requisitions.index'), PHP_URL_PATH)
+            ? redirect()->to($previous)
+            : redirect()->route('requisitions.pending');
+    }
+
+    private function isWaitingForCurrentUser(Requisition $requisition): bool
+    {
+        $pending = $requisition->approvalDetails()->where('status', 'pending');
+
+        if ($this->requisitionService->hasFullAccess(Auth::user())) {
+            return $pending->exists();
+        }
+
+        return $pending->where('to_user_id', Auth::id())->exists();
+    }
+
     /**
      * Get requisition details for the modal (AJAX).
      */
@@ -202,7 +239,14 @@ class RequisitionController extends Controller
 
         // 1. Fetch available lots (Brand/Spec) for each item
         // Replaces the old 'current_stock' calculation
+        $lastReceipts = $this->lastReceiptsFor($requisition);
+
         foreach ($requisition->items as $item) {
+            $item->previous_receipt = $lastReceipts->get($item->product_id);
+
+            // Unit as shown on screen (Bangla name on Bangla pages)
+            $item->product?->append('unit_label');
+
             $item->available_lots = DB::table('stocks')
                 ->join('lots', 'stocks.lot_id', '=', 'lots.id')
                 ->join('lot_details', function ($join) {
@@ -226,6 +270,12 @@ class RequisitionController extends Controller
                 )
                 ->distinct()
                 ->get();
+
+            // Current balance of the product over all lots (the dialog marks items that are out of stock).
+            $item->available_quantity = (int) DB::table('stocks')
+                ->where('product_id', $item->product_id)
+                ->whereNull('deleted_at')
+                ->sum('quantity');
         }
 
         // 2. Timeline Logic
@@ -242,6 +292,7 @@ class RequisitionController extends Controller
             'user' => $requisition->requestedBy->name ?? 'Unknown',
             'role' => 'Requestor',
             'date' => $requisition->created_at->format('d M, Y h:i A'),
+            'date_iso' => $requisition->created_at->toIso8601String(), // lets the page show the date in its own language
             'comments' => $initiationComments,
             'color' => 'primary',
             'status_raw' => 'initiated'
@@ -266,6 +317,7 @@ class RequisitionController extends Controller
                     'user' => $actor->fromUser->name ?? 'System',
                     'role' => $actor->fromUser->role->role_name_en ?? 'Approver',
                     'date' => $actor->updated_at->format('d M, Y h:i A'),
+                    'date_iso' => $actor->updated_at->toIso8601String(),
                     'comments' => $actor->comments,
                     'color' => $actor->status == 'rejected' ? 'danger' : 'success',
                     'status_raw' => $actor->status
@@ -284,6 +336,8 @@ class RequisitionController extends Controller
                     'user' => 'Waiting for: ' . $pendingUsers,
                     'role' => $roleName,
                     'date' => $details->first()->created_at->format('d M, Y h:i A'),
+                    'date_iso' => $details->first()->created_at->toIso8601String(),
+                    'pending_users' => $pendingUsers,
                     'comments' => '',
                     'color' => 'warning',
                     'status_raw' => 'pending'
@@ -296,6 +350,7 @@ class RequisitionController extends Controller
             'is_print_enabled' => $requisition->is_print_enabled,
             'requestor' => $requisition->requestedBy->name,
             'formatted_date' => $requisition->requisition_date->format('d M, Y'),
+            'date_iso' => $requisition->requisition_date->format('Y-m-d'),
             'timeline' => $timeline
         ]);
     }
@@ -355,6 +410,61 @@ class RequisitionController extends Controller
         }
     }
     /**
+     * Remove selected items from a requisition that is waiting for the current user's decision.
+     *
+     * Only the Store Admin (role 3) may do this, only while the requisition is pending with
+     * them, and at least one item has to stay (a requisition without items is rejected instead).
+     * Items are soft-deleted, so nothing is lost for the record.
+     */
+    public function removeItems(Request $request, Requisition $requisition)
+    {
+        $user = Auth::user();
+        $waitingForUser = $this->isWaitingForCurrentUser($requisition);
+
+        // The Store Admin at their own step; Super Admin / Admin at any step (full access).
+        $mayRemove = $this->requisitionService->hasFullAccess($user)
+            || $this->requisitionService->actingRoleFor($user, $requisition) === 3;
+
+        if (! $mayRemove || ! $waitingForUser) {
+            return response()->json(['success' => false, 'message' => __('requisition.pending_manage.modal.delete_not_allowed')], 403);
+        }
+
+        $ids = collect($request->input('item_ids', []))
+            ->filter(fn ($id) => is_numeric($id))
+            ->map(fn ($id) => (int) $id)
+            ->unique()
+            ->values();
+
+        $items = RequisitionItem::where('requisition_id', $requisition->id)->whereIn('id', $ids)->get();
+
+        if ($ids->isEmpty() || $items->count() !== $ids->count()) {
+            return response()->json(['success' => false, 'message' => __('requisition.pending_manage.modal.delete_none')], 422);
+        }
+
+        if ($items->count() >= $requisition->items()->count()) {
+            return response()->json(['success' => false, 'message' => __('requisition.pending_manage.modal.delete_all_blocked')], 422);
+        }
+
+        try {
+            DB::transaction(function () use ($items, $user) {
+                foreach ($items as $item) {
+                    $item->forceFill(['deleted_by' => $user->id])->save();
+                    $item->delete();
+                }
+            });
+        } catch (Exception $e) {
+            Log::error('Requisition item removal failed', ['requisition_id' => $requisition->id, 'exception' => $e]);
+
+            return response()->json(['success' => false, 'message' => __('requisition.pending_manage.modal.action_failed')], 500);
+        }
+
+        return response()->json([
+            'success' => true,
+            'message' => __('requisition.pending_manage.modal.items_deleted', ['count' => $items->count()]),
+        ]);
+    }
+
+    /**
      * Remove the specified resource from storage.
      */
     public function destroy(Requisition $requisition)
@@ -396,6 +506,33 @@ class RequisitionController extends Controller
     /**
      * Display the printable requisition slip with QR Code.
      */
+    /**
+     * When the requester last received each product of this requisition (through an earlier
+     * requisition), and how many: the newest issue per product, keyed by product id.
+     */
+    private function lastReceiptsFor(Requisition $requisition)
+    {
+        return \App\Models\IssuedItem::query()
+            ->where('user_id', $requisition->requested_by_user_id)
+            ->where('requisition_id', '!=', $requisition->id)
+            ->whereIn('product_id', $requisition->items->pluck('product_id'))
+            ->whereNull('deleted_at')
+            ->orderByDesc('issued_date')
+            ->orderByDesc('id')
+            ->get(['product_id', 'requisition_id', 'quantity', 'issued_date'])
+            ->groupBy('product_id')
+            ->map(function ($issues) {
+                $latest = $issues->first();
+
+                return [
+                    'date_iso' => \Illuminate\Support\Carbon::parse($latest->issued_date)->format('Y-m-d'),
+                    // everything received in that requisition for the product
+                    'quantity' => (int) $issues->where('requisition_id', $latest->requisition_id)->sum('quantity'),
+                    'requisition_id' => (int) $latest->requisition_id,
+                ];
+            });
+    }
+
     public function printSlip(Requisition $requisition)
     {
         // Load all necessary relationships for the slip
@@ -405,7 +542,23 @@ class RequisitionController extends Controller
             'items.lot' // To show assigned lot/brand info
         ]);
 
-        return view('requisition.print', compact('requisition'));
+        // Each product's last receipt by the requester (date and quantity)
+        $lastReceipts = $this->lastReceiptsFor($requisition);
+
+        // The officer who approved it: the highest approval step before the store keeper's delivery
+        $approval = \App\Models\ApprovalDetail::query()
+            ->where('requistion_id', $requisition->id)
+            ->where('status', 'approved')
+            ->where('serial', '<', 3)
+            ->orderByDesc('serial')
+            ->orderByDesc('id')
+            ->with('fromUser')
+            ->first();
+        $approver = $approval?->fromUser;
+        $approverRole = $approver ? \App\Models\CnfRole::find($approver->role_id) : null;
+        $approvedAt = $approval?->updated_at;
+
+        return view('requisition.print', compact('requisition', 'lastReceipts', 'approver', 'approverRole', 'approvedAt'));
     }
 
     /**
@@ -492,7 +645,8 @@ class RequisitionController extends Controller
     public function verifyAndProcess(Request $request, Requisition $requisition)
     {
         // 1. Authorization Check (Role 4 = Store Keeper)
-        if (Auth::user()->role_id != 4) {
+        // Super Admin / Admin may do it too, while the requisition is at the Store Keeper step.
+        if ($this->requisitionService->actingRoleFor(Auth::user(), $requisition) !== 4) {
             return response()->json(['success' => false, 'message' => 'Unauthorized. Only Store Keepers can scan.'], 403);
         }
 

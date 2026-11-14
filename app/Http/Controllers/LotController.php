@@ -94,6 +94,28 @@ class LotController extends Controller
     }
 
     /**
+     * The lot on an A4 sheet, for printing (?preview=1 shows it first without printing).
+     */
+    public function printSlip(Lot $lot)
+    {
+        $lot->load('lotDetails.product.category', 'purchaseType', 'fiscalYear');
+
+        // The officer who approved the lot (none while it is a draft, pending or rejected)
+        $approval = \App\Models\ApprovalDetail::query()
+            ->where('lot_id', $lot->id)
+            ->where('status', 'approved')
+            ->orderByDesc('serial')
+            ->orderByDesc('id')
+            ->with('fromUser')
+            ->first();
+        $approver = $approval?->fromUser;
+        $approverRole = $approver ? \App\Models\CnfRole::find($approver->role_id) : null;
+        $approvedAt = $approval?->updated_at;
+
+        return view('lot.print', compact('lot', 'approver', 'approverRole', 'approvedAt'));
+    }
+
+    /**
      * Show the form for editing the specified resource.
      */
     public function edit(Lot $lot)
@@ -144,7 +166,7 @@ class LotController extends Controller
     {
         try {
             $this->lotService->approveLot($lot, $request->input('comments'));
-            return redirect()->route('lots.entry.index')->with('success', 'Lot approved successfully, items stocked, and budget updated.');
+            return redirect()->route('lots.entry.index')->with('success', __('lot.requests.approved'));
         } catch (Exception $e) {
             Log::error($e->getMessage());
             return redirect()->back()->with('error', $e->getMessage());
@@ -158,7 +180,7 @@ class LotController extends Controller
     {
         try {
             $this->lotService->rejectLot($lot, $request->input('comments'));
-            return redirect()->route('lots.entry.index')->with('success', 'Lot rejected successfully.');
+            return redirect()->route('lots.entry.index')->with('success', __('lot.requests.rejected'));
         } catch (Exception $e) {
             Log::error($e->getMessage());
             return redirect()->back()->with('error', $e->getMessage());

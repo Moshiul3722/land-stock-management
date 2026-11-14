@@ -40,6 +40,8 @@ return [
         'search_placeholder' => 'Search by product, category, sub-category or unit',
         'hint' => 'Give the product a name, category and unit; sub-category and description are optional.',
         'exists' => 'A product with this name already exists.',
+        'name_en' => 'Product name (English)',
+        'name_bn' => 'Product name (Bangla)',
         'created' => 'New product added successfully.',
         'updated' => 'Product updated successfully.',
         'deleted' => 'Product deleted successfully.',

@@ -1,5 +1,5 @@
 <aside class="main-sidebar sidebar-dark-primary elevation-4">
-    <a href="{{ url('/home') }}" class="brand-link">
+    <a href="{{ url('/home') }}" wire:navigate class="brand-link">
         <img src="{{ asset('theme/assets/img/gov.png') }}"
              alt="{{ config('app.name') }} Logo"
              class="brand-image">
@@ -7,7 +7,7 @@
     </a>
     <div class="sidebar">
         <nav class="mt-2">
-            <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu" data-accordion="false">
+            <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu" data-accordion="true">
                 @include('layouts.menu')
             </ul>
         </nav>

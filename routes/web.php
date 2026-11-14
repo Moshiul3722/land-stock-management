@@ -32,31 +32,39 @@ use Illuminate\Support\Facades\Artisan;
 
 Auth::routes();
 
+// Sign-in with a mobile number and a one-time code (OTP); the page itself is the login page
+Route::post('/login/otp/send', [\App\Http\Controllers\Auth\OtpLoginController::class, 'send'])->name('login.otp.send');
+Route::post('/login/otp/resend', [\App\Http\Controllers\Auth\OtpLoginController::class, 'resend'])->name('login.otp.resend');
+Route::post('/login/otp/verify', [\App\Http\Controllers\Auth\OtpLoginController::class, 'verify'])->name('login.otp.verify');
+Route::post('/login/otp/cancel', [\App\Http\Controllers\Auth\OtpLoginController::class, 'cancel'])->name('login.otp.cancel');
+
 // Route::get('/', [LoginController::class, 'showLoginForm'])->name('login');
 Route::get('/', function () {
-    // If users are logged in, redirect to dashboard, otherwise show landing page
+    // If users are logged in, redirect to dashboard, otherwise open the login page
     if (Auth::check()) {
         return redirect()->route('home');
     }
-    return view('welcome');
+    return redirect()->route('login');
 })->name('landing');
 Route::get('/home', [HomeController::class, 'index'])->name('home');
-Route::get('/force-reset-db', function () {
-    // Optional: Safety check to prevent running on production
-    // if (app()->environment('production')) {
-    //     abort(403, 'ACTION BLOCKED: Cannot reset database in production.');
-    // }
-
-    try {
-        // Run the command
-        Artisan::call('migrate:fresh --seed --force');
-
-        // Return the output so you know it worked
-        return '<h1>Database Reset Successful</h1><pre>' . Artisan::output() . '</pre>';
-    } catch (\Exception $e) {
-        return '<h1>Error</h1><p>' . $e->getMessage() . '</p>';
-    }
-});
+// SWITCHED OFF (2026-11-14): this address wiped and rebuilt the whole database for anyone
+// who opened it, without signing in. Kept here only for reference - do not switch it back on.
+// Route::get('/force-reset-db', function () {
+//     // Optional: Safety check to prevent running on production
+//     // if (app()->environment('production')) {
+//     //     abort(403, 'ACTION BLOCKED: Cannot reset database in production.');
+//     // }
+//
+//     try {
+//         // Run the command
+//         Artisan::call('migrate:fresh --seed --force');
+//
+//         // Return the output so you know it worked
+//         return '<h1>Database Reset Successful</h1><pre>' . Artisan::output() . '</pre>';
+//     } catch (\Exception $e) {
+//         return '<h1>Error</h1><p>' . $e->getMessage() . '</p>';
+//     }
+// });
 
 // Route::get('generator_builder', '\InfyOm\GeneratorBuilder\Controllers\GeneratorBuilderController@builder')->name('io_generator_builder');
 
@@ -144,6 +152,7 @@ Route::middleware(['auth', 'permission'])->group(function () {
 
     // Lot Resources
     Route::get('/lots/autocomplete', [LotController::class, 'autocomplete'])->name('lots.autocomplete');
+    Route::get('/lots/{lot}/print', [LotController::class, 'printSlip'])->name('lots.print');
     Route::resource('lots', LotController::class);
     Route::get('/lots/entry/index', [LotController::class, 'entryIndex'])->name('lots.entry.index');
     Route::post('/lots/{lot}/approve', [App\Http\Controllers\LotController::class, 'approve'])->name('lots.approve');
@@ -152,6 +161,10 @@ Route::middleware(['auth', 'permission'])->group(function () {
     // Stock Resources
     Route::get('/stock', [StockController::class, 'index'])->name('stock.index');
     Route::get('/stock/show/{product}', [StockController::class, 'show'])->name('stock.show');
+    // Who received a product through requisitions: department, date and quantity
+    Route::get('/stock/issues/{product}', [StockController::class, 'issues'])->name('stock.issues');
+    // Goods the signed-in user's section / department received through requisitions
+    Route::get('/stock/department-issues', [StockController::class, 'departmentIssues'])->name('stock.department_issues');
     Route::get('/stock/check-status/{product}', [StockController::class, 'checkProductStatus'])->name('stock.check_status');
 
     // Requisition Resources
@@ -161,6 +174,8 @@ Route::middleware(['auth', 'permission'])->group(function () {
     Route::resource('requisitions', RequisitionController::class);
     Route::get('/requisitions/{requisition}/details', [RequisitionController::class, 'getDetails'])->name('requisitions.get_details');
     Route::post('/requisitions/{requisition}/update-items', [RequisitionController::class, 'updateItems'])->name('requisitions.update_items');
+    // Store Admin removes selected items from a requisition that is waiting for their decision
+    Route::post('/requisitions/{requisition}/remove-items', [RequisitionController::class, 'removeItems'])->name('requisitions.remove_items');
 
     // Budget Resources
     Route::resource('budgets', BudgetController::class);

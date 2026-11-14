@@ -26,6 +26,7 @@ return [
     'required_field' => ':attribute is required.',
     'clear_selection' => 'Clear selection',
     'type_to_search' => 'Type to search',
+    'clear_date' => 'Clear date',
     'select_date' => 'Select a date',
     'today' => 'Today',
     'yesterday' => 'Yesterday',

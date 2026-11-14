@@ -52,6 +52,42 @@
 
 .modal .modal-heading {
     min-width: 0;
+    flex: 1 1 0;
+}
+
+/* Today's weekday and date, just before the close button */
+.modal .modal-today {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    align-self: center;
+    margin: 0 0 0 auto;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: #475569;
+    white-space: nowrap;
+}
+
+.modal .modal-today > i {
+    color: #1d65db;
+}
+
+.modal .modal-header .modal-today + .close {
+    margin-left: 1rem;
+}
+
+/* Phones: the date drops to its own line under the title */
+@media (max-width: 575.98px) {
+    .modal .modal-header {
+        flex-wrap: wrap;
+    }
+
+    .modal .modal-today {
+        order: 3;
+        flex: 1 1 100%;
+        margin: 0.25rem 0 0;
+        white-space: normal;
+    }
 }
 
 .modal .modal-title {
@@ -78,7 +114,8 @@
     margin: -0.25rem -0.5rem -0.25rem auto;
     padding: 0;
     border-radius: 0.5rem;
-    color: #64748b;
+    background: #f1f5f9;
+    color: #475569;
     font-size: 1.5rem;
     font-weight: 400;
     line-height: 1;
@@ -87,9 +124,30 @@
     transition: background-color 0.15s, color 0.15s;
 }
 
+/* The same cross as in the requisition dialog: the icon font's "times", not the "×" character */
+.modal .modal-header .close > span {
+    display: none;
+}
+
+.modal .modal-header .close::before {
+    font-family: "Font Awesome 5 Free";
+    font-size: 1rem;
+    font-weight: 900;
+    line-height: 1;
+    content: "\f00d";
+}
+
+/* Phones and small tablets: a bigger target, as in the requisition dialog */
+@media (max-width: 767.98px) {
+    .modal .modal-header .close {
+        width: 2.75rem;
+        height: 2.75rem;
+    }
+}
+
 .modal .modal-header .close:hover,
 .modal .modal-header .close:focus {
-    background: #f1f5f9;
+    background: #e2e8f0;
     color: #0f172a;
     outline: 0;
 }
@@ -222,21 +280,38 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    min-height: 2.75rem;
-    padding: 0 1rem;
+    min-height: 2.125rem;
+    min-width: 5.5rem;
+    padding: 0 0.875rem;
     border: 1px solid transparent;
     border-radius: 0.5rem;
-    font-size: 0.875rem;
+    font-size: 0.8125rem;
     font-weight: 600;
     line-height: 1;
+    letter-spacing: 0.01em;
     white-space: nowrap;
-    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.05);
+    background-image: linear-gradient(to bottom, rgba(255, 255, 255, 0.14), rgba(255, 255, 255, 0));
+    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.2);
     transition: background-color 0.15s, border-color 0.15s, color 0.15s, box-shadow 0.15s;
 }
 
 .modal .modal-footer .btn > i,
 .modal .modal-actions .btn > i {
-    margin-right: 0.5rem;
+    margin-right: 0.4rem;
+    font-size: 0.75rem;
+}
+
+.modal .modal-footer .btn:not(:disabled):hover,
+.modal .modal-actions .btn:not(:disabled):hover {
+    box-shadow: 0 3px 8px -2px rgba(15, 23, 42, 0.22), inset 0 1px 0 rgba(255, 255, 255, 0.2);
+}
+
+/* Phones: finger-sized height (the buttons are full width there) */
+@media (max-width: 575.98px) {
+    .modal .modal-footer .btn,
+    .modal .modal-actions .btn {
+        min-height: 2.5rem;
+    }
 }
 
 .modal .modal-footer .btn:focus-visible,

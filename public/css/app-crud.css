@@ -97,14 +97,21 @@
     background: #f8f9fc;
 }
 
-/* Ten rows are visible at a time; the rest scroll. */
+/* Ten sub-categories per page; the rest are reached through the small pager below. */
 .crud-nested-list {
     margin: 0;
-    padding: 0 0.25rem 0 0;
+    padding: 0;
     list-style: none;
-    max-height: 27.5rem;
-    overflow-y: auto;
-    overscroll-behavior: contain;
+}
+
+.crud-sub-footer {
+    margin: 0.4rem 0 0.25rem;
+    padding: 0.35rem 0.6rem;
+    font-size: 0.9em;
+}
+
+.crud-sub-footer .page-link {
+    padding: 0.2rem 0.6rem;
 }
 
 .crud-nested-list > li {
@@ -189,4 +196,141 @@
     .crud-footer .page-link {
         padding: 0.4rem 0.55rem;
     }
+}
+
+/* Sub-category name: opens the list of its products */
+.crud-sub-link {
+    padding: 0;
+    border: 0;
+    background: none;
+    color: inherit;
+    font: inherit;
+    text-align: left;
+    cursor: pointer;
+}
+
+/* Only the name is highlighted on hover, not the code or the product count */
+.crud-sub-name {
+    display: inline-block;
+    margin-left: -0.4rem;
+    padding: 0.1rem 0.4rem;
+    border-radius: 0.35rem;
+    transition: background-color 0.15s, color 0.15s;
+}
+
+.crud-sub-link:hover .crud-sub-name,
+.crud-sub-link:focus-visible .crud-sub-name {
+    background: #dfe7fb;
+    color: #1f3fae;
+}
+
+.crud-sub-link:focus-visible {
+    outline: 2px solid #2f55d4;
+    outline-offset: 2px;
+    border-radius: 0.25rem;
+}
+
+.crud-modal-table th,
+.crud-modal-table td {
+    padding: 0.15rem 0.6rem !important;
+    height: auto !important;
+    line-height: 1.45;
+    vertical-align: middle;
+}
+
+.crud-busy {
+    opacity: 0.55;
+}
+
+/* Search box in a modal header (between the title and the close button) */
+.crud-head-title {
+    flex: 1 1 auto;
+}
+
+.crud-head-search {
+    position: relative;
+    flex: 0 1 17rem;
+    min-width: 11rem;
+    align-self: center;
+}
+
+.crud-head-search > i {
+    position: absolute;
+    left: 0.8rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #94a3b8;
+    font-size: 0.9em;
+    pointer-events: none;
+}
+
+.crud-head-search > input {
+    display: block;
+    width: 100%;
+    min-height: 2.75rem;
+    padding: 0.4rem 0.75rem 0.4rem 2.3rem;
+    border: 1px solid #cbd5e1;
+    border-radius: 0.5rem;
+    background: #fff;
+    color: #0f172a;
+    font-size: 0.95em;
+    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.05);
+    transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.crud-head-search > input::placeholder {
+    color: #94a3b8;
+}
+
+.crud-head-search > input:hover {
+    border-color: #94a3b8;
+}
+
+.crud-head-search > input:focus {
+    outline: none;
+    border-color: #4f6fe0;
+    box-shadow: 0 0 0 4px rgba(79, 111, 224, 0.15);
+}
+
+.crud-head-search:focus-within > i {
+    color: #4f6fe0;
+}
+
+/* Phones: the search drops to its own full-width line under the title */
+@media (max-width: 575.98px) {
+    .crud-head-wrap {
+        flex-wrap: wrap;
+    }
+
+    .crud-head-wrap .crud-head-title {
+        flex: 1 1 0;
+    }
+
+    .crud-head-wrap .crud-head-search {
+        order: 3;
+        flex: 1 1 100%;
+    }
+}
+
+/* Products modal header: no divider under it, close button on a soft tile */
+.tw-root .crud-head-wrap {
+    border-bottom: 0 !important;
+    padding-bottom: 0.25rem !important;
+}
+
+.tw-root .crud-head-close {
+    background: #eef2f7 !important;
+    color: #475569 !important;
+}
+
+.tw-root .crud-head-close:hover {
+    background: #e2e8f0 !important;
+    color: #0f172a !important;
+}
+
+/* Small label inside a table cell (e.g. the fiscal year of a budget) */
+.crud-badge {
+    font-size: 0.85em;
+    font-weight: 600;
+    padding: 0.3em 0.6em;
 }

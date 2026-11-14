@@ -5,6 +5,7 @@ namespace App\Livewire\Requisitions;
 use App\Models\Product;
 use App\Models\ProductCategory;
 use App\Models\Requisition;
+use App\Models\RequisitionItem;
 use App\Services\MenuPermissionService;
 use App\Services\RequisitionService;
 use App\Services\StockService;
@@ -14,6 +15,7 @@ use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\ValidationException;
 use InvalidArgumentException;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Locked;
@@ -33,6 +35,9 @@ use Throwable;
  */
 class ManageRequisitions extends Component
 {
+    /** Role "General User" (ব্যবহারকারী), as in cnf_role. */
+    private const GENERAL_USER_ROLE_ID = 5;
+
     use WithPagination;
 
     /** Statuses a requisition can have (same list the old index page offered). */
@@ -91,6 +96,22 @@ class ManageRequisitions extends Component
 
     public string $remarks = '';
 
+    /** Row of `items` loaded into the picker for editing; null while adding. */
+    public ?int $editingIndex = null;
+
+    /** Page of the requested-items table in the form. */
+    public int $itemPage = 1;
+
+    private const ITEMS_PER_PAGE = 7;
+
+    /** Page of the items table in the view dialog. */
+    public int $viewItemPage = 1;
+
+    private const VIEW_ITEMS_PER_PAGE = 5;
+
+    /** Requisition whose row is highlighted (the user came from its notification). */
+    public ?int $highlightId = null;
+
     public function mount(): void
     {
         abort_unless($this->can('requisitions.index'), 403);
@@ -103,6 +124,26 @@ class ManageRequisitions extends Component
         // with ?create=1 and opens the create modal straight away.
         if (request()->boolean('create') && $this->can('requisitions.create')) {
             $this->openCreate();
+        }
+
+        // A link to one requisition (e.g. from a product's issue history: ?view=54) opens its
+        // details dialog straight away.
+        if (is_numeric(request()->query('view'))) {
+            $this->openView((int) request()->query('view'));
+        }
+
+        // Arriving from a notification (?highlight=169): that requisition's row is shown with a
+        // background colour, on whichever page of the list it sits.
+        if (ctype_digit((string) request()->query('highlight'))) {
+            $this->highlightId = (int) request()->query('highlight');
+            $target = $this->ownRequisitions()->find($this->highlightId, ['id', 'created_at']);
+            if ($target) {
+                $before = $this->ownRequisitions()
+                    ->where(fn (Builder $q) => $q->where('created_at', '>', $target->created_at)
+                        ->orWhere(fn (Builder $same) => $same->where('created_at', $target->created_at)->where('id', '>', $target->id)))
+                    ->count();
+                $this->setPage(intdiv($before, (int) $this->perPage) + 1);
+            }
         }
     }
 
@@ -195,10 +236,19 @@ class ManageRequisitions extends Component
         $this->showForm = true;
     }
 
+    /** Choosing a category clears its error at once (the product list changes with it). */
     public function updatedCategoryId(): void
     {
         $this->productId = null;
-        $this->resetValidation(['productId']);
+        $this->resetValidation($this->categoryId ? ['categoryId', 'productId'] : ['productId']);
+    }
+
+    /** Choosing a product clears its error at once. */
+    public function updatedProductId(): void
+    {
+        if ($this->productId) {
+            $this->resetValidation(['productId']);
+        }
     }
 
     public function addItem(): void
@@ -211,30 +261,97 @@ class ManageRequisitions extends Component
                 Rule::exists('products', 'id')->whereNull('deleted_at')->where('category_id', $this->categoryId),
             ],
             'quantity' => ['required', 'integer', 'min:1', 'max:100000'],
-        ], [], $this->attributeNames());
+        ], $this->validationMessages(), $this->attributeNames());
 
         $productId = (int) $this->productId;
         $quantity = (int) $this->quantity;
+        $editing = $this->editingIndex !== null && isset($this->items[$this->editingIndex]);
 
-        $index = collect($this->items)->search(fn ($item) => (int) $item['product_id'] === $productId);
+        // Another row that already holds this product (the row being edited does not count).
+        $index = collect($this->items)->search(fn ($item, $key) => (int) $item['product_id'] === $productId
+            && ! ($editing && $key === $this->editingIndex));
 
-        if ($index !== false) {
+        $shown = null; // row to bring into view
+        if ($editing && $index === false) {
+            $this->items[$this->editingIndex] = ['product_id' => $productId, 'quantity' => $quantity];
+            $shown = $this->editingIndex;
+            $this->notify('success', __('requisition.manage.item_updated'));
+        } elseif ($index !== false) {
+            // One row per product: the quantity goes to the existing row.
             $this->items[$index]['quantity'] = min(100000, (int) $this->items[$index]['quantity'] + $quantity);
+            if ($editing) {
+                unset($this->items[$this->editingIndex]);
+                $this->items = array_values($this->items);
+            }
+            $shown = collect($this->items)->search(fn ($item) => (int) $item['product_id'] === $productId);
             $this->notify('info', __('requisition.manage.item_merged'));
         } else {
             $this->items[] = ['product_id' => $productId, 'quantity' => $quantity];
+            $shown = count($this->items) - 1;
         }
 
-        $this->productId = null;
-        $this->quantity = 1;
+        $this->showItemRow((int) $shown);
+        $this->resetPicker();
         $this->resetValidation(['items', 'productId', 'quantity']);
+    }
+
+    /** Loads a row into the picker so its product or quantity can be changed. */
+    public function editItem(int $index): void
+    {
+        if (! isset($this->items[$index])) {
+            return;
+        }
+
+        $item = $this->items[$index];
+        $this->editingIndex = $index;
+        $this->categoryId = Product::whereKey($item['product_id'])->value('category_id');
+        $this->productId = (int) $item['product_id'];
+        $this->quantity = max(1, (int) $item['quantity']);
+        unset($this->productOptions);
+        $this->resetValidation();
+    }
+
+    public function cancelItemEdit(): void
+    {
+        $this->resetPicker();
+        $this->resetValidation(['categoryId', 'productId', 'quantity']);
     }
 
     public function removeItem(int $index): void
     {
+        if (! isset($this->items[$index])) {
+            return;
+        }
+
         unset($this->items[$index]);
         $this->items = array_values($this->items);
+        $this->resetPicker();
         $this->resetValidation();
+        $this->itemPage = max(1, min($this->itemPage, $this->itemPageCount()));
+    }
+
+    public function gotoItemPage(int $page): void
+    {
+        $this->itemPage = max(1, min($page, $this->itemPageCount()));
+    }
+
+    private function itemPageCount(): int
+    {
+        return max(1, (int) ceil(count($this->items) / self::ITEMS_PER_PAGE));
+    }
+
+    /** Opens the page of the items table that holds the given row. */
+    private function showItemRow(int $index): void
+    {
+        $this->itemPage = max(1, min(intdiv(max(0, $index), self::ITEMS_PER_PAGE) + 1, $this->itemPageCount()));
+    }
+
+    /** Clears the picker but keeps the chosen category, so the next product is quick to add. */
+    private function resetPicker(): void
+    {
+        $this->editingIndex = null;
+        $this->productId = null;
+        $this->quantity = 1;
     }
 
     /**
@@ -260,15 +377,24 @@ class ManageRequisitions extends Component
             $this->authorizeOrFail($this->can('requisitions.create'));
         }
 
-        $validated = $this->validate([
-            'items' => ['required', 'array', 'min:1', 'max:200'],
-            'items.*.product_id' => ['required', 'integer', 'distinct', Rule::exists('products', 'id')->whereNull('deleted_at')],
-            'items.*.quantity' => ['required', 'integer', 'min:1', 'max:100000'],
-            'remarks' => ['nullable', 'string', 'max:1000'],
-        ], [
-            'items.required' => __('requisition.manage.items_required'),
-            'items.min' => __('requisition.manage.items_required'),
-        ], $this->attributeNames());
+        try {
+            $validated = $this->validate([
+                'items' => ['required', 'array', 'min:1', 'max:200'],
+                'items.*.product_id' => ['required', 'integer', 'distinct', Rule::exists('products', 'id')->whereNull('deleted_at')],
+                'items.*.quantity' => ['required', 'integer', 'min:1', 'max:100000'],
+                'remarks' => ['nullable', 'string', 'max:1000'],
+            ], $this->validationMessages(), $this->attributeNames());
+        } catch (ValidationException $e) {
+            // The row with the problem may be on another page of the items table: open it.
+            foreach (array_keys($e->errors()) as $key) {
+                if (preg_match('/^items\.(\d+)\./', $key, $match)) {
+                    $this->showItemRow((int) $match[1]);
+                    break;
+                }
+            }
+
+            throw $e;
+        }
 
         $data = [
             // The service expects `details`; only validated, whitelisted keys are passed on.
@@ -317,7 +443,7 @@ class ManageRequisitions extends Component
 
     public function openView(int $id): void
     {
-        $requisition = $this->ownRequisitions()->find($id);
+        $requisition = $this->viewableRequisitions()->find($id);
         if (! $requisition) {
             $this->notify('error', __('requisition.manage.not_found'));
 
@@ -325,7 +451,16 @@ class ManageRequisitions extends Component
         }
 
         $this->viewingId = $requisition->id;
+        unset($this->viewing, $this->previousRequests);
+        $this->viewItemPage = 1;
         $this->showView = true;
+    }
+
+    public function gotoViewItemPage(int $page): void
+    {
+        $count = $this->viewing ? $this->viewing->items->count() : 0;
+        $last = max(1, (int) ceil($count / self::VIEW_ITEMS_PER_PAGE));
+        $this->viewItemPage = max(1, min($page, $last));
     }
 
     #[Computed]
@@ -335,9 +470,10 @@ class ManageRequisitions extends Component
             return null;
         }
 
-        return $this->ownRequisitions()
+        return $this->viewableRequisitions()
             ->with([
                 'items.product.category',
+                'items.product.subCategory',
                 'items.lotDetail',
                 'requestedBy:id,name',
                 'approvalDetails' => fn ($q) => $q->where('status', '!=', 'superceded')->orderBy('serial')->orderBy('id'),
@@ -345,6 +481,37 @@ class ManageRequisitions extends Component
                 'approvalDetails.toUser',
             ])
             ->find($this->viewingId);
+    }
+
+    /**
+     * The requester's latest earlier requisition for each product of the one being viewed:
+     * its date and the quantity asked for, keyed by product id. Submitted requisitions only
+     * (drafts do not count), and only those made before this one.
+     */
+    #[Computed]
+    public function previousRequests(): Collection
+    {
+        $viewing = $this->viewing;
+        if (! $viewing) {
+            return collect();
+        }
+
+        return RequisitionItem::query()
+            ->join('requisitions', 'requisitions.id', '=', 'requisition_items.requisition_id')
+            ->whereIn('requisition_items.product_id', $viewing->items->pluck('product_id')->unique())
+            ->where('requisitions.requested_by_user_id', $viewing->requested_by_user_id)
+            ->where('requisitions.id', '<', $viewing->id)
+            ->where('requisitions.status', '!=', 'draft')
+            ->whereNull('requisitions.deleted_at')
+            ->whereNull('requisition_items.deleted_at')
+            ->groupBy('requisition_items.product_id', 'requisitions.id', 'requisitions.requisition_date')
+            ->orderByDesc('requisitions.requisition_date')
+            ->orderByDesc('requisitions.id')
+            ->selectRaw('requisition_items.product_id, requisitions.requisition_date as last_date, sum(requisition_items.quantity) as last_quantity')
+            ->toBase()
+            ->get()
+            ->unique('product_id') // newest first, so the first row per product is the latest
+            ->keyBy('product_id');
     }
 
     /**
@@ -493,7 +660,7 @@ class ManageRequisitions extends Component
         return Product::query()
             ->where('category_id', $this->categoryId)
             ->orderBy('name')
-            ->get(['id', 'name', 'product_unit']);
+            ->get(['id', 'name', 'name_bn', 'product_unit']);
     }
 
     /** Product details and live stock for the rows in the form, keyed by product id. */
@@ -507,14 +674,36 @@ class ManageRequisitions extends Component
 
         $stockService = app(StockService::class);
 
+        // Date of this user's latest earlier requisition for each product: submitted ones only,
+        // and not the requisition that is being edited.
+        $previousDates = RequisitionItem::query()
+            ->join('requisitions', 'requisitions.id', '=', 'requisition_items.requisition_id')
+            ->whereIn('requisition_items.product_id', $ids)
+            ->where('requisitions.requested_by_user_id', Auth::id())
+            ->where('requisitions.status', '!=', 'draft')
+            ->whereNull('requisitions.deleted_at')
+            ->when($this->editingId, fn ($query) => $query->where('requisitions.id', '!=', $this->editingId))
+            ->whereNull('requisition_items.deleted_at')
+            ->groupBy('requisition_items.product_id', 'requisitions.id', 'requisitions.requisition_date')
+            ->orderByDesc('requisitions.requisition_date')
+            ->orderByDesc('requisitions.id')
+            ->selectRaw('requisition_items.product_id, requisitions.requisition_date as last_date, sum(requisition_items.quantity) as last_quantity')
+            ->toBase()
+            ->get()
+            ->unique('product_id') // newest requisition first, so the first row per product is the latest
+            ->keyBy('product_id');
+
         return Product::query()
             ->with('category:id,name')
             ->whereIn('id', $ids)
             ->get(['id', 'name', 'product_unit', 'category_id'])
             ->keyBy('id')
-            ->map(function (Product $product) use ($stockService) {
+            ->map(function (Product $product) use ($stockService, $previousDates) {
                 $stock = $stockService->getAggregatedStockList(['product_id' => $product->id]);
                 $product->available_quantity = (int) ($stock->first()->total_quantity ?? 0);
+                $previous = $previousDates->get($product->id);
+                $product->previous_requisition_date = $previous->last_date ?? null;
+                $product->previous_requisition_quantity = $previous ? (int) $previous->last_quantity : null;
 
                 return $product;
             });
@@ -566,8 +755,21 @@ class ManageRequisitions extends Component
             'statuses' => self::STATUSES,
             'perPageOptions' => self::PER_PAGE_OPTIONS,
             'canCreate' => $this->can('requisitions.create'),
+            // Rows of the current page of the items table; the keys stay the rows' real indexes.
+            'pageItems' => array_slice($this->items, ($this->itemPage - 1) * self::ITEMS_PER_PAGE, self::ITEMS_PER_PAGE, true),
+            'itemPages' => $this->itemPageCount(),
+            'itemsPerPage' => self::ITEMS_PER_PAGE,
+            'viewItemsPerPage' => self::VIEW_ITEMS_PER_PAGE,
+            // Today's weekday and date, shown in the header of the view dialog.
+            'todayLabel' => $this->localDigits(now()->locale(app()->getLocale() === 'bn' ? 'bn' : 'en')->translatedFormat(app()->getLocale() === 'bn' ? 'l, j F Y' : 'l, d M Y')),
+            // Stock information in the form (in stock with the count / out of stock) is for every
+            // role except the General User, who sees none of it.
+            'showStockCount' => (int) Auth::user()?->role_id !== self::GENERAL_USER_ROLE_ID,
             'hasFilters' => $this->hasFilters(),
             'canEdit' => fn (Requisition $r) => $this->canEdit($r),
+            // Requisitions of this page the signed-in user can decide on: id => role of the step
+            // they are waiting at. Their "view" button opens the decision dialog instead.
+            'decidable' => $this->decidableRequisitions(),
             'formatDate' => fn ($date, bool $withTime = false) => $this->formatDate($date, $withTime),
             'digits' => fn ($value) => $this->localDigits($value),
             'statusLabel' => fn (?string $status) => $this->statusLabel($status),
@@ -578,10 +780,57 @@ class ManageRequisitions extends Component
     // Internals
     // ------------------------------------------------------------------
 
-    /** Only the signed-in user's own requisitions are ever reachable (prevents IDOR). */
+    /**
+     * Pending requisitions of the current list page that the signed-in user may decide on:
+     * Super Admin / Admin on any of them, everyone else only where the pending step is assigned
+     * to them (the same rule RequisitionController::approve applies).
+     *
+     * @return array<int, int> requisition id => role id of the approval step it is waiting at
+     */
+    private function decidableRequisitions(): array
+    {
+        $user = Auth::user();
+        $fullAccess = $user && in_array((int) $user->role_id, \App\Services\RequisitionService::FULL_ACCESS_ROLE_IDS, true);
+        // This list holds the user's own requisitions. Once the Admin has approved one (its slip
+        // can be printed, it waits for the Store Keeper), a Super Admin / Admin sees their own
+        // requisition like every other requester: the plain details with the print buttons.
+        $ids = collect($this->requisitions->items())->where('status', 'pending')
+            ->reject(fn ($requisition) => $fullAccess && $requisition->is_print_enabled)
+            ->pluck('id');
+        if (! $user || $ids->isEmpty()) {
+            return [];
+        }
+
+        return \App\Models\ApprovalDetail::query()
+            ->whereIn('requistion_id', $ids)
+            ->where('status', 'pending')
+            ->when(! $fullAccess, fn ($query) => $query->where('to_user_id', $user->id))
+            ->with('toUser:id,role_id')
+            ->get(['id', 'requistion_id', 'to_user_id'])
+            ->mapWithKeys(fn ($task) => [(int) $task->requistion_id => (int) ($task->toUser->role_id ?? 0)])
+            ->all();
+    }
+
+    /** Only the signed-in user's own requisitions can be listed, edited, submitted or deleted (prevents IDOR). */
     private function ownRequisitions(): Builder
     {
         return Requisition::query()->where('requested_by_user_id', Auth::id());
+    }
+
+    /**
+     * Requisitions whose details may be opened (read only): the user's own, and for the store
+     * and admin roles any requisition that has been submitted - they already handle those in the
+     * requisition request list. Drafts of other people stay private; general users see only their own.
+     */
+    private function viewableRequisitions(): Builder
+    {
+        if ((int) Auth::user()?->role_id === self::GENERAL_USER_ROLE_ID || ! Auth::user()?->role_id) {
+            return $this->ownRequisitions();
+        }
+
+        return Requisition::query()->where(fn (Builder $query) => $query
+            ->where('requested_by_user_id', Auth::id())
+            ->orWhere('status', '!=', 'draft'));
     }
 
     /** Own + draft + allowed, or null after telling the user why not. */
@@ -618,7 +867,7 @@ class ManageRequisitions extends Component
 
     private function resetForm(): void
     {
-        $this->reset('categoryId', 'productId', 'quantity', 'items', 'remarks');
+        $this->reset('categoryId', 'productId', 'quantity', 'items', 'remarks', 'editingIndex', 'itemPage');
         $this->resetValidation();
         unset($this->itemProducts, $this->productOptions);
     }
@@ -647,6 +896,38 @@ class ManageRequisitions extends Component
     }
 
     /** @return array<string, string> */
+    /** Messages in the page language for the picker and for the item rows. */
+    private function validationMessages(): array
+    {
+        $required = fn (string $attribute) => __('commontable.required_field', ['attribute' => $attribute]);
+        $quantity = __('requisition.manage.quantity_invalid');
+
+        return [
+            'categoryId.required' => $required(__('requisition.manage.category')),
+            'categoryId.integer' => __('requisition.manage.category_invalid'),
+            'categoryId.exists' => __('requisition.manage.category_invalid'),
+            'productId.required' => $required(__('requisition.manage.product')),
+            'productId.integer' => __('requisition.manage.product_invalid'),
+            'productId.exists' => __('requisition.manage.product_invalid'),
+            'quantity.required' => $required(__('requisition.manage.quantity')),
+            'quantity.integer' => $quantity,
+            'quantity.min' => $quantity,
+            'quantity.max' => $quantity,
+            'items.required' => __('requisition.manage.items_required'),
+            'items.min' => __('requisition.manage.items_required'),
+            'items.max' => __('requisition.manage.items_too_many'),
+            'items.*.product_id.required' => __('requisition.manage.product_invalid'),
+            'items.*.product_id.integer' => __('requisition.manage.product_invalid'),
+            'items.*.product_id.exists' => __('requisition.manage.product_invalid'),
+            'items.*.product_id.distinct' => __('requisition.manage.product_duplicate'),
+            'items.*.quantity.required' => $required(__('requisition.manage.quantity')),
+            'items.*.quantity.integer' => $quantity,
+            'items.*.quantity.min' => $quantity,
+            'items.*.quantity.max' => $quantity,
+            'remarks.max' => __('requisition.manage.remarks_too_long'),
+        ];
+    }
+
     private function attributeNames(): array
     {
         return [

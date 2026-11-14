@@ -26,6 +26,7 @@ return [
     'required_field' => ':attribute দিতে হবে।',
     'clear_selection' => 'নির্বাচন মুছুন',
     'type_to_search' => 'লিখে খুঁজুন',
+    'clear_date' => 'তারিখ মুছুন',
     'select_date' => 'তারিখ নির্বাচন করুন',
     'today' => 'আজ',
     'yesterday' => 'গতকাল',

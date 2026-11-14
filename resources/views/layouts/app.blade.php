@@ -196,113 +196,22 @@
     @stack('page_css')
     {{-- One look for every dialog (matches the lot entry modal) --}}
     <link rel="stylesheet" href="{{ asset('css/app-modal.css') }}?v={{ @filemtime(public_path('css/app-modal.css')) }}">
+    {{-- One look for every list page / table (matches the requisition list) --}}
+    <link rel="stylesheet" href="{{ asset('css/app-list.css') }}?v={{ @filemtime(public_path('css/app-list.css')) }}">
+    {{-- Top bar: section / department name and today's date --}}
+    <link rel="stylesheet" href="{{ asset('css/app-topbar.css') }}?v={{ @filemtime(public_path('css/app-topbar.css')) }}">
+    {{-- Left sidebar colours --}}
+    <link rel="stylesheet" href="{{ asset('css/app-sidebar.css') }}?v={{ @filemtime(public_path('css/app-sidebar.css')) }}">
     {{-- Site-wide responsive base font size (17px desktop, 16px tablet, 15px phone) --}}
     <link rel="stylesheet" href="{{ asset('css/base-font.css') }}?v={{ @filemtime(public_path('css/base-font.css')) }}">
-</head>
 
-<body class="hold-transition sidebar-mini layout-fixed">
-    <div id="wait">
-
-    </div>
-    <div class="wrapper">
-        <!-- Main Header -->
-        <nav class="main-header navbar navbar-expand navbar-white navbar-light">
-            <!-- Left navbar links -->
-            <ul class="navbar-nav">
-                <li class="nav-item">
-                    <a class="nav-link" data-widget="pushmenu" href="#" role="button"><i
-                            class="fas fa-bars"></i></a>
-                </li>
-            </ul>
-
-            <ul class="navbar-nav ml-auto">
-                <li class="nav-item dropdown">
-                    <a class="nav-link" data-toggle="dropdown" href="#">
-                        <i class="fa fa-bell"></i>
-                        @if (isset($unreadCount) && $unreadCount > 0)
-                            <span class="badge badge-warning navbar-badge">{{ $unreadCount }}</span>
-                        @endif
-                    </a>
-                    <div class="dropdown-menu dropdown-menu-xl dropdown-menu-right" style="min-width: 450px;">
-                        <span class="dropdown-item dropdown-header">{{ $unreadCount ?? 0 }} Notifications</span>
-                        <div class="dropdown-divider"></div>
-
-                        @if (isset($recentNotifications))
-                            @foreach ($recentNotifications as $notification)
-                                <a href="{{ route('notifications.read', $notification->id) }}" class="dropdown-item">
-                                    <i class="fas fa-envelope mr-2"></i>
-                                    {{ Str::limit($notification->notification_text, 80) }}
-                                    <span
-                                        class="float-right text-muted text-sm">{{ $notification->created_at->timezone('Asia/Dhaka')->format('d M, Y h:i A') }}</span>
-                                </a>
-                                <div class="dropdown-divider"></div>
-                            @endforeach
-                        @endif
-
-                        <a href="{{ route('notifications.index') }}" class="dropdown-item dropdown-footer">See All
-                            Notifications</a>
-                    </div>
-                </li>
-                <li class="nav-item">
-                    <label class="custom-switch">
-                        <input type="checkbox" id="languageToggle" {{ app()->getLocale() === 'en' ? 'checked' : '' }}>
-                        <span class="custom-slider" data-on="EN" data-off="BN" data-offstyle="success"></span>
-                    </label>
-                </li>
-                <li class="nav-item dropdown user-menu">
-                    <a href="#" class="nav-link dropdown-toggle" data-toggle="dropdown">
-                        <img src="{{ asset('theme/assets/img/gov.png') }}" class="user-image" alt="User Image">
-                        <span class="d-none d-md-inline">{{ Auth::user()->name }}</span>
-                    </a>
-                    <ul class="dropdown-menu dropdown-menu-lg dropdown-menu-right">
-                        <!-- User image -->
-                        <li class="user-header bg-primary">
-                            <img src="{{ asset('theme/assets/img/gov.png') }}" class="img-circle elevation-2"
-                                alt="User Image">
-                            <p>
-                                {{ Auth::user()->name }}
-                                <small>Member since {{ Auth::user()->created_at->format('M. Y') }}</small>
-                            </p>
-                        </li>
-                        <!-- Menu Footer-->
-                        <li class="user-footer">
-                            <a href="{{ route('profile.index') }}" class="btn btn-default btn-flat">Profile</a>
-                            <a href="#" class="btn btn-default btn-flat float-right"
-                                onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
-                                Sign out
-                            </a>
-                            <form id="logout-form" action="{{ route('logout') }}" method="POST" class="d-none">
-                                @csrf
-                            </form>
-                        </li>
-                    </ul>
-                </li>
-            </ul>
-        </nav>
-
-        <!-- Left side column. contains the logo and sidebar -->
-        @include('layouts.sidebar')
-
-        <!-- Content Wrapper. Contains page content -->
-        <div class="content-wrapper">
-            <section class="content">
-                @yield('content')
-            </section>
-        </div>
-
-        <!-- Main Footer -->
-        <footer class="main-footer">
-            <div class="float-right d-none d-sm-block">
-                <b>{{ __('footer.version') }}</b> v1.0
-            </div>
-            <strong>
-                {{ __('footer.copyright') }} &copy; <?php echo date('Y'); ?> {{ __('common.app_name') }} | {{ __('common.ministry') }}
-            </strong> |
-            {{ __('common.footer_copyright') }}
-        </footer>
-    </div>
-
+    {{--
+        Libraries live in <head> so they are loaded once: Livewire (wire:navigate) replaces
+        only the <body> when the page changes and runs the page's inline scripts again.
+    --}}
     <script src="{{ asset('js/jquery.min.js') }}"></script>
+    {{-- Keeps jQuery pages working when Livewire changes the page without a reload --}}
+    <script src="{{ asset('js/app-navigate.js') }}?v={{ @filemtime(public_path('js/app-navigate.js')) }}"></script>
 
     <script src="{{ asset('js/popper.min.js') }}"></script>
 
@@ -368,6 +277,185 @@
     {{-- Toastr --}}
     <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
 
+    <script src="{{ asset('js/sweetalert2@11.js') }}"></script>
+    <script src="{{ asset('js/app-toast.js') }}?v={{ @filemtime(public_path('js/app-toast.js')) }}"></script>
+    {{-- Page libraries that must be ready before the page's inline scripts run --}}
+    @stack('head_scripts')
+    <script>AppNav.libsReady();</script>
+</head>
+
+<body class="hold-transition sidebar-mini layout-fixed">
+    <div id="wait">
+
+    </div>
+    <div class="wrapper">
+        <!-- Main Header -->
+        <nav class="main-header navbar navbar-expand navbar-white navbar-light">
+            <!-- Left navbar links -->
+            <ul class="navbar-nav">
+                <li class="nav-item">
+                    <a class="nav-link" data-widget="pushmenu" href="#" role="button"><i
+                            class="fas fa-bars"></i></a>
+                </li>
+            </ul>
+
+            {{-- Section / department of the signed-in user, with today's date to its right --}}
+            @php
+                $topbarBn = app()->getLocale() === 'bn';
+                $topbarDept = Auth::user()?->department;
+                $topbarDeptName = $topbarDept
+                    ? (($topbarBn ? ($topbarDept->name_bn ?: $topbarDept->name) : $topbarDept->name) ?: $topbarDept->name)
+                    : null;
+                $topbarToday = now()->locale($topbarBn ? 'bn' : 'en')->translatedFormat($topbarBn ? 'l, j F Y' : 'l, d M Y');
+                if ($topbarBn) {
+                    $topbarToday = strtr($topbarToday, ['0' => '০', '1' => '১', '2' => '২', '3' => '৩', '4' => '৪', '5' => '৫', '6' => '৬', '7' => '৭', '8' => '৮', '9' => '৯']);
+                }
+            @endphp
+            <div class="app-topbar-context">
+                @if ($topbarDeptName)
+                    <span class="app-topbar-dept" title="{{ $topbarDeptName }}">{{ $topbarDeptName }}</span>
+                @endif
+                <span class="app-topbar-date" title="{{ __('requisition.manage.today') }}">
+                    <i class="fas fa-calendar-day" aria-hidden="true"></i>
+                    <span class="sr-only">{{ __('requisition.manage.today') }}:</span>
+                    <time datetime="{{ now()->format('Y-m-d') }}">{{ $topbarToday }}</time>
+                </span>
+            </div>
+
+            <ul class="navbar-nav ml-auto">
+                <li class="nav-item dropdown">
+                    <a class="nav-link app-bell {{ isset($unreadCount) && $unreadCount > 0 ? 'has-unread' : '' }}" data-toggle="dropdown" href="#"
+                        role="button" aria-label="{{ app()->getLocale() === 'bn' ? 'নোটিফিকেশন' : 'Notifications' }}"
+                        title="{{ app()->getLocale() === 'bn' ? 'নোটিফিকেশন' : 'Notifications' }}">
+                        <i class="fa fa-bell" aria-hidden="true"></i>
+                        @if (isset($unreadCount) && $unreadCount > 0)
+                            <span class="badge navbar-badge app-bell-count">{{ $unreadCount > 99 ? '99+' : $unreadCount }}</span>
+                        @endif
+                    </a>
+                    {{-- Notification panel: header with the unread count, the latest unread notifications
+                         (an icon by kind, the text on as many lines as it needs, how long ago), a link to all. --}}
+                    @php
+                        $notifyBn = app()->getLocale() === 'bn';
+                        $notifyDigits = fn ($value) => $notifyBn
+                            ? strtr((string) $value, ['0' => '০', '1' => '১', '2' => '২', '3' => '৩', '4' => '৪', '5' => '৫', '6' => '৬', '7' => '৭', '8' => '৮', '9' => '৯'])
+                            : (string) $value;
+                        $notifyCount = (int) ($unreadCount ?? 0);
+                        // Icon and colour by what the notification is about
+                        $notifyKind = function (string $text) {
+                            $lower = strtolower($text);
+                            return match (true) {
+                                str_contains($lower, 'reject') => ['fa-times-circle', 'is-danger'],
+                                str_contains($lower, 'deliver') => ['fa-truck', 'is-success'],
+                                str_contains($lower, 'approved') => ['fa-check-circle', 'is-info'],
+                                str_contains($lower, 'pending') => ['fa-hourglass-half', 'is-warning'],
+                                default => ['fa-bell', 'is-neutral'],
+                            };
+                        };
+                    @endphp
+                    <div class="dropdown-menu dropdown-menu-right app-notify" aria-label="{{ $notifyBn ? 'নোটিফিকেশন' : 'Notifications' }}">
+                        <div class="app-notify-head">
+                            <span class="app-notify-title">{{ $notifyBn ? 'নোটিফিকেশন' : 'Notifications' }}</span>
+                            @if ($notifyCount > 0)
+                                <span class="app-notify-count">{{ $notifyBn ? $notifyDigits($notifyCount) . 'টি নতুন' : $notifyCount . ' new' }}</span>
+                            @endif
+                        </div>
+
+                        <div class="app-notify-list">
+                            @forelse (($recentNotifications ?? collect()) as $notification)
+                                @php
+                                    [$notifyIcon, $notifyTone] = $notifyKind((string) $notification->notification_text);
+                                    $notifyAt = $notification->created_at->timezone('Asia/Dhaka');
+                                @endphp
+                                <a href="{{ route('notifications.read', $notification->id) }}" class="app-notify-item">
+                                    <span class="app-notify-icon {{ $notifyTone }}" aria-hidden="true"><i class="fas {{ $notifyIcon }}"></i></span>
+                                    <span class="app-notify-body">
+                                        <span class="app-notify-text">{{ $notification->notification_text }}</span>
+                                        <span class="app-notify-time" title="{{ $notifyAt->format('d M, Y h:i A') }}">
+                                            <i class="fas fa-clock" aria-hidden="true"></i>
+                                            {{ $notifyDigits($notifyAt->copy()->locale($notifyBn ? 'bn' : 'en')->diffForHumans()) }}
+                                            <span class="app-notify-date">· {{ $notifyDigits($notifyAt->copy()->locale($notifyBn ? 'bn' : 'en')->translatedFormat($notifyBn ? 'j M, g:i A' : 'd M, h:i A')) }}</span>
+                                        </span>
+                                    </span>
+                                    <span class="app-notify-dot" aria-hidden="true"></span>
+                                </a>
+                            @empty
+                                <div class="app-notify-empty">
+                                    <span class="app-notify-empty-icon" aria-hidden="true"><i class="fas fa-bell-slash"></i></span>
+                                    <p>{{ $notifyBn ? 'নতুন কোনো নোটিফিকেশন নেই' : 'No new notifications' }}</p>
+                                </div>
+                            @endforelse
+                        </div>
+
+                        <a href="{{ route('notifications.index') }}" wire:navigate class="app-notify-foot">
+                            {{ $notifyBn ? 'সব নোটিফিকেশন দেখুন' : 'See all notifications' }} <i class="fas fa-arrow-right" aria-hidden="true"></i>
+                        </a>
+                    </div>
+                </li>
+                <li class="nav-item">
+                    {{-- Language: a two-part switch (checked = English). The page script reacts to #languageToggle. --}}
+                    <label class="app-lang" title="{{ app()->getLocale() === 'bn' ? 'ভাষা পরিবর্তন' : 'Change language' }}">
+                        <input type="checkbox" id="languageToggle" {{ app()->getLocale() === 'en' ? 'checked' : '' }}
+                            aria-label="{{ app()->getLocale() === 'bn' ? 'ভাষা পরিবর্তন' : 'Change language' }}">
+                        <span class="app-lang-track" aria-hidden="true">
+                            <span class="app-lang-thumb"></span>
+                            <span class="app-lang-opt app-lang-bn">বাং</span>
+                            <span class="app-lang-opt app-lang-en">EN</span>
+                        </span>
+                    </label>
+                </li>
+                <li class="nav-item dropdown user-menu">
+                    <a href="#" class="nav-link dropdown-toggle" data-toggle="dropdown">
+                        <img src="{{ asset('theme/assets/img/gov.png') }}" class="user-image" alt="User Image">
+                        <span class="d-none d-md-inline">{{ Auth::user()->name }}</span>
+                    </a>
+                    <ul class="dropdown-menu dropdown-menu-lg dropdown-menu-right">
+                        <!-- User image -->
+                        <li class="user-header bg-primary">
+                            <img src="{{ asset('theme/assets/img/gov.png') }}" class="img-circle elevation-2"
+                                alt="User Image">
+                            <p>
+                                {{ Auth::user()->name }}
+                                <small>Member since {{ Auth::user()->created_at->format('M. Y') }}</small>
+                            </p>
+                        </li>
+                        <!-- Menu Footer-->
+                        <li class="user-footer">
+                            <a href="{{ route('profile.index') }}" wire:navigate class="btn btn-default btn-flat">Profile</a>
+                            <a href="#" class="btn btn-default btn-flat float-right"
+                                onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
+                                Sign out
+                            </a>
+                            <form id="logout-form" action="{{ route('logout') }}" method="POST" class="d-none">
+                                @csrf
+                            </form>
+                        </li>
+                    </ul>
+                </li>
+            </ul>
+        </nav>
+
+        <!-- Left side column. contains the logo and sidebar -->
+        @include('layouts.sidebar')
+
+        <!-- Content Wrapper. Contains page content -->
+        <div class="content-wrapper">
+            <section class="content">
+                @yield('content')
+            </section>
+        </div>
+
+        <!-- Main Footer -->
+        <footer class="main-footer">
+            <div class="float-right d-none d-sm-block">
+                <b>{{ __('footer.version') }}</b> v1.0
+            </div>
+            <strong>
+                {{ __('footer.copyright') }} &copy; <?php echo date('Y'); ?> {{ __('common.app_name') }} | {{ __('common.ministry') }}
+            </strong> |
+            {{ __('common.footer_copyright') }}
+        </footer>
+    </div>
+
     <script>
         $(function() {
             bsCustomFileInput.init();
@@ -403,7 +491,6 @@
         };
     </script>
 
-    <script src="{{ asset('js/sweetalert2@11.js') }}"></script>
     <!-- CSRF Token setup script -->
     <script>
         // Get the CSRF token value from the meta tag
@@ -415,8 +502,29 @@
                 'X-CSRF-TOKEN': csrfToken
             }
         });
+
+        // Session expired while the page was open: any background request that is refused
+        // for that reason (419 expired page, 401 signed out) opens the login page.
+        if (! window.__sessionExpiryBound) {
+            window.__sessionExpiryBound = true;
+            window.__loginUrl = @json(route('login'));
+            $(document).ajaxError(function (event, xhr) {
+                if (xhr && (xhr.status === 419 || xhr.status === 401)) {
+                    window.location.href = window.__loginUrl;
+                }
+            });
+            document.addEventListener('livewire:init', function () {
+                Livewire.hook('request', function (request) {
+                    request.fail(function (failure) {
+                        if (failure.status === 419 || failure.status === 401) {
+                            failure.preventDefault();
+                            window.location.href = window.__loginUrl;
+                        }
+                    });
+                });
+            });
+        }
     </script>
-    <script src="{{ asset('js/app-toast.js') }}?v={{ @filemtime(public_path('js/app-toast.js')) }}"></script>
     @stack('third_party_scripts')
     @stack('page_scripts')
     @stack('js')
