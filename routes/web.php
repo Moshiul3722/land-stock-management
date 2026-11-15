@@ -31,11 +31,11 @@ use Illuminate\Support\Facades\Artisan;
 
 
 // Sign-in is by e-mailed code only (below): the password sign-in (POST /login) is not registered.
-// There is no self sign-up either: users are added by a Super Admin / Admin on the Users page.
+// There is no self sign-up or "forgot password" either: users are added by a Super Admin / Admin
+// on the Users page.
 Route::get('login', [LoginController::class, 'showLoginForm'])->name('login');
 Route::post('logout', [LoginController::class, 'logout'])->name('logout');
 Route::namespace('App\Http\Controllers')->group(function () {
-    Route::resetPassword();
     Route::confirmPassword();
 });
 
