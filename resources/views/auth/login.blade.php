@@ -1,8 +1,8 @@
 {{--
     Sign-in page.
 
-    Two steps with a mobile number: (1) the registered number, (2) the one-time code (OTP) sent
-    to it - see App\Http\Controllers\Auth\OtpLoginController. Signing in with e-mail and
+    Two steps with an e-mail address: (1) the registered address, (2) the one-time code (OTP)
+    e-mailed to it - see App\Http\Controllers\Auth\OtpLoginController. Signing in with e-mail and
     password stays available as a second option (the form posts to the usual /login).
     The page uses only the project's own files (no CDN): the icon font and the Bangla font.
 --}}
@@ -18,8 +18,12 @@
     // Seconds left for the code, and until another one may be asked for
     $expiresIn = $onOtpStep ? max(0, (int) now()->diffInSeconds($otp->expires_at, false)) : 0;
     $resendIn = $onOtpStep ? max(0, (int) config('sms.otp.resend_seconds', 60) - (int) \Illuminate\Support\Carbon::parse($otp->created_at)->diffInSeconds(now(), true)) : 0;
-    // The number being verified, with the middle hidden: 017XXXXXX45
-    $maskedMobile = $onOtpStep ? $digits(substr($pending['mobile'], 0, 3) . 'XXXXXX' . substr($pending['mobile'], -2)) : '';
+    // The address being verified, with most of the name hidden: gaxxxxx@gmail.com
+    $maskedEmail = '';
+    if ($onOtpStep && ! empty($pending['email'])) {
+        [$local, $domain] = array_pad(explode('@', $pending['email'], 2), 2, '');
+        $maskedEmail = mb_substr($local, 0, 2) . str_repeat('x', max(3, mb_strlen($local) - 2)) . '@' . $domain;
+    }
     // E-mail sign-in opens by itself when that form came back with an error
     $onEmail = ! $onOtpStep && ($errors->has('email') || $errors->has('password'));
 @endphp
@@ -250,7 +254,7 @@
                 </ol>
                 <div class="auth-card-head">
                     <h2 class="auth-title">{{ __('login.otp_title') }}</h2>
-                    <p class="auth-sub">{{ __('login.otp_subtitle', ['mobile' => $maskedMobile, 'digits' => $digits($otpDigits)]) }}</p>
+                    <p class="auth-sub">{{ __('login.otp_subtitle', ['email' => $maskedEmail, 'digits' => $digits($otpDigits)]) }}</p>
                 </div>
 
                 @if (session('otp_sent'))
@@ -295,7 +299,7 @@
                     </form>
                 </div>
             @else
-                {{-- ============ Step 1: the mobile number ============ --}}
+                {{-- ============ Step 1: the e-mail address ============ --}}
                 <div id="mobile-pane" @if ($onEmail) hidden @endif>
                     <ol class="auth-steps" aria-label="{{ __('login.step', ['current' => $digits(1), 'total' => $digits(2)]) }}">
                         <li class="is-current" aria-current="step"><span class="auth-step-no">{{ $digits(1) }}</span>{{ __('login.step_mobile') }}</li>
@@ -309,15 +313,15 @@
 
                     <form method="post" action="{{ route('login.otp.send') }}" novalidate>
                         @csrf
-                        <label class="auth-label" for="mobile">{{ __('login.mobile') }}</label>
-                        <div class="auth-field @error('mobile') is-invalid @enderror">
-                            <span class="auth-prefix"><i class="fas fa-mobile-alt" aria-hidden="true"></i>{{ $isBn ? '+৮৮' : '+88' }}</span>
-                            <input type="tel" id="mobile" name="mobile" inputmode="numeric" autocomplete="tel-national" maxlength="17"
-                                value="{{ old('mobile') }}" placeholder="{{ __('login.mobile_placeholder') }}" required @if (! $onEmail) autofocus @endif
-                                @error('mobile') aria-invalid="true" aria-describedby="mobile-error" @enderror>
+                        <label class="auth-label" for="otp_email">{{ __('login.email') }}</label>
+                        <div class="auth-field @error('otp_email') is-invalid @enderror">
+                            <span class="auth-prefix"><i class="fas fa-envelope" aria-hidden="true"></i></span>
+                            <input type="email" id="otp_email" name="otp_email" inputmode="email" autocomplete="email" maxlength="191"
+                                value="{{ old('otp_email') }}" placeholder="{{ __('login.otp_email_placeholder') }}" required @if (! $onEmail) autofocus @endif
+                                @error('otp_email') aria-invalid="true" aria-describedby="otp-email-error" @enderror>
                         </div>
-                        @error('mobile')
-                            <p class="auth-error" id="mobile-error" role="alert"><i class="fas fa-exclamation-circle" aria-hidden="true"></i><span>{{ $message }}</span></p>
+                        @error('otp_email')
+                            <p class="auth-error" id="otp-email-error" role="alert"><i class="fas fa-exclamation-circle" aria-hidden="true"></i><span>{{ $message }}</span></p>
                         @enderror
 
                         <button type="submit" class="auth-btn">
@@ -329,7 +333,7 @@
 
                     <div class="auth-or">{{ __('login.or') }}</div>
                     <div class="auth-center">
-                        <button type="button" class="auth-link" data-show="email-pane"><i class="fas fa-envelope" aria-hidden="true"></i> {{ __('login.use_email') }}</button>
+                        <button type="button" class="auth-link" data-show="email-pane"><i class="fas fa-lock" aria-hidden="true"></i> {{ __('login.use_email') }}</button>
                     </div>
                 </div>
 
@@ -366,7 +370,7 @@
 
                     <div class="auth-or">{{ __('login.or') }}</div>
                     <div class="auth-center">
-                        <button type="button" class="auth-link" data-show="mobile-pane"><i class="fas fa-mobile-alt" aria-hidden="true"></i> {{ __('login.use_mobile') }}</button>
+                        <button type="button" class="auth-link" data-show="mobile-pane"><i class="fas fa-envelope-open-text" aria-hidden="true"></i> {{ __('login.use_mobile') }}</button>
                     </div>
                 </div>
             @endif
@@ -384,7 +388,7 @@
             return toLocal((m < 10 ? '0' : '') + m + ':' + (s < 10 ? '0' : '') + s);
         };
 
-        // ---- Mobile / e-mail: switch between the two ways of signing in ----
+        // ---- Code by e-mail / password: switch between the two ways of signing in ----
         Array.prototype.forEach.call(document.querySelectorAll('[data-show]'), function (button) {
             button.addEventListener('click', function () {
                 ['mobile-pane', 'email-pane'].forEach(function (id) {
