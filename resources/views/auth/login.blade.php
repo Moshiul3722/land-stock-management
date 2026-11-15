@@ -127,9 +127,10 @@
         .auth-note { display: flex; align-items: flex-start; gap: 0.5rem; margin: 1.1rem 0 0; padding: 0.65rem 0.8rem; border-radius: 0.75rem; background: #f1f5f9; color: #475569; font-size: 0.8125rem; line-height: 1.45; }
         .auth-note i { margin-top: 0.15rem; color: #1d65db; }
 
-        /* ---- The code: one box per digit ---- */
+        /* ---- The code: one box per digit ----
+           Same Bangla font as the step numbers: the page font draws "১" as a small tick. */
         .otp-boxes { display: grid; grid-template-columns: repeat({{ $otpDigits }}, minmax(0, 1fr)); gap: 0.5rem; }
-        .otp-boxes input { width: 100%; height: 3.5rem; padding: 0; border: 1.5px solid #cbd5e1; border-radius: 0.85rem; background: #fff; color: #0f172a; font-size: 1.5rem; font-weight: 600; text-align: center; outline: 0; transition: border-color 0.15s, box-shadow 0.15s, background-color 0.15s; }
+        .otp-boxes input { width: 100%; height: 3.5rem; padding: 0; border: 1.5px solid #cbd5e1; border-radius: 0.85rem; background: #fff; color: #0f172a; font-family: 'Kohinoor Bangla', 'Nirmala UI', 'Noto Sans Bengali', 'Vrinda', system-ui, sans-serif; font-size: 1.5rem; font-weight: 600; text-align: center; outline: 0; transition: border-color 0.15s, box-shadow 0.15s, background-color 0.15s; }
         .otp-boxes input:focus { border-color: #2f7cf6; box-shadow: 0 0 0 4px rgba(47, 124, 246, 0.18); }
         .otp-boxes input.is-filled { border-color: #93b4f5; background: #f5f8ff; }
         .otp-boxes.is-invalid input { border-color: #dc2626; }
