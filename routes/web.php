@@ -35,9 +35,6 @@ use Illuminate\Support\Facades\Artisan;
 // on the Users page.
 Route::get('login', [LoginController::class, 'showLoginForm'])->name('login');
 Route::post('logout', [LoginController::class, 'logout'])->name('logout');
-Route::namespace('App\Http\Controllers')->group(function () {
-    Route::confirmPassword();
-});
 
 // Sign-in with an e-mail address and a one-time code (OTP); the page itself is the login page
 Route::post('/login/otp/send', [\App\Http\Controllers\Auth\OtpLoginController::class, 'send'])->name('login.otp.send');
