@@ -19,6 +19,7 @@ yarn-error.log
 /env
 *.sql.backup
 /inventory_land_store.sql
+/inventory_land_store_*.sql
 
 # macOS junk
 .DS_Store
