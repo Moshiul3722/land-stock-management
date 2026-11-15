@@ -33,7 +33,10 @@ use Illuminate\Support\Facades\Artisan;
 // Sign-in is by e-mailed code only (below): the password sign-in (POST /login) is not registered.
 // There is no self sign-up or "forgot password" either: users are added by a Super Admin / Admin
 // on the Users page.
-Route::get('login', [LoginController::class, 'showLoginForm'])->name('login');
+// The login page lives at the site's own address; a signed-in user is sent on to /home
+// (the controller's "guest" middleware). The old /login address still leads there.
+Route::get('/', [LoginController::class, 'showLoginForm'])->name('login');
+Route::get('login', \Illuminate\Routing\RedirectController::class)->defaults('destination', '/')->defaults('status', 302);
 Route::post('logout', [LoginController::class, 'logout'])->name('logout');
 
 // Sign-in with an e-mail address and a one-time code (OTP); the page itself is the login page
@@ -42,14 +45,6 @@ Route::post('/login/otp/resend', [\App\Http\Controllers\Auth\OtpLoginController:
 Route::post('/login/otp/verify', [\App\Http\Controllers\Auth\OtpLoginController::class, 'verify'])->name('login.otp.verify');
 Route::post('/login/otp/cancel', [\App\Http\Controllers\Auth\OtpLoginController::class, 'cancel'])->name('login.otp.cancel');
 
-// Route::get('/', [LoginController::class, 'showLoginForm'])->name('login');
-Route::get('/', function () {
-    // If users are logged in, redirect to dashboard, otherwise open the login page
-    if (Auth::check()) {
-        return redirect()->route('home');
-    }
-    return redirect()->route('login');
-})->name('landing');
 Route::get('/home', [HomeController::class, 'index'])->name('home');
 // SWITCHED OFF (2026-11-14): this address wiped and rebuilt the whole database for anyone
 // who opened it, without signing in. Kept here only for reference - do not switch it back on.

@@ -340,6 +340,36 @@
             return toLocal((m < 10 ? '0' : '') + m + ':' + (s < 10 ? '0' : '') + s);
         };
 
+        // ---- A page left open for long keeps working ----
+        // The forms carry a security token that stops working once the session runs out. When the
+        // page has been open (or was brought back from the browser's history) for a while, a fresh
+        // token is fetched before a form is sent, so nobody has to reload the page first.
+        var tokenAt = Date.now(), staleAfter = 20 * 60 * 1000;
+        var tokenFields = function () { return Array.prototype.slice.call(document.querySelectorAll('input[name="_token"]')); };
+        function refreshToken() {
+            return fetch(@json(route('login')), { credentials: 'same-origin', cache: 'no-store' })
+                .then(function (response) { return response.text(); })
+                .then(function (html) {
+                    var found = html.match(/name="_token" value="([^"]+)"/) || html.match(/name="csrf-token" content="([^"]+)"/);
+                    if (!found) { return; }
+                    tokenFields().forEach(function (field) { field.value = found[1]; });
+                    tokenAt = Date.now();
+                });
+        }
+        document.addEventListener('submit', function (event) {
+            var form = event.target;
+            if (Date.now() - tokenAt < staleAfter || form.getAttribute('data-fresh')) { return; }
+            event.preventDefault();
+            refreshToken().catch(function () {}).then(function () {
+                form.setAttribute('data-fresh', '1');
+                HTMLFormElement.prototype.submit.call(form);
+            });
+        }, true);
+        document.addEventListener('visibilitychange', function () {
+            if (document.visibilityState === 'visible' && Date.now() - tokenAt >= staleAfter) { refreshToken().catch(function () {}); }
+        });
+        window.addEventListener('pageshow', function (event) { if (event.persisted) { tokenAt = 0; } });
+
         // ---- The code: one digit per box, moving on by itself; a pasted code fills them all ----
         var boxes = Array.prototype.slice.call(document.querySelectorAll('#otp-boxes input'));
         if (!boxes.length) { return; }
