@@ -30,9 +30,16 @@ use Illuminate\Support\Facades\Artisan;
 */
 
 
-Auth::routes();
+// Sign-in is by e-mailed code only (below): the password sign-in (POST /login) is not registered.
+// There is no self sign-up either: users are added by a Super Admin / Admin on the Users page.
+Route::get('login', [LoginController::class, 'showLoginForm'])->name('login');
+Route::post('logout', [LoginController::class, 'logout'])->name('logout');
+Route::namespace('App\Http\Controllers')->group(function () {
+    Route::resetPassword();
+    Route::confirmPassword();
+});
 
-// Sign-in with a mobile number and a one-time code (OTP); the page itself is the login page
+// Sign-in with an e-mail address and a one-time code (OTP); the page itself is the login page
 Route::post('/login/otp/send', [\App\Http\Controllers\Auth\OtpLoginController::class, 'send'])->name('login.otp.send');
 Route::post('/login/otp/resend', [\App\Http\Controllers\Auth\OtpLoginController::class, 'resend'])->name('login.otp.resend');
 Route::post('/login/otp/verify', [\App\Http\Controllers\Auth\OtpLoginController::class, 'verify'])->name('login.otp.verify');

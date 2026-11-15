@@ -33,13 +33,7 @@ return [
     'change_number' => 'Change email',
     'otp_sent' => 'The code has been sent.',
 
-    'or' => 'or',
-    'use_email' => 'Sign in with password',
-    'use_mobile' => 'Sign in with an emailed code (OTP)',
     'email' => 'Email',
-    'password' => 'Password',
-    'email_login' => 'Sign in',
-    'show_password' => 'Show password',
     'footer' => '© :year Ministry of Land. All rights reserved.',
 
     'mobile_invalid' => 'Enter a valid mobile number (for example 017XXXXXXXX).',

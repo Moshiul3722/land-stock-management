@@ -2,8 +2,8 @@
     Sign-in page.
 
     Two steps with an e-mail address: (1) the registered address, (2) the one-time code (OTP)
-    e-mailed to it - see App\Http\Controllers\Auth\OtpLoginController. Signing in with e-mail and
-    password stays available as a second option (the form posts to the usual /login).
+    e-mailed to it - see App\Http\Controllers\Auth\OtpLoginController. This is the only way in:
+    signing in with a password is switched off.
     The page uses only the project's own files (no CDN): the icon font and the Bangla font.
 --}}
 @php
@@ -24,8 +24,6 @@
         [$local, $domain] = array_pad(explode('@', $pending['email'], 2), 2, '');
         $maskedEmail = mb_substr($local, 0, 2) . str_repeat('x', max(3, mb_strlen($local) - 2)) . '@' . $domain;
     }
-    // E-mail sign-in opens by itself when that form came back with an error
-    $onEmail = ! $onOtpStep && ($errors->has('email') || $errors->has('password'));
 @endphp
 <!DOCTYPE html>
 <html lang="{{ $isBn ? 'bn' : 'en' }}">
@@ -128,10 +126,6 @@
         .auth-link:disabled { color: #94a3b8; cursor: not-allowed; text-decoration: none; }
         .auth-note { display: flex; align-items: flex-start; gap: 0.5rem; margin: 1.1rem 0 0; padding: 0.65rem 0.8rem; border-radius: 0.75rem; background: #f1f5f9; color: #475569; font-size: 0.8125rem; line-height: 1.45; }
         .auth-note i { margin-top: 0.15rem; color: #1d65db; }
-        .auth-or { display: flex; align-items: center; gap: 0.75rem; margin: 1.25rem 0 0.5rem; color: #94a3b8; font-size: 0.8rem; }
-        .auth-or::before, .auth-or::after { content: ""; flex: 1 1 auto; height: 1px; background: #e2e8f0; }
-        .auth-center { text-align: center; }
-        .auth-gap { margin-top: 0.9rem; }
 
         /* ---- The code: one box per digit ---- */
         .otp-boxes { display: grid; grid-template-columns: repeat({{ $otpDigits }}, minmax(0, 1fr)); gap: 0.5rem; }
@@ -300,7 +294,7 @@
                 </div>
             @else
                 {{-- ============ Step 1: the e-mail address ============ --}}
-                <div id="mobile-pane" @if ($onEmail) hidden @endif>
+                <div id="mobile-pane">
                     <ol class="auth-steps" aria-label="{{ __('login.step', ['current' => $digits(1), 'total' => $digits(2)]) }}">
                         <li class="is-current" aria-current="step"><span class="auth-step-no">{{ $digits(1) }}</span>{{ __('login.step_mobile') }}</li>
                         <li class="auth-step-line" aria-hidden="true"></li>
@@ -317,7 +311,7 @@
                         <div class="auth-field @error('otp_email') is-invalid @enderror">
                             <span class="auth-prefix"><i class="fas fa-envelope" aria-hidden="true"></i></span>
                             <input type="email" id="otp_email" name="otp_email" inputmode="email" autocomplete="email" maxlength="191"
-                                value="{{ old('otp_email') }}" placeholder="{{ __('login.otp_email_placeholder') }}" required @if (! $onEmail) autofocus @endif
+                                value="{{ old('otp_email') }}" placeholder="{{ __('login.otp_email_placeholder') }}" required autofocus
                                 @error('otp_email') aria-invalid="true" aria-describedby="otp-email-error" @enderror>
                         </div>
                         @error('otp_email')
@@ -330,48 +324,6 @@
                     </form>
 
                     <p class="auth-note"><i class="fas fa-user-shield" aria-hidden="true"></i><span>{{ __('login.approved_only') }}</span></p>
-
-                    <div class="auth-or">{{ __('login.or') }}</div>
-                    <div class="auth-center">
-                        <button type="button" class="auth-link" data-show="email-pane"><i class="fas fa-lock" aria-hidden="true"></i> {{ __('login.use_email') }}</button>
-                    </div>
-                </div>
-
-                {{-- ============ The other way in: e-mail and password ============ --}}
-                <div id="email-pane" @if (! $onEmail) hidden @endif>
-                    <div class="auth-card-head">
-                        <h2 class="auth-title">{{ __('login.use_email') }}</h2>
-                        <p class="auth-sub">&nbsp;</p>
-                    </div>
-
-                    <form method="post" action="{{ url('/login') }}">
-                        @csrf
-                        <label class="auth-label" for="email">{{ __('login.email') }}</label>
-                        <div class="auth-field @error('email') is-invalid @enderror">
-                            <span class="auth-prefix"><i class="fas fa-envelope" aria-hidden="true"></i></span>
-                            <input type="email" id="email" name="email" value="{{ old('email') }}" autocomplete="username" required @if ($onEmail) autofocus @endif>
-                        </div>
-                        @error('email')
-                            <p class="auth-error" role="alert"><i class="fas fa-exclamation-circle" aria-hidden="true"></i><span>{{ $message }}</span></p>
-                        @enderror
-
-                        <label class="auth-label auth-gap" for="password">{{ __('login.password') }}</label>
-                        <div class="auth-field @error('password') is-invalid @enderror">
-                            <span class="auth-prefix"><i class="fas fa-lock" aria-hidden="true"></i></span>
-                            <input type="password" id="password" name="password" autocomplete="current-password" required>
-                            <button type="button" id="toggle-password" aria-label="{{ __('login.show_password') }}" aria-pressed="false"><i class="fas fa-eye" aria-hidden="true"></i></button>
-                        </div>
-                        @error('password')
-                            <p class="auth-error" role="alert"><i class="fas fa-exclamation-circle" aria-hidden="true"></i><span>{{ $message }}</span></p>
-                        @enderror
-
-                        <button type="submit" class="auth-btn"><i class="fas fa-sign-in-alt" aria-hidden="true"></i> {{ __('login.email_login') }}</button>
-                    </form>
-
-                    <div class="auth-or">{{ __('login.or') }}</div>
-                    <div class="auth-center">
-                        <button type="button" class="auth-link" data-show="mobile-pane"><i class="fas fa-envelope-open-text" aria-hidden="true"></i> {{ __('login.use_mobile') }}</button>
-                    </div>
                 </div>
             @endif
         </div>
@@ -387,27 +339,6 @@
             var m = Math.floor(seconds / 60), s = seconds % 60;
             return toLocal((m < 10 ? '0' : '') + m + ':' + (s < 10 ? '0' : '') + s);
         };
-
-        // ---- Code by e-mail / password: switch between the two ways of signing in ----
-        Array.prototype.forEach.call(document.querySelectorAll('[data-show]'), function (button) {
-            button.addEventListener('click', function () {
-                ['mobile-pane', 'email-pane'].forEach(function (id) {
-                    var pane = document.getElementById(id);
-                    if (pane) { pane.hidden = id !== button.getAttribute('data-show'); }
-                });
-                var first = document.querySelector('#' + button.getAttribute('data-show') + ' input:not([type=hidden])');
-                if (first) { first.focus(); }
-            });
-        });
-        var toggle = document.getElementById('toggle-password');
-        if (toggle) {
-            toggle.addEventListener('click', function () {
-                var field = document.getElementById('password'), show = field.type === 'password';
-                field.type = show ? 'text' : 'password';
-                toggle.setAttribute('aria-pressed', String(show));
-                toggle.firstElementChild.className = show ? 'fas fa-eye-slash' : 'fas fa-eye';
-            });
-        }
 
         // ---- The code: one digit per box, moving on by itself; a pasted code fills them all ----
         var boxes = Array.prototype.slice.call(document.querySelectorAll('#otp-boxes input'));
