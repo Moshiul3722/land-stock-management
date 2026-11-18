@@ -210,16 +210,6 @@
                                     <span class="invalid-feedback" role="alert"></span>
                                 </div>
                             </div>
-                            {{-- The number the user signs in with (a login code is sent to it) --}}
-                            <div class="col-md-6">
-                                <div class="form-group">
-                                    <label for="user_mobile">{{ __('user.mobile') }}</label>
-                                    <input type="tel" name="mobile" id="user_mobile" class="form-control"
-                                        maxlength="17" autocomplete="off" inputmode="numeric" placeholder="01XXXXXXXXX">
-                                    <span class="invalid-feedback" role="alert"></span>
-                                    <small class="form-text text-muted">{{ __('user.mobile_hint') }}</small>
-                                </div>
-                            </div>
                             <div class="col-md-6">
                                 <div class="form-group">
                                     <label for="user_role_id">{{ __('user.role') }} <span
@@ -233,7 +223,7 @@
                                     <span class="invalid-feedback" role="alert"></span>
                                 </div>
                             </div>
-                            <div class="col-12">
+                            <div class="col-md-6">
                                 <div class="form-group">
                                     <label for="user_department_id">{{ __('user.section_department') }}
                                         <span class="text-danger d-none" id="user_department_required">*</span></label>
@@ -244,6 +234,16 @@
                                         @endforeach
                                     </select>
                                     <span class="invalid-feedback" role="alert"></span>
+                                </div>
+                            </div>
+                            {{-- The number the user signs in with (a login code is sent to it) --}}
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="user_mobile">{{ __('user.mobile') }}</label>
+                                    <input type="tel" name="mobile" id="user_mobile" class="form-control"
+                                        maxlength="17" autocomplete="off" inputmode="numeric" placeholder="01XXXXXXXXX">
+                                    <span class="invalid-feedback" role="alert"></span>
+                                    <small class="form-text text-muted">{{ __('user.mobile_hint') }}</small>
                                 </div>
                             </div>
                             <div class="col-md-6 user-password-col">
