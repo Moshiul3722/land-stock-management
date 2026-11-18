@@ -805,6 +805,8 @@ class ManageRequisitions extends Component
             ->whereIn('requistion_id', $ids)
             ->where('status', 'pending')
             ->when(! $fullAccess, fn ($query) => $query->where('to_user_id', $user->id))
+            // Super Admin / Admin decide on the Admin's step only
+            ->when($fullAccess, fn ($query) => $query->whereHas('toUser', fn ($q) => $q->where('role_id', \App\Services\RequisitionService::ADMIN_ROLE_ID)))
             ->with('toUser:id,role_id')
             ->get(['id', 'requistion_id', 'to_user_id'])
             ->mapWithKeys(fn ($task) => [(int) $task->requistion_id => (int) ($task->toUser->role_id ?? 0)])

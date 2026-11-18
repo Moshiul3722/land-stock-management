@@ -217,8 +217,8 @@ class RequisitionController extends Controller
         $pending = $requisition->approvalDetails()->where('status', 'pending');
 
         if ($this->requisitionService->hasFullAccess(Auth::user())) {
-            // Super Admin / Admin decide on every step except the Store Keeper's
-            return $pending->exists() && ! $this->requisitionService->isWaitingForStoreKeeper($requisition);
+            // Super Admin / Admin decide on the Admin's step only (not the Store Admin's or the Store Keeper's)
+            return $this->requisitionService->isWaitingForAdmin($requisition);
         }
 
         return $pending->where('to_user_id', Auth::id())->exists();

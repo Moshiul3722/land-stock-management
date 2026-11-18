@@ -129,8 +129,9 @@ class RequisitionService
             ->select('approval_details.*')
             ->get()
             ->filter(fn ($task) => $task->requisition !== null)
-            // What waits for the Store Keeper is the Store Keeper's alone: it is not listed here
-            ->reject(fn ($task) => (int) ($task->toUser->role_id ?? 0) === self::STORE_KEEPER_ROLE_ID)
+            // What waits for the Store Admin or the Store Keeper is theirs alone: only the
+            // Admin's step is listed here
+            ->filter(fn ($task) => (int) ($task->toUser->role_id ?? 0) === self::ADMIN_ROLE_ID)
             // the user's own task first, so unique() keeps it
             ->sortBy(fn ($task) => (int) $task->to_user_id === (int) $user->id ? 0 : 1)
             ->unique('requistion_id')
@@ -336,18 +337,21 @@ class RequisitionService
         return $result;
     }
 
-    /** Roles with full access: they may act on any step of the approval workflow before the Store Keeper's. */
+    /** Roles with full access: they act on the Admin's step of the approval workflow. */
     public const FULL_ACCESS_ROLE_IDS = [1, 2];
 
-    /** The Store Keeper's step (delivery, QR check) is for the Store Keeper only. */
-    public const STORE_KEEPER_ROLE_ID = 4;
+    /**
+     * The Admin's step. Super Admin and Admin see and decide on requisitions at this step only;
+     * the Store Admin's and the Store Keeper's steps belong to those roles alone.
+     */
+    public const ADMIN_ROLE_ID = 2;
 
-    /** Whether a requisition is waiting at the Store Keeper's step. */
-    public function isWaitingForStoreKeeper(Requisition $requisition): bool
+    /** Whether a requisition is waiting at the Admin's step. */
+    public function isWaitingForAdmin(Requisition $requisition): bool
     {
         return $requisition->approvalDetails()
             ->where('status', 'pending')
-            ->whereHas('toUser', fn ($query) => $query->where('role_id', self::STORE_KEEPER_ROLE_ID))
+            ->whereHas('toUser', fn ($query) => $query->where('role_id', self::ADMIN_ROLE_ID))
             ->exists();
     }
 
