@@ -389,6 +389,16 @@
             body {
                 -webkit-print-color-adjust: exact;
             }
+
+            /* While its print panel is open Safari shows the page in its print layout without
+               the page background (when "Print backgrounds" is off), so on a Mac in dark mode the
+               slip looked blank: black text on the dark window. The page itself is white here. */
+            html.is-safari,
+            html.is-safari body {
+                background: #fff !important;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
         }
     </style>
 </head>
