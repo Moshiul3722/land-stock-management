@@ -619,8 +619,8 @@
                     const shown = localDigits(asciiDigits(this.value).replace(/[^0-9]/g, ''));
                     if (this.value !== shown) this.value = shown;
                 });
-                // The approved quantity can never be more than what is in stock: a larger number is
-                // brought back down to the stock and a notice says why.
+                // The approved quantity can never be more than what is in stock: a larger number
+                // stays in the field, a notice says why, and "approve" goes inactive until it is fixed.
                 function stockOf(input) {
                     const raw = String($(input).attr('data-available') || '');
                     return raw === '' ? null : Number(raw);
@@ -631,12 +631,15 @@
                 function capToStock(input) {
                     const stock = stockOf(input);
                     const number = parseInt(asciiDigits(input.value), 10);
-                    if (stock !== null && stock > 0 && number > stock) {
-                        input.value = localDigits(stock);
+                    const over = stock !== null && stock > 0 && number > stock;
+                    // The notice once each time the number goes above the stock (not on every key)
+                    if (over && input.getAttribute('data-over') !== '1') {
                         toastr.warning(overStockMessage(input));
-                        return true;
                     }
-                    return false;
+                    input.setAttribute('data-over', over ? '1' : '0');
+                    $(input).closest('span.tw-inline-flex').toggleClass('tw-border-rose-400 tw-ring-2 tw-ring-rose-200', over);
+                    $(input).toggleClass('!tw-text-rose-600', over);
+                    return over;
                 }
                 // Fields whose number is above the stock (e.g. the requested amount was larger)
                 function overStockInputs() {
@@ -822,7 +825,12 @@
                 $('.item-qty-input').each(function() {
                     const raw = String($(this).attr('data-available') || '');
                     const stock = raw === '' ? null : Number(raw);
-                    if (stock !== null && stock > 0 && (parseInt(asciiDigits(this.value), 10) || 0) > stock) {
+                    const isOver = stock !== null && stock > 0 && (parseInt(asciiDigits(this.value), 10) || 0) > stock;
+                    // A field above the stock is outlined in red (also when the dialog opens with one)
+                    $(this).closest('span.tw-inline-flex').toggleClass('tw-border-rose-400 tw-ring-2 tw-ring-rose-200', isOver);
+                    $(this).toggleClass('!tw-text-rose-600', isOver);
+                    if (isOver) {
+                        this.setAttribute('data-over', '1');
                         canApprove = false;
                         if (!overStockTitle) {
                             overStockTitle = T.over_stock.replace(':name', $(this).attr('data-name') || '').replace(':qty', localDigits(stock));
