@@ -8,6 +8,7 @@ use App\Models\Department;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Str;
 use App\Http\Controllers\AppBaseController;
 use App\Http\Controllers\ServiceControllers\RoleServiceController;
 use App\Http\Controllers\ServiceControllers\UserServiceController;
@@ -76,7 +77,8 @@ class UserController extends AppBaseController
                 'mobile' => $data['mobile'] ?? null,
                 'role_id' => $data['role_id'],
                 'department_id' => $data['department_id'] ?? null,
-                'password' => Hash::make($data['password']),
+                // Sign-in is by e-mailed code only: a new user gets a random password nobody knows.
+                'password' => Hash::make($data['password'] ?? Str::random(40)),
             ];
 
             // E-mail of a user that was removed earlier: bring that record back with the
@@ -188,7 +190,7 @@ class UserController extends AppBaseController
     }
 
     /**
-     * Shared validation for create and update. On update the password is optional.
+     * Shared validation for create and update. The password is optional (sign-in is by e-mailed code).
      */
     private function validateUser(Request $request, ?User $user = null): array
     {
@@ -256,7 +258,7 @@ class UserController extends AppBaseController
                 'integer',
                 Rule::exists('departments', 'id')->whereNull('deleted_at'),
             ],
-            'password' => [$user ? 'nullable' : 'required', 'string', 'min:6', 'max:191'],
+            'password' => ['nullable', 'string', 'min:6', 'max:191'],
             'confirm_password' => ['required_with:password', 'same:password'],
         ], [
             'department_id.required_if' => trans('user.department_required'),

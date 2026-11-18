@@ -246,7 +246,7 @@
                                     <span class="invalid-feedback" role="alert"></span>
                                 </div>
                             </div>
-                            <div class="col-md-6">
+                            <div class="col-md-6 user-password-col">
                                 <div class="form-group mb-md-0">
                                     <label for="user_password"><span id="user_password_label"></span>
                                         <span class="text-danger" id="user_password_required">*</span></label>
@@ -267,7 +267,7 @@
                                     <small class="form-text text-muted" id="user_password_hint"></small>
                                 </div>
                             </div>
-                            <div class="col-md-6">
+                            <div class="col-md-6 user-password-col">
                                 <div class="form-group mb-0">
                                     <label for="user_confirm_password"><span id="user_confirm_label"></span>
                                         <span class="text-danger" id="user_confirm_required">*</span></label>
@@ -796,6 +796,9 @@
                 $('#user_confirm_label').text(user ? text.resetPasswordConfirm : text.confirmPassword);
                 $('#user_password_hint').text(user ? text.resetPasswordHint : text.passwordHint);
                 $('#user_password_required, #user_confirm_required').toggleClass('d-none', !!user);
+                // Sign-in is by e-mailed code only, so a new user needs no password; the
+                // fields are shown only when editing (to reset one).
+                $('.user-password-col').toggleClass('d-none', !user);
 
                 $('#user_name').val(user ? user.name : '');
                 $('#user_name_bn').val(user ? user.nameBn : '');
@@ -959,9 +962,6 @@
                 }
                 var password = $('#user_password').val();
                 var confirmPassword = $('#user_confirm_password').val();
-                if (!editingId && password === '') {
-                    fieldError($('#user_password'), text.required);
-                }
                 if (password !== '' && password.length < PASSWORD_MIN_LENGTH) {
                     fieldError($('#user_password'), text.passwordTooShort);
                 }
