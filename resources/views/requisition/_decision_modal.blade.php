@@ -837,11 +837,17 @@
                         }
                     }
                 });
+                // A changed approved quantity has to be saved ("পরিমাণ সংরক্ষণ") before approving
+                let saveFirstTitle = '';
+                if (hasUnsavedChanges) {
+                    canApprove = false;
+                    saveFirstTitle = T.save_first;
+                }
                 const btn = $('#btn-approve');
                 if (canApprove) {
                     btn.prop('disabled', false).attr('title', T.ready_to_approve);
                 } else {
-                    btn.prop('disabled', true).attr('title', overStockTitle || T.resolve_first);
+                    btn.prop('disabled', true).attr('title', overStockTitle || saveFirstTitle || T.resolve_first);
                 }
             }
         });
