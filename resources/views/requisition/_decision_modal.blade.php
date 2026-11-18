@@ -394,7 +394,7 @@
                             const unitHtml = unit ? `<span class="tw-text-sm tw-text-slate-500">${esc(unit)}</span>` : '';
                             let approvedHtml = isStoreAdmin ?
                                 `<span class="tw-inline-flex tw-min-w-32 tw-items-stretch tw-overflow-hidden tw-rounded-lg tw-border tw-border-solid tw-border-slate-300 tw-bg-white tw-align-middle tw-shadow-sm tw-transition hover:tw-border-slate-400 focus-within:tw-border-brand-500 focus-within:tw-ring-2 focus-within:tw-ring-brand-500/20">
-                                    <input type="text" inputmode="numeric" autocomplete="off" maxlength="5" class="item-qty-input tw-block tw-min-h-8 tw-w-10 tw-flex-none tw-border-0 tw-bg-transparent tw-px-0.5 tw-py-0 tw-text-center tw-text-base tw-font-bold tw-tabular-nums tw-text-slate-900 focus:tw-outline-none" data-id="${item.id}" data-available="${available !== null ? available : ''}" data-name="${esc(item.product.name)}" value="${localDigits(item.quantity)}" aria-label="${esc(T.approved_quantity)}: ${esc(item.product.name)}">
+                                    <input type="text" inputmode="numeric" autocomplete="off" maxlength="5" class="item-qty-input tw-block tw-min-h-8 tw-w-10 tw-flex-none tw-border-0 tw-bg-transparent tw-px-0.5 tw-py-0 tw-text-center tw-text-base tw-font-bold tw-tabular-nums tw-text-slate-900 focus:tw-outline-none" data-id="${item.id}" data-saved="${Number(item.quantity)}" data-available="${available !== null ? available : ''}" data-name="${esc(item.product.name)}" value="${localDigits(item.quantity)}" aria-label="${esc(T.approved_quantity)}: ${esc(item.product.name)}">
                                     <span class="tw-flex tw-w-6 tw-flex-none tw-flex-col tw-border-0 tw-border-l tw-border-solid tw-border-slate-200 sm:tw-w-5">
                                         <button type="button" class="item-qty-step tw-flex tw-flex-1 tw-items-center tw-justify-center tw-border-0 tw-bg-transparent tw-p-0 tw-text-slate-400 tw-transition hover:tw-bg-brand-50 hover:tw-text-brand-700 active:tw-bg-brand-100 focus:tw-outline-none focus-visible:tw-bg-brand-50 focus-visible:tw-text-brand-700" data-step="1" tabindex="-1" aria-label="${esc(stepUpLabel)}" title="${esc(stepUpLabel)}"><i class="fas fa-caret-up tw-text-xs" aria-hidden="true"></i></button>
                                         <button type="button" class="item-qty-step tw-flex tw-flex-1 tw-items-center tw-justify-center tw-border-0 tw-bg-transparent tw-p-0 tw-text-slate-400 tw-transition hover:tw-bg-brand-50 hover:tw-text-brand-700 active:tw-bg-brand-100 focus:tw-outline-none focus-visible:tw-bg-brand-50 focus-visible:tw-text-brand-700 tw-border-t tw-border-solid tw-border-slate-200" data-step="-1" tabindex="-1" aria-label="${esc(stepDownLabel)}" title="${esc(stepDownLabel)}"><i class="fas fa-caret-down tw-text-xs" aria-hidden="true"></i></button>
@@ -672,8 +672,18 @@
                     this.value = localDigits(number > 0 ? number : 1);
                 });
 
+                // "Changed" means a field differs from the amount that is saved (at first: the
+                // requested amount). Putting the number back to it counts as unchanged again, so
+                // "save" looks normal and "approve" is active.
+                function quantitiesChanged() {
+                    let changed = false;
+                    $('.item-qty-input').each(function() {
+                        if ((parseInt(asciiDigits(this.value), 10) || 0) !== Number($(this).attr('data-saved'))) changed = true;
+                    });
+                    return changed;
+                }
                 $(document).on('change input', '.item-lot-select, .item-qty-input', function() {
-                    hasUnsavedChanges = true;
+                    hasUnsavedChanges = quantitiesChanged();
                     evaluateApproveButtonFromUI();
                     updateSaveButtonUI();
                 });
@@ -709,7 +719,10 @@
                         },
                         success: function(res) {
                             toastr.success(T.assignments_saved);
-                            // RESET DIRTY FLAG ON SUCCESS
+                            // RESET DIRTY FLAG ON SUCCESS: the saved amounts are now what the fields show
+                            $('.item-qty-input').each(function() {
+                                $(this).attr('data-saved', parseInt(asciiDigits(this.value), 10) || 1);
+                            });
                             hasUnsavedChanges = false;
                             updateSaveButtonUI();
                             evaluateApproveButtonFromUI();
