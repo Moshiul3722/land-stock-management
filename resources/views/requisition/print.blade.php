@@ -14,6 +14,16 @@
             font-display: block;
         }
 
+        /* Nikosh draws Bangla small next to English, so the Bangla letters (only) are drawn
+           larger; English and digits-free text keep their size. */
+        @font-face {
+            font-family: 'Nikosh';
+            src: local('Nikosh'), local('NikoshBAN'), url('{{ asset('fonts/Nikosh.ttf') }}') format('truetype');
+            unicode-range: U+0980-09FF, U+200C-200D, U+25CC;
+            size-adjust: 125%;
+            font-display: block;
+        }
+
         @font-face {
             font-family: 'Kalpurush';
             src: local('Kalpurush'), url('{{ asset('fonts/kalpurush.ttf') }}') format('truetype');
