@@ -22,6 +22,9 @@ class ApprovalService
     protected $stockRepository;
     protected $notificationService;
 
+    private const SUPER_ADMIN_ROLE_ID = 1;
+    private const ADMIN_ROLE_ID = 2;
+
     public function __construct(StockRepository $stockRepository, NotificationService $notificationService)
     {
         $this->stockRepository = $stockRepository;
@@ -106,6 +109,17 @@ class ApprovalService
     {
         $entity = ApprovalEntity::where('name', $entityName)->firstOrFail();
         $nextStep = $entity->processes()->where('serial', $currentSerial + 1)->first();
+
+        // Requisitions: an approval by the Super Admin or the Admin counts for both of them, so
+        // the Admin's step is skipped when one of them has just approved (e.g. the Super Admin
+        // approving at the Store Admin's step sends it straight to the Store Keeper).
+        $approverRole = (int) (Auth::user()?->role_id ?? 0);
+        while ($nextStep && $model instanceof Requisition && $currentSerial > 0
+            && (int) $nextStep->role_id === self::ADMIN_ROLE_ID
+            && in_array($approverRole, [self::SUPER_ADMIN_ROLE_ID, self::ADMIN_ROLE_ID], true)) {
+            $nextStep = $entity->processes()->where('serial', $nextStep->serial + 1)->first();
+        }
+
         if ($nextStep) {
             // --- Move to Next Approver ---
             $nextApprovers = User::where('role_id', $nextStep->role_id)->get();
