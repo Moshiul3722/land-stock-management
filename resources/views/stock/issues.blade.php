@@ -1,6 +1,30 @@
 @extends('layouts.app')
 
 @push('page_css')
+    <style>
+        /* The product's name in the page header: a rounded gradient badge */
+        html body .content-header .list-page-context .list-page-context-value.issue-product-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.3rem 1rem 0.35rem;
+            border-radius: 999px;
+            background: linear-gradient(120deg, #1d4fd8 0%, #4f46e5 55%, #7c3aed 100%);
+            color: #fff;
+            font-size: 1.2rem;
+            line-height: 1.35;
+            box-shadow: 0 8px 18px -10px rgba(79, 70, 229, 0.75);
+        }
+
+        html body .content-header .list-page-context .issue-product-pill i {
+            font-size: 0.9em;
+            opacity: 0.85;
+        }
+
+        html body .content-header .row > .list-page-context:has(.issue-product-pill) {
+            align-items: center;
+        }
+    </style>
     <link rel="stylesheet" href="{{ asset('css/tailwind.css') }}?v={{ @filemtime(public_path('css/tailwind.css')) }}">
 @endpush
 
@@ -74,7 +98,9 @@
                 {{-- The product this page is about, next to the breadcrumb --}}
                 <div class="col-auto list-page-context">
                     <span class="list-page-context-label">{{ __('stock.product_name') }}</span>
-                    <strong class="list-page-context-value">{{ $product->name }}</strong>
+                    <strong class="list-page-context-value issue-product-pill">
+                        <i class="fas fa-box-open" aria-hidden="true"></i>{{ $product->name }}
+                    </strong>
                 </div>
             </div>
         </div>
