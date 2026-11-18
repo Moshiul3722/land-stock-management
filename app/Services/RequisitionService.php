@@ -129,6 +129,8 @@ class RequisitionService
             ->select('approval_details.*')
             ->get()
             ->filter(fn ($task) => $task->requisition !== null)
+            // What waits for the Store Keeper is the Store Keeper's alone: it is not listed here
+            ->reject(fn ($task) => (int) ($task->toUser->role_id ?? 0) === self::STORE_KEEPER_ROLE_ID)
             // the user's own task first, so unique() keeps it
             ->sortBy(fn ($task) => (int) $task->to_user_id === (int) $user->id ? 0 : 1)
             ->unique('requistion_id')
@@ -334,8 +336,20 @@ class RequisitionService
         return $result;
     }
 
-    /** Roles with full access: they may act on any step of the approval workflow. */
+    /** Roles with full access: they may act on any step of the approval workflow before the Store Keeper's. */
     public const FULL_ACCESS_ROLE_IDS = [1, 2];
+
+    /** The Store Keeper's step (delivery, QR check) is for the Store Keeper only. */
+    public const STORE_KEEPER_ROLE_ID = 4;
+
+    /** Whether a requisition is waiting at the Store Keeper's step. */
+    public function isWaitingForStoreKeeper(Requisition $requisition): bool
+    {
+        return $requisition->approvalDetails()
+            ->where('status', 'pending')
+            ->whereHas('toUser', fn ($query) => $query->where('role_id', self::STORE_KEEPER_ROLE_ID))
+            ->exists();
+    }
 
     public function hasFullAccess(?User $user): bool
     {
