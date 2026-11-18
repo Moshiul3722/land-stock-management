@@ -710,9 +710,10 @@
                         <h3 class="tw-mb-3 tw-mt-0 tw-flex tw-items-center tw-gap-2 tw-text-sm tw-font-semibold tw-leading-snug tw-text-slate-700">
                             <i class="fas fa-history tw-text-slate-400" aria-hidden="true"></i>{{ __('requisition.manage.timeline') }}
                         </h3>
-                        {{-- One row per step: a round icon on a line that joins the steps, and a card with
-                             what happened, who did it (or is awaited) and when --}}
-                        <ol class="tw-m-0 tw-list-none tw-p-0">
+                        {{-- One card per step, two side by side (one under the other on phones): a round
+                             status icon with the step number, what happened, who did it (or is awaited)
+                             and when --}}
+                        <ol class="tw-m-0 tw-grid tw-list-none tw-grid-cols-1 tw-gap-3 tw-p-0 sm:tw-grid-cols-2">
                             @foreach ($this->timeline as $step)
                                 @php
                                     [$stepIcon, $stepDot, $stepCard] = match ($step['state']) {
@@ -722,32 +723,26 @@
                                         default => ['fa-file-alt', 'tw-bg-brand-50 tw-text-brand-600 tw-ring-brand-100', 'tw-border-slate-200 tw-bg-white'],
                                     };
                                 @endphp
-                                <li class="tw-relative tw-flex tw-gap-3 {{ $loop->last ? '' : 'tw-pb-3' }}">
-                                    @unless ($loop->last)
-                                        <span class="tw-absolute tw-bottom-0 tw-left-4 tw-top-9 tw-w-0.5 tw--translate-x-1/2 tw-rounded-full tw-bg-slate-200" aria-hidden="true"></span>
-                                    @endunless
-                                    <span class="tw-relative tw-inline-flex tw-h-8 tw-w-8 tw-flex-none tw-items-center tw-justify-center tw-rounded-full tw-text-xs tw-ring-4 {{ $stepDot }}" aria-hidden="true">
-                                        <i class="fas {{ $stepIcon }}"></i>
+                                <li class="tw-flex tw-min-w-0 tw-gap-3 tw-rounded-xl tw-border tw-border-solid tw-p-3 {{ $stepCard }}">
+                                    <span class="tw-mt-0.5 tw-inline-flex tw-h-8 tw-w-8 tw-flex-none tw-items-center tw-justify-center tw-rounded-full tw-text-xs tw-ring-4 {{ $stepDot }}">
+                                        <i class="fas {{ $stepIcon }}" aria-hidden="true"></i>
                                     </span>
-                                    <div class="tw-min-w-0 tw-flex-1 tw-rounded-xl tw-border tw-border-solid tw-px-3.5 tw-py-2.5 {{ $stepCard }}">
-                                        <div class="tw-flex tw-flex-wrap tw-items-baseline tw-justify-between tw-gap-x-3 tw-gap-y-0.5">
-                                            <p class="tw-m-0 tw-text-sm tw-font-semibold tw-leading-snug tw-text-slate-900">
-                                                @if ($step['state'] === 'initiated')
-                                                    {{ __('requisition.manage.step_initiated') }}
-                                                @elseif ($step['state'] === 'pending')
-                                                    {{ $statusLabel('pending') }}
-                                                @else
-                                                    {{ $statusLabel($step['state']) }}
-                                                @endif
-                                            </p>
-                                            <span class="tw-inline-flex tw-items-center tw-gap-1.5 tw-whitespace-nowrap tw-text-xs tw-text-slate-500">
-                                                <i class="fas fa-clock tw-text-slate-400" aria-hidden="true"></i>{{ $formatDate($step['date'], true) }}
-                                            </span>
-                                        </div>
+                                    <div class="tw-min-w-0 tw-flex-1">
+                                        <p class="tw-m-0 tw-flex tw-items-center tw-gap-2 tw-text-sm tw-font-semibold tw-leading-snug tw-text-slate-900">
+                                            {{-- Step number --}}
+                                            <span class="tw-inline-flex tw-h-5 tw-min-w-[1.25rem] tw-flex-none tw-items-center tw-justify-center tw-rounded-full tw-bg-slate-100 tw-px-1 tw-text-xs tw-font-bold tw-leading-none tw-text-slate-500">{{ $digits($loop->iteration) }}</span>
+                                            @if ($step['state'] === 'initiated')
+                                                {{ __('requisition.manage.step_initiated') }}
+                                            @elseif ($step['state'] === 'pending')
+                                                {{ $statusLabel('pending') }}
+                                            @else
+                                                {{ $statusLabel($step['state']) }}
+                                            @endif
+                                        </p>
                                         @if ($step['state'] === 'pending' || $step['name'])
                                             <p class="tw-mb-0 tw-mt-1 tw-flex tw-items-start tw-gap-1.5 tw-text-xs tw-leading-snug tw-text-slate-600">
                                                 <i class="fas {{ $step['state'] === 'pending' ? 'fa-user-clock' : 'fa-user' }} tw-mt-0.5 tw-text-slate-400" aria-hidden="true"></i>
-                                                <span>
+                                                <span class="tw-min-w-0 tw-break-words">
                                                     @if ($step['state'] === 'pending')
                                                         {{ __('requisition.manage.waiting_for', ['name' => $step['name'] ?: '—']) }}
                                                     @else
@@ -756,10 +751,13 @@
                                                 </span>
                                             </p>
                                         @endif
+                                        <p class="tw-mb-0 tw-mt-1 tw-flex tw-items-center tw-gap-1.5 tw-text-xs tw-leading-snug tw-text-slate-500">
+                                            <i class="fas fa-clock tw-text-slate-400" aria-hidden="true"></i>{{ $formatDate($step['date'], true) }}
+                                        </p>
                                         @if ($step['comments'])
                                             <p class="tw-mb-0 tw-mt-2 tw-flex tw-gap-2 tw-rounded-lg tw-border-0 tw-border-l-4 tw-border-solid tw-border-slate-300 tw-bg-slate-50 tw-px-3 tw-py-2 tw-text-sm tw-text-slate-700">
                                                 <i class="fas fa-quote-left tw-mt-0.5 tw-text-xs tw-text-slate-400" aria-hidden="true"></i>
-                                                <span class="tw-min-w-0">{{ $step['comments'] }}</span>
+                                                <span class="tw-min-w-0 tw-break-words">{{ $step['comments'] }}</span>
                                             </p>
                                         @endif
                                     </div>
