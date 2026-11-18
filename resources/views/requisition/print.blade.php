@@ -6,8 +6,22 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Requisition Slip #{{ $requisition->id }}</title>
     <style>
+        /* The slip's font: Nikosh (NikoshBAN), else Kalpurush. The computer's own copy is used
+           when it has one; otherwise the copy in public/fonts is downloaded with the page. */
+        @font-face {
+            font-family: 'Nikosh';
+            src: local('Nikosh'), local('NikoshBAN'), url('{{ asset('fonts/Nikosh.ttf') }}') format('truetype');
+            font-display: block;
+        }
+
+        @font-face {
+            font-family: 'Kalpurush';
+            src: local('Kalpurush'), url('{{ asset('fonts/kalpurush.ttf') }}') format('truetype');
+            font-display: block;
+        }
+
         body {
-            font-family: 'Arial', sans-serif;
+            font-family: 'Nikosh', 'NikoshBAN', 'Kalpurush', sans-serif;
             font-size: 14px;
             margin: 0;
             padding: 20px;
@@ -168,6 +182,8 @@
         }
 
         body.is-preview .preview-bar {
+            /* The on-screen toolbar keeps the font it had; only the slip uses Nikosh */
+            font-family: 'Arial', sans-serif;
             position: sticky;
             top: 0;
             z-index: 10;
@@ -354,7 +370,8 @@
     $isPreview = request()->boolean('preview');
     $previewBn = app()->getLocale() === 'bn';
 @endphp
-<body @if ($isPreview) class="is-preview" @else onload="window.print()" @endif>
+{{-- Printing waits until the slip's font has loaded, so the paper never shows a fallback font --}}
+<body @if ($isPreview) class="is-preview" @else onload="(document.fonts ? document.fonts.ready : Promise.resolve()).then(function () { window.print(); })" @endif>
 
     @if ($isPreview)
         <div class="preview-bar">
@@ -613,7 +630,10 @@
                     pages.style.zoom = scale;
                 }
 
-                window.addEventListener('load', build);
+                // The pages are measured with the slip's own font, so they are built once it has loaded
+                window.addEventListener('load', function () {
+                    (document.fonts ? document.fonts.ready : Promise.resolve()).then(build);
+                });
                 window.addEventListener('resize', fit);
             })();
         </script>
