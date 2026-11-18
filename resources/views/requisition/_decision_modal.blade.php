@@ -817,11 +817,23 @@
                 $('.item-lot-select').each(function() {
                     if (!$(this).val()) canApprove = false;
                 });
+                // An approved quantity above the product's stock keeps "approve" switched off
+                let overStockTitle = '';
+                $('.item-qty-input').each(function() {
+                    const raw = String($(this).attr('data-available') || '');
+                    const stock = raw === '' ? null : Number(raw);
+                    if (stock !== null && stock > 0 && (parseInt(asciiDigits(this.value), 10) || 0) > stock) {
+                        canApprove = false;
+                        if (!overStockTitle) {
+                            overStockTitle = T.over_stock.replace(':name', $(this).attr('data-name') || '').replace(':qty', localDigits(stock));
+                        }
+                    }
+                });
                 const btn = $('#btn-approve');
                 if (canApprove) {
                     btn.prop('disabled', false).attr('title', T.ready_to_approve);
                 } else {
-                    btn.prop('disabled', true).attr('title', T.resolve_first);
+                    btn.prop('disabled', true).attr('title', overStockTitle || T.resolve_first);
                 }
             }
         });
