@@ -36,13 +36,13 @@ class StockController extends Controller
         // Handle AJAX requests for filtering
         if ($request->ajax()) {
             $filters = $request->only(['category_id', 'purchase_type_id']);
-            $stockSummary = $this->stockService->getAggregatedStockList($filters);
+            $stockSummary = $this->onePerProduct($this->stockService->getAggregatedStockList($filters));
             return view('stock._stock_list', compact('stockSummary'));
         }
 
         // For initial page load: the whole list is on the page; the category filter, the search
         // box and the paging work in the browser.
-        $stockSummary = $this->stockService->getAggregatedStockList([]);
+        $stockSummary = $this->onePerProduct($this->stockService->getAggregatedStockList([]));
 
         // Unit of each product as shown on screen (Bangla name on Bangla pages), by product id.
         $listedProducts = Product::query()
@@ -60,6 +60,22 @@ class StockController extends Controller
             ]);
 
         return view('stock.index', compact('categories', 'purchaseTypes', 'stockSummary', 'unitLabels', 'banglaNames'));
+    }
+
+    /**
+     * The stock list shows each product once: the stock of all its entries (lots, brands,
+     * specifications, purchase types) is added up into one row.
+     */
+    private function onePerProduct($rows)
+    {
+        return $rows->groupBy('product_id')
+            ->map(function ($entries) {
+                $row = clone $entries->first();
+                $row->total_quantity = $entries->sum(fn ($entry) => (float) $entry->total_quantity);
+
+                return $row;
+            })
+            ->values();
     }
 
     /**
