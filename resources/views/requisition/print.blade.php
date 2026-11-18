@@ -419,11 +419,51 @@
                 document.documentElement.classList.add('is-safari');
             }
         })();
+
+        // "Print" in the preview. While its print panel is open Safari lays the page it prints out
+        // for paper, which left the preview behind the panel blank; there a copy of the A4 pages is
+        // printed from a hidden frame, so the preview on screen stays as it is. Other browsers
+        // print the page itself.
+        function slipPrint() {
+            var pages = document.getElementById('a4-pages');
+            if (!document.documentElement.classList.contains('is-safari') || !pages) {
+                window.print();
+                return;
+            }
+            var old = document.getElementById('slip-print-frame');
+            if (old) old.parentNode.removeChild(old);
+            var frame = document.createElement('iframe');
+            frame.id = 'slip-print-frame';
+            frame.setAttribute('aria-hidden', 'true');
+            frame.style.cssText = 'position:absolute;left:-10000px;top:0;width:210mm;height:297mm;border:0;';
+            document.body.appendChild(frame);
+            var copy = pages.cloneNode(true);
+            copy.style.zoom = '';
+            var doc = frame.contentWindow.document;
+            doc.open();
+            // The closing tags are split so the page's own head/body ends are not matched here
+            doc.write('<!DOCTYPE html><html class="is-safari"><' + 'head>' + document.head.innerHTML +
+                '</' + 'head><' + 'body class="is-preview">' + copy.outerHTML + '</' + 'body></' + 'html>');
+            doc.close();
+            var printed = false;
+            function go() {
+                if (printed) return;
+                printed = true;
+                var win = frame.contentWindow;
+                (win.document.fonts ? win.document.fonts.ready : Promise.resolve()).then(function () {
+                    win.focus();
+                    win.print();
+                });
+            }
+            frame.onload = go;
+            // document.write may finish without a load event in some versions
+            setTimeout(go, 600);
+        }
     </script>
 
     @if ($isPreview)
         <div class="preview-bar">
-            <button type="button" class="preview-print" onclick="window.print()">{{ $previewBn ? 'প্রিন্ট করুন' : 'Print' }}</button>
+            <button type="button" class="preview-print" onclick="slipPrint()">{{ $previewBn ? 'প্রিন্ট করুন' : 'Print' }}</button>
             <button type="button" class="preview-close" onclick="window.close()">{{ $previewBn ? 'বন্ধ করুন' : 'Close' }}</button>
             <span class="preview-size">A4 · 210 × 297 mm</span>
         </div>
