@@ -365,6 +365,35 @@ class RequisitionController extends Controller
             // Example: items[101] = { quantity: 5, lot_id: 12 }
             $items = $request->input('items', []);
 
+            // The approved quantity can never be more than the product's stock: every item is
+            // checked first, so a refused save changes nothing.
+            foreach ($items as $itemId => $data) {
+                $reqItem = RequisitionItem::where('id', $itemId)
+                    ->where('requisition_id', $requisition->id)
+                    ->first();
+                if (! $reqItem) {
+                    continue;
+                }
+                $quantity = (int) ($data['quantity'] ?? 0);
+                $inStock = (int) DB::table('stocks')
+                    ->where('product_id', $reqItem->product_id)
+                    ->whereNull('deleted_at')
+                    ->sum('quantity');
+                if ($quantity < 1 || ($inStock > 0 && $quantity > $inStock)) {
+                    $digits = fn ($value) => app()->getLocale() === 'bn'
+                        ? strtr((string) $value, ['0' => '০', '1' => '১', '2' => '২', '3' => '৩', '4' => '৪', '5' => '৫', '6' => '৬', '7' => '৭', '8' => '৮', '9' => '৯'])
+                        : (string) $value;
+
+                    return response()->json([
+                        'success' => false,
+                        'message' => __('requisition.pending_manage.modal.over_stock', [
+                            'name' => $reqItem->product->name ?? ('#' . $reqItem->product_id),
+                            'qty' => $digits($inStock),
+                        ]),
+                    ], 422);
+                }
+            }
+
             foreach ($items as $itemId => $data) {
                 // Validate existence and relationship security
                 $reqItem = RequisitionItem::where('id', $itemId)
@@ -384,7 +413,8 @@ class RequisitionController extends Controller
                 //     ]);
                 // }
                 if ($reqItem) {
-                    $updates = ['quantity' => $data['quantity']];
+                    $quantity = (int) ($data['quantity'] ?? 0);
+                    $updates = ['quantity' => $quantity];
 
                     // If Lot Detail ID is sent (Store Admin selected it)
                     if (!empty($data['lot_detail_id'])) {

@@ -223,6 +223,7 @@ return [
             'saving' => 'Saving...',
             'assignments_saved' => 'Quantities saved.',
             'assignments_failed' => 'Could not save.',
+            'over_stock' => 'The approved quantity of ":name" cannot be more than the stock. In stock: :qty.',
             'unavailable_block' => 'Cannot approve. Some items are unavailable; split or resolve them first.',
             'assign_all' => 'Assign a brand/spec to every item before approving.',
             'approve_title' => 'Approve this requisition?',
