@@ -42,7 +42,12 @@
         .udash .ud-stat.is-prods { --ud-tone: #0891b2; --ud-soft: #ecfeff; --ud-band: linear-gradient(120deg, #0e7490, #22d3ee); }
         .udash .ud-stat.is-wait { --ud-tone: #d97706; --ud-soft: #fffbeb; --ud-band: linear-gradient(120deg, #b45309, #f59e0b); }
 
-        /* ---- Section cards (notifications, chart): a header and a body, full width ---- */
+        /* ---- Section cards (notifications, chart): a header and a body ----
+           Side by side on wide screens, one under the other below that. */
+        .udash .ud-pair { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1rem; align-items: stretch; margin-bottom: 1rem; }
+        .udash .ud-pair > .ud-section { display: flex; flex-direction: column; margin-bottom: 0; }
+        /* The chart grows to the height of the notifications next to it */
+        .udash .ud-pair .ud-chart-box { flex: 1 1 auto; min-height: 22rem; }
         .udash .ud-section { overflow: hidden; margin-bottom: 1rem; }
         .udash .ud-head { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 0.6rem 1rem; padding: 1rem 1.25rem; border-bottom: 1px solid #eef2f7; }
         .udash .ud-head-main { display: flex; align-items: center; gap: 0.8rem; min-width: 0; }
@@ -97,6 +102,10 @@
         .udash .ud-months .is-now { color: #4f46e5; font-weight: 700; }
         .udash .ud-months small { display: block; color: #94a3b8; font-size: 0.7rem; }
 
+        @media (max-width: 1199.98px) {
+            .udash .ud-pair { grid-template-columns: minmax(0, 1fr); }
+            .udash .ud-pair .ud-chart-box { flex: 0 0 auto; min-height: 0; }
+        }
         @media (max-width: 991.98px) {
             .udash .ud-stats { grid-template-columns: minmax(0, 1fr); }
             .udash .ud-stat { min-height: 0; }
@@ -326,7 +335,9 @@
                 </div>
             </div>
 
-            {{-- ============ Five newest notifications (full width) ============ --}}
+            {{-- ============ Notifications and the monthly chart, side by side ============ --}}
+            <div class="ud-pair">
+            {{-- ============ Five newest notifications ============ --}}
             @php $unreadShown = $latestNotifications->where('is_read', false)->count(); @endphp
             <div class="ud-card ud-section">
                 <div class="ud-head">
@@ -380,7 +391,7 @@
                 @endif
             </div>
 
-            {{-- ============ Requisitions per month (full width, under the notifications) ============ --}}
+            {{-- ============ Requisitions per month (next to the notifications) ============ --}}
             @php
                 $chartRows = $months->map(function ($row) use ($isBn, $digits) {
                     return [
@@ -427,6 +438,7 @@
                         </ol>
                     </div>
                 </div>
+            </div>
             </div>
         </div>
     </section>
