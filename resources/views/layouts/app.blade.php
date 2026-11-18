@@ -439,6 +439,8 @@
 
         <!-- Content Wrapper. Contains page content -->
         <div class="content-wrapper">
+            {{-- Products with less than 5 in stock (Super Admin, Admin, Store Admin) --}}
+            <x-ui.low-stock-marquee />
             <section class="content">
                 @yield('content')
             </section>
