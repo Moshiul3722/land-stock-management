@@ -9,16 +9,17 @@
             gap: 0.5rem;
             padding: 0.3rem 1rem 0.35rem;
             border-radius: 999px;
-            background: linear-gradient(120deg, #1d4fd8 0%, #4f46e5 55%, #7c3aed 100%);
-            color: #fff;
+            border: 1px solid #c7d2fe;
+            background: linear-gradient(120deg, #eef4ff 0%, #eef2ff 55%, #f5f3ff 100%);
+            color: #3730a3;
             font-size: 1.2rem;
             line-height: 1.35;
-            box-shadow: 0 8px 18px -10px rgba(79, 70, 229, 0.75);
+            box-shadow: 0 6px 14px -10px rgba(79, 70, 229, 0.45);
         }
 
         html body .content-header .list-page-context .issue-product-pill i {
             font-size: 0.9em;
-            opacity: 0.85;
+            color: #6366f1;
         }
 
         html body .content-header .row > .list-page-context:has(.issue-product-pill) {
