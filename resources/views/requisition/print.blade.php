@@ -292,6 +292,14 @@
             z-index: 1;
         }
 
+        /* Safari prints on its own paper size and margins (it ignores the A4 page size used
+           for printing), so a sheet a full 297 mm tall spills onto a second page. In Safari the
+           pages are built a little shorter, so each one fits on A4 or Letter paper whatever
+           margins Safari adds. Chrome is not affected. */
+        html.is-safari .a4-sheet {
+            height: 250mm;
+        }
+
         .a4-foot {
             z-index: 1;
             position: absolute;
@@ -347,7 +355,17 @@
             .a4-sheet:last-child {
                 break-after: auto;
             }
+
+            /* Safari: the older page-break property as well */
+            html.is-safari .a4-sheet {
+                page-break-after: always;
+            }
+
+            html.is-safari .a4-sheet:last-child {
+                page-break-after: auto;
+            }
 @else
+
             /* Our own page footer replaces the browser's date, title and address lines:
                only the page number, in Bangla digits. */
             @page {
@@ -382,6 +400,16 @@
 @endphp
 {{-- Printing waits until the slip's font has loaded, so the paper never shows a fallback font --}}
 <body @if ($isPreview) class="is-preview" @else onload="(document.fonts ? document.fonts.ready : Promise.resolve()).then(function () { window.print(); })" @endif>
+
+    {{-- Safari prints differently from Chrome (see the html.is-safari print rules above) --}}
+    <script>
+        (function () {
+            var ua = navigator.userAgent;
+            if (/Safari\//.test(ua) && !/Chrome|Chromium|CriOS|Edg|OPR|FxiOS|Android/.test(ua)) {
+                document.documentElement.classList.add('is-safari');
+            }
+        })();
+    </script>
 
     @if ($isPreview)
         <div class="preview-bar">
