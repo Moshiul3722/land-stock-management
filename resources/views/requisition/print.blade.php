@@ -399,7 +399,7 @@
     $previewBn = app()->getLocale() === 'bn';
 @endphp
 {{-- Printing waits until the slip's font has loaded, so the paper never shows a fallback font --}}
-<body @if ($isPreview) class="is-preview" @else onload="(document.fonts ? document.fonts.ready : Promise.resolve()).then(function () { window.print(); })" @endif>
+<body @if ($isPreview) class="is-preview" @else onload="slipPrintWhenReady()" @endif>
 
     {{-- Safari prints differently from Chrome (see the html.is-safari print rules above) --}}
     <script>
@@ -409,6 +409,19 @@
                 document.documentElement.classList.add('is-safari');
             }
         })();
+
+        // Printed straight away: wait for the slip's font. Safari opens its print panel before it
+        // has drawn the page, so the slip behind the panel stayed blank; there the page is first
+        // drawn (a short pause) and then the panel opens.
+        function slipPrintWhenReady() {
+            (document.fonts ? document.fonts.ready : Promise.resolve()).then(function () {
+                if (!document.documentElement.classList.contains('is-safari')) {
+                    window.print();
+                    return;
+                }
+                setTimeout(function () { window.print(); }, 500);
+            });
+        }
     </script>
 
     @if ($isPreview)
