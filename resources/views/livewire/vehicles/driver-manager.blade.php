@@ -34,8 +34,13 @@
                                     <td class="crud-serial">{{ $digits($rows->firstItem() + $loop->index) }}</td>
                                     <td class="text-center">
                                         @if ($row->photo_path)
-                                            <img src="{{ $fileUrl($row->id, 'photo') }}" alt="" loading="lazy"
-                                                style="width: 40px; height: 40px; object-fit: cover; border-radius: 50%; border: 1px solid #e2e8f0;">
+                                            {{-- Click: the photo large (lightbox below) --}}
+                                            <button type="button" class="border-0 bg-transparent p-0" style="cursor: zoom-in;"
+                                                x-on:click="$dispatch('driver-zoom', { src: @js($fileUrl($row->id, 'photo')), caption: @js($f('photo') . ' — ' . ($row->name_bn ?: $row->name)) })"
+                                                data-tip="{{ $f('photo') }}" aria-label="{{ $f('photo') }}: {{ $row->name_bn ?: $row->name }}">
+                                                <img src="{{ $fileUrl($row->id, 'photo') }}" alt="" loading="lazy"
+                                                    style="width: 40px; height: 40px; object-fit: cover; border-radius: 50%; border: 1px solid #e2e8f0;">
+                                            </button>
                                         @else
                                             <span class="d-inline-flex align-items-center justify-content-center text-muted"
                                                 style="width: 40px; height: 40px; border-radius: 50%; background: #f1f5f9;" title="{{ $t('no_photo') }}">
@@ -49,7 +54,20 @@
                                     </td>
                                     <td class="text-center">{{ $row->mobile ? $digits($row->mobile) : __('vehicle.none') }}</td>
                                     <td class="text-center crud-wrap">{{ $row->email ?: __('vehicle.none') }}</td>
-                                    <td class="text-center">{{ $row->license_no ?: __('vehicle.none') }}</td>
+                                    <td class="text-center">
+                                        <div class="d-inline-flex align-items-center" style="gap: 0.6rem;">
+                                            @if ($row->license_path)
+                                                {{-- Licence image; click: large --}}
+                                                <button type="button" class="border-0 bg-transparent p-0 flex-shrink-0" style="cursor: zoom-in;"
+                                                    x-on:click="$dispatch('driver-zoom', { src: @js($fileUrl($row->id, 'license')), caption: @js($f('license_image') . ' — ' . ($row->license_no ?: ($row->name_bn ?: $row->name))) })"
+                                                    data-tip="{{ $f('license_image') }}" aria-label="{{ $f('license_image') }}: {{ $row->name_bn ?: $row->name }}">
+                                                    <img src="{{ $fileUrl($row->id, 'license') }}" alt="" loading="lazy"
+                                                        style="width: 64px; height: 40px; object-fit: cover; border-radius: 6px; border: 1px solid #e2e8f0;">
+                                                </button>
+                                            @endif
+                                            <span>{{ $row->license_no ?: __('vehicle.none') }}</span>
+                                        </div>
+                                    </td>
                                     <td class="text-center">{{ $digits($row->vehicles_count) }}{{ $isBn ? 'টি' : '' }}</td>
                                     @include('livewire.vehicles.partials.row-actions', ['id' => $row->id, 'label' => $row->name_bn ?: $row->name, 'view' => true])
                                 </tr>
@@ -234,6 +252,20 @@
                     </div>
                 @endif
             </x-ui.modal>
+
+            {{-- Photo / licence image shown large; closes on a click anywhere or Escape --}}
+            <div x-data="{ src: null, caption: '' }" x-on:driver-zoom.window="src = $event.detail.src; caption = $event.detail.caption"
+                x-on:keydown.escape.window="src = null">
+                <div x-show="src" x-cloak x-transition.opacity x-on:click="src = null" role="dialog" aria-modal="true" x-bind:aria-label="caption"
+                    class="tw-fixed tw-inset-0 tw-z-[1080] tw-flex tw-cursor-zoom-out tw-flex-col tw-items-center tw-justify-center tw-gap-3 tw-bg-slate-900/80 tw-p-4">
+                    <img x-bind:src="src" x-bind:alt="caption" class="tw-max-h-[80vh] tw-max-w-full tw-rounded-xl tw-bg-white tw-object-contain tw-shadow-2xl">
+                    <p class="tw-m-0 tw-max-w-full tw-text-center tw-text-sm tw-font-semibold tw-text-white" x-text="caption"></p>
+                    <button type="button" x-on:click.stop="src = null" aria-label="{{ __('commontable.close') }}"
+                        class="tw-absolute tw-right-4 tw-top-4 tw-inline-flex tw-h-10 tw-w-10 tw-items-center tw-justify-center tw-rounded-full tw-border-0 tw-bg-white/90 tw-text-slate-700 hover:tw-bg-white">
+                        <i class="fas fa-times" aria-hidden="true"></i>
+                    </button>
+                </div>
+            </div>
 
             <x-ui.confirm-delete wire:model="showDelete" action="delete" id="vdriver-delete"
                 :title="__('vehicle.delete_title')" :text="__('vehicle.delete_text')" :name="$deleteLabel" />
