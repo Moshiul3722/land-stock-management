@@ -137,15 +137,18 @@
                                 },
                                 pick(raw) {
                                     const text = String(raw || '').toUpperCase().replace(/[|]/g, 'I');
-                                    // Smart card licence: 2 letters, 7 digits, 1 letter, 5 digits (e.g. DK0123456L00001);
-                                    // OCR may put dots / dashes between the parts and read 0 as O or 1 as I
                                     const digits = (v) => v.replace(/O/g, '0').replace(/[IL]/g, '1');
-                                    let m = text.match(/\b([A-Z]{2})[\s.,:\-]*([0-9OI]{7})[\s.,:\-]*([A-Z])[\s.,:\-]*([0-9OIL]{5})\b/);
+                                    // Bangladeshi licence: 2 letters, 6-9 digits, 1 letter, 4-6 digits
+                                    // (e.g. DK08382738L00007); OCR may put dots / spaces between the parts
+                                    // and read 0 as O or 1 as I
+                                    const strict = /\b([A-Z]{2})[\s.,:\-]*([0-9OI]{6,9})[\s.,:\-]*([A-Z])[\s.,:\-]*([0-9OIL]{4,6})\b/;
+                                    let m = text.match(strict);
                                     if (m) return m[1] + digits(m[2]) + m[3] + digits(m[4]);
-                                    m = text.match(/(?:LICEN[CS]E|D\.?\s?L\.?)\s*(?:NO|NUMBER|NUM)\.?\s*[:\-]?\s*([A-Z0-9][A-Z0-9\-\/ ]{5,24})/);
-                                    if (m) return m[1].replace(/\s+/g, '').replace(/[^A-Z0-9\-\/]+$/, '');
-                                    const words = text.split(/\s+/).filter((w) => /^(?=.*\d)(?=.*[A-Z])[A-Z0-9\-\/]{8,20}$/.test(w));
-                                    return words.sort((a, b) => b.length - a.length)[0] || '';
+                                    // Otherwise, after the Licence No. label: the first word with several digits
+                                    const at = text.search(/LICEN[CS]E\s*N[O0]|D\.?\s?L\.?\s*N[O0]\b/);
+                                    const words = (at >= 0 ? text.slice(at) : text).split(/[\s,]+/);
+                                    const number = words.find((w) => /^[A-Z0-9\-\/]{8,20}$/.test(w) && (w.match(/\d/g) || []).length >= 6 && /[A-Z]/.test(w));
+                                    return number || '';
                                 },
                                 async read(event) {
                                     const file = event.target.files && event.target.files[0];
