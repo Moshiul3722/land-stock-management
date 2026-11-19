@@ -101,14 +101,21 @@ class DemandManager extends VehicleCrud
             ->paginate($this->perPage);
     }
 
-    /** Units of fuel (stored as written here). */
-    private const FUEL_UNITS = ['লিটার', 'মিলিলিটার', 'গ্যালন', 'ব্যারেল', 'ঘনমিটার', 'কেজি'];
+    /** Units by demand type (stored as written here); "other" offers all of them. */
+    private const UNITS = [
+        'fuel' => ['লিটার', 'মিলিলিটার', 'গ্যালন', 'ব্যারেল', 'ঘনমিটার', 'কেজি'],
+        'repair' => ['টি', 'সেট', 'জোড়া', 'বার', 'ঘণ্টা', 'দিন'],
+        'parts' => ['টি', 'সেট', 'জোড়া', 'মিটার', 'ফুট', 'লিটার', 'কেজি', 'বক্স', 'প্যাকেট', 'রোল'],
+    ];
 
-    /** Unit choices: the fuel units, plus the unit already saved on the demand being edited. */
+    /**
+     * Unit choices for the chosen demand type (all units when none or "other" is chosen), plus
+     * the unit already saved on the demand being edited.
+     */
     #[Computed]
     public function unitChoices(): array
     {
-        $units = self::FUEL_UNITS;
+        $units = self::UNITS[$this->demandType] ?? array_values(array_unique(array_merge(...array_values(self::UNITS))));
         if ($this->savedUnit !== '' && ! in_array($this->savedUnit, $units, true)) {
             $units[] = $this->savedUnit;
         }
@@ -116,17 +123,37 @@ class DemandManager extends VehicleCrud
         return array_combine($units, array_map(fn ($unit) => $this->unitLabel($unit), $units));
     }
 
+    /** A unit that does not fit the newly chosen demand type is cleared. */
+    public function updatedDemandType(): void
+    {
+        unset($this->unitChoices);
+        if ($this->unit !== '' && ! array_key_exists($this->unit, $this->unitChoices)) {
+            $this->unit = '';
+        }
+    }
+
     /** How a unit is shown: with what it is used for, on Bangla and English pages. */
     private function unitLabel(string $unit): string
     {
         $bn = app()->getLocale() === 'bn';
         $notes = [
-            'লিটার' => $bn ? 'লিটার (পেট্রোল / অকটেন / ডিজেল)' : 'Litre (petrol / octane / diesel)',
+            'লিটার' => $bn ? 'লিটার (পেট্রোল / অকটেন / ডিজেল / মবিল)' : 'Litre (petrol / octane / diesel / engine oil)',
             'মিলিলিটার' => $bn ? 'মিলিলিটার (মবিল / লুব্রিকেন্ট)' : 'Millilitre (engine oil / lubricant)',
             'গ্যালন' => $bn ? 'গ্যালন' : 'Gallon',
             'ব্যারেল' => $bn ? 'ব্যারেল' : 'Barrel',
             'ঘনমিটার' => $bn ? 'ঘনমিটার (সিএনজি)' : 'Cubic metre (CNG)',
-            'কেজি' => $bn ? 'কেজি (এলপিজি)' : 'Kilogram (LPG)',
+            'কেজি' => $bn ? 'কেজি (এলপিজি / গ্রিজ)' : 'Kilogram (LPG / grease)',
+            'টি' => $bn ? 'টি / পিস' : 'Piece',
+            'সেট' => $bn ? 'সেট' : 'Set',
+            'জোড়া' => $bn ? 'জোড়া (টায়ার / ব্রেক প্যাড ইত্যাদি)' : 'Pair (tyres / brake pads ...)',
+            'বার' => $bn ? 'বার (কতবার মেরামত)' : 'Times (repairs)',
+            'ঘণ্টা' => $bn ? 'ঘণ্টা (কাজের সময়)' : 'Hours (work time)',
+            'দিন' => $bn ? 'দিন' : 'Days',
+            'মিটার' => $bn ? 'মিটার (তার / পাইপ ইত্যাদি)' : 'Metre (wire / hose ...)',
+            'ফুট' => $bn ? 'ফুট' : 'Feet',
+            'বক্স' => $bn ? 'বক্স' : 'Box',
+            'প্যাকেট' => $bn ? 'প্যাকেট' : 'Packet',
+            'রোল' => $bn ? 'রোল (টেপ ইত্যাদি)' : 'Roll (tape ...)',
         ];
 
         return $notes[$unit] ?? $unit;

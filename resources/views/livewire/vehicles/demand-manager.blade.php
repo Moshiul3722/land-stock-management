@@ -81,9 +81,12 @@
                         <div class="tw-grid tw-grid-cols-1 tw-gap-4 sm:tw-grid-cols-2">
                             @include('livewire.vehicles.partials.search-select', ['name' => 'vehicleId', 'label' => $f('vehicle'), 'required' => true, 'options' => $this->vehicleChoices])
                             @include('livewire.vehicles.partials.field', ['name' => 'demandDate', 'label' => $f('demand_date'), 'type' => 'date', 'required' => true])
-                            @include('livewire.vehicles.partials.search-select', ['name' => 'demandType', 'label' => $f('demand_type'), 'required' => true, 'options' => $typeOptions, 'wide' => true])
+                            @include('livewire.vehicles.partials.search-select', ['name' => 'demandType', 'label' => $f('demand_type'), 'required' => true, 'options' => $typeOptions, 'wide' => true, 'live' => true])
                             @include('livewire.vehicles.partials.field', ['name' => 'quantity', 'label' => $f('quantity'), 'type' => 'number'])
-                            @include('livewire.vehicles.partials.search-select', ['name' => 'unit', 'label' => $f('unit'), 'options' => $this->unitChoices])
+                            {{-- The units depend on the demand type: the field is rebuilt when the type changes --}}
+                            <div wire:key="demand-unit-{{ $demandType ?: 'all' }}">
+                                @include('livewire.vehicles.partials.search-select', ['name' => 'unit', 'label' => $f('unit'), 'options' => $this->unitChoices])
+                            </div>
                             @include('livewire.vehicles.partials.field', ['name' => 'reason', 'label' => $f('reason'), 'type' => 'textarea', 'required' => true, 'max' => 1000, 'wide' => true])
                         </div>
                     </div>

@@ -6,6 +6,7 @@
       $required bool
       $hint     small help text under the field
       $wide     true: spans both columns
+      $live     true: the choice is sent to the server at once (e.g. when other fields depend on it)
 --}}
 @php
     $ui = \App\Livewire\Concerns\Ui::class;
@@ -17,7 +18,7 @@
         open: false,
         q: '',
         active: 0,
-        value: $wire.entangle('{{ $name }}'),
+        value: $wire.entangle('{{ $name }}'){{ ! empty($live) ? '.live' : '' }},
         options: @js($list),
         get chosen() { return this.options.find((o) => o.value === String(this.value ?? '')) },
         get filtered() {
