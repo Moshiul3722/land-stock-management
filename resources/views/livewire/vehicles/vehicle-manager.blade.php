@@ -72,10 +72,10 @@
                         @php $choices = $this->choices; @endphp
                         <div class="tw-grid tw-grid-cols-1 tw-gap-4 sm:tw-grid-cols-2">
                             @include('livewire.vehicles.partials.field', ['name' => 'vehicleNo', 'label' => $f('vehicle_no'), 'required' => true, 'max' => 50])
-                            @include('livewire.vehicles.partials.field', ['name' => 'typeId', 'label' => $f('vehicle_type'), 'type' => 'select', 'required' => true, 'options' => $choices['types']])
-                            @include('livewire.vehicles.partials.field', ['name' => 'driverId', 'label' => $f('driver'), 'type' => 'select', 'options' => $choices['drivers'], 'hint' => count($choices['drivers']) ? null : $t('drivers_none')])
+                            @include('livewire.vehicles.partials.search-select', ['name' => 'typeId', 'label' => $f('vehicle_type'), 'required' => true, 'options' => $choices['types']])
+                            @include('livewire.vehicles.partials.search-select', ['name' => 'driverId', 'label' => $f('driver'), 'options' => $choices['drivers'], 'hint' => count($choices['drivers']) ? null : $t('drivers_none')])
                             @include('livewire.vehicles.partials.field', ['name' => 'drivingDate', 'label' => $f('driving_date'), 'type' => 'date'])
-                            @include('livewire.vehicles.partials.field', ['name' => 'routeId', 'label' => $f('route'), 'type' => 'select', 'options' => $choices['routes'], 'wide' => true])
+                            @include('livewire.vehicles.partials.search-select', ['name' => 'routeId', 'label' => $f('route'), 'options' => $choices['routes'], 'wide' => true])
 
                             {{-- Offices / officers: any number, with a filter --}}
                             <div class="sm:tw-col-span-2" x-data="{ q: '' }">

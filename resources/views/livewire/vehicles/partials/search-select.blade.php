@@ -4,6 +4,8 @@
       $label    label text
       $options  [value => label]
       $required bool
+      $hint     small help text under the field
+      $wide     true: spans both columns
 --}}
 @php
     $ui = \App\Livewire\Concerns\Ui::class;
@@ -54,7 +56,7 @@
             this.active = (this.active + step + count) % count;
             this.$nextTick(() => { const el = this.$refs.list.querySelector('[data-active=true]'); if (el) el.scrollIntoView({ block: 'nearest' }); });
         },
-    }" x-on:click.outside="close()" x-on:keydown.escape.stop="if (open) { close(); $refs.button.focus(); }" class="tw-relative">
+    }" x-on:click.outside="close()" x-on:keydown.escape.stop="if (open) { close(); $refs.button.focus(); }" class="tw-relative {{ ! empty($wide) ? 'sm:tw-col-span-2' : '' }}">
     <label for="{{ $fid }}" class="{{ $ui::LABEL }}">{{ $label }} @if (! empty($required))<span class="tw-text-rose-600">*</span>@endif</label>
     <button type="button" id="{{ $fid }}" x-ref="button" x-on:click="open ? close() : show()"
         x-on:keydown.arrow-down.prevent="show()" aria-haspopup="listbox" x-bind:aria-expanded="open"
@@ -93,4 +95,5 @@
         </ul>
     </div>
     @error($name) <p id="{{ $fid }}-error" class="{{ $ui::ERROR }}"><i class="fas fa-exclamation-circle tw-mt-0.5" aria-hidden="true"></i>{{ $message }}</p> @enderror
+    @if (! empty($hint)) <p class="{{ $ui::HINT }}">{{ $hint }}</p> @endif
 </div>
