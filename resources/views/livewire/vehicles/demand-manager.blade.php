@@ -79,11 +79,11 @@
                     <div class="{{ $ui::MODAL_BODY }}">
                         @error('form') <div class="{{ $ui::FORM_ALERT }}" role="alert"><i class="fas fa-exclamation-circle tw-mt-0.5" aria-hidden="true"></i><span>{{ $message }}</span></div> @enderror
                         <div class="tw-grid tw-grid-cols-1 tw-gap-4 sm:tw-grid-cols-2">
-                            @include('livewire.vehicles.partials.field', ['name' => 'vehicleId', 'label' => $f('vehicle'), 'type' => 'select', 'required' => true, 'options' => $this->vehicleChoices])
+                            @include('livewire.vehicles.partials.search-select', ['name' => 'vehicleId', 'label' => $f('vehicle'), 'required' => true, 'options' => $this->vehicleChoices])
                             @include('livewire.vehicles.partials.field', ['name' => 'demandDate', 'label' => $f('demand_date'), 'type' => 'date', 'required' => true])
-                            @include('livewire.vehicles.partials.field', ['name' => 'demandType', 'label' => $f('demand_type'), 'type' => 'select', 'required' => true, 'options' => $typeOptions, 'wide' => true])
+                            @include('livewire.vehicles.partials.search-select', ['name' => 'demandType', 'label' => $f('demand_type'), 'required' => true, 'options' => $typeOptions, 'wide' => true])
                             @include('livewire.vehicles.partials.field', ['name' => 'quantity', 'label' => $f('quantity'), 'type' => 'number'])
-                            @include('livewire.vehicles.partials.field', ['name' => 'unit', 'label' => $f('unit'), 'max' => 30])
+                            @include('livewire.vehicles.partials.search-select', ['name' => 'unit', 'label' => $f('unit'), 'options' => $this->unitChoices])
                             @include('livewire.vehicles.partials.field', ['name' => 'reason', 'label' => $f('reason'), 'type' => 'textarea', 'required' => true, 'max' => 1000, 'wide' => true])
                         </div>
                     </div>

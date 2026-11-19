@@ -29,6 +29,10 @@ class DemandManager extends VehicleCrud
 
     public string $demandDate = '';
 
+    /** The unit saved on the demand being edited (kept as a choice even if not in the list) */
+    #[\Livewire\Attributes\Locked]
+    public string $savedUnit = '';
+
     protected function permissionRoutes(): array
     {
         return ['vehicle-demands.index'];
@@ -97,6 +101,37 @@ class DemandManager extends VehicleCrud
             ->paginate($this->perPage);
     }
 
+    /** Units of fuel (stored as written here). */
+    private const FUEL_UNITS = ['লিটার', 'মিলিলিটার', 'গ্যালন', 'ব্যারেল', 'ঘনমিটার', 'কেজি'];
+
+    /** Unit choices: the fuel units, plus the unit already saved on the demand being edited. */
+    #[Computed]
+    public function unitChoices(): array
+    {
+        $units = self::FUEL_UNITS;
+        if ($this->savedUnit !== '' && ! in_array($this->savedUnit, $units, true)) {
+            $units[] = $this->savedUnit;
+        }
+
+        return array_combine($units, array_map(fn ($unit) => $this->unitLabel($unit), $units));
+    }
+
+    /** How a unit is shown: with what it is used for, on Bangla and English pages. */
+    private function unitLabel(string $unit): string
+    {
+        $bn = app()->getLocale() === 'bn';
+        $notes = [
+            'লিটার' => $bn ? 'লিটার (পেট্রোল / অকটেন / ডিজেল)' : 'Litre (petrol / octane / diesel)',
+            'মিলিলিটার' => $bn ? 'মিলিলিটার (মবিল / লুব্রিকেন্ট)' : 'Millilitre (engine oil / lubricant)',
+            'গ্যালন' => $bn ? 'গ্যালন' : 'Gallon',
+            'ব্যারেল' => $bn ? 'ব্যারেল' : 'Barrel',
+            'ঘনমিটার' => $bn ? 'ঘনমিটার (সিএনজি)' : 'Cubic metre (CNG)',
+            'কেজি' => $bn ? 'কেজি (এলপিজি)' : 'Kilogram (LPG)',
+        ];
+
+        return $notes[$unit] ?? $unit;
+    }
+
     /** A driver can add only when they have a vehicle; other roles when any vehicle exists. */
     #[Computed]
     public function canAdd(): bool
@@ -124,13 +159,16 @@ class DemandManager extends VehicleCrud
         $this->demandType = (string) $record->demand_type;
         $this->quantity = $record->quantity !== null ? rtrim(rtrim((string) $record->quantity, '0'), '.') : '';
         $this->unit = (string) $record->unit;
+        $this->savedUnit = (string) $record->unit;
+        unset($this->unitChoices);
         $this->reason = (string) $record->reason;
         $this->demandDate = $record->demand_date ? $record->demand_date->format('Y-m-d') : '';
     }
 
     protected function resetFields(): void
     {
-        $this->reset('vehicleId', 'demandType', 'quantity', 'unit', 'reason', 'demandDate');
+        $this->reset('vehicleId', 'demandType', 'quantity', 'unit', 'reason', 'demandDate', 'savedUnit');
+        unset($this->unitChoices);
     }
 
     protected function beforeValidate(): void
@@ -146,7 +184,7 @@ class DemandManager extends VehicleCrud
             'vehicleId' => ['required', Rule::in(array_map('strval', array_keys($this->vehicleChoices)))],
             'demandType' => ['required', Rule::in(VehicleDemand::TYPES)],
             'quantity' => ['nullable', 'numeric', 'min:0', 'max:99999999'],
-            'unit' => ['nullable', 'string', 'max:30'],
+            'unit' => ['nullable', Rule::in(array_keys($this->unitChoices))],
             'reason' => ['required', 'string', 'max:1000'],
             'demandDate' => ['required', 'date_format:Y-m-d'],
         ];
