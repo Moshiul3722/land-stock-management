@@ -1,7 +1,16 @@
 @php
     $ui = \App\Livewire\Concerns\Ui::class;
     $isBn = app()->getLocale() === 'bn';
-    $fileUrl = fn ($driverId, $kind) => route('vehicle-drivers.file', ['driver' => $driverId, 'kind' => $kind]);
+    // A driver's image address. Given the driver, it carries a version that changes whenever the
+    // file changes, so a replaced photo / licence image is shown at once (not the browser's old copy).
+    $fileUrl = function ($driver, $kind) {
+        if (! $driver instanceof \App\Models\VehicleDriver) {
+            return route('vehicle-drivers.file', ['driver' => $driver, 'kind' => $kind]);
+        }
+        $path = $kind === 'photo' ? $driver->photo_path : $driver->license_path;
+
+        return route('vehicle-drivers.file', ['driver' => $driver->id, 'kind' => $kind, 'v' => substr(md5((string) $path), 0, 10)]);
+    };
 @endphp
 
 <div x-data x-on:app-toast.window="(window.appToast || window.toastr)[$event.detail.type]($event.detail.message)">
@@ -36,9 +45,9 @@
                                         @if ($row->photo_path)
                                             {{-- Click: the photo large (lightbox below) --}}
                                             <button type="button" class="border-0 bg-transparent p-0" style="cursor: zoom-in;"
-                                                x-on:click="$dispatch('driver-zoom', { src: @js($fileUrl($row->id, 'photo')), caption: @js($f('photo') . ' — ' . ($row->name_bn ?: $row->name)) })"
+                                                x-on:click="$dispatch('driver-zoom', { src: @js($fileUrl($row, 'photo')), caption: @js($f('photo') . ' — ' . ($row->name_bn ?: $row->name)) })"
                                                 data-tip="{{ $f('photo') }}" aria-label="{{ $f('photo') }}: {{ $row->name_bn ?: $row->name }}">
-                                                <img src="{{ $fileUrl($row->id, 'photo') }}" alt="" loading="lazy"
+                                                <img src="{{ $fileUrl($row, 'photo') }}" alt="" loading="lazy"
                                                     style="width: 40px; height: 40px; object-fit: cover; border-radius: 50%; border: 1px solid #e2e8f0;">
                                             </button>
                                         @else
@@ -59,9 +68,9 @@
                                             @if ($row->license_path)
                                                 {{-- Licence image; click: large --}}
                                                 <button type="button" class="border-0 bg-transparent p-0 flex-shrink-0" style="cursor: zoom-in;"
-                                                    x-on:click="$dispatch('driver-zoom', { src: @js($fileUrl($row->id, 'license')), caption: @js($f('license_image') . ' — ' . ($row->license_no ?: ($row->name_bn ?: $row->name))) })"
+                                                    x-on:click="$dispatch('driver-zoom', { src: @js($fileUrl($row, 'license')), caption: @js($f('license_image') . ' — ' . ($row->license_no ?: ($row->name_bn ?: $row->name))) })"
                                                     data-tip="{{ $f('license_image') }}" aria-label="{{ $f('license_image') }}: {{ $row->name_bn ?: $row->name }}">
-                                                    <img src="{{ $fileUrl($row->id, 'license') }}" alt="" loading="lazy"
+                                                    <img src="{{ $fileUrl($row, 'license') }}" alt="" loading="lazy"
                                                         style="width: 64px; height: 40px; object-fit: cover; border-radius: 6px; border: 1px solid #e2e8f0;">
                                                 </button>
                                             @endif
@@ -154,11 +163,14 @@
                                     const file = event.target.files && event.target.files[0];
                                     if (!file) return;
                                     this.busy = true; this.found = false; this.status = this.texts.reading;
+                                    const before = $wire.licenseNo;
                                     try {
                                         await this.load();
                                         const result = await window.Tesseract.recognize(file, 'eng');
                                         const number = this.pick(result && result.data ? result.data.text : '');
-                                        if (number) { $wire.licenseNo = number; this.found = true; this.status = this.texts.done; }
+                                        // A number typed by hand while the image was being read is kept
+                                        if (number && $wire.licenseNo === before) { $wire.licenseNo = number; this.found = true; this.status = this.texts.done; }
+                                        else if (number) { this.status = ''; }
                                         else { this.status = this.texts.none; }
                                     } catch (e) { this.status = this.texts.none; }
                                     finally { this.busy = false; }
@@ -210,7 +222,7 @@
                         <div class="tw-flex tw-flex-col tw-gap-4 sm:tw-flex-row">
                             <div class="tw-flex tw-h-32 tw-w-32 tw-flex-none tw-items-center tw-justify-center tw-self-center tw-overflow-hidden tw-rounded-2xl tw-border tw-border-solid tw-border-slate-200 tw-bg-slate-50 tw-text-slate-300 sm:tw-self-start">
                                 @if ($driver->photo_path)
-                                    <img src="{{ $fileUrl($driver->id, 'photo') }}" alt="" class="tw-h-full tw-w-full tw-object-cover">
+                                    <img src="{{ $fileUrl($driver, 'photo') }}" alt="" class="tw-h-full tw-w-full tw-object-cover">
                                 @else
                                     <i class="fas fa-user tw-text-4xl" aria-hidden="true"></i>
                                 @endif
@@ -232,8 +244,8 @@
                         @if ($driver->license_path)
                             <div>
                                 <p class="{{ $ui::LABEL }}">{{ $f('license_image') }}</p>
-                                <a href="{{ $fileUrl($driver->id, 'license') }}" target="_blank" rel="noopener">
-                                    <img src="{{ $fileUrl($driver->id, 'license') }}" alt="{{ $f('license_image') }}" class="tw-max-h-64 tw-max-w-full tw-rounded-xl tw-border tw-border-solid tw-border-slate-200">
+                                <a href="{{ $fileUrl($driver, 'license') }}" target="_blank" rel="noopener">
+                                    <img src="{{ $fileUrl($driver, 'license') }}" alt="{{ $f('license_image') }}" class="tw-max-h-64 tw-max-w-full tw-rounded-xl tw-border tw-border-solid tw-border-slate-200">
                                 </a>
                             </div>
                         @endif
