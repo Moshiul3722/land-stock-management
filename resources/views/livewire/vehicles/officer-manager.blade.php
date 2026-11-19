@@ -60,7 +60,7 @@
                             @include('livewire.vehicles.partials.field', ['name' => 'nameBn', 'label' => $f('name_bn'), 'required' => true, 'max' => 150, 'lang' => 'bn'])
                             @include('livewire.vehicles.partials.field', ['name' => 'name', 'label' => $f('name_en'), 'max' => 150])
                             @include('livewire.vehicles.partials.field', ['name' => 'designation', 'label' => $f('designation'), 'max' => 150])
-                            @include('livewire.vehicles.partials.field', ['name' => 'departmentId', 'label' => $f('department'), 'type' => 'select', 'options' => $this->departments])
+                            @include('livewire.vehicles.partials.search-select', ['name' => 'departmentId', 'label' => $f('department'), 'options' => $this->departments])
                             @include('livewire.vehicles.partials.field', ['name' => 'mobile', 'label' => $f('mobile'), 'type' => 'tel', 'max' => 17])
                         </div>
                     </div>
