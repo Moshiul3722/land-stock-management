@@ -67,6 +67,7 @@ return [
         'search' => 'Search by number, type, driver, route or officer',
         'officer_filter' => 'Find an officer',
         'officers_none' => 'Add officers first on the "Officers" page.',
+        'drivers_none' => 'Add drivers first on the "Vehicle Drivers" page.',
         'selected' => ':count selected',
         'no_exists' => 'A vehicle with this number already exists.',
         'in_use' => 'This vehicle has demand forms, so it cannot be deleted.',
