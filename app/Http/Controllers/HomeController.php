@@ -31,6 +31,11 @@ class HomeController extends Controller
      */
     public function index()
     {
+        // A vehicle driver's work is the demand form: that is their start page.
+        if ((int) auth()->user()->role_id === \App\Models\VehicleDriver::roleId()) {
+            return redirect()->route('vehicle-demands.index');
+        }
+
         // A General User (role 5) gets a dashboard about their own requisitions and
         // notifications.
         if ((int) auth()->user()->role_id === 5) {

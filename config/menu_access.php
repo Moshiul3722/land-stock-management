@@ -93,6 +93,9 @@ return [
         'ptbudgets.update' => ['ptbudgets.create', 'ptbudgets.index'],
         'ptbudgets.destroy' => ['ptbudgets.create', 'ptbudgets.index'],
 
+        // Vehicle management
+        'vehicle-drivers.file' => ['vehicle-drivers.index', 'vehicles.index'],
+
         // Requisitions: the requester's own list
         'requisitions.store' => ['requisitions.create'],
         'requisitions.create_modal' => ['requisitions.create'],

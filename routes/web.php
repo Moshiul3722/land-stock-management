@@ -122,6 +122,17 @@ Route::middleware(['auth', 'permission'])->group(function () {
     // Product Unit (Livewire: App\Livewire\Catalog\UnitManager)
     Route::view('/product-units', 'crud.host', ['component' => 'catalog.unit-manager'])->name('product-units.index');
 
+    // Vehicle management (Livewire: App\Livewire\Vehicles\*)
+    Route::view('/vehicle-types', 'crud.host', ['component' => 'vehicles.type-manager'])->name('vehicle-types.index');
+    Route::view('/vehicle-officers', 'crud.host', ['component' => 'vehicles.officer-manager'])->name('vehicle-officers.index');
+    Route::view('/vehicle-drivers', 'crud.host', ['component' => 'vehicles.driver-manager'])->name('vehicle-drivers.index');
+    Route::view('/vehicle-routes', 'crud.host', ['component' => 'vehicles.route-manager'])->name('vehicle-routes.index');
+    Route::view('/vehicles', 'crud.host', ['component' => 'vehicles.vehicle-manager'])->name('vehicles.index');
+    Route::view('/vehicle-demands', 'crud.host', ['component' => 'vehicles.demand-manager'])->name('vehicle-demands.index');
+    // A driver's photo or licence image (kept out of the public folder)
+    Route::get('/vehicle-drivers/{driver}/file/{kind}', [App\Http\Controllers\VehicleDriverFileController::class, 'show'])
+        ->whereIn('kind', ['photo', 'license'])->name('vehicle-drivers.file');
+
     Route::resource('years', App\Http\Controllers\YearController::class);
 
 
