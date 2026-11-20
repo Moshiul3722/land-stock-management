@@ -83,7 +83,10 @@ class VehicleManager extends VehicleCrud
 
         return [
             'types' => VehicleType::orderBy('name')->get()->mapWithKeys(fn ($t) => [$t->id => $t->label])->all(),
-            'drivers' => VehicleDriver::orderBy('name')->get()
+            // A driver drives one vehicle only: drivers of other vehicles are not offered
+            'drivers' => VehicleDriver::query()
+                ->whereDoesntHave('vehicles', fn ($q) => $q->when($this->editingId, fn ($w) => $w->where('vehicles.id', '!=', $this->editingId)))
+                ->orderBy('name')->get()
                 ->mapWithKeys(fn ($d) => [$d->id => $d->label . ($d->mobile ? ' · ' . $this->localDigits($d->mobile) : '')])->all(),
             'routes' => VehicleRoute::orderBy('name')->pluck('name', 'id')->all(),
             'officers' => VehicleOfficer::with('department:id,name,name_bn')->orderBy('name_bn')->get()
@@ -135,7 +138,14 @@ class VehicleManager extends VehicleCrud
         return [
             'vehicleNo' => ['required', 'string', 'max:50', Rule::unique('vehicles', 'vehicle_no')->whereNull('deleted_at')->ignore($this->editingId)],
             'typeId' => ['required', Rule::exists('vehicle_types', 'id')->whereNull('deleted_at')],
-            'driverId' => ['nullable', Rule::exists('vehicle_drivers', 'id')->whereNull('deleted_at')],
+            'driverId' => ['nullable', Rule::exists('vehicle_drivers', 'id')->whereNull('deleted_at'),
+                function ($attribute, $value, $fail) {
+                    $taken = $value !== '' && $value !== null && Vehicle::where('driver_id', (int) $value)
+                        ->when($this->editingId, fn ($q) => $q->where('id', '!=', $this->editingId))->exists();
+                    if ($taken) {
+                        $fail(__('vehicle.vehicles.driver_taken'));
+                    }
+                }],
             'drivingDate' => ['nullable', 'date_format:Y-m-d'],
             'routeId' => ['nullable', Rule::exists('vehicle_routes', 'id')->whereNull('deleted_at')],
             'officerIds' => ['array'],
