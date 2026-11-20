@@ -169,6 +169,7 @@ return [
         'search_placeholder' => 'Search by section, requester, requisition no., product or date',
         'requester_details' => 'Requester details',
         'no_department' => 'No section/department set',
+        'vehicle_driver' => 'Vehicle driver',
         'view_action' => 'View & decide',
         'unknown' => 'Unknown',
         'empty_title' => 'No pending requisitions',

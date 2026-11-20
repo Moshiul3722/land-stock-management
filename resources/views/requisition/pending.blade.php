@@ -316,6 +316,15 @@
                                     </tr>
                                 </thead>
                                 <tbody>
+                                    @php
+                                        // Requesters who are vehicle drivers have no section / department: they are
+                                        // shown as "Vehicle driver (their vehicle numbers)".
+                                        $driverVehicles = \App\Models\VehicleDriver::query()
+                                            ->whereIn('user_id', $pendingTasks->pluck('requisition.requested_by_user_id')->filter()->unique())
+                                            ->with('vehicles:id,driver_id,vehicle_no')
+                                            ->get()
+                                            ->mapWithKeys(fn ($driver) => [(int) $driver->user_id => $driver->vehicles->pluck('vehicle_no')->map(fn ($no) => $digits($no))->join(', ')]);
+                                    @endphp
                                     {{-- Newest requisition first --}}
                                     @foreach ($pendingTasks->sortByDesc(fn ($task) => $task->requisition->id) as $task)
                                         @php
@@ -323,9 +332,12 @@
                                             $requester = $req->requestedBy->name ?? __('requisition.pending_manage.unknown');
                                             // Section / department of the requester, in the page language.
                                             $department = $req->requestedBy?->department;
+                                            $driverOf = $driverVehicles->get((int) $req->requested_by_user_id);
                                             $departmentName = $department
                                                 ? (($isEn ? $department->name : ($department->name_bn ?: $department->name)) ?: $department->name)
-                                                : __('requisition.pending_manage.no_department');
+                                                : ($driverOf !== null
+                                                    ? __('requisition.pending_manage.vehicle_driver') . ($driverOf !== '' ? ' (' . $driverOf . ')' : '')
+                                                    : __('requisition.pending_manage.no_department'));
                                             $date = $showDate($req->requisition_date);
                                             // When the requisition was submitted (its creation time).
                                             $time = $req->created_at
