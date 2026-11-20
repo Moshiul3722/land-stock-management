@@ -121,15 +121,16 @@
         .center { text-align: center; }
         .dots { display: inline-block; min-width: 26mm; border-bottom: 1px dotted #000; text-align: center; }
 
-        .two td { height: 40mm; width: 50%; }
+        .two td { height: 50mm; width: 50%; }
         .line { display: flex; gap: 6px; margin-bottom: 9px; }
         .line .k { flex: none; }
         .line .v { flex: 1; min-height: 1.4em; border-bottom: 1px dotted #000; }
-        .sign { display: block; max-width: 45mm; max-height: 16mm; margin-top: 2px; }
+        .sign { display: block; max-width: 65mm; max-height: 24mm; margin-top: 2px; }
+        .sign-box { min-height: 26mm; }
 
         .note { margin: 4mm 0; font-weight: bold; text-align: center; }
 
-        .bottom td { height: 26mm; text-align: center; vertical-align: middle; }
+        .bottom td { height: 40mm; text-align: center; vertical-align: middle; }
         .status { margin-top: 4mm; font-size: 14px; }
         .status.rejected { font-weight: bold; }
 
@@ -288,7 +289,7 @@
                             <div class="line"><span class="k">আবেদনকারীর নাম:</span><span class="v">{{ $req->applicant_name }}</span></div>
                             <div class="line"><span class="k">পদবী:</span><span class="v">{{ $req->applicant_designation }}</span></div>
                             <div class="line"><span class="k">স্বাক্ষর ও তারিখ:</span>
-                                <span class="v">
+                                <span class="v sign-box">
                                     @if ($applicantSign)<img class="sign" alt="" src="{{ $applicantSign }}">@endif
                                     {{ $date($req->created_at) }}
                                 </span>
