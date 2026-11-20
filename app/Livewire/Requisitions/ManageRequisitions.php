@@ -699,8 +699,7 @@ class ManageRequisitions extends Component
             ->get(['id', 'name', 'product_unit', 'category_id'])
             ->keyBy('id')
             ->map(function (Product $product) use ($stockService, $previousDates) {
-                $stock = $stockService->getAggregatedStockList(['product_id' => $product->id]);
-                $product->available_quantity = (int) ($stock->first()->total_quantity ?? 0);
+                $product->available_quantity = (int) $stockService->availableQuantity($product->id);
                 $previous = $previousDates->get($product->id);
                 $product->previous_requisition_date = $previous->last_date ?? null;
                 $product->previous_requisition_quantity = $previous ? (int) $previous->last_quantity : null;

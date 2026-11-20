@@ -158,9 +158,7 @@ class StockController extends Controller
      */
     public function checkProductStatus(Product $product)
     {
-        $stockSummary = $this->stockService->getAggregatedStockList(['product_id' => $product->id]);
-
-        $totalQuantity = $stockSummary->first()->total_quantity ?? 0;
+        $totalQuantity = $this->stockService->availableQuantity($product->id);
 
         if ($totalQuantity > 0) {
             return response()->json([

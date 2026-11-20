@@ -285,8 +285,7 @@ class RequisitionService
 
         if ($action === 'submit') {
             foreach ($data['details'] as $item) {
-                $stockSummary = $this->stockService->getAggregatedStockList(['product_id' => $item['product_id']]);
-                $available = $stockSummary->first()->total_quantity ?? 0;
+                $available = $this->stockService->availableQuantity((int) $item['product_id']);
 
                 if ($available <= 0) { // Simple check: available vs 0. Or use $available < $item['quantity'] if you want strict checking
                     $productName = \App\Models\Product::find($item['product_id'])->name ?? 'Item';

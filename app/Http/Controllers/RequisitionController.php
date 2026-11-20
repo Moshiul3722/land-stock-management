@@ -116,8 +116,7 @@ class RequisitionController extends Controller
 
         // Pre-calculate stock status for existing items so the view renders correctly
         foreach ($requisition->items as $item) {
-            $stockSummary = $this->stockService->getAggregatedStockList(['product_id' => $item->product_id]);
-            $qty = $stockSummary->first()->total_quantity ?? 0;
+            $qty = $this->stockService->availableQuantity($item->product_id);
 
             $item->stock_status_label = $qty > 0 ? 'Available' : 'Not Available';
             $item->stock_status_class = $qty > 0 ? 'badge bg-success' : 'badge bg-danger';
