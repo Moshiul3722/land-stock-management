@@ -243,7 +243,7 @@
                                 <div class="tw-grid tw-grid-cols-1 tw-gap-4 sm:tw-grid-cols-2">
                                     @include('livewire.vehicles.partials.search-select', ['name' => 'decVehicleId', 'label' => $t('vehicle_no'), 'required' => true, 'options' => $choices['vehicles'], 'live' => true])
                                     @include('livewire.vehicles.partials.search-select', ['name' => 'decDriverId', 'label' => $t('driver_name'), 'required' => true, 'options' => $choices['drivers']])
-                                    @include('livewire.vehicles.partials.field', ['name' => 'decFuelAmount', 'label' => $t('fuel_amount'), 'type' => 'number'])
+                                    @include('livewire.vehicles.partials.field', ['name' => 'decFuelAmount', 'label' => $t('fuel_amount'), 'type' => 'number', 'hint' => $decFuelNote ?: null])
                                     @include('livewire.vehicles.partials.search-select', ['name' => 'decFuelUnit', 'label' => $t('fuel_unit'), 'options' => $choices['units']])
                                     @include('livewire.vehicles.partials.field', ['name' => 'decNote', 'label' => $t('decision_note'), 'type' => 'textarea', 'max' => 1000, 'wide' => true])
                                 </div>

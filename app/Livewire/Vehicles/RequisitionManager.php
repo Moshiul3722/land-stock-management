@@ -71,6 +71,10 @@ class RequisitionManager extends VehicleCrud
 
     public string $decNote = '';
 
+    /** How the fuel amount was worked out (shown under the field) */
+    #[Locked]
+    public string $decFuelNote = '';
+
     protected function permissionRoutes(): array
     {
         return ['vehicle-requisitions.index'];
@@ -254,7 +258,11 @@ class RequisitionManager extends VehicleCrud
         $this->decFuelAmount = $record->fuel_amount !== null ? rtrim(rtrim((string) $record->fuel_amount, '0'), '.') : '';
         $this->decFuelUnit = (string) ($record->fuel_unit ?: VehicleRequisition::FUEL_UNITS[0]);
         $this->decNote = '';
+        $this->decFuelNote = '';
         unset($this->deciding, $this->decisionChoices);
+        if ($this->decFuelAmount === '') {
+            $this->autoFuel();
+        }
         $this->showView = false;
         $this->showDecide = true;
     }
@@ -266,6 +274,45 @@ class RequisitionManager extends VehicleCrud
         if ($driverId) {
             $this->decDriverId = (string) $driverId;
         }
+        $this->autoFuel();
+    }
+
+    /**
+     * Fuel for the chosen vehicle: the round-trip distance divided by the km the vehicle's
+     * type goes on a litre, rounded up to the next whole litre. It can still be changed.
+     */
+    private function autoFuel(): void
+    {
+        $this->decFuelNote = '';
+        $request = $this->deciding;
+        $vehicle = $this->decVehicleId !== '' ? Vehicle::with('type')->find((int) $this->decVehicleId) : null;
+        if (! $request || ! $vehicle) {
+            return;
+        }
+        $distance = $request->distance_km !== null ? (float) $request->distance_km : 0.0;
+        if ($distance <= 0) {
+            $this->decFuelNote = __('vehicle.requisitions.fuel_no_distance');
+
+            return;
+        }
+        $economy = $vehicle->type?->fuelEconomy();
+        if (! $economy) {
+            $this->decFuelNote = __('vehicle.requisitions.fuel_no_economy');
+
+            return;
+        }
+
+        $litres = (int) ceil(round($distance / $economy['value'], 2));
+        $this->decFuelAmount = (string) max(1, $litres);
+        $this->decFuelUnit = 'লিটার';
+        $this->resetValidation(['decFuelAmount', 'decFuelUnit']);
+        $number = fn ($value) => $this->localDigits(rtrim(rtrim(number_format($value, 2, '.', ''), '0'), '.'));
+        $this->decFuelNote = __('vehicle.requisitions.fuel_auto', [
+            'km' => $number($distance),
+            'per' => $number($economy['value']),
+            'exact' => $number($distance / $economy['value']),
+            'litres' => $this->localDigits($this->decFuelAmount),
+        ]) . ($economy['usual'] ? ' ' . __('vehicle.requisitions.fuel_usual') : '');
     }
 
     public function approve(): void

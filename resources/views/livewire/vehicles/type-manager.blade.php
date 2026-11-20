@@ -54,6 +54,7 @@
                         <div class="tw-grid tw-grid-cols-1 tw-gap-4 sm:tw-grid-cols-2">
                             @include('livewire.vehicles.partials.field', ['name' => 'nameBn', 'label' => $f('name_bn'), 'required' => true, 'max' => 100, 'lang' => 'bn'])
                             @include('livewire.vehicles.partials.field', ['name' => 'name', 'label' => $f('name_en'), 'required' => true, 'max' => 100])
+                            @include('livewire.vehicles.partials.field', ['name' => 'kmPerLitre', 'label' => $t('km_per_litre'), 'type' => 'number', 'hint' => $t('km_per_litre_hint'), 'wide' => true])
                         </div>
                     </div>
                     @include('livewire.vehicles.partials.modal-foot')

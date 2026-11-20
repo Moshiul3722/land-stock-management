@@ -15,6 +15,8 @@ class TypeManager extends VehicleCrud
 
     public string $name = '';
 
+    public string $kmPerLitre = '';
+
     protected function permissionRoutes(): array
     {
         return ['vehicle-types.index'];
@@ -45,17 +47,19 @@ class TypeManager extends VehicleCrud
     {
         $this->nameBn = (string) $record->name_bn;
         $this->name = (string) $record->name;
+        $this->kmPerLitre = $record->km_per_litre !== null ? rtrim(rtrim((string) $record->km_per_litre, '0'), '.') : '';
     }
 
     protected function resetFields(): void
     {
-        $this->reset('nameBn', 'name');
+        $this->reset('nameBn', 'name', 'kmPerLitre');
     }
 
     protected function beforeValidate(): void
     {
         $this->nameBn = trim($this->nameBn);
         $this->name = trim($this->name);
+        $this->kmPerLitre = strtr(trim($this->kmPerLitre), ['০' => '0', '১' => '1', '২' => '2', '৩' => '3', '৪' => '4', '৫' => '5', '৬' => '6', '৭' => '7', '৮' => '8', '৯' => '9']);
     }
 
     protected function formRules(): array
@@ -65,17 +69,18 @@ class TypeManager extends VehicleCrud
         return [
             'nameBn' => ['required', 'string', 'max:100', $unique('name_bn')],
             'name' => ['required', 'string', 'max:100', $unique('name')],
+            'kmPerLitre' => ['nullable', 'numeric', 'min:0.5', 'max:200'],
         ];
     }
 
     protected function formLabels(): array
     {
-        return ['nameBn' => __('vehicle.fields.name_bn'), 'name' => __('vehicle.fields.name_en')];
+        return ['nameBn' => __('vehicle.fields.name_bn'), 'name' => __('vehicle.fields.name_en'), 'kmPerLitre' => __('vehicle.types.km_per_litre')];
     }
 
     protected function formAttributes(): array
     {
-        return ['name_bn' => $this->nameBn, 'name' => $this->name];
+        return ['name_bn' => $this->nameBn, 'name' => $this->name, 'km_per_litre' => $this->kmPerLitre !== '' ? $this->kmPerLitre : null];
     }
 
     protected function recordLabel(Model $record): string
