@@ -241,7 +241,7 @@
             <div class="modal-content tw-font-sans tw-text-slate-800">
                 <div class="tw-flex tw-flex-none tw-flex-wrap tw-items-start tw-justify-between tw-gap-x-4 tw-gap-y-1 tw-border-0 tw-border-b tw-border-solid tw-border-slate-200 tw-px-5 tw-py-3 sm:tw-flex-nowrap sm:tw-px-6">
                     <div class="tw-flex tw-min-w-0 tw-flex-1 tw-flex-wrap tw-items-center tw-gap-x-3 tw-gap-y-1">
-                        <h2 id="distViewTitle" class="tw-m-0 tw-text-lg tw-font-bold tw-text-slate-900"></h2>
+                        <h2 id="distViewTitle" class="tw-m-0 tw-text-[20px] tw-font-bold tw-text-slate-900"></h2>
                         <span id="dist-status" class="{{ $badgeBase }}"><span id="dist-status-dot" class="tw-h-1.5 tw-w-1.5 tw-rounded-full" aria-hidden="true"></span><span id="dist-status-text"></span></span>
                     </div>
                     {{-- Today's weekday and date; on phones it wraps under the title --}}

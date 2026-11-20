@@ -160,7 +160,7 @@ div.content:is(.list-page, :has(table.table)) > [class*="col-"] {
 .content:is(.list-page, :has(table.table)) .card > .card-header .card-title {
     float: none;
     color: #0f172a !important;
-    font-size: 1.0625rem;
+    font-size: 20px;
     font-weight: 700;
     line-height: 1.4;
 }

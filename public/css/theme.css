@@ -101,3 +101,9 @@ a.text-primary:hover { color: var(--theme-700) !important; }
 
 /* DataTables */
 table.dataTable tbody tr.selected > * { box-shadow: inset 0 0 0 9999px rgba(47, 116, 82, 0.9); }
+
+/* Titles: card / list titles and dialog titles share one clear size (20px, bold); the
+   page title above each page stays larger. */
+.content .card > .card-header .card-title,
+.content .card-title { font-size: 20px; font-weight: 700; }
+.modal .modal-title { font-size: 20px; font-weight: 700; }

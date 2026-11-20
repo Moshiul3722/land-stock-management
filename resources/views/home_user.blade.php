@@ -29,7 +29,7 @@
         .udash .ud-stat { display: flex; flex-direction: column; min-height: 11.5rem; overflow: hidden; color: inherit; transition: transform 0.12s, box-shadow 0.15s; }
         .udash .ud-stat:hover { color: inherit; text-decoration: none; transform: translateY(-2px); box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04), 0 18px 32px -18px rgba(15, 23, 42, 0.35); }
         .udash a.ud-stat:focus-visible { outline: 0; box-shadow: 0 0 0 4px rgba(57, 140, 98, 0.3); }
-        .udash .ud-stat-title { display: flex; align-items: center; gap: 0.6rem; margin: 0; padding: 0.8rem 1.25rem; background: var(--ud-band); color: #fff; font-size: 1.15rem; font-weight: 700; line-height: 1.3; }
+        .udash .ud-stat-title { display: flex; align-items: center; gap: 0.6rem; margin: 0; padding: 0.8rem 1.25rem; background: var(--ud-band); color: #fff; font-size: 20px; font-weight: 700; line-height: 1.3; }
         .udash .ud-stat-title i { font-size: 1rem; opacity: 0.9; }
         .udash .ud-stat-body { display: flex; flex: 1 1 auto; align-items: center; justify-content: space-between; gap: 1rem; padding: 1rem 1.25rem 1.1rem; }
         .udash .ud-stat-value { display: block; color: #0f172a; font-size: 3rem; font-weight: 700; line-height: 1.05; font-variant-numeric: tabular-nums; }
@@ -52,7 +52,7 @@
         .udash .ud-head { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 0.6rem 1rem; padding: 1rem 1.25rem; border-bottom: 1px solid #f1f4f2; }
         .udash .ud-head-main { display: flex; align-items: center; gap: 0.8rem; min-width: 0; }
         .udash .ud-head-icon { display: inline-flex; flex: 0 0 auto; align-items: center; justify-content: center; width: 2.6rem; height: 2.6rem; border-radius: 0.8rem; background: #f5f8f6; color: #2f7452; font-size: 1.05rem; }
-        .udash .ud-title { margin: 0; color: #0f172a; font-size: 1.15rem; font-weight: 700; line-height: 1.3; }
+        .udash .ud-title { margin: 0; color: #0f172a; font-size: 20px; font-weight: 700; line-height: 1.3; }
         .udash .ud-sub { margin: 0; color: #64748b; font-size: 0.85rem; }
         .udash .ud-chip { display: inline-flex; align-items: center; gap: 0.35rem; padding: 0.2rem 0.65rem; border-radius: 999px; background: #f5f8f6; color: #2f7250; font-size: 0.78rem; font-weight: 700; white-space: nowrap; }
         .udash .ud-chip::before { content: ""; width: 0.4rem; height: 0.4rem; border-radius: 50%; background: currentColor; }

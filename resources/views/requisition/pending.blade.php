@@ -138,7 +138,7 @@
         #scannerModal .modal-content { overflow: hidden; border: 0; border-radius: 1rem; box-shadow: 0 24px 60px -20px rgba(15, 23, 42, 0.45); }
         #scannerModal .scan-header { align-items: center; gap: 0.75rem; padding: 1rem 1.25rem; border-bottom: 1px solid #f1f4f2; }
         #scannerModal .scan-header-icon { display: inline-flex; flex: 0 0 auto; align-items: center; justify-content: center; width: 2.75rem; height: 2.75rem; border-radius: 0.85rem; background: linear-gradient(135deg, #2f7452, #3a8f65); color: #fff; font-size: 1.25rem; box-shadow: 0 8px 16px -8px rgba(53, 129, 91, 0.7); }
-        #scannerModal .scan-header .modal-title { font-size: 1.125rem; }
+        #scannerModal .scan-header .modal-title { font-size: 20px; }
         /* A narrow dialog: today's date sits on its own line under the title */
         #scannerModal .scan-header { flex-wrap: wrap; }
         #scannerModal .scan-header .modal-today { order: 3; flex: 1 1 100%; margin: 0.15rem 0 0; white-space: normal; }

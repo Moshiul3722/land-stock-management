@@ -259,7 +259,7 @@
             <form wire:submit="save('submit')" class="req-form tw-m-0 tw-flex tw-min-h-0 tw-flex-1 tw-flex-col" novalidate>
                 <div class="tw-flex tw-flex-wrap tw-items-start tw-justify-between tw-gap-x-4 tw-gap-y-1 tw-border-0 tw-border-b tw-border-solid tw-border-slate-200 tw-px-5 tw-py-4 sm:tw-flex-nowrap sm:tw-px-6">
                     <div class="tw-min-w-0 tw-flex-1">
-                        <h2 id="req-form-title" class="tw-m-0 tw-text-lg tw-font-bold tw-text-slate-900">
+                        <h2 id="req-form-title" class="tw-m-0 tw-text-[20px] tw-font-bold tw-text-slate-900">
                             {{ $editingId ? __('requisition.manage.edit_title', ['id' => $digits($editingId)]) : __('requisition.manage.create_title') }}
                         </h2>
                         <p class="tw-mb-0 tw-mt-0.5 tw-text-sm tw-text-slate-500">{{ __('requisition.manage.form_hint') }}</p>
@@ -566,7 +566,7 @@
                 <div class="tw-mx-auto tw-mb-4 tw-flex tw-h-12 tw-w-12 tw-items-center tw-justify-center tw-rounded-full tw-bg-rose-50 tw-text-lg tw-text-rose-600" aria-hidden="true">
                     <i class="fas fa-trash-alt"></i>
                 </div>
-                <h2 id="req-delete-title" class="tw-m-0 tw-text-lg tw-font-bold tw-text-slate-900">{{ __('requisition.manage.delete_title') }}</h2>
+                <h2 id="req-delete-title" class="tw-m-0 tw-text-[20px] tw-font-bold tw-text-slate-900">{{ __('requisition.manage.delete_title') }}</h2>
                 <p id="req-delete-text" class="tw-mb-0 tw-mt-2 tw-text-sm tw-text-slate-600">
                     {{ __('requisition.manage.delete_text', ['id' => $digits($deletingId), 'count' => $digits($deletingItemsCount)]) }}
                 </p>

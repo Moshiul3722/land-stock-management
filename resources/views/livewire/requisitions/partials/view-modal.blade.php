@@ -4,7 +4,7 @@
             @if ($viewed = $this->viewing)
                 <div class="tw-flex tw-flex-wrap tw-items-start tw-justify-between tw-gap-x-4 tw-gap-y-1 tw-border-0 tw-border-b tw-border-solid tw-border-slate-200 tw-px-5 tw-py-3 sm:tw-flex-nowrap sm:tw-px-6">
                     <div class="tw-flex tw-min-w-0 tw-flex-1 tw-flex-wrap tw-items-center tw-gap-x-3 tw-gap-y-1">
-                        <h2 id="req-view-title" class="tw-m-0 tw-text-lg tw-font-bold tw-text-slate-900">{{ __('requisition.manage.view_title', ['id' => $digits($viewed->id)]) }}</h2>
+                        <h2 id="req-view-title" class="tw-m-0 tw-text-[20px] tw-font-bold tw-text-slate-900">{{ __('requisition.manage.view_title', ['id' => $digits($viewed->id)]) }}</h2>
                         <span class="{{ $badge($viewed->status) }}"><span class="{{ $dot($viewed->status) }}" aria-hidden="true"></span>{{ $statusLabel($viewed->status) }}</span>
                     </div>
                     {{-- Today's weekday and date; on phones it wraps under the title --}}

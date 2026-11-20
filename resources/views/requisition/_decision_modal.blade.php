@@ -41,7 +41,7 @@
                 {{-- Header: title, status, today's date, close --}}
                 <div class="tw-flex tw-flex-none tw-flex-wrap tw-items-start tw-justify-between tw-gap-x-4 tw-gap-y-1 tw-border-0 tw-border-b tw-border-solid tw-border-slate-200 tw-px-5 tw-py-3 sm:tw-flex-nowrap sm:tw-px-6">
                     <div class="tw-flex tw-min-w-0 tw-flex-1 tw-flex-wrap tw-items-center tw-gap-x-3 tw-gap-y-1">
-                        <h2 id="actionModalLabel" class="tw-m-0 tw-text-lg tw-font-bold tw-text-slate-900">
+                        <h2 id="actionModalLabel" class="tw-m-0 tw-text-[20px] tw-font-bold tw-text-slate-900">
                             {{ __('requisition.pending_manage.modal.title_short') }} <span id="modal-req-no"></span>
                         </h2>
                         <span class="tw-inline-flex tw-items-center tw-gap-1.5 tw-whitespace-nowrap tw-rounded-full tw-bg-amber-50 tw-px-2.5 tw-py-1 tw-text-xs tw-font-semibold tw-text-amber-800 tw-ring-1 tw-ring-inset tw-ring-amber-300">

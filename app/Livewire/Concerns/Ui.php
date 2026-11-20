@@ -35,7 +35,7 @@ final class Ui
 
     public const MODAL_CLOSE = self::ICON_BTN . ' tw--mr-2 tw--mt-1 tw-flex-none !tw-bg-slate-100 !tw-text-slate-600 hover:!tw-bg-slate-200 hover:!tw-text-slate-900';
 
-    public const MODAL_TITLE = 'tw-m-0 tw-text-lg tw-font-bold tw-text-slate-900';
+    public const MODAL_TITLE = 'tw-m-0 tw-text-[20px] tw-font-bold tw-text-slate-900';
 
     public const MODAL_HINT = 'tw-mb-0 tw-mt-0.5 tw-text-sm tw-text-slate-500';
 
