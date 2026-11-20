@@ -33,7 +33,7 @@
                             @forelse ($rows as $row)
                                 <tr wire:key="vehicle-{{ $row->id }}">
                                     <td class="crud-serial">{{ $digits($rows->firstItem() + $loop->index) }}</td>
-                                    <td class="text-center font-weight-bold crud-wrap">{{ $row->vehicle_no }}</td>
+                                    <td class="text-center font-weight-bold crud-wrap">{{ $digits($row->vehicle_no) }}</td>
                                     <td class="text-center crud-wrap">{{ $row->type?->label ?? __('vehicle.none') }}</td>
                                     <td class="text-center crud-wrap">{{ $row->driver?->label ?? __('vehicle.none') }}</td>
                                     <td class="text-center">{{ $dateText($row->driving_date) }}</td>
