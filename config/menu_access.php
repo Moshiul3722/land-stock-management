@@ -25,6 +25,8 @@ return [
         'profile.index', 'profile.update', 'profile.password', 'profile.photo',
         'change.language',
         'notifications.index', 'notifications.read', 'notifications.read_all',
+        // Low-stock list print (the controller allows Super Admin, Admin and Store Admin only)
+        'low-stock.print',
         // Look-up lists for the form drop-downs
         'get.sub_categories', 'products.by_sub_category', 'products.by_category',
         'products.autocomplete_unit', 'lots.autocomplete', 'stock.check_status',

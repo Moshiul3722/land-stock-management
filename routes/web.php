@@ -203,6 +203,9 @@ Route::middleware(['auth', 'permission'])->group(function () {
     Route::post('/profile/password', [ProfileController::class, 'updatePassword'])->name('profile.password');
     Route::get('/profile/photo', [ProfileController::class, 'photo'])->name('profile.photo');
 
+    // Low-stock list (print preview / print), opened from the low-stock line under the top bar
+    Route::get('/low-stock/print', [App\Http\Controllers\LowStockController::class, 'printList'])->name('low-stock.print');
+
     // Reports Routes
     Route::prefix('reports')->name('reports.')->group(function () {
         Route::get('/stock/current', [ReportController::class, 'currentStock'])->name('stock.current');

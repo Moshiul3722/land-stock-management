@@ -1,54 +1,52 @@
 {{--
     Low-stock notice: a scrolling line under the top bar naming every product whose total
     stock is below 5. Shown on every page, to Super Admin, Admin and Store Admin only.
+    Its label opens the full list, with print preview and print (LowStockController).
     Used in resources/views/layouts/app.blade.php.
 --}}
 @php
-    $lowStockRoles = [1, 2, 3];
-    $lowStockLimit = 5;
     $lowStockUser = auth()->user();
     $lowStockItems = collect();
 
-    if ($lowStockUser && in_array((int) $lowStockUser->role_id, $lowStockRoles, true)) {
+    if (\App\Support\LowStock::canSee($lowStockUser)) {
         $isBn = app()->getLocale() === 'bn';
-        $digits = fn ($value) => $isBn
-            ? strtr((string) $value, ['0' => '০', '1' => '১', '2' => '২', '3' => '৩', '4' => '৪', '5' => '৫', '6' => '৬', '7' => '৭', '8' => '৮', '9' => '৯'])
-            : (string) $value;
+        $digits = fn ($value) => \App\Support\LowStock::digits($value);
+        $lowStockLimit = \App\Support\LowStock::LIMIT;
 
-        // Total stock of each product that has ever been stocked (same rows as the stock list)
-        $lowStockItems = \Illuminate\Support\Facades\DB::table('stocks')
-            ->join('products', 'products.id', '=', 'stocks.product_id')
-            ->whereNull('stocks.deleted_at')
-            ->whereNull('products.deleted_at')
-            ->groupBy('products.id', 'products.name', 'products.name_bn', 'products.product_unit')
-            ->havingRaw('SUM(stocks.quantity) < ?', [$lowStockLimit])
-            ->orderByRaw('SUM(stocks.quantity)')
-            ->orderBy('products.name')
-            ->selectRaw('products.id, products.name, products.name_bn, products.product_unit, SUM(stocks.quantity) as total')
-            ->get()
-            ->map(function ($row) use ($isBn, $digits) {
-                $total = max(0, (int) $row->total);
-                $name = $isBn && trim((string) $row->name_bn) !== '' ? $row->name_bn : $row->name;
-                $unit = $row->product_unit && ! is_numeric($row->product_unit) ? \App\Models\ProductUnit::label($row->product_unit) : '';
-
-                return [
-                    'id' => (int) $row->id,
-                    'name' => $name,
-                    'amount' => trim($digits($total) . ' ' . $unit),
-                    'out' => $total === 0,
-                ];
-            });
+        $lowStockItems = \App\Support\LowStock::items()->map(fn ($item) => $item + [
+            'amount' => trim($digits($item['total']) . ' ' . $item['unit']),
+        ]);
 
         $lowStockTexts = $isBn ? [
             'label' => 'স্টক কম',
             'hint' => 'যেসব মালামালের স্টক ' . $digits($lowStockLimit) . '-এর কম',
             'out' => 'শেষ',
             'count' => $digits($lowStockItems->count()) . 'টি মালামাল',
+            'open' => 'স্টক কম মালামালের তালিকা দেখুন',
+            'title' => 'স্টক কম মালামালের তালিকা',
+            'serial' => 'ক্রমিক',
+            'product' => 'মালামাল',
+            'stock' => 'বর্তমান স্টক',
+            'status' => 'অবস্থা',
+            'low' => 'কম',
+            'preview' => 'প্রিন্ট প্রিভিউ',
+            'print' => 'প্রিন্ট',
+            'close' => 'বন্ধ করুন',
         ] : [
             'label' => 'Low stock',
             'hint' => 'Products with less than ' . $lowStockLimit . ' in stock',
             'out' => 'Out',
             'count' => $lowStockItems->count() . ' products',
+            'open' => 'Show the low-stock list',
+            'title' => 'Low-stock products',
+            'serial' => 'No.',
+            'product' => 'Product',
+            'stock' => 'Current stock',
+            'status' => 'Status',
+            'low' => 'Low',
+            'preview' => 'Print preview',
+            'print' => 'Print',
+            'close' => 'Close',
         ];
         $canOpenStock = app(\App\Services\MenuPermissionService::class)->allowsRoute($lowStockUser, 'stock.show');
         // About 4 seconds per product, so the speed stays readable however long the list is
@@ -58,11 +56,12 @@
 
 @if ($lowStockItems->isNotEmpty())
     <div class="low-stock" role="region" aria-label="{{ $lowStockTexts['hint'] }}">
-        <span class="low-stock-label" title="{{ $lowStockTexts['hint'] }}">
+        <button type="button" class="low-stock-label" title="{{ $lowStockTexts['open'] }}" aria-label="{{ $lowStockTexts['open'] }}"
+            data-toggle="modal" data-target="#low-stock-modal">
             <i class="fas fa-exclamation-triangle" aria-hidden="true"></i>
             <span>{{ $lowStockTexts['label'] }}</span>
             <span class="low-stock-count">{{ $lowStockTexts['count'] }}</span>
-        </span>
+        </button>
         <div class="low-stock-track">
             {{-- The list twice in a row: when the first copy has scrolled away the second one is
                  exactly where the first started, so the line runs on without a jump. --}}
@@ -83,6 +82,63 @@
                         @endforeach
                     </ul>
                 @endforeach
+            </div>
+        </div>
+    </div>
+
+    {{-- The whole list, with print preview and print --}}
+    <div class="modal fade low-stock-modal" id="low-stock-modal" tabindex="-1" role="dialog" aria-labelledby="low-stock-modal-title" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <span class="low-stock-modal-icon" aria-hidden="true"><i class="fas fa-exclamation-triangle"></i></span>
+                    <div class="mr-auto">
+                        <h5 class="modal-title mb-0" id="low-stock-modal-title">{{ $lowStockTexts['title'] }}</h5>
+                        <small class="text-muted">{{ $lowStockTexts['hint'] }} · {{ $lowStockTexts['count'] }}</small>
+                    </div>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="{{ $lowStockTexts['close'] }}"><span aria-hidden="true">&times;</span></button>
+                </div>
+                <div class="modal-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0 low-stock-table">
+                            <thead>
+                                <tr>
+                                    <th class="text-center" style="width: 4.5rem;">{{ $lowStockTexts['serial'] }}</th>
+                                    <th>{{ $lowStockTexts['product'] }}</th>
+                                    <th class="text-center">{{ $lowStockTexts['stock'] }}</th>
+                                    <th class="text-center">{{ $lowStockTexts['status'] }}</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach ($lowStockItems as $item)
+                                    <tr>
+                                        <td class="text-center">{{ $digits($loop->iteration) }}</td>
+                                        <td class="font-weight-bold">
+                                            @if ($canOpenStock)
+                                                <a href="{{ route('stock.show', $item['id']) }}" wire:navigate class="text-body">{{ $item['name'] }}</a>
+                                            @else
+                                                {{ $item['name'] }}
+                                            @endif
+                                        </td>
+                                        <td class="text-center text-nowrap">{{ $item['amount'] }}</td>
+                                        <td class="text-center">
+                                            <span class="low-stock-badge {{ $item['out'] ? 'is-out' : '' }}">{{ $item['out'] ? $lowStockTexts['out'] : $lowStockTexts['low'] }}</span>
+                                        </td>
+                                    </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" data-dismiss="modal">{{ $lowStockTexts['close'] }}</button>
+                    <a href="{{ route('low-stock.print', ['preview' => 1]) }}" target="_blank" rel="noopener" class="btn btn-outline-primary">
+                        <i class="fas fa-file-alt mr-1" aria-hidden="true"></i>{{ $lowStockTexts['preview'] }}
+                    </a>
+                    <a href="{{ route('low-stock.print') }}" target="_blank" rel="noopener" class="btn btn-primary">
+                        <i class="fas fa-print mr-1" aria-hidden="true"></i>{{ $lowStockTexts['print'] }}
+                    </a>
+                </div>
             </div>
         </div>
     </div>
@@ -112,6 +168,78 @@
             font-weight: 700;
             white-space: nowrap;
             box-shadow: 6px 0 12px -6px rgba(120, 53, 15, 0.45);
+        }
+
+        button.low-stock-label {
+            border: 0;
+            cursor: pointer;
+            font: inherit;
+            font-weight: 700;
+        }
+
+        button.low-stock-label:hover {
+            background: linear-gradient(120deg, #92400e, #d97706);
+        }
+
+        button.low-stock-label:focus-visible {
+            outline: 2px solid #fff;
+            outline-offset: -4px;
+        }
+
+        .low-stock-modal .modal-header {
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .low-stock-modal-icon {
+            display: inline-flex;
+            flex: none;
+            align-items: center;
+            justify-content: center;
+            width: 2.5rem;
+            height: 2.5rem;
+            border-radius: 0.75rem;
+            background: #fef3c7;
+            color: #b45309;
+        }
+
+        .low-stock-table thead th {
+            position: sticky;
+            top: 0;
+            z-index: 1;
+            background: #f8fafc;
+            border-top: 0;
+            font-size: 0.8125rem;
+            color: #475569;
+        }
+
+        .low-stock-table td {
+            vertical-align: middle;
+        }
+
+        .low-stock-badge {
+            display: inline-block;
+            padding: 0.1rem 0.6rem;
+            border-radius: 999px;
+            background: #fef3c7;
+            color: #92400e;
+            font-size: 0.8125rem;
+            font-weight: 700;
+        }
+
+        .low-stock-badge.is-out {
+            background: #fee2e2;
+            color: #b91c1c;
+        }
+
+        @media (max-width: 575.98px) {
+            .low-stock-modal .modal-footer {
+                flex-wrap: wrap;
+            }
+
+            .low-stock-modal .modal-footer > * {
+                flex: 1 1 auto;
+            }
         }
 
         .low-stock-count {
