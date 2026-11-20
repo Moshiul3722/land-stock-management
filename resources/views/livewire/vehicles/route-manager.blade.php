@@ -54,7 +54,41 @@
                     <div class="{{ $ui::MODAL_BODY }}">
                         @error('form') <div class="{{ $ui::FORM_ALERT }}" role="alert"><i class="fas fa-exclamation-circle tw-mt-0.5" aria-hidden="true"></i><span>{{ $message }}</span></div> @enderror
                         <div class="tw-grid tw-grid-cols-1 tw-gap-4 sm:tw-grid-cols-2">
-                            @include('livewire.vehicles.partials.field', ['name' => 'name', 'label' => $f('route_name'), 'required' => true, 'max' => 150, 'wide' => true])
+                            {{-- Route name: the places in order, joined with arrows --}}
+                            <div class="sm:tw-col-span-2">
+                                <p class="{{ $ui::LABEL }}">{{ $f('route_name') }} <span class="tw-text-rose-600">*</span></p>
+                                <ol class="tw-m-0 tw-list-none tw-space-y-1 tw-p-0">
+                                    @foreach ($stops as $i => $stop)
+                                        <li wire:key="route-stop-{{ $i }}-{{ count($stops) }}">
+                                            @if ($i > 0)
+                                                <div class="tw-flex tw-justify-center tw-pb-1 tw-text-brand-500" aria-hidden="true"><i class="fas fa-arrow-down"></i></div>
+                                            @endif
+                                            <div class="tw-flex tw-items-center tw-gap-2">
+                                                <span class="tw-inline-flex tw-h-8 tw-w-8 tw-flex-none tw-items-center tw-justify-center tw-rounded-full tw-bg-brand-50 tw-text-sm tw-font-bold tw-text-brand-700">{{ $digits($i + 1) }}</span>
+                                                <input id="vf-stop-{{ $i }}" type="text" wire:model="stops.{{ $i }}" maxlength="100" autocomplete="off"
+                                                    placeholder="{{ __('vehicle.routes.stop', ['n' => $digits($i + 1)]) }}" aria-label="{{ __('vehicle.routes.stop', ['n' => $digits($i + 1)]) }}"
+                                                    class="{{ $ui::INPUT }} tw-min-w-0 tw-flex-1 @error('stops.' . $i) {{ $ui::INPUT_ERROR }} @enderror">
+                                                @if (count($stops) > 2)
+                                                    <button type="button" wire:click="removeStop({{ $i }})" class="{{ $ui::ICON_BTN }} tw-flex-none !tw-text-rose-600 hover:!tw-bg-rose-50"
+                                                        aria-label="{{ __('vehicle.routes.remove_stop') }}" title="{{ __('vehicle.routes.remove_stop') }}">
+                                                        <i class="fas fa-times" aria-hidden="true"></i>
+                                                    </button>
+                                                @endif
+                                            </div>
+                                            @error('stops.' . $i) <p class="{{ $ui::ERROR }}"><i class="fas fa-exclamation-circle tw-mt-0.5" aria-hidden="true"></i>{{ $message }}</p> @enderror
+                                        </li>
+                                    @endforeach
+                                </ol>
+                                @if (count($stops) < 10)
+                                    <button type="button" wire:click="addStop" class="{{ $ui::BTN_SECONDARY }} tw-mt-3 !tw-min-h-9 tw-w-full sm:tw-w-auto">
+                                        <i class="fas fa-plus" aria-hidden="true"></i>{{ __('vehicle.routes.add_stop') }}
+                                    </button>
+                                @endif
+                                <p class="{{ $ui::HINT }} tw-break-words">{{ __('vehicle.routes.name_preview') }}:
+                                    <span class="tw-font-semibold tw-text-slate-800" x-text="($wire.stops || []).map((s) => String(s ?? '').trim()).filter(Boolean).join(' → ') || '—'"></span>
+                                </p>
+                                @error('name') <p class="{{ $ui::ERROR }}"><i class="fas fa-exclamation-circle tw-mt-0.5" aria-hidden="true"></i>{{ $message }}</p> @enderror
+                            </div>
                             @include('livewire.vehicles.partials.field', ['name' => 'startPoint', 'label' => $f('start_point'), 'max' => 150])
                             @include('livewire.vehicles.partials.field', ['name' => 'endPoint', 'label' => $f('end_point'), 'max' => 150])
                             @include('livewire.vehicles.partials.field', ['name' => 'description', 'label' => $f('description'), 'type' => 'textarea', 'max' => 1000, 'wide' => true])

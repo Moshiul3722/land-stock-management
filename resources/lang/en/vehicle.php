@@ -56,6 +56,11 @@ return [
         'edit' => 'Edit route',
         'hint' => 'Routes the vehicles run on.',
         'search' => 'Search by route name or place',
+        'stop' => 'Place :n',
+        'stops' => 'Route places',
+        'add_stop' => 'Add another place',
+        'remove_stop' => 'Remove this place',
+        'name_preview' => 'The route name will be',
     ],
     'vehicles' => [
         'title' => 'Vehicle Details',
