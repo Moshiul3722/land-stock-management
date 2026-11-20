@@ -54,7 +54,7 @@
                         @php
                             // Groups listed here have no heading of their own: their pages are listed
                             // straight under the module (e.g. Reports > Stock report, not Reports > Reports > ...).
-                            $flatten = (bool) array_intersect(array_column($visibleMenus, 'route'), ['reports.stock.current', 'reports.consumption', 'vehicle-types.index', 'vehicle-officers.index', 'vehicle-drivers.index', 'vehicle-routes.index', 'vehicles.index', 'vehicle-demands.index']);
+                            $flatten = (bool) array_intersect(array_column($visibleMenus, 'route'), ['reports.stock.current', 'reports.consumption', 'vehicle-types.index', 'vehicle-officers.index', 'vehicle-drivers.index', 'vehicle-routes.index', 'vehicles.index', 'vehicle-requisitions.index', 'vehicle-demands.index']);
                         @endphp
                         {{-- A group whose pages are all hidden from the sidebar gets no heading --}}
                         @if (empty($visibleMenus))

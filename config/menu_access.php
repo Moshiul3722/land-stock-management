@@ -95,6 +95,7 @@ return [
 
         // Vehicle management
         'vehicle-drivers.file' => ['vehicle-drivers.index', 'vehicles.index'],
+        'vehicle-requisitions.print' => ['vehicle-requisitions.index'],
 
         // Requisitions: the requester's own list
         'requisitions.store' => ['requisitions.create'],
