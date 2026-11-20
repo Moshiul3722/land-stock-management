@@ -201,6 +201,7 @@ Route::middleware(['auth', 'permission'])->group(function () {
     Route::get('/profile', [ProfileController::class, 'index'])->name('profile.index');
     Route::post('/profile/update', [ProfileController::class, 'update'])->name('profile.update');
     Route::post('/profile/password', [ProfileController::class, 'updatePassword'])->name('profile.password');
+    Route::get('/profile/photo', [ProfileController::class, 'photo'])->name('profile.photo');
 
     // Reports Routes
     Route::prefix('reports')->name('reports.')->group(function () {

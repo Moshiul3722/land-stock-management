@@ -88,4 +88,19 @@ class ProfileController extends Controller
 
         return redirect()->route('profile.index')->with('success', __('profile.password_updated'));
     }
+
+    /**
+     * The signed-in user's own profile photo, read from the public disk. Served by the app
+     * (not through public/storage), so it shows even where that storage link is missing.
+     */
+    public function photo()
+    {
+        $path = Auth::user()?->profile_photo_path;
+        abort_unless($path && Storage::disk('public')->exists($path), 404);
+
+        return response()->file(Storage::disk('public')->path($path), [
+            'Cache-Control' => 'private, max-age=3600',
+            'X-Content-Type-Options' => 'nosniff',
+        ]);
+    }
 }

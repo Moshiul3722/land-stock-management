@@ -22,7 +22,7 @@
 return [
 
     'open' => [
-        'profile.index', 'profile.update', 'profile.password',
+        'profile.index', 'profile.update', 'profile.password', 'profile.photo',
         'change.language',
         'notifications.index', 'notifications.read', 'notifications.read_all',
         // Look-up lists for the form drop-downs

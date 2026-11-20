@@ -95,7 +95,7 @@
         $profileName = $profileBn && trim((string) $user->name_bn) !== '' ? $user->name_bn : $user->name;
         $department = $user->department;
         $profileDepartment = $department ? ($profileBn ? ($department->name_bn ?: $department->name) : $department->name) : '';
-        $photoUrl = $user->profile_photo_path ? asset('storage/' . $user->profile_photo_path) : asset('theme/assets/img/gov.png');
+        $photoUrl = $user->profile_photo_path ? route('profile.photo', ['v' => substr(md5($user->profile_photo_path), 0, 10)]) : asset('theme/assets/img/gov.png');
         $signatureUri = $user->signatureDataUri();
         // A password error brings the page back on the password tab
         $onPasswordTab = $errors->has('current_password') || $errors->has('password');
