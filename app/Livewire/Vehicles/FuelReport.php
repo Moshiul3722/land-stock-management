@@ -1,0 +1,159 @@
+<?php
+
+namespace App\Livewire\Vehicles;
+
+use App\Livewire\Concerns\ManagesCrudTable;
+use App\Models\Vehicle;
+use App\Models\VehicleDemand;
+use App\Models\VehicleRequisition;
+use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\DB;
+use Livewire\Attributes\Computed;
+use Livewire\Attributes\Url;
+use Livewire\Component;
+
+/**
+ * Fuel used by each vehicle: the fuel of approved vehicle demands (requisitions) plus the
+ * drivers' fuel demands, in total per vehicle and month by month. Amounts in different
+ * units (litre, kg ...) are kept apart. Filter by vehicle and year; can be printed.
+ */
+class FuelReport extends Component
+{
+    use ManagesCrudTable;
+
+    #[Url(as: 'vehicle', except: '')]
+    public string $vehicleId = '';
+
+    /** A year, or '' for all time */
+    #[Url(as: 'year')]
+    public string $year = '';
+
+    protected function permissionRoutes(): array
+    {
+        return ['vehicle-fuel-report.index'];
+    }
+
+    public function mount(): void
+    {
+        $this->authorizeAccess();
+        if (! array_key_exists('year', request()->query())) {
+            $this->year = (string) now()->year;
+        }
+    }
+
+    public function updated(): void
+    {
+        $this->authorizeAccess();
+        if ($this->year !== '' && ! array_key_exists($this->year, $this->yearChoices)) {
+            $this->year = (string) now()->year;
+        }
+        if ($this->vehicleId !== '' && ! array_key_exists($this->vehicleId, $this->vehicleChoices)) {
+            $this->vehicleId = '';
+        }
+        unset($this->report);
+    }
+
+    #[Computed]
+    public function vehicleChoices(): array
+    {
+        return Vehicle::with('type')->orderBy('vehicle_no')->get()
+            ->mapWithKeys(fn ($v) => [(string) $v->id => $this->localDigits($v->vehicle_no) . ($v->type ? ' · ' . $v->type->label : '')])->all();
+    }
+
+    #[Computed]
+    public function yearChoices(): array
+    {
+        $years = collect([now()->year])
+            ->merge(VehicleRequisition::where('status', 'approved')->whereNotNull('fuel_amount')->selectRaw('DISTINCT YEAR(report_date) y')->pluck('y'))
+            ->merge(VehicleDemand::where('demand_type', 'fuel')->whereNotNull('quantity')->selectRaw('DISTINCT YEAR(demand_date) y')->pluck('y'))
+            ->filter()->map(fn ($y) => (int) $y)->unique()->sortDesc();
+
+        return ['' => __('vehicle.fuel_report.all_time')] + $years->mapWithKeys(fn ($y) => [(string) $y => $this->localDigits($y)])->all();
+    }
+
+    /** Sums by vehicle and by month, from both sources, per unit. */
+    #[Computed]
+    public function report(): array
+    {
+        $vehicle = $this->vehicleId !== '' ? (int) $this->vehicleId : null;
+        $year = $this->year !== '' ? (int) $this->year : null;
+
+        $requisitions = VehicleRequisition::query()
+            ->where('status', 'approved')->whereNotNull('fuel_amount')->whereNotNull('vehicle_id')
+            ->when($vehicle, fn ($q) => $q->where('vehicle_id', $vehicle))
+            ->when($year, fn ($q) => $q->whereYear('report_date', $year))
+            ->groupBy('vehicle_id', 'fuel_unit', DB::raw("DATE_FORMAT(report_date, '%Y-%m')"))
+            ->selectRaw("vehicle_id, fuel_unit AS unit, DATE_FORMAT(report_date, '%Y-%m') AS ym, SUM(fuel_amount) AS amount, COUNT(*) AS times")
+            ->get();
+        $demands = VehicleDemand::query()
+            ->where('demand_type', 'fuel')->whereNotNull('quantity')->whereNotNull('vehicle_id')
+            ->when($vehicle, fn ($q) => $q->where('vehicle_id', $vehicle))
+            ->when($year, fn ($q) => $q->whereYear('demand_date', $year))
+            ->groupBy('vehicle_id', 'unit', DB::raw("DATE_FORMAT(demand_date, '%Y-%m')"))
+            ->selectRaw("vehicle_id, unit, DATE_FORMAT(demand_date, '%Y-%m') AS ym, SUM(quantity) AS amount, COUNT(*) AS times")
+            ->get();
+
+        $byVehicle = [];
+        $byMonth = [];
+        $total = ['req' => [], 'dem' => [], 'all' => []];
+        foreach (['req' => $requisitions, 'dem' => $demands] as $source => $rows) {
+            foreach ($rows as $row) {
+                $unit = trim((string) $row->unit);
+                $amount = (float) $row->amount;
+                foreach ([&$byVehicle[$row->vehicle_id], &$byMonth[$row->ym], &$total] as &$bucket) {
+                    $bucket[$source][$unit] = ($bucket[$source][$unit] ?? 0) + $amount;
+                    $bucket['all'][$unit] = ($bucket['all'][$unit] ?? 0) + $amount;
+                    $bucket['times_' . $source] = ($bucket['times_' . $source] ?? 0) + (int) $row->times;
+                }
+                unset($bucket);
+            }
+        }
+
+        // A chosen year shows all twelve months; all time shows the months that have fuel
+        if ($year) {
+            $months = [];
+            for ($m = 1; $m <= 12; $m++) {
+                $key = sprintf('%04d-%02d', $year, $m);
+                $months[$key] = $byMonth[$key] ?? [];
+            }
+            $byMonth = $months;
+        } else {
+            ksort($byMonth);
+        }
+
+        $vehicles = Vehicle::withTrashed()->with('type')->whereIn('id', array_keys($byVehicle))->get()->keyBy('id');
+        uasort($byVehicle, fn ($a, $b) => array_sum($b['all'] ?? []) <=> array_sum($a['all'] ?? []));
+
+        return ['byVehicle' => $byVehicle, 'byMonth' => $byMonth, 'total' => $total, 'vehicles' => $vehicles];
+    }
+
+    /** "20 litre, 5 kg" in local digits; '—' when nothing. */
+    public function amountText(?array $sums): string
+    {
+        $parts = [];
+        foreach ($sums ?? [] as $unit => $amount) {
+            if ($amount <= 0) {
+                continue;
+            }
+            $number = rtrim(rtrim(number_format($amount, 2, '.', ''), '0'), '.');
+            $parts[] = trim($this->localDigits($number) . ' ' . $unit);
+        }
+
+        return $parts ? implode(', ', $parts) : '—';
+    }
+
+    public function monthText(string $ym): string
+    {
+        $bn = app()->getLocale() === 'bn';
+
+        return $this->localDigits(Carbon::createFromFormat('Y-m-d', $ym . '-01')->locale($bn ? 'bn' : 'en')->translatedFormat('F Y'));
+    }
+
+    public function render()
+    {
+        return view('livewire.vehicles.fuel-report', $this->tableViewData() + [
+            't' => fn (string $name) => __("vehicle.fuel_report.{$name}"),
+            'report' => $this->report,
+        ]);
+    }
+}

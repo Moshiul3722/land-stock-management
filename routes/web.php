@@ -131,6 +131,7 @@ Route::middleware(['auth', 'permission'])->group(function () {
     Route::view('/vehicle-requisitions', 'crud.host', ['component' => 'vehicles.requisition-manager'])->name('vehicle-requisitions.index');
     Route::get('/vehicle-requisitions/{vehicleRequisition}/print', [App\Http\Controllers\VehicleRequisitionController::class, 'printForm'])->name('vehicle-requisitions.print');
     Route::view('/vehicle-demands', 'crud.host', ['component' => 'vehicles.demand-manager'])->name('vehicle-demands.index');
+    Route::view('/vehicle-fuel-report', 'crud.host', ['component' => 'vehicles.fuel-report'])->name('vehicle-fuel-report.index');
     // A driver's photo or licence image (kept out of the public folder)
     Route::get('/vehicle-drivers/{driver}/file/{kind}', [App\Http\Controllers\VehicleDriverFileController::class, 'show'])
         ->whereIn('kind', ['photo', 'license'])->name('vehicle-drivers.file');
