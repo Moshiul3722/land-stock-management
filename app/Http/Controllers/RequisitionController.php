@@ -565,6 +565,14 @@ class RequisitionController extends Controller
 
     public function printSlip(Requisition $requisition)
     {
+        // Only the requester's own slip; the store and admin roles (Super Admin, Admin, Store
+        // Admin, Store Keeper) may print any requisition's slip.
+        $viewer = Auth::user();
+        abort_unless(
+            $viewer && ((int) $requisition->requested_by_user_id === (int) $viewer->id || in_array((int) $viewer->role_id, [1, 2, 3, 4], true)),
+            403
+        );
+
         // Load all necessary relationships for the slip
         $requisition->load([
             'requestedBy.department', // To show user details
