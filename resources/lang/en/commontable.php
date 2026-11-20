@@ -9,6 +9,7 @@ return [
     'file_upload' => 'Upload File(s)',
     'file_select' => 'Select File',
     'per_page' => 'Per page',
+    'any_date' => 'Any date',
     'search' => 'Search',
     'dt_info' => 'Showing _START_ to _END_ of _TOTAL_ entries',
     'dt_info_empty' => 'No entries to show',

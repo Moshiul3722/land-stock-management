@@ -28,7 +28,7 @@
         <div class="card card-primary">
             @include('livewire.vehicles.partials.card-head', ['canAdd' => $this->canAdd])
             <div class="card-body position-relative">
-                @include('livewire.partials.toolbar', ['id' => 'vdemand', 'placeholder' => $t('search')])
+                @include('livewire.partials.toolbar', ['id' => 'vdemand', 'placeholder' => $t('search'), 'dateFilter' => ['model' => 'dateFilter', 'label' => $f('demand_date')]])
                 @include('livewire.vehicles.partials.loading')
 
                 <div class="table-responsive">

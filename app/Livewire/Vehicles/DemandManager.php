@@ -29,6 +29,10 @@ class DemandManager extends VehicleCrud
 
     public string $demandDate = '';
 
+    /** List filter: demands of this date only (YYYY-MM-DD), '' = any date */
+    #[\Livewire\Attributes\Url(as: 'date', except: '')]
+    public string $dateFilter = '';
+
     /** The unit saved on the demand being edited (kept as a choice even if not in the list) */
     #[\Livewire\Attributes\Locked]
     public string $savedUnit = '';
@@ -96,9 +100,19 @@ class DemandManager extends VehicleCrud
                 ->orWhereIn('demand_type', $typeMatches)
                 ->orWhereHas('vehicle', fn ($v) => $v->where('vehicle_no', 'like', $like))
                 ->orWhereHas('driver', fn ($d) => $d->where('name', 'like', $like)->orWhere('name_bn', 'like', $like))))
+            ->when($this->dateFilter !== '', fn ($q) => $q->whereDate('demand_date', $this->dateFilter))
             ->orderByDesc('demand_date')
             ->orderByDesc('id')
             ->paginate($this->perPage);
+    }
+
+    /** A changed date filter starts the list again from page one (a bad value is dropped). */
+    public function updatedDateFilter(): void
+    {
+        if ($this->dateFilter !== '' && ! preg_match('/^\d{4}-\d{2}-\d{2}$/', $this->dateFilter)) {
+            $this->dateFilter = '';
+        }
+        $this->resetPage();
     }
 
     /** Units by demand type (stored as written here); "other" offers all of them. */
