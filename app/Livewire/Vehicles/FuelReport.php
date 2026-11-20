@@ -34,6 +34,10 @@ class FuelReport extends Component
     #[\Livewire\Attributes\Locked]
     public string $detailMonth = '';
 
+    /** Vehicle whose fuel history is shown in the dialog (its number was clicked) */
+    #[\Livewire\Attributes\Locked]
+    public ?int $detailVehicle = null;
+
     protected function permissionRoutes(): array
     {
         return ['vehicle-fuel-report.index'];
@@ -141,8 +145,34 @@ class FuelReport extends Component
             return;
         }
         $this->detailMonth = $ym;
+        $this->detailVehicle = null;
         unset($this->monthEntries);
         $this->showMonth = true;
+    }
+
+    /** Open the dialog with a vehicle's fuel history, in the chosen year (or all time). */
+    public function openVehicle(int $id): void
+    {
+        $this->authorizeAccess();
+        if (! Vehicle::withTrashed()->whereKey($id)->exists()) {
+            return;
+        }
+        $this->detailVehicle = $id;
+        $this->detailMonth = '';
+        unset($this->monthEntries);
+        $this->showMonth = true;
+    }
+
+    /** Heading of the dialog: the month, or the vehicle number with the period. */
+    public function detailTitle(): string
+    {
+        if ($this->detailVehicle) {
+            $no = Vehicle::withTrashed()->whereKey($this->detailVehicle)->value('vehicle_no');
+
+            return $this->localDigits((string) $no) . ' — ' . __('vehicle.fuel_report.vehicle_history');
+        }
+
+        return $this->detailMonth ? $this->monthText($this->detailMonth) . ' — ' . __('vehicle.fuel_report.month_details') : '';
     }
 
     /**
@@ -152,12 +182,21 @@ class FuelReport extends Component
     #[Computed]
     public function monthEntries(): array
     {
-        if ($this->detailMonth === '') {
+        if ($this->detailMonth === '' && ! $this->detailVehicle) {
             return [];
         }
-        $start = Carbon::createFromFormat('Y-m-d', $this->detailMonth . '-01')->startOfDay();
-        $end = $start->copy()->endOfMonth();
-        $vehicle = $this->vehicleId !== '' ? (int) $this->vehicleId : null;
+        // A month, or (for a vehicle's history) the chosen year, or all time
+        if ($this->detailMonth !== '') {
+            $start = Carbon::createFromFormat('Y-m-d', $this->detailMonth . '-01')->startOfDay();
+            $end = $start->copy()->endOfMonth();
+        } elseif ($this->year !== '') {
+            $start = Carbon::create((int) $this->year, 1, 1)->startOfDay();
+            $end = $start->copy()->endOfYear();
+        } else {
+            $start = Carbon::create(1900, 1, 1);
+            $end = Carbon::create(9999, 12, 31);
+        }
+        $vehicle = $this->detailVehicle ?: ($this->vehicleId !== '' ? (int) $this->vehicleId : null);
         $bn = app()->getLocale() === 'bn';
         $name = fn ($person) => $person ? (($bn && $person->name_bn) ? $person->name_bn : ($person->name ?: $person->name_bn)) : null;
 

@@ -117,6 +117,7 @@ return [
         'grand_total' => 'Grand total',
         'times' => 'times',
         'month_details' => 'Fuel taken, date by date',
+        'vehicle_history' => 'Fuel history',
         'date' => 'Date',
         'source' => 'From',
         'amount' => 'Amount',

@@ -75,7 +75,8 @@
                                     <tr wire:key="fuel-v-{{ $id }}">
                                         <td class="crud-serial">{{ $digits($loop->iteration) }}</td>
                                         <td class="text-center crud-wrap" style="min-width: 9rem;">
-                                            <span class="d-block font-weight-bold">{{ $v ? $digits($v->vehicle_no) : '#' . $digits($id) }}</span>
+                                            <button type="button" wire:click="openVehicle({{ (int) $id }})" class="btn btn-link p-0 d-block mx-auto font-weight-bold text-body" style="text-decoration: underline dotted; text-underline-offset: 3px;"
+                                                title="{{ $t('vehicle_history') }}" aria-label="{{ $t('vehicle_history') }}: {{ $v ? $digits($v->vehicle_no) : '#' . $digits($id) }}">{{ $v ? $digits($v->vehicle_no) : '#' . $digits($id) }}</button>
                                             @if ($v?->type)<small class="text-muted">{{ $v->type->label }}</small>@endif
                                         </td>
                                         <td class="text-center text-nowrap">{{ $this->amountText($sums['req'] ?? []) }}@if (! empty($sums['times_req']))<small class="d-block text-muted">{{ $digits($sums['times_req']) }} {{ $t('times') }}</small>@endif</td>
@@ -160,8 +161,8 @@
             <x-ui.modal wire:model="showMonth" max-width="4xl" labelledby="fuel-month-title">
                 <div class="{{ $ui::MODAL_HEADER }}">
                     <div class="tw-min-w-0 tw-flex-1">
-                        <h2 id="fuel-month-title" class="{{ $ui::MODAL_TITLE }}">{{ $detailMonth ? $this->monthText($detailMonth) : '' }} — {{ $t('month_details') }}</h2>
-                        <p class="{{ $ui::MODAL_HINT }}">{{ $chosenVehicle }}</p>
+                        <h2 id="fuel-month-title" class="{{ $ui::MODAL_TITLE }}">{{ $showMonth ? $this->detailTitle() : '' }}</h2>
+                        <p class="{{ $ui::MODAL_HINT }}">{{ $detailVehicle ? $period : $chosenVehicle }}</p>
                     </div>
                     <button type="button" x-on:click="open = false" class="{{ $ui::MODAL_CLOSE }}" aria-label="{{ __('commontable.close') }}">
                         <i class="fas fa-times" aria-hidden="true"></i>
@@ -175,7 +176,7 @@
                                     <tr>
                                         <th class="crud-serial">{{ __('commontable.serial') }}</th>
                                         <th>{{ $t('date') }}</th>
-                                        @if ($vehicleId === '')<th>{{ $t('vehicle_no') }}</th>@endif
+                                        @if ($vehicleId === '' && ! $detailVehicle)<th>{{ $t('vehicle_no') }}</th>@endif
                                         <th>{{ $t('source') }}</th>
                                         <th>{{ $t('amount') }}</th>
                                         <th>{{ $t('driver') }}</th>
@@ -187,7 +188,7 @@
                                         <tr wire:key="fuel-e-{{ $e['source'] }}-{{ $e['id'] }}">
                                             <td class="crud-serial">{{ $digits($loop->iteration) }}</td>
                                             <td class="text-center text-nowrap font-weight-bold">{{ $dateText($e['date']) }}</td>
-                                            @if ($vehicleId === '')<td class="text-center text-nowrap">{{ $e['vehicle'] ? $digits($e['vehicle']) : '—' }}</td>@endif
+                                            @if ($vehicleId === '' && ! $detailVehicle)<td class="text-center text-nowrap">{{ $e['vehicle'] ? $digits($e['vehicle']) : '—' }}</td>@endif
                                             <td class="text-center"><span class="badge {{ $e['source'] === 'req' ? 'badge-info' : 'badge-warning' }}" style="font-size: .8125rem;">{{ $e['source'] === 'req' ? $t('from_requisitions') : $t('from_demands') }}</span></td>
                                             <td class="text-center text-nowrap font-weight-bold">{{ $this->amountText($e['amount']) }}</td>
                                             <td class="text-center crud-wrap" style="min-width: 7.5rem;">{{ $e['driver'] ?: '—' }}</td>
