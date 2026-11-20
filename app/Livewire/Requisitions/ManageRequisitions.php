@@ -763,7 +763,7 @@ class ManageRequisitions extends Component
             'todayLabel' => $this->localDigits(now()->locale(app()->getLocale() === 'bn' ? 'bn' : 'en')->translatedFormat(app()->getLocale() === 'bn' ? 'l, j F Y' : 'l, d M Y')),
             // Stock information in the form (in stock with the count / out of stock) is for every
             // role except the General User, who sees none of it.
-            'showStockCount' => (int) Auth::user()?->role_id !== self::GENERAL_USER_ROLE_ID,
+            'showStockCount' => ! $this->isGeneralUser(),
             'hasFilters' => $this->hasFilters(),
             'canEdit' => fn (Requisition $r) => $this->canEdit($r),
             // Requisitions of this page the signed-in user can decide on: id => role of the step
@@ -825,7 +825,7 @@ class ManageRequisitions extends Component
      */
     private function viewableRequisitions(): Builder
     {
-        if ((int) Auth::user()?->role_id === self::GENERAL_USER_ROLE_ID || ! Auth::user()?->role_id) {
+        if ($this->isGeneralUser() || ! Auth::user()?->role_id) {
             return $this->ownRequisitions();
         }
 
@@ -854,6 +854,14 @@ class ManageRequisitions extends Component
         }
 
         return $requisition;
+    }
+
+    /** General User, or a vehicle driver (who uses the requisition list the same way). */
+    protected function isGeneralUser(): bool
+    {
+        $role = (int) Auth::user()?->role_id;
+
+        return $role === self::GENERAL_USER_ROLE_ID || $role === \App\Models\VehicleDriver::roleId();
     }
 
     private function can(string $route): bool
