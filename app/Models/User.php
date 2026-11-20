@@ -59,6 +59,18 @@ class User extends Authenticatable
      * Get the role of the user.
      */
     /**
+     * Address of the user's own profile photo (served by ProfileController::photo), or the
+     * default image when there is none. The `v` part changes with the file, so a new photo
+     * is not hidden by the browser's cache.
+     */
+    public function profilePhotoUrl(): string
+    {
+        return $this->profile_photo_path
+            ? route('profile.photo', ['v' => substr(md5($this->profile_photo_path), 0, 10)])
+            : asset('theme/assets/img/gov.png');
+    }
+
+    /**
      * The signature image as a data URI (for the printed slip and the profile page),
      * or null when the user has not uploaded one.
      */

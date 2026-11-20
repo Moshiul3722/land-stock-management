@@ -405,14 +405,14 @@
                 </li>
                 <li class="nav-item dropdown user-menu">
                     <a href="#" class="nav-link dropdown-toggle" data-toggle="dropdown">
-                        <img src="{{ asset('theme/assets/img/gov.png') }}" class="user-image" alt="User Image">
+                        <img src="{{ Auth::user()->profilePhotoUrl() }}" class="user-image" alt="User Image" style="object-fit: cover;">
                         <span class="d-none d-md-inline">{{ Auth::user()->name }}</span>
                     </a>
                     <ul class="dropdown-menu dropdown-menu-lg dropdown-menu-right">
                         <!-- User image -->
                         <li class="user-header bg-primary">
-                            <img src="{{ asset('theme/assets/img/gov.png') }}" class="img-circle elevation-2"
-                                alt="User Image">
+                            <img src="{{ Auth::user()->profilePhotoUrl() }}" class="img-circle elevation-2"
+                                alt="User Image" style="object-fit: cover;">
                             <p>
                                 {{ Auth::user()->name }}
                                 <small>Member since {{ Auth::user()->created_at->format('M. Y') }}</small>
