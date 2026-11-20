@@ -187,8 +187,9 @@
                                             <td class="issue-serial tw-whitespace-nowrap tw-px-2 tw-py-1.5 tw-text-center tw-tabular-nums tw-text-slate-600 sm:tw-px-3">{{ $digits($loop->iteration) }}</td>
                                             <td class="tw-whitespace-nowrap tw-px-3 tw-py-1.5 tw-font-semibold tw-tabular-nums tw-text-slate-900 sm:tw-px-5">
                                                 @if ($issue->requisition_id && $canOpenRequisition)
-                                                    {{-- Opens this requisition's details in the requisition list --}}
-                                                    <a href="{{ route('requisitions.index', ['view' => $issue->requisition_id]) }}" wire:navigate
+                                                    {{-- Opens this requisition's details in a dialog on this page (the address is
+                                                         the requisition list, for opening it in a new tab) --}}
+                                                    <a href="{{ route('requisitions.index', ['view' => $issue->requisition_id]) }}" data-open-requisition="{{ $issue->requisition_id }}"
                                                         title="{{ $text['open_requisition'] }}"
                                                         class="tw--mx-1.5 tw-inline-block tw-rounded-md tw-px-1.5 tw-py-0.5 tw-text-brand-700 tw-transition hover:tw-bg-brand-50 hover:tw-text-brand-800 hover:tw-no-underline focus:tw-outline-none focus-visible:tw-ring-4 focus-visible:tw-ring-brand-500/25">#{{ $digits($issue->requisition_id) }}</a>
                                                 @else
@@ -237,6 +238,10 @@
             </div>
         </div>
     </div>
+    {{-- The requisition details dialog, opened over this page --}}
+    @if ($canOpenRequisition)
+        <livewire:requisitions.requisition-viewer />
+    @endif
 @endsection
 
 @push('js')
@@ -344,6 +349,14 @@
                 render();
             });
             render();
+
+            // A requisition number opens its details in a dialog here; Ctrl/Cmd-click still opens
+            // the requisition list in a new tab.
+            $(document).off('click.openRequisition').on('click.openRequisition', '[data-open-requisition]', function(event) {
+                if (event.ctrlKey || event.metaKey || event.shiftKey || event.button === 1 || !window.Livewire) { return; }
+                event.preventDefault();
+                window.Livewire.dispatch('open-requisition', { id: parseInt($(this).attr('data-open-requisition'), 10) });
+            });
         });
     </script>
 @endpush

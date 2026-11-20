@@ -107,7 +107,7 @@ class ManageRequisitions extends Component
     /** Page of the items table in the view dialog. */
     public int $viewItemPage = 1;
 
-    private const VIEW_ITEMS_PER_PAGE = 5;
+    protected const VIEW_ITEMS_PER_PAGE = 5;
 
     /** Requisition whose row is highlighted (the user came from its notification). */
     public ?int $highlightId = null;
