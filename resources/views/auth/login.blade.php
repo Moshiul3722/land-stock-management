@@ -135,7 +135,9 @@
         .otp-boxes input.is-filled { border-color: #93b4f5; background: #f5f8ff; }
         .otp-boxes.is-invalid input { border-color: #dc2626; }
         .otp-meta { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 0.25rem 0.75rem; margin-top: 0.75rem; color: #475569; font-size: 0.875rem; }
-        .otp-meta strong { color: #0f172a; font-variant-numeric: tabular-nums; }
+        /* The timer's digits: the same Bangla font as the code boxes (Hind Siliguri's equal-width
+           digits draw ১ wrongly) */
+        .otp-meta strong { color: #0f172a; font-family: 'Kohinoor Bangla', 'Nirmala UI', 'Noto Sans Bengali', 'Vrinda', system-ui, sans-serif; font-weight: 600; font-variant-numeric: tabular-nums; }
         .otp-meta .is-over { color: #b91c1c; font-weight: 600; }
         .otp-row { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 0.25rem 1rem; margin-top: 0.9rem; }
         .otp-row form { margin: 0; }
