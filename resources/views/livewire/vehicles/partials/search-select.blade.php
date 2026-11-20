@@ -7,12 +7,14 @@
       $hint     small help text under the field
       $wide     true: spans both columns
       $live     true: the choice is sent to the server at once (e.g. when other fields depend on it)
+      $disabled [value => note]: shown greyed with the note, and cannot be chosen
 --}}
 @php
     $ui = \App\Livewire\Concerns\Ui::class;
     $fid = 'vf-' . \Illuminate\Support\Str::kebab($name);
     $hasError = $errors->has($name);
-    $list = collect($options ?? [])->map(fn ($text, $value) => ['value' => (string) $value, 'label' => (string) $text])->values();
+    $disabled = $disabled ?? [];
+    $list = collect($options ?? [])->map(fn ($text, $value) => ['value' => (string) $value, 'label' => (string) $text, 'note' => isset($disabled[$value]) ? (string) $disabled[$value] : null])->values();
 @endphp
 <div x-data="{
         open: false,
@@ -50,7 +52,7 @@
             this.open = false;
             if (this.follow) { window.removeEventListener('scroll', this.follow, true); window.removeEventListener('resize', this.follow); }
         },
-        pick(option) { this.value = option ? option.value : ''; this.close(); this.$refs.button.focus(); },
+        pick(option) { if (option && option.note) return; this.value = option ? option.value : ''; this.close(); this.$refs.button.focus(); },
         move(step) {
             const count = this.filtered.length;
             if (!count) return;
@@ -85,10 +87,13 @@
                 class="tw-cursor-pointer tw-rounded-md tw-px-3 tw-py-2 tw-text-sm tw-text-slate-400 hover:tw-bg-slate-50">— {{ __('vehicle.choose') }} —</li>
             <template x-for="(option, index) in filtered" x-bind:key="option.value">
                 <li role="option" x-on:click="pick(option)" x-on:mouseenter="active = index"
-                    x-bind:data-active="index === active" x-bind:aria-selected="chosen && chosen.value === option.value"
-                    x-bind:class="[index === active ? 'tw-bg-brand-50' : '', chosen && chosen.value === option.value ? 'tw-font-semibold tw-text-brand-700' : 'tw-text-slate-700']"
-                    class="tw-flex tw-cursor-pointer tw-items-center tw-justify-between tw-gap-2 tw-rounded-md tw-px-3 tw-py-2 tw-text-sm">
-                    <span x-text="option.label"></span>
+                    x-bind:data-active="index === active" x-bind:aria-selected="chosen && chosen.value === option.value" x-bind:aria-disabled="option.note ? 'true' : null"
+                    x-bind:class="[option.note ? 'tw-cursor-not-allowed tw-text-slate-400' : 'tw-cursor-pointer', !option.note && index === active ? 'tw-bg-brand-50' : '', chosen && chosen.value === option.value ? 'tw-font-semibold tw-text-brand-700' : (option.note ? '' : 'tw-text-slate-700')]"
+                    class="tw-flex tw-items-center tw-justify-between tw-gap-2 tw-rounded-md tw-px-3 tw-py-2 tw-text-sm">
+                    <span class="tw-min-w-0">
+                        <span class="tw-block" x-text="option.label"></span>
+                        <span class="tw-block tw-text-xs tw-text-amber-700" x-show="option.note" x-text="option.note"></span>
+                    </span>
                     <i class="fas fa-check tw-text-xs tw-text-brand-600" x-show="chosen && chosen.value === option.value" aria-hidden="true"></i>
                 </li>
             </template>

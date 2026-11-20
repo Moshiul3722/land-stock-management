@@ -72,6 +72,7 @@ return [
         'search' => 'Search by number, type, driver, route or officer',
         'officer_filter' => 'Find an officer',
         'officers_none' => 'Add officers first on the "Officers" page.',
+        'driver_busy' => 'Drives :vehicle (cannot be chosen)',
         'driver_taken' => 'This driver already drives another vehicle. A driver can drive only one vehicle at a time.',
         'drivers_none' => 'Add drivers first on the "Vehicle Drivers" page.',
         'selected' => ':count selected',

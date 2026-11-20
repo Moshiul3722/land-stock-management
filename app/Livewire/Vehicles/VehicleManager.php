@@ -83,11 +83,13 @@ class VehicleManager extends VehicleCrud
 
         return [
             'types' => VehicleType::orderBy('name')->get()->mapWithKeys(fn ($t) => [$t->id => $t->label])->all(),
-            // A driver drives one vehicle only: drivers of other vehicles are not offered
-            'drivers' => VehicleDriver::query()
-                ->whereDoesntHave('vehicles', fn ($q) => $q->when($this->editingId, fn ($w) => $w->where('vehicles.id', '!=', $this->editingId)))
-                ->orderBy('name')->get()
+            'drivers' => VehicleDriver::orderBy('name')->get()
                 ->mapWithKeys(fn ($d) => [$d->id => $d->label . ($d->mobile ? ' · ' . $this->localDigits($d->mobile) : '')])->all(),
+            // A driver drives one vehicle only: drivers of other vehicles are listed but cannot be chosen
+            'busyDrivers' => Vehicle::query()->whereNotNull('driver_id')
+                ->when($this->editingId, fn ($q) => $q->where('id', '!=', $this->editingId))
+                ->pluck('vehicle_no', 'driver_id')
+                ->map(fn ($no) => __('vehicle.vehicles.driver_busy', ['vehicle' => $no]))->all(),
             'routes' => VehicleRoute::orderBy('name')->pluck('name', 'id')->all(),
             'officers' => VehicleOfficer::with('department:id,name,name_bn')->orderBy('name_bn')->get()
                 ->map(fn ($o) => [
