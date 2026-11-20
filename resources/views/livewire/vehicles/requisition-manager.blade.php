@@ -56,12 +56,15 @@
                                             @if ($row->applicant_designation)<small class="text-muted">{{ $row->applicant_designation }}</small>@endif
                                         </td>
                                     @endif
-                                    <td class="crud-wrap" style="min-width: 10rem;">{{ \Illuminate\Support\Str::limit((string) $row->destination, 70) }}</td>
+                                    <td class="text-center crud-wrap" style="min-width: 10rem;">{{ \Illuminate\Support\Str::limit((string) $row->destination, 70) }}</td>
                                     <td class="text-center"><span class="badge {{ $row->purpose === 'official' ? 'badge-info' : 'badge-secondary' }}" style="font-size: 0.8125rem;">{{ $purposeOptions[$row->purpose] ?? $row->purpose }}</span></td>
                                     <td class="text-center crud-wrap" style="min-width: 7.5rem;">
                                         @if ($row->vehicle)
                                             <span class="d-block font-weight-bold">{{ $row->vehicle->vehicle_no }}</span>
-                                            <small class="text-muted">{{ $row->driver?->label }}</small>
+                                            <small class="d-block text-muted">{{ $row->driver?->label }}</small>
+                                            @if ($row->driver?->mobile)
+                                                <small class="d-block text-muted">{{ $digits($row->driver->mobile) }}</small>
+                                            @endif
                                         @else
                                             {{ $none }}
                                         @endif
