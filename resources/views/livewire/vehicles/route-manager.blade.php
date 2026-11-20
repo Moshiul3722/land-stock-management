@@ -26,7 +26,7 @@
                             @forelse ($rows as $row)
                                 <tr wire:key="vroute-{{ $row->id }}">
                                     <td class="crud-serial">{{ $digits($rows->firstItem() + $loop->index) }}</td>
-                                    <td class="crud-wrap font-weight-bold">{{ $row->name }}</td>
+                                    <td class="text-center crud-wrap font-weight-bold">{{ $row->name }}</td>
                                     <td class="text-center crud-wrap">{{ $row->start_point ?: __('vehicle.none') }} → {{ $row->end_point ?: __('vehicle.none') }}</td>
                                     <td class="crud-wrap">{{ \Illuminate\Support\Str::limit((string) $row->description, 80) ?: __('vehicle.none') }}</td>
                                     <td class="text-center">{{ $digits($row->vehicles_count) }}{{ app()->getLocale() === 'bn' ? 'টি' : '' }}</td>
