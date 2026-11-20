@@ -157,8 +157,8 @@
     {{-- The fuel entries of one month --}}
     <div class="tw-root no-print">
         <div class="tw-font-sans tw-text-slate-800">
-            @php $ui = \App\Livewire\Concerns\Ui::class; $entries = $showMonth ? $this->monthEntries : []; $dateText = fn ($d) => $d ? $digits($d->copy()->locale(app()->getLocale() === 'bn' ? 'bn' : 'en')->translatedFormat(app()->getLocale() === 'bn' ? 'j F Y, l' : 'd M Y, D')) : '—'; @endphp
-            <x-ui.modal wire:model="showMonth" max-width="4xl" labelledby="fuel-month-title">
+            @php $ui = \App\Livewire\Concerns\Ui::class; $entries = $showMonth ? $this->monthEntries : []; $isBn = app()->getLocale() === 'bn'; $dateText = fn ($d) => $d ? $digits($d->copy()->locale($isBn ? 'bn' : 'en')->translatedFormat($isBn ? 'j F Y' : 'd M Y')) : '—'; $dayText = fn ($d) => $d ? $d->copy()->locale($isBn ? 'bn' : 'en')->translatedFormat('l') : ''; @endphp
+            <x-ui.modal wire:model="showMonth" max-width="5xl" labelledby="fuel-month-title">
                 <div class="{{ $ui::MODAL_HEADER }}">
                     <div class="tw-min-w-0 tw-flex-1">
                         <h2 id="fuel-month-title" class="{{ $ui::MODAL_TITLE }}">{{ $showMonth ? $this->detailTitle() : '' }} <span class="tw-text-sm tw-font-semibold tw-text-slate-500">({{ $detailVehicle ? $period : $chosenVehicle }})</span></h2>
@@ -186,9 +186,9 @@
                                     @foreach ($entries as $e)
                                         <tr wire:key="fuel-e-{{ $e['source'] }}-{{ $e['id'] }}">
                                             <td class="crud-serial">{{ $digits($loop->iteration) }}</td>
-                                            <td class="text-center text-nowrap font-weight-bold">{{ $dateText($e['date']) }}</td>
+                                            <td class="text-center text-nowrap"><span class="d-block font-weight-bold">{{ $dateText($e['date']) }}</span><small class="text-muted">{{ $dayText($e['date']) }}</small></td>
                                             @if ($vehicleId === '' && ! $detailVehicle)<td class="text-center text-nowrap">{{ $e['vehicle'] ? $digits($e['vehicle']) : '—' }}</td>@endif
-                                            <td class="text-center"><span class="badge {{ $e['source'] === 'req' ? 'badge-info' : 'badge-warning' }}" style="font-size: .8125rem;">{{ $e['source'] === 'req' ? $t('from_requisitions') : $t('from_demands') }}</span></td>
+                                            <td class="text-center"><span class="badge {{ $e['source'] === 'req' ? 'badge-info' : 'badge-warning' }}" style="font-size: .8125rem; white-space: normal; line-height: 1.35;">{{ $e['source'] === 'req' ? $t('from_requisitions') : $t('from_demands') }}</span></td>
                                             <td class="text-center text-nowrap font-weight-bold">{{ $this->amountText($e['amount']) }}</td>
                                             <td class="text-center crud-wrap" style="min-width: 7.5rem;">{{ $e['driver'] ?: '—' }}</td>
                                             <td class="crud-wrap" style="min-width: 10rem;">{{ \Illuminate\Support\Str::limit($e['details'], 90) ?: '—' }}</td>
