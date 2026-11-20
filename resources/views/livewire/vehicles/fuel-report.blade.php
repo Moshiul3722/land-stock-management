@@ -161,8 +161,8 @@
             <x-ui.modal wire:model="showMonth" max-width="4xl" labelledby="fuel-month-title">
                 <div class="{{ $ui::MODAL_HEADER }}">
                     <div class="tw-min-w-0 tw-flex-1">
-                        <h2 id="fuel-month-title" class="{{ $ui::MODAL_TITLE }}">{{ $showMonth ? $this->detailTitle() : '' }}</h2>
-                        <p class="{{ $ui::MODAL_HINT }}">{{ $detailVehicle ? $period : $chosenVehicle }}</p>
+                        <h2 id="fuel-month-title" class="{{ $ui::MODAL_TITLE }}">{{ $showMonth ? $this->detailTitle() : '' }}@if ($detailVehicle) <span class="tw-text-sm tw-font-semibold tw-text-slate-500">({{ $period }})</span>@endif</h2>
+                        @unless ($detailVehicle)<p class="{{ $ui::MODAL_HINT }}">{{ $chosenVehicle }}</p>@endunless
                     </div>
                     <button type="button" x-on:click="open = false" class="{{ $ui::MODAL_CLOSE }}" aria-label="{{ __('commontable.close') }}">
                         <i class="fas fa-times" aria-hidden="true"></i>
