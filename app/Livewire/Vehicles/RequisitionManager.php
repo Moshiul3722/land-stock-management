@@ -171,7 +171,8 @@ class RequisitionManager extends VehicleCrud
     }
 
     /**
-     * Round-trip road distance (report place -> destination -> report place) from Google Maps,
+     * Round-trip road distance (report place -> destination -> report place) from Google Maps
+     * (with a key) or OpenStreetMap,
      * put in the distance field; it can still be changed by hand.
      */
     private function autoDistance(bool $asked): void
@@ -196,7 +197,7 @@ class RequisitionManager extends VehicleCrud
 
         $result = app(\App\Services\RouteDistanceService::class)->drivingDistance($from, $to);
         if ($result['status'] !== 'ok') {
-            $this->distanceNote = __('vehicle.requisitions.distance_' . ($result['status'] === 'no_key' ? 'no_key' : ($result['status'] === 'not_found' ? 'not_found' : 'failed')));
+            $this->distanceNote = __('vehicle.requisitions.distance_' . ($result['status'] === 'not_found' ? 'not_found' : 'failed'));
             $this->distanceFailed = true;
 
             return;
@@ -207,9 +208,13 @@ class RequisitionManager extends VehicleCrud
         $this->distanceKm = rtrim(rtrim(number_format($roundTrip, 1, '.', ''), '0'), '.');
         $this->resetValidation('distanceKm');
         $this->distanceNote = __('vehicle.requisitions.distance_auto', [
+            'source' => $result['source'] === 'google' ? 'Google Maps' : 'OpenStreetMap',
             'one' => $this->localDigits(rtrim(rtrim(number_format($oneWay, 1, '.', ''), '0'), '.')),
             'km' => $this->localDigits($this->distanceKm),
         ]);
+        if (! empty($result['from_name']) && ! empty($result['to_name'])) {
+            $this->distanceNote .= ' ' . __('vehicle.requisitions.distance_places', ['from' => $result['from_name'], 'to' => $result['to_name']]);
+        }
         $this->distanceFailed = false;
     }
 

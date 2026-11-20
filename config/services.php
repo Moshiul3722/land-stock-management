@@ -24,7 +24,8 @@ return [
         'token' => env('POSTMARK_TOKEN'),
     ],
 
-    // Google Maps Routes API: road distance for the vehicle requisition form (key in .env only)
+    // Google Maps Routes API: road distance for the vehicle requisition form (key in .env only;
+    // without one, OpenStreetMap is used)
     'google_maps' => [
         'key' => env('GOOGLE_MAPS_API_KEY'),
     ],
