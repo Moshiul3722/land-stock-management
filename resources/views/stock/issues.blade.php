@@ -53,6 +53,8 @@
         'times' => 'Issues',
         'no_department' => 'No section/department',
         'search' => 'Search by requisition no., section/department or date',
+        'pick_date' => 'Any date',
+        'date_filter' => 'Filter by date',
         'back' => 'Back to stock list',
         'empty' => 'This product has not been issued through a requisition yet.',
     ] : [
@@ -67,6 +69,8 @@
         'times' => 'মোট বার',
         'no_department' => 'সেকশন/ডিপার্টমেন্ট নেই',
         'search' => 'রিকুইজিশন নং, সেকশন/ডিপার্টমেন্ট বা তারিখ দিয়ে খুঁজুন',
+        'pick_date' => 'যেকোনো তারিখ',
+        'date_filter' => 'তারিখ দিয়ে খুঁজুন',
         'back' => 'স্টক তালিকায় ফিরুন',
         'empty' => 'এই পণ্যটি এখনো কোনো রিকুইজিশনের মাধ্যমে প্রদান করা হয়নি।',
     ];
@@ -141,6 +145,11 @@
                             <i class="fas fa-search tw-pointer-events-none tw-absolute tw-left-3.5 tw-top-1/2 tw--translate-y-1/2 tw-text-sm tw-text-slate-400" aria-hidden="true"></i>
                             <input id="issue-search" type="search" autocomplete="off" placeholder="{{ $text['search'] }}" title="{{ $text['search'] }}" class="{{ $input }} tw-pl-10">
                         </div>
+                        {{-- Date: only the handovers of that day --}}
+                        <div class="tw-min-w-[11rem] tw-flex-1 sm:tw-w-56 sm:tw-flex-none" title="{{ $text['date_filter'] }}">
+                            <label for="issue-date" class="tw-sr-only">{{ $text['date_filter'] }}</label>
+                            <x-ui.date-field id="issue-date" :placeholder="$text['pick_date']" compact clearable :pop-width="300" />
+                        </div>
                         <button type="button" id="issue-clear"
                             class="tw-inline-flex tw-min-h-11 tw-flex-1 tw-items-center tw-justify-center tw-gap-2 tw-whitespace-nowrap tw-rounded-lg tw-border tw-border-solid tw-border-slate-300 tw-bg-white tw-px-3 tw-text-sm tw-font-semibold tw-text-slate-700 tw-shadow-sm tw-transition hover:tw-bg-slate-50 hover:tw-text-slate-900 focus:tw-outline-none focus-visible:tw-ring-4 focus-visible:tw-ring-slate-400/30 disabled:tw-cursor-not-allowed disabled:tw-opacity-50 sm:tw-flex-none"
                             disabled>
@@ -173,7 +182,7 @@
                                             $department = $departmentName($issue);
                                             $date = $showDate($issue->issued_date);
                                         @endphp
-                                        <tr data-search="{{ mb_strtolower('#' . $issue->requisition_id . ' ' . $department . ' ' . $date . ' ' . $issue->issued_date . ' ' . $issue->user?->department?->name . ' ' . $issue->user?->department?->name_bn) }}"
+                                        <tr data-date="{{ $issue->issued_date ? \Illuminate\Support\Carbon::parse($issue->issued_date)->format('Y-m-d') : '' }}" data-search="{{ mb_strtolower('#' . $issue->requisition_id . ' ' . $department . ' ' . $date . ' ' . $issue->issued_date . ' ' . $issue->user?->department?->name . ' ' . $issue->user?->department?->name_bn) }}"
                                             class="tw-border-0 tw-border-b tw-border-solid tw-border-slate-100 tw-transition hover:tw-bg-slate-50/70 last:tw-border-b-0">
                                             <td class="issue-serial tw-whitespace-nowrap tw-px-2 tw-py-1.5 tw-text-center tw-tabular-nums tw-text-slate-600 sm:tw-px-3">{{ $digits($loop->iteration) }}</td>
                                             <td class="tw-whitespace-nowrap tw-px-3 tw-py-1.5 tw-font-semibold tw-tabular-nums tw-text-slate-900 sm:tw-px-5">
@@ -246,7 +255,7 @@
             var buttonClass = pager.data('btn') || '';
             var idle = buttonClass + ' tw-border-slate-200 tw-bg-white tw-text-slate-600 hover:tw-bg-slate-50 hover:tw-text-slate-900';
             var active = buttonClass + ' tw-border-brand-600 tw-bg-brand-600 tw-text-white';
-            var state = { term: '', perPage: 10, page: 1 };
+            var state = { term: '', date: '', perPage: 10, page: 1 };
 
             function digits(value) {
                 var text = String(value);
@@ -261,7 +270,8 @@
             function render() {
                 var term = normalise(state.term);
                 var matched = rows.filter(function(row) {
-                    return term === '' || normalise(row.getAttribute('data-search')).indexOf(term) !== -1;
+                    return (term === '' || normalise(row.getAttribute('data-search')).indexOf(term) !== -1)
+                        && (state.date === '' || row.getAttribute('data-date') === state.date);
                 });
                 var last = Math.max(1, Math.ceil(matched.length / state.perPage));
                 state.page = Math.min(Math.max(1, state.page), last);
@@ -275,7 +285,7 @@
                 });
                 $('#issue-no-match').toggleClass('tw-hidden', matched.length !== 0);
                 $('#issue-table').closest('div').toggleClass('tw-hidden', matched.length === 0);
-                $('#issue-clear').prop('disabled', state.term === '');
+                $('#issue-clear').prop('disabled', state.term === '' && state.date === '');
 
                 $('#issue-info').text(matched.length === 0 ? '' : infoText
                     .replace(':total', digits(matched.length))
@@ -317,10 +327,20 @@
                 state.page = 1;
                 render();
             });
+            // The date field keeps its value in a hidden input that fires "change"
+            $('#issue-date-value').on('change', function() {
+                state.date = this.value || '';
+                state.page = 1;
+                render();
+            });
             $('#issue-clear').on('click', function() {
                 state.term = '';
+                state.date = '';
                 state.page = 1;
                 $('#issue-search').val('');
+                var dateField = document.getElementById('issue-date-value');
+                var picker = dateField && dateField.closest('[x-data]');
+                if (picker && window.Alpine) { window.Alpine.$data(picker).value = ''; }
                 render();
             });
             render();
