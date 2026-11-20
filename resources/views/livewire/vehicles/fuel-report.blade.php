@@ -120,7 +120,14 @@
                                 @forelse ($byMonth as $ym => $sums)
                                     <tr wire:key="fuel-m-{{ $ym }}" @if (empty($sums['all'])) class="text-muted" @endif>
                                         <td class="crud-serial">{{ $digits($loop->iteration) }}</td>
-                                        <td class="text-center font-weight-bold" style="min-width: 8rem;">{{ $this->monthText($ym) }}</td>
+                                        <td class="text-center font-weight-bold" style="min-width: 8rem;">
+                                            @if (! empty($sums['all']))
+                                                <button type="button" wire:click="openMonth('{{ $ym }}')" class="btn btn-link p-0 font-weight-bold" style="text-decoration: underline dotted; text-underline-offset: 3px;"
+                                                    title="{{ $t('month_details') }}" aria-label="{{ $t('month_details') }}: {{ $this->monthText($ym) }}">{{ $this->monthText($ym) }}</button>
+                                            @else
+                                                {{ $this->monthText($ym) }}
+                                            @endif
+                                        </td>
                                         <td class="text-center text-nowrap">{{ $this->amountText($sums['req'] ?? []) }}</td>
                                         <td class="text-center text-nowrap">{{ $this->amountText($sums['dem'] ?? []) }}</td>
                                         <td class="text-center text-nowrap font-weight-bold">{{ $this->amountText($sums['all'] ?? []) }}</td>
@@ -143,6 +150,61 @@
                     </div>
                 </div>
             </div>
+        </div>
+    </div>
+
+    {{-- The fuel entries of one month --}}
+    <div class="tw-root no-print">
+        <div class="tw-font-sans tw-text-slate-800">
+            @php $ui = \App\Livewire\Concerns\Ui::class; $entries = $showMonth ? $this->monthEntries : []; $dateText = fn ($d) => $d ? $digits($d->copy()->locale(app()->getLocale() === 'bn' ? 'bn' : 'en')->translatedFormat(app()->getLocale() === 'bn' ? 'j F Y, l' : 'd M Y, D')) : '—'; @endphp
+            <x-ui.modal wire:model="showMonth" max-width="4xl" labelledby="fuel-month-title">
+                <div class="{{ $ui::MODAL_HEADER }}">
+                    <div class="tw-min-w-0 tw-flex-1">
+                        <h2 id="fuel-month-title" class="{{ $ui::MODAL_TITLE }}">{{ $detailMonth ? $this->monthText($detailMonth) : '' }} — {{ $t('month_details') }}</h2>
+                        <p class="{{ $ui::MODAL_HINT }}">{{ $chosenVehicle }}</p>
+                    </div>
+                    <button type="button" x-on:click="open = false" class="{{ $ui::MODAL_CLOSE }}" aria-label="{{ __('commontable.close') }}">
+                        <i class="fas fa-times" aria-hidden="true"></i>
+                    </button>
+                </div>
+                <div class="{{ $ui::MODAL_BODY }}">
+                    @if (count($entries))
+                        <div class="tw-overflow-x-auto">
+                            <table class="table crud-table mb-0">
+                                <thead>
+                                    <tr>
+                                        <th class="crud-serial">{{ __('commontable.serial') }}</th>
+                                        <th>{{ $t('date') }}</th>
+                                        @if ($vehicleId === '')<th>{{ $t('vehicle_no') }}</th>@endif
+                                        <th>{{ $t('source') }}</th>
+                                        <th>{{ $t('amount') }}</th>
+                                        <th>{{ $t('driver') }}</th>
+                                        <th>{{ $t('details') }}</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach ($entries as $e)
+                                        <tr wire:key="fuel-e-{{ $e['source'] }}-{{ $e['id'] }}">
+                                            <td class="crud-serial">{{ $digits($loop->iteration) }}</td>
+                                            <td class="text-center text-nowrap font-weight-bold">{{ $dateText($e['date']) }}</td>
+                                            @if ($vehicleId === '')<td class="text-center text-nowrap">{{ $e['vehicle'] ? $digits($e['vehicle']) : '—' }}</td>@endif
+                                            <td class="text-center"><span class="badge {{ $e['source'] === 'req' ? 'badge-info' : 'badge-warning' }}" style="font-size: .8125rem;">{{ $e['source'] === 'req' ? $t('from_requisitions') : $t('from_demands') }}</span></td>
+                                            <td class="text-center text-nowrap font-weight-bold">{{ $this->amountText($e['amount']) }}</td>
+                                            <td class="text-center crud-wrap" style="min-width: 7.5rem;">{{ $e['driver'] ?: '—' }}</td>
+                                            <td class="crud-wrap" style="min-width: 10rem;">{{ \Illuminate\Support\Str::limit($e['details'], 90) ?: '—' }}</td>
+                                        </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
+                        </div>
+                    @else
+                        <p class="{{ $ui::HINT }}">{{ $t('none') }}</p>
+                    @endif
+                </div>
+                <div class="{{ $ui::MODAL_FOOTER }}">
+                    <button type="button" x-on:click="open = false" class="{{ $ui::BTN_SECONDARY }}">{{ __('commontable.close') }}</button>
+                </div>
+            </x-ui.modal>
         </div>
     </div>
 </div>

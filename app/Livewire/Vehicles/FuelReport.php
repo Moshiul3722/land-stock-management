@@ -28,6 +28,12 @@ class FuelReport extends Component
     #[Url(as: 'year')]
     public string $year = '';
 
+    /** Month whose fuel entries are shown in the dialog (YYYY-MM) */
+    public bool $showMonth = false;
+
+    #[\Livewire\Attributes\Locked]
+    public string $detailMonth = '';
+
     protected function permissionRoutes(): array
     {
         return ['vehicle-fuel-report.index'];
@@ -125,6 +131,69 @@ class FuelReport extends Component
         uasort($byVehicle, fn ($a, $b) => array_sum($b['all'] ?? []) <=> array_sum($a['all'] ?? []));
 
         return ['byVehicle' => $byVehicle, 'byMonth' => $byMonth, 'total' => $total, 'vehicles' => $vehicles];
+    }
+
+    /** Open the dialog with the dated fuel entries of a month (for the chosen vehicle). */
+    public function openMonth(string $ym): void
+    {
+        $this->authorizeAccess();
+        if (! preg_match('/^\d{4}-(0[1-9]|1[0-2])$/', $ym)) {
+            return;
+        }
+        $this->detailMonth = $ym;
+        unset($this->monthEntries);
+        $this->showMonth = true;
+    }
+
+    /**
+     * Each time fuel was taken in the dialog's month: date, vehicle, where it came from,
+     * amount and details, oldest first.
+     */
+    #[Computed]
+    public function monthEntries(): array
+    {
+        if ($this->detailMonth === '') {
+            return [];
+        }
+        $start = Carbon::createFromFormat('Y-m-d', $this->detailMonth . '-01')->startOfDay();
+        $end = $start->copy()->endOfMonth();
+        $vehicle = $this->vehicleId !== '' ? (int) $this->vehicleId : null;
+        $bn = app()->getLocale() === 'bn';
+        $name = fn ($person) => $person ? (($bn && $person->name_bn) ? $person->name_bn : ($person->name ?: $person->name_bn)) : null;
+
+        $entries = [];
+        VehicleRequisition::query()
+            ->with(['vehicle' => fn ($q) => $q->withTrashed(), 'driver' => fn ($q) => $q->withTrashed()])
+            ->where('status', 'approved')->whereNotNull('fuel_amount')->whereNotNull('vehicle_id')
+            ->when($vehicle, fn ($q) => $q->where('vehicle_id', $vehicle))
+            ->whereBetween('report_date', [$start->toDateString(), $end->toDateString()])
+            ->get()
+            ->each(function ($r) use (&$entries, $name) {
+                $entries[] = [
+                    'date' => $r->report_date, 'source' => 'req', 'id' => $r->id,
+                    'vehicle' => $r->vehicle?->vehicle_no, 'driver' => $name($r->driver),
+                    'amount' => [trim((string) $r->fuel_unit) => (float) $r->fuel_amount],
+                    'details' => collect([$r->applicant_name, $r->destination])->filter()->join(' → '),
+                ];
+            });
+        VehicleDemand::query()
+            ->with(['vehicle' => fn ($q) => $q->withTrashed(), 'driver' => fn ($q) => $q->withTrashed()])
+            ->where('demand_type', 'fuel')->whereNotNull('quantity')->whereNotNull('vehicle_id')
+            ->when($vehicle, fn ($q) => $q->where('vehicle_id', $vehicle))
+            ->whereBetween('demand_date', [$start->toDateString(), $end->toDateString()])
+            ->get()
+            ->each(function ($d) use (&$entries, $name) {
+                $entries[] = [
+                    'date' => $d->demand_date, 'source' => 'dem', 'id' => $d->id,
+                    'vehicle' => $d->vehicle?->vehicle_no, 'driver' => $name($d->driver),
+                    'amount' => [trim((string) $d->unit) => (float) $d->quantity],
+                    'details' => (string) $d->reason,
+                ];
+            });
+
+        usort($entries, fn ($a, $b) => [$a['date']?->timestamp, $a['source'], $a['id']] <=> [$b['date']?->timestamp, $b['source'], $b['id']]);
+
+        return $entries;
     }
 
     /** "20 litre, 5 kg" in local digits; '—' when nothing. */

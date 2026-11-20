@@ -116,6 +116,12 @@ return [
         'total' => 'Total',
         'grand_total' => 'Grand total',
         'times' => 'times',
+        'month_details' => 'Fuel taken, date by date',
+        'date' => 'Date',
+        'source' => 'From',
+        'amount' => 'Amount',
+        'driver' => 'Driver',
+        'details' => 'Details',
         'none' => 'No fuel used in this period.',
     ],
     'requisitions' => [
