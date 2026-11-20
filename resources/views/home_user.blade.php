@@ -39,7 +39,7 @@
         .udash .ud-stat.is-done { --ud-tone: #059669; --ud-soft: #ecfdf5; --ud-band: linear-gradient(120deg, #047857, #10b981); }
         .udash .ud-stat.is-users { --ud-tone: #3a8d63; --ud-soft: #f8faf9; --ud-band: linear-gradient(120deg, #317955, #42a071); }
         .udash .ud-stat.is-cats { --ud-tone: #e11d48; --ud-soft: #fff1f2; --ud-band: linear-gradient(120deg, #be123c, #fb7185); }
-        .udash .ud-stat.is-prods { --ud-tone: #0891b2; --ud-soft: #ecfeff; --ud-band: linear-gradient(120deg, #0e7490, #22d3ee); }
+        .udash .ud-stat.is-prods { --ud-tone: #4a7a5a; --ud-soft: #f2f6f3; --ud-band: linear-gradient(120deg, #3d6a4c, #6b9a78); }
         .udash .ud-stat.is-wait { --ud-tone: #d97706; --ud-soft: #fffbeb; --ud-band: linear-gradient(120deg, #b45309, #f59e0b); }
 
         /* ---- Section cards (notifications, chart): a header and a body ----
