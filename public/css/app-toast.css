@@ -27,7 +27,7 @@
     gap: 10px;
     padding: 14px 16px;
     border-radius: 10px;
-    border: 1px solid #e5e7eb;
+    border: 1px solid #e7e9e8;
     background: #ffffff;
     color: #171717;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
@@ -121,9 +121,9 @@
 }
 
 .app-toast--info {
-    background: #f0f8ff;
-    border-color: #d3e0fd;
-    color: #0973dc;
+    background: #f6f9f8;
+    border-color: #e3ede8;
+    color: #2b6a4a;
 }
 
 @media (max-width: 600px) {

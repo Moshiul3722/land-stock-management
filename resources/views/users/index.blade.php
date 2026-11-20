@@ -371,7 +371,7 @@
             line-height: calc(2.75rem - 2px);
             padding-left: 0.75rem;
             padding-right: 3.9rem;
-            color: #495057;
+            color: #1c4531;
         }
 
         #userFormModal .select2-container .select2-selection--single .select2-selection__arrow {
@@ -403,7 +403,7 @@
             box-shadow: none;
             -webkit-appearance: none;
             appearance: none;
-            color: #6c757d;
+            color: #2c6c4c;
             font-size: 1.25rem;
             font-weight: 400;
             line-height: 1;
@@ -422,8 +422,8 @@
 
         #userFormModal .select2-container--focus .select2-selection--single,
         #userFormModal .select2-container--open .select2-selection--single {
-            border-color: #80bdff;
-            box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+            border-color: #51b884;
+            box-shadow: 0 0 0 0.2rem rgba(49, 119, 84, 0.25);
             outline: 0;
         }
 
@@ -469,14 +469,14 @@
             margin: 0.75rem 0 0;
             padding: 0.6rem 0.75rem;
             align-items: center;
-            background: #e9eefb;
-            border: 1px solid #cfd9f3;
+            background: #eff5f2;
+            border: 1px solid #dbe7e1;
             border-radius: 0.5rem;
         }
 
         #users_table_wrapper > .row:last-child .dt-info {
             padding-top: 0;
-            color: #1f2d5a;
+            color: #274838;
             font-weight: 600;
         }
 
@@ -984,7 +984,7 @@
                     text: text.confirmUpdate,
                     icon: 'warning',
                     showCancelButton: true,
-                    confirmButtonColor: '#3085d6',
+                    confirmButtonColor: '#327b57',
                     cancelButtonColor: '#d33',
                     confirmButtonText: text.confirmUpdateYes,
                     cancelButtonText: text.confirmNo

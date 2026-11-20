@@ -87,7 +87,7 @@
         .none { padding: 12mm 0; text-align: center; }
 
         /* Preview: the list on a grey page with a bar to print or close */
-        html.is-preview-page, body.is-preview { background: #e5e7eb; }
+        html.is-preview-page, body.is-preview { background: #e7e9e8; }
         body.is-preview { min-height: 100vh; padding-bottom: 1px; }
         body.is-preview .sheet { margin: 16px auto 24px; box-shadow: 0 10px 30px -12px rgba(15, 23, 42, 0.45); }
         .bar { display: none; }
@@ -101,11 +101,11 @@
             justify-content: center;
             gap: 8px;
             padding: 10px;
-            background: #0f1f47;
+            background: #1a3528;
             font-family: Arial, sans-serif;
         }
         .bar button { min-height: 36px; padding: 0 16px; border: 1px solid transparent; border-radius: 8px; font: inherit; font-weight: 600; cursor: pointer; }
-        .bar .print { background: #1d65db; color: #fff; }
+        .bar .print { background: #2f7452; color: #fff; }
         .bar .close { border-color: #cbd5e1; background: #fff; color: #334155; }
         .bar .size { margin-left: 8px; color: #cbd5e1; font-size: 13px; }
 

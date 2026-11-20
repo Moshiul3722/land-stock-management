@@ -295,10 +295,10 @@
                 $(doc.head).append('<style>' +
                     '@page { size: A4 portrait; margin: 0; }' +
                     'html, body { height: auto !important; }' +
-                    'body { margin: 0 !important; padding: 0 !important; background: #e5e7eb !important; color: #0f172a; font-size: 11pt !important; }' +
-                    '.a4-bar { position: sticky; top: 0; z-index: 10; display: flex; align-items: center; justify-content: center; gap: 8px; padding: 10px; background: #0f1f47; }' +
+                    'body { margin: 0 !important; padding: 0 !important; background: #e7e9e8 !important; color: #0f172a; font-size: 11pt !important; }' +
+                    '.a4-bar { position: sticky; top: 0; z-index: 10; display: flex; align-items: center; justify-content: center; gap: 8px; padding: 10px; background: #1a3528; }' +
                     '.a4-bar button { min-height: 36px; padding: 0 16px; border: 1px solid transparent; border-radius: 8px; font: inherit; font-weight: 600; cursor: pointer; }' +
-                    '.a4-bar .a4-print { background: #1d65db; color: #fff; }' +
+                    '.a4-bar .a4-print { background: #2f7452; color: #fff; }' +
                     '.a4-bar .a4-close { background: #fff; border-color: #cbd5e1; color: #334155; }' +
                     '.a4-bar .a4-size { margin-left: 8px; color: #cbd5e1; font-size: 10pt; }' +
                     '.a4-desk { overflow-x: auto; padding: 16px 0 24px; }' +

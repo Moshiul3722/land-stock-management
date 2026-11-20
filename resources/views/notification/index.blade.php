@@ -6,7 +6,7 @@
         .notify-page { padding: 1rem 0.5rem 1.5rem; }
         .notify-page .np-head { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 0.5rem 1rem; margin-bottom: 1rem; }
         .notify-page .np-crumb { display: flex; flex-wrap: wrap; gap: 0.4rem; margin: 0; padding: 0; list-style: none; color: #64748b; font-size: 0.875rem; }
-        .notify-page .np-crumb a { color: #1d65db; font-weight: 500; }
+        .notify-page .np-crumb a { color: #2f7452; font-weight: 500; }
         .notify-page .np-crumb li + li::before { content: "/"; margin-right: 0.4rem; color: #cbd5e1; }
         .notify-page .np-head-text { text-align: right; }
         .notify-page .np-title { margin: 0; color: #0f172a; font-size: 1.5rem; font-weight: 700; line-height: 1.25; }
@@ -15,31 +15,31 @@
         .notify-page .np-card { overflow: hidden; border: 1px solid #e2e8f0; border-radius: 1rem; background: #fff; box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04), 0 12px 28px -18px rgba(15, 23, 42, 0.25); }
 
         /* Toolbar: counts on the left, "mark all as read" on the right */
-        .notify-page .np-bar { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 0.75rem; padding: 0.9rem 1.25rem; border-bottom: 1px solid #eef2f7; }
+        .notify-page .np-bar { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 0.75rem; padding: 0.9rem 1.25rem; border-bottom: 1px solid #f1f4f2; }
         .notify-page .np-stats { display: flex; flex-wrap: wrap; align-items: center; gap: 0.5rem; }
         .notify-page .np-chip { display: inline-flex; align-items: center; gap: 0.4rem; padding: 0.3rem 0.75rem; border: 1px solid #e2e8f0; border-radius: 999px; background: #f8fafc; color: #475569; font-size: 0.8125rem; font-weight: 600; }
-        .notify-page .np-chip.is-unread { border-color: #c7d9fb; background: #eef4ff; color: #1d4fd8; }
+        .notify-page .np-chip.is-unread { border-color: #dbe7e1; background: #f5f8f6; color: #2f7250; }
         .notify-page .np-chip.is-unread::before { content: ""; width: 0.45rem; height: 0.45rem; border-radius: 999px; background: currentColor; }
         .notify-page .np-bar form { margin: 0; }
-        .notify-page .np-btn { display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem; min-height: 2.4rem; padding: 0 1rem; border: 1px solid #1d65db; border-radius: 0.6rem; background: #1d65db linear-gradient(to bottom, rgba(255, 255, 255, 0.14), rgba(255, 255, 255, 0)); color: #fff; font-size: 0.875rem; font-weight: 600; cursor: pointer; box-shadow: 0 6px 14px -6px rgba(37, 99, 235, 0.7); transition: background-color 0.15s, border-color 0.15s, box-shadow 0.15s; }
-        .notify-page .np-btn:hover { border-color: #1a51b0; background-color: #1a51b0; }
-        .notify-page .np-btn:focus-visible { outline: 0; box-shadow: 0 0 0 4px rgba(47, 124, 246, 0.3); }
+        .notify-page .np-btn { display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem; min-height: 2.4rem; padding: 0 1rem; border: 1px solid #2f7452; border-radius: 0.6rem; background: #2f7452 linear-gradient(to bottom, rgba(255, 255, 255, 0.14), rgba(255, 255, 255, 0)); color: #fff; font-size: 0.875rem; font-weight: 600; cursor: pointer; box-shadow: 0 6px 14px -6px rgba(53, 129, 91, 0.7); transition: background-color 0.15s, border-color 0.15s, box-shadow 0.15s; }
+        .notify-page .np-btn:hover { border-color: #255b40; background-color: #255b40; }
+        .notify-page .np-btn:focus-visible { outline: 0; box-shadow: 0 0 0 4px rgba(57, 140, 98, 0.3); }
         .notify-page .np-btn:disabled { border-color: #e2e8f0; background: #f1f5f9; color: #94a3b8; box-shadow: none; cursor: not-allowed; }
 
         /* List */
         .notify-page .np-list { margin: 0; padding: 0; list-style: none; }
-        .notify-page .np-item { border-bottom: 1px solid #eef2f7; }
+        .notify-page .np-item { border-bottom: 1px solid #f1f4f2; }
         .notify-page .np-item:last-child { border-bottom: 0; }
         .notify-page .np-link { position: relative; display: flex; align-items: flex-start; gap: 0.9rem; padding: 0.95rem 1.25rem; color: inherit; text-decoration: none; transition: background-color 0.15s; }
         .notify-page .np-link:hover { background: #f8fafc; color: inherit; text-decoration: none; }
-        .notify-page .np-link:focus-visible { outline: 0; box-shadow: inset 0 0 0 3px rgba(47, 124, 246, 0.35); }
-        .notify-page .np-item.is-unread .np-link { background: #f5f8ff; }
-        .notify-page .np-item.is-unread .np-link:hover { background: #ecf2ff; }
-        .notify-page .np-item.is-unread .np-link::before { content: ""; position: absolute; top: 0; bottom: 0; left: 0; width: 3px; background: #1d65db; }
+        .notify-page .np-link:focus-visible { outline: 0; box-shadow: inset 0 0 0 3px rgba(57, 140, 98, 0.35); }
+        .notify-page .np-item.is-unread .np-link { background: #f9fbfa; }
+        .notify-page .np-item.is-unread .np-link:hover { background: #f4f7f6; }
+        .notify-page .np-item.is-unread .np-link::before { content: ""; position: absolute; top: 0; bottom: 0; left: 0; width: 3px; background: #2f7452; }
 
         .notify-page .np-icon { display: inline-flex; flex: 0 0 auto; align-items: center; justify-content: center; width: 2.6rem; height: 2.6rem; border-radius: 0.8rem; font-size: 1.05rem; }
         .notify-page .np-icon.is-success { background: #ecfdf5; color: #059669; }
-        .notify-page .np-icon.is-info { background: #eef4ff; color: #1d65db; }
+        .notify-page .np-icon.is-info { background: #f5f8f6; color: #2f7452; }
         .notify-page .np-icon.is-danger { background: #fff1f2; color: #e11d48; }
         .notify-page .np-icon.is-warning { background: #fffbeb; color: #d97706; }
         .notify-page .np-icon.is-neutral { background: #f1f5f9; color: #475569; }
@@ -50,7 +50,7 @@
         .notify-page .np-meta { display: flex; flex-wrap: wrap; align-items: center; gap: 0.25rem 0.9rem; margin-top: 0.3rem; color: #64748b; font-size: 0.8125rem; }
         .notify-page .np-meta span { display: inline-flex; align-items: center; gap: 0.35rem; }
         .notify-page .np-meta i { color: #94a3b8; font-size: 0.75rem; }
-        .notify-page .np-state { flex: 0 0 auto; align-self: center; padding: 0.2rem 0.6rem; border-radius: 999px; background: #1d65db; color: #fff; font-size: 0.6875rem; font-weight: 700; letter-spacing: 0.02em; }
+        .notify-page .np-state { flex: 0 0 auto; align-self: center; padding: 0.2rem 0.6rem; border-radius: 999px; background: #2f7452; color: #fff; font-size: 0.6875rem; font-weight: 700; letter-spacing: 0.02em; }
         .notify-page .np-chevron { flex: 0 0 auto; align-self: center; color: #cbd5e1; font-size: 0.8rem; }
 
         /* Nothing to show */
@@ -59,12 +59,12 @@
         .notify-page .np-empty p { margin: 0; color: #64748b; font-size: 0.9375rem; font-weight: 500; }
 
         /* Pages */
-        .notify-page .np-foot { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 0.75rem; padding: 0.85rem 1.25rem; border-top: 1px solid #eef2f7; background: #f8fafc; }
+        .notify-page .np-foot { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 0.75rem; padding: 0.85rem 1.25rem; border-top: 1px solid #f1f4f2; background: #f8fafc; }
         .notify-page .np-range { margin: 0; color: #64748b; font-size: 0.8125rem; }
         .notify-page .np-foot .pagination { flex-wrap: wrap; gap: 4px; margin: 0; }
         .notify-page .np-foot .page-link { display: inline-flex; align-items: center; justify-content: center; min-width: 2.25rem; height: 2.25rem; padding: 0 0.6rem; border: 1px solid #e2e8f0; border-radius: 0.55rem !important; background: #fff; color: #334155; font-size: 0.875rem; font-weight: 600; }
-        .notify-page .np-foot .page-link:hover { background: #eef4ff; color: #1d4fd8; }
-        .notify-page .np-foot .page-item.active .page-link { border-color: #1d65db; background: #1d65db; color: #fff; }
+        .notify-page .np-foot .page-link:hover { background: #f5f8f6; color: #2f7250; }
+        .notify-page .np-foot .page-item.active .page-link { border-color: #2f7452; background: #2f7452; color: #fff; }
         .notify-page .np-foot .page-item.disabled .page-link { background: #f8fafc; color: #cbd5e1; }
 
         @media (max-width: 575.98px) {

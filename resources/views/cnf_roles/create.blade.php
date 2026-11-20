@@ -101,7 +101,7 @@
                     text: "{{ __('sweetalert.about_to_save') }}",
                     icon: 'warning',
                     showCancelButton: true,
-                    confirmButtonColor: '#3085d6',
+                    confirmButtonColor: '#327b57',
                     cancelButtonColor: '#d33',
                     confirmButtonText: "{{ __('sweetalert.save_notice') }}",
                 }).then((result) => {

@@ -159,7 +159,7 @@
             // Generate dynamic colors based on data length
             var colors = [
                 '#f56954', '#00a65a', '#f39c12', '#00c0ef', '#3c8dbc', '#d2d6de',
-                '#8e44ad', '#34495e', '#16a085', '#e67e22'
+                '#2e704f', '#374f43', '#16a085', '#e67e22'
             ];
 
             var ctxPie = document.getElementById('pieChart').getContext('2d');

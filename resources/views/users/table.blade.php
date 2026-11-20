@@ -80,7 +80,7 @@
             icon: 'warning',
             showCancelButton: true,
             confirmButtonColor: '#d33',
-            cancelButtonColor: '#3085d6',
+            cancelButtonColor: '#327b57',
             cancelButtonText: "{{ __('sweetalert.cancel') }}",
             confirmButtonText: "{{ __('sweetalert.delete_notice') }}"
         }).then((result) => {

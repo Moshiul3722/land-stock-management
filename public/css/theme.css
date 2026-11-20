@@ -1,0 +1,103 @@
+/*
+ * Colour theme: calm government green with a soft gold touch.
+ * Only colours: the AdminLTE / Bootstrap "primary" pieces (buttons, card headers, links,
+ * page numbers, focus rings, drop-down highlights) that the library draws in its own blue.
+ * Loaded after every other stylesheet. The meaning colours (green = done, red = reject /
+ * delete, amber = waiting, teal = info) are left as they are.
+ */
+:root {
+    --theme-50: #f2f7f4;
+    --theme-100: #e3eee8;
+    --theme-200: #c7ddd1;
+    --theme-500: #3a8a62;
+    --theme-600: #2f7452;
+    --theme-700: #255b40;
+    --theme-800: #1d4a34;
+    --theme-ring: rgba(47, 116, 82, 0.22);
+    --theme-gold: #b08d57;
+}
+
+/* Links */
+a { color: var(--theme-600); }
+a:hover { color: var(--theme-700); }
+.btn-link { color: var(--theme-600); }
+.btn-link:hover { color: var(--theme-700); }
+
+/* Primary buttons: a quiet green with a slight sheen */
+.btn-primary {
+    border-color: var(--theme-600);
+    background: linear-gradient(180deg, var(--theme-500) 0%, var(--theme-600) 100%);
+    color: #fff;
+}
+.btn-primary:hover,
+.btn-primary:focus,
+.btn-primary.focus {
+    border-color: var(--theme-700);
+    background: linear-gradient(180deg, var(--theme-600) 0%, var(--theme-700) 100%);
+    color: #fff;
+}
+.btn-primary:not(:disabled):not(.disabled):active,
+.btn-primary:not(:disabled):not(.disabled).active,
+.show > .btn-primary.dropdown-toggle {
+    border-color: var(--theme-800);
+    background: var(--theme-700);
+}
+.btn-primary:focus,
+.btn-primary.focus,
+.btn-primary:not(:disabled):not(.disabled):active:focus { box-shadow: 0 0 0 0.2rem var(--theme-ring); }
+.btn-primary.disabled,
+.btn-primary:disabled { border-color: var(--theme-500); background: var(--theme-500); }
+
+.btn-outline-primary { border-color: var(--theme-600); color: var(--theme-600); }
+.btn-outline-primary:hover,
+.btn-outline-primary:not(:disabled):not(.disabled):active { border-color: var(--theme-600); background: var(--theme-600); color: #fff; }
+.btn-outline-primary:focus { box-shadow: 0 0 0 0.2rem var(--theme-ring); }
+
+/* Backgrounds, text, borders, badges */
+.bg-primary,
+.badge-primary { background-color: var(--theme-600) !important; color: #fff; }
+.text-primary { color: var(--theme-600) !important; }
+a.text-primary:hover { color: var(--theme-700) !important; }
+.border-primary { border-color: var(--theme-600) !important; }
+
+/* Cards */
+.card-primary:not(.card-outline) > .card-header {
+    background: linear-gradient(90deg, var(--theme-700), var(--theme-600));
+    color: #fff;
+}
+.card-primary.card-outline { border-top-color: var(--theme-600); }
+.card-primary.card-outline-tabs > .card-header a.active { border-top-color: var(--theme-600); }
+
+/* Page numbers */
+.page-item.active .page-link { border-color: var(--theme-600); background-color: var(--theme-600); }
+.page-link { color: var(--theme-600); }
+.page-link:hover { color: var(--theme-700); }
+.page-link:focus { box-shadow: 0 0 0 0.2rem var(--theme-ring); }
+
+/* Tabs, pills, list and drop-down highlights */
+.nav-pills .nav-link.active,
+.nav-pills .show > .nav-link { background-color: var(--theme-600); }
+.list-group-item.active { border-color: var(--theme-600); background-color: var(--theme-600); }
+.dropdown-item.active,
+.dropdown-item:active { background-color: var(--theme-600); }
+
+/* Form focus and checked controls */
+.form-control:focus,
+.custom-select:focus { border-color: var(--theme-500); box-shadow: 0 0 0 0.2rem var(--theme-ring); }
+.custom-control-input:checked ~ .custom-control-label::before { border-color: var(--theme-600); background-color: var(--theme-600); }
+.custom-control-input:focus ~ .custom-control-label::before { box-shadow: 0 0 0 0.2rem var(--theme-ring); }
+.custom-file-input:focus ~ .custom-file-label { border-color: var(--theme-500); box-shadow: 0 0 0 0.2rem var(--theme-ring); }
+
+/* Select2 and the date-time picker */
+.select2-container--default .select2-results__option--highlighted[aria-selected],
+.select2-container--default .select2-results__option--highlighted.select2-results__option--selectable { background-color: var(--theme-600); color: #fff; }
+.select2-container--default.select2-container--focus .select2-selection--multiple,
+.select2-container--default.select2-container--open .select2-selection--single { border-color: var(--theme-500); }
+.select2-container--default .select2-selection--multiple .select2-selection__choice { border-color: var(--theme-600); background-color: var(--theme-600); }
+.bootstrap-datetimepicker-widget table td.active,
+.bootstrap-datetimepicker-widget table td.active:hover,
+.bootstrap-datetimepicker-widget table td span.active { background-color: var(--theme-600); }
+.bootstrap-datetimepicker-widget table td.today::before { border-bottom-color: var(--theme-600); }
+
+/* DataTables */
+table.dataTable tbody tr.selected > * { box-shadow: inset 0 0 0 9999px rgba(47, 116, 82, 0.9); }

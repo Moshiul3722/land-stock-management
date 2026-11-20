@@ -6,7 +6,7 @@
         .profile-page { padding: 1rem 0.5rem 1.5rem; }
         .profile-page .pp-head { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 0.5rem 1rem; margin-bottom: 1rem; }
         .profile-page .pp-crumb { display: flex; flex-wrap: wrap; gap: 0.4rem; margin: 0; padding: 0; list-style: none; color: #64748b; font-size: 0.875rem; }
-        .profile-page .pp-crumb a { color: #1d65db; font-weight: 500; }
+        .profile-page .pp-crumb a { color: #2f7452; font-weight: 500; }
         .profile-page .pp-crumb li + li::before { content: "/"; margin-right: 0.4rem; color: #cbd5e1; }
         .profile-page .pp-title { margin: 0; color: #0f172a; font-size: 1.5rem; font-weight: 700; line-height: 1.25; }
         .profile-page .pp-subtitle { margin: 0.15rem 0 0; color: #64748b; font-size: 0.875rem; }
@@ -16,16 +16,16 @@
         .profile-page .pp-card { overflow: hidden; border: 1px solid #e2e8f0; border-radius: 1rem; background: #fff; box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04), 0 12px 28px -18px rgba(15, 23, 42, 0.25); }
 
         /* Identity card */
-        .profile-page .pp-cover { height: 6rem; background: linear-gradient(120deg, #13244f 0%, #1d65db 60%, #4f46e5 100%); }
+        .profile-page .pp-cover { height: 6rem; background: linear-gradient(120deg, #1e3c2d 0%, #2f7452 60%, #3a8f65 100%); }
         .profile-page .pp-identity { padding: 0 1.25rem 1.25rem; text-align: center; }
         .profile-page .pp-avatar { width: 6.5rem; height: 6.5rem; margin-top: -3.25rem; border: 4px solid #fff; border-radius: 999px; background: #fff; object-fit: cover; box-shadow: 0 8px 20px -10px rgba(15, 23, 42, 0.5); }
         .profile-page .pp-name { margin: 0.6rem 0 0; color: #0f172a; font-size: 1.2rem; font-weight: 700; line-height: 1.3; overflow-wrap: anywhere; }
         .profile-page .pp-designation { margin: 0.15rem 0 0; color: #475569; font-size: 0.9rem; }
-        .profile-page .pp-role { display: inline-flex; align-items: center; gap: 0.4rem; margin-top: 0.6rem; padding: 0.25rem 0.75rem; border: 1px solid #c7d9fb; border-radius: 999px; background: #eef4ff; color: #1d4fd8; font-size: 0.8125rem; font-weight: 600; }
+        .profile-page .pp-role { display: inline-flex; align-items: center; gap: 0.4rem; margin-top: 0.6rem; padding: 0.25rem 0.75rem; border: 1px solid #dbe7e1; border-radius: 999px; background: #f5f8f6; color: #2f7250; font-size: 0.8125rem; font-weight: 600; }
         .profile-page .pp-role::before { content: ""; width: 0.4rem; height: 0.4rem; border-radius: 999px; background: currentColor; }
         .profile-page .pp-facts { margin: 1.1rem 0 0; padding: 0; list-style: none; text-align: left; }
-        .profile-page .pp-facts li { display: flex; align-items: flex-start; gap: 0.75rem; padding: 0.7rem 0; border-top: 1px solid #eef2f7; }
-        .profile-page .pp-fact-icon { display: inline-flex; flex: 0 0 auto; align-items: center; justify-content: center; width: 2.25rem; height: 2.25rem; border-radius: 0.65rem; background: #f1f5f9; color: #1d65db; }
+        .profile-page .pp-facts li { display: flex; align-items: flex-start; gap: 0.75rem; padding: 0.7rem 0; border-top: 1px solid #f1f4f2; }
+        .profile-page .pp-fact-icon { display: inline-flex; flex: 0 0 auto; align-items: center; justify-content: center; width: 2.25rem; height: 2.25rem; border-radius: 0.65rem; background: #f1f5f9; color: #2f7452; }
         .profile-page .pp-fact-label { display: block; color: #64748b; font-size: 0.75rem; font-weight: 600; }
         .profile-page .pp-fact-value { display: block; color: #0f172a; font-size: 0.9rem; font-weight: 500; overflow-wrap: anywhere; }
 
@@ -34,8 +34,8 @@
         .profile-page .pp-tabs .nav-item { flex: 1 1 0; }
         .profile-page .pp-tabs .nav-link { display: flex; align-items: center; justify-content: center; gap: 0.45rem; min-height: 2.5rem; padding: 0 0.75rem; border-radius: 0.55rem; background: transparent; color: #64748b; font-size: 0.9375rem; font-weight: 600; text-align: center; transition: background-color 0.15s, color 0.15s, box-shadow 0.15s; }
         .profile-page .pp-tabs .nav-link:hover { color: #0f172a; }
-        .profile-page .pp-tabs .nav-link.active { background: #fff; color: #1d4fd8; box-shadow: 0 1px 3px rgba(15, 23, 42, 0.14); }
-        .profile-page .pp-tabs .nav-link:focus-visible { outline: 0; box-shadow: 0 0 0 3px rgba(47, 124, 246, 0.35); }
+        .profile-page .pp-tabs .nav-link.active { background: #fff; color: #2f7250; box-shadow: 0 1px 3px rgba(15, 23, 42, 0.14); }
+        .profile-page .pp-tabs .nav-link:focus-visible { outline: 0; box-shadow: 0 0 0 3px rgba(57, 140, 98, 0.35); }
 
         /* Forms */
         .profile-page .pp-body { padding: 1.25rem; }
@@ -46,7 +46,7 @@
         .profile-page .pp-field-wide { grid-column: 1 / -1; }
         .profile-page .pp-field label.pp-label { display: block; margin-bottom: 0.35rem; color: #334155; font-size: 0.875rem; font-weight: 600; }
         .profile-page .pp-field .form-control { height: 2.75rem; border: 1px solid #cbd5e1; border-radius: 0.6rem; color: #0f172a; font-size: 0.9375rem; box-shadow: none; transition: border-color 0.15s, box-shadow 0.15s; }
-        .profile-page .pp-field .form-control:focus { border-color: #2f7cf6; box-shadow: 0 0 0 4px rgba(47, 124, 246, 0.18); }
+        .profile-page .pp-field .form-control:focus { border-color: #398c62; box-shadow: 0 0 0 4px rgba(57, 140, 98, 0.18); }
         .profile-page .pp-field .form-control.is-invalid { border-color: #dc2626; }
         .profile-page .pp-field .form-control[readonly] { border-color: #e2e8f0; background: #f1f5f9; color: #64748b; cursor: not-allowed; }
         .profile-page .pp-hint { display: block; margin-top: 0.35rem; color: #64748b; font-size: 0.8125rem; line-height: 1.45; }
@@ -56,17 +56,17 @@
         .profile-page .custom-file { height: 2.75rem; }
         .profile-page .custom-file-input { height: 2.75rem; }
         .profile-page .custom-file-label { display: flex; align-items: center; height: 2.75rem; padding: 0 5.5rem 0 0.9rem; overflow: hidden; border: 1px dashed #94a3b8; border-radius: 0.6rem; background: #f8fafc; color: #475569; font-size: 0.9rem; white-space: nowrap; text-overflow: ellipsis; }
-        .profile-page .custom-file-label::after { content: "{{ __('profile.browse') }}" !important; display: flex; align-items: center; height: auto; top: 4px; right: 4px; bottom: 4px; padding: 0 0.9rem; border: 0; border-radius: 0.45rem; background: #1d65db; color: #fff; font-size: 0.8125rem; font-weight: 600; }
-        .profile-page .custom-file-input:focus ~ .custom-file-label { border-color: #2f7cf6; box-shadow: 0 0 0 4px rgba(47, 124, 246, 0.18); }
+        .profile-page .custom-file-label::after { content: "{{ __('profile.browse') }}" !important; display: flex; align-items: center; height: auto; top: 4px; right: 4px; bottom: 4px; padding: 0 0.9rem; border: 0; border-radius: 0.45rem; background: #2f7452; color: #fff; font-size: 0.8125rem; font-weight: 600; }
+        .profile-page .custom-file-input:focus ~ .custom-file-label { border-color: #398c62; box-shadow: 0 0 0 4px rgba(57, 140, 98, 0.18); }
         .profile-page .pp-preview { display: flex; align-items: center; justify-content: center; min-height: 5.5rem; margin-bottom: 0.6rem; padding: 0.5rem; border: 1px solid #e2e8f0; border-radius: 0.6rem; background: #fff; color: #94a3b8; font-size: 0.8125rem; text-align: center; }
         .profile-page .pp-preview img { max-width: 100%; max-height: 4.5rem; }
         .profile-page .pp-preview img.pp-preview-photo { width: 4.5rem; height: 4.5rem; border-radius: 999px; object-fit: cover; }
 
         /* Buttons */
-        .profile-page .pp-actions { display: flex; justify-content: flex-end; margin-top: 1.25rem; padding-top: 1rem; border-top: 1px solid #eef2f7; }
-        .profile-page .pp-btn { display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem; min-height: 2.6rem; padding: 0 1.25rem; border: 1px solid #1d65db; border-radius: 0.6rem; background: #1d65db linear-gradient(to bottom, rgba(255, 255, 255, 0.14), rgba(255, 255, 255, 0)); color: #fff; font-size: 0.9375rem; font-weight: 600; cursor: pointer; box-shadow: 0 6px 14px -6px rgba(37, 99, 235, 0.7); transition: background-color 0.15s, border-color 0.15s, box-shadow 0.15s; }
-        .profile-page .pp-btn:hover { border-color: #1a51b0; background-color: #1a51b0; }
-        .profile-page .pp-btn:focus-visible { outline: 0; box-shadow: 0 0 0 4px rgba(47, 124, 246, 0.3); }
+        .profile-page .pp-actions { display: flex; justify-content: flex-end; margin-top: 1.25rem; padding-top: 1rem; border-top: 1px solid #f1f4f2; }
+        .profile-page .pp-btn { display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem; min-height: 2.6rem; padding: 0 1.25rem; border: 1px solid #2f7452; border-radius: 0.6rem; background: #2f7452 linear-gradient(to bottom, rgba(255, 255, 255, 0.14), rgba(255, 255, 255, 0)); color: #fff; font-size: 0.9375rem; font-weight: 600; cursor: pointer; box-shadow: 0 6px 14px -6px rgba(53, 129, 91, 0.7); transition: background-color 0.15s, border-color 0.15s, box-shadow 0.15s; }
+        .profile-page .pp-btn:hover { border-color: #255b40; background-color: #255b40; }
+        .profile-page .pp-btn:focus-visible { outline: 0; box-shadow: 0 0 0 4px rgba(57, 140, 98, 0.3); }
 
         .profile-page .pp-flash { display: flex; align-items: center; gap: 0.6rem; margin-bottom: 1rem; padding: 0.75rem 1rem; border: 1px solid #a7f3d0; border-radius: 0.75rem; background: #ecfdf5; color: #065f46; font-size: 0.9rem; font-weight: 600; }
 

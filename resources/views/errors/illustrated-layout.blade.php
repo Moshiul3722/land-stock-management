@@ -183,7 +183,7 @@
             *::after {
                 border-width: 0;
                 border-style: solid;
-                border-color: #dae1e7;
+                border-color: #dee3e0;
             }
 
             button,
@@ -236,15 +236,15 @@
             }
 
             .bg-blue-dark {
-                background-color: #2779bd;
+                background-color: #2b694a;
             }
 
             .bg-indigo-light {
-                background-color: #7886d7;
+                background-color: #42a272;
             }
 
             .bg-purple-light {
-                background-color: #a779e9;
+                background-color: #46ac79;
             }
 
             .bg-no-repeat {
@@ -256,11 +256,11 @@
             }
 
             .border-grey-light {
-                border-color: #dae1e7;
+                border-color: #dee3e0;
             }
 
             .hover\:border-grey:hover {
-                border-color: #b8c2cc;
+                border-color: #53b986;
             }
 
             .rounded-lg {
@@ -368,15 +368,15 @@
             }
 
             .text-black {
-                color: #22292f;
+                color: #222925;
             }
 
             .text-grey-darkest {
-                color: #3d4852;
+                color: #3c4842;
             }
 
             .text-grey-darker {
-                color: #606f7b;
+                color: #296447;
             }
 
             .text-2xl {

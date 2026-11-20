@@ -29,7 +29,7 @@
         font-size: 0.6rem; /* Adjust font size as necessary */
     }
     .sidebar-divider {
-        border-top: 1px solid #4f5962;
+        border-top: 1px solid #204e37;
         margin: auto;
 
     }

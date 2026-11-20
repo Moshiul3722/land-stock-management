@@ -16,7 +16,7 @@
             bottom: 0;
             left: 15px;
             width: 2px;
-            background: #e9ecef;
+            background: #ebedec;
             z-index: 0;
         }
 
@@ -46,7 +46,7 @@
 
         /* Colors */
         .bg-primary {
-            background-color: #007bff !important;
+            background-color: #317754 !important;
         }
 
         .bg-success {
@@ -64,7 +64,7 @@
 
         .timeline-content {
             background: #fff;
-            border: 1px solid #dee2e6;
+            border: 1px solid #e1e3e2;
             border-radius: 6px;
             padding: 12px 15px;
             position: relative;
@@ -78,8 +78,8 @@
             width: 10px;
             height: 10px;
             background: #fff;
-            border-left: 1px solid #dee2e6;
-            border-bottom: 1px solid #dee2e6;
+            border-left: 1px solid #e1e3e2;
+            border-bottom: 1px solid #e1e3e2;
             transform: rotate(45deg);
         }
 
@@ -92,12 +92,12 @@
         .user-name {
             font-weight: bold;
             font-size: 1rem;
-            color: #343a40;
+            color: #323935;
         }
 
         .action-date {
             font-size: 0.8rem;
-            color: #868e96;
+            color: #37875f;
         }
 
         .role-badge {
@@ -106,7 +106,7 @@
             font-size: 0.75rem;
             border-radius: 4px;
             background: #f1f3f5;
-            color: #495057;
+            color: #1c4531;
             margin-bottom: 6px;
         }
 
@@ -116,7 +116,7 @@
             border-left: 4px solid #17a2b8;
             padding: 8px 12px;
             font-size: 0.9rem;
-            color: #495057;
+            color: #1c4531;
             border-radius: 0 4px 4px 0;
         }
 
@@ -136,8 +136,8 @@
         /* ---------- Scanner dialog ---------- */
         #scannerModal .scan-dialog { max-width: 30rem; }
         #scannerModal .modal-content { overflow: hidden; border: 0; border-radius: 1rem; box-shadow: 0 24px 60px -20px rgba(15, 23, 42, 0.45); }
-        #scannerModal .scan-header { align-items: center; gap: 0.75rem; padding: 1rem 1.25rem; border-bottom: 1px solid #eef2f7; }
-        #scannerModal .scan-header-icon { display: inline-flex; flex: 0 0 auto; align-items: center; justify-content: center; width: 2.75rem; height: 2.75rem; border-radius: 0.85rem; background: linear-gradient(135deg, #1d65db, #4f46e5); color: #fff; font-size: 1.25rem; box-shadow: 0 8px 16px -8px rgba(37, 99, 235, 0.7); }
+        #scannerModal .scan-header { align-items: center; gap: 0.75rem; padding: 1rem 1.25rem; border-bottom: 1px solid #f1f4f2; }
+        #scannerModal .scan-header-icon { display: inline-flex; flex: 0 0 auto; align-items: center; justify-content: center; width: 2.75rem; height: 2.75rem; border-radius: 0.85rem; background: linear-gradient(135deg, #2f7452, #3a8f65); color: #fff; font-size: 1.25rem; box-shadow: 0 8px 16px -8px rgba(53, 129, 91, 0.7); }
         #scannerModal .scan-header .modal-title { font-size: 1.125rem; }
         /* A narrow dialog: today's date sits on its own line under the title */
         #scannerModal .scan-header { flex-wrap: wrap; }
@@ -150,18 +150,18 @@
         #scannerModal .scan-tabs { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; margin-bottom: 0.9rem; padding: 4px; border-radius: 0.75rem; background: #f1f5f9; }
         #scannerModal .scan-tab { display: inline-flex; align-items: center; justify-content: center; gap: 0.45rem; min-height: 2.5rem; padding: 0 0.75rem; border: 0; border-radius: 0.55rem; background: transparent; color: #64748b; font-size: 0.9375rem; font-weight: 600; cursor: pointer; transition: background-color 0.15s, color 0.15s, box-shadow 0.15s; }
         #scannerModal .scan-tab:hover { color: #0f172a; }
-        #scannerModal .scan-tab.is-active { background: #fff; color: #1d4fd8; box-shadow: 0 1px 3px rgba(15, 23, 42, 0.14); }
-        #scannerModal .scan-tab:focus-visible { outline: 0; box-shadow: 0 0 0 3px rgba(47, 124, 246, 0.35); }
+        #scannerModal .scan-tab.is-active { background: #fff; color: #2f7250; box-shadow: 0 1px 3px rgba(15, 23, 42, 0.14); }
+        #scannerModal .scan-tab:focus-visible { outline: 0; box-shadow: 0 0 0 3px rgba(57, 140, 98, 0.35); }
 
         /* Camera view */
-        #scannerModal .scan-view { position: relative; display: flex; align-items: center; justify-content: center; min-height: 17rem; overflow: hidden; border-radius: 0.9rem; background: radial-gradient(circle at 50% 35%, #1e2b55, #0b1430 75%); }
+        #scannerModal .scan-view { position: relative; display: flex; align-items: center; justify-content: center; min-height: 17rem; overflow: hidden; border-radius: 0.9rem; background: radial-gradient(circle at 50% 35%, #254535, #12241b 75%); }
         #scannerModal #reader { width: 100%; border: 0 !important; }
         #scannerModal #reader video { display: block; width: 100% !important; border-radius: 0.9rem; }
         #scannerModal .scan-view[data-state="idle"] #reader,
         #scannerModal .scan-view[data-state="starting"] #reader { display: none; }
         #scannerModal .scan-idle { position: relative; z-index: 2; display: flex; flex-direction: column; align-items: center; gap: 0.65rem; padding: 1.5rem 1.25rem; text-align: center; }
         #scannerModal .scan-view[data-state="live"] .scan-idle { display: none; }
-        #scannerModal .scan-idle-icon { display: inline-flex; align-items: center; justify-content: center; width: 3.5rem; height: 3.5rem; border-radius: 999px; background: rgba(255, 255, 255, 0.1); color: #dbe5fb; font-size: 1.4rem; }
+        #scannerModal .scan-idle-icon { display: inline-flex; align-items: center; justify-content: center; width: 3.5rem; height: 3.5rem; border-radius: 999px; background: rgba(255, 255, 255, 0.1); color: #e7efeb; font-size: 1.4rem; }
         #scannerModal .scan-idle-text { max-width: 20rem; margin: 0; color: #cbd5e1; font-size: 0.9rem; font-weight: 500; line-height: 1.5; }
         #scannerModal .scan-view[data-state="error"] .scan-idle-text { color: #fecaca; }
         #scannerModal .scan-view[data-state="starting"] #scan-camera-start { display: none; }
@@ -174,7 +174,7 @@
         #scannerModal .scan-frame span:nth-child(2) { top: 0; right: 0; border-bottom: 0; border-left: 0; border-top-right-radius: 0.6rem; }
         #scannerModal .scan-frame span:nth-child(3) { bottom: 0; left: 0; border-top: 0; border-right: 0; border-bottom-left-radius: 0.6rem; }
         #scannerModal .scan-frame span:nth-child(4) { right: 0; bottom: 0; border-top: 0; border-left: 0; border-bottom-right-radius: 0.6rem; }
-        #scannerModal .scan-frame i { position: absolute; right: 6%; left: 6%; top: 8%; height: 2px; border-radius: 2px; background: linear-gradient(90deg, transparent, #60a5fa, transparent); box-shadow: 0 0 12px 2px rgba(96, 165, 250, 0.7); animation: scan-line 2.2s ease-in-out infinite; }
+        #scannerModal .scan-frame i { position: absolute; right: 6%; left: 6%; top: 8%; height: 2px; border-radius: 2px; background: linear-gradient(90deg, transparent, #45a876, transparent); box-shadow: 0 0 12px 2px rgba(69, 168, 118, 0.7); animation: scan-line 2.2s ease-in-out infinite; }
         @keyframes scan-line { 0%, 100% { top: 8%; } 50% { top: 90%; } }
         @media (prefers-reduced-motion: reduce) { #scannerModal .scan-frame i { animation: none; top: 50%; } }
         #scannerModal .scan-live-hint { position: absolute; right: 0; bottom: 0.6rem; left: 0; z-index: 2; display: none; margin: 0; color: #fff; font-size: 0.8125rem; font-weight: 600; text-align: center; text-shadow: 0 1px 3px rgba(0, 0, 0, 0.7); }
@@ -182,21 +182,21 @@
 
         /* Buttons */
         #scannerModal .scan-btn { display: inline-flex; align-items: center; justify-content: center; gap: 0.45rem; min-height: 2.5rem; padding: 0 1rem; border: 1px solid transparent; border-radius: 0.6rem; font-size: 0.9rem; font-weight: 600; line-height: 1; cursor: pointer; transition: background-color 0.15s, border-color 0.15s, box-shadow 0.15s, color 0.15s; }
-        #scannerModal .scan-btn-primary { border-color: #1d65db; background: #1d65db linear-gradient(to bottom, rgba(255, 255, 255, 0.14), rgba(255, 255, 255, 0)); color: #fff; box-shadow: 0 6px 14px -6px rgba(37, 99, 235, 0.7); }
-        #scannerModal .scan-btn-primary:hover { border-color: #1a51b0; background-color: #1a51b0; }
+        #scannerModal .scan-btn-primary { border-color: #2f7452; background: #2f7452 linear-gradient(to bottom, rgba(255, 255, 255, 0.14), rgba(255, 255, 255, 0)); color: #fff; box-shadow: 0 6px 14px -6px rgba(53, 129, 91, 0.7); }
+        #scannerModal .scan-btn-primary:hover { border-color: #255b40; background-color: #255b40; }
         #scannerModal .scan-btn-quiet { width: 100%; margin-top: 0.65rem; border-color: #e2e8f0; background: #fff; color: #475569; }
         #scannerModal .scan-btn-quiet:hover { background: #f8fafc; color: #0f172a; }
-        #scannerModal .scan-btn:focus-visible { outline: 0; box-shadow: 0 0 0 4px rgba(47, 124, 246, 0.3); }
+        #scannerModal .scan-btn:focus-visible { outline: 0; box-shadow: 0 0 0 4px rgba(57, 140, 98, 0.3); }
         #scannerModal .scan-btn:disabled { opacity: 0.55; cursor: not-allowed; }
 
         /* File drop area */
         #scannerModal .scan-drop { display: flex; flex-direction: column; align-items: center; gap: 0.35rem; min-height: 17rem; justify-content: center; padding: 1.5rem 1.25rem; border: 2px dashed #cbd5e1; border-radius: 0.9rem; background: #f8fafc; text-align: center; transition: border-color 0.15s, background-color 0.15s; }
-        #scannerModal .scan-drop.is-over { border-color: #2f7cf6; background: #eef4ff; }
-        #scannerModal .scan-drop-icon { display: inline-flex; align-items: center; justify-content: center; width: 3.5rem; height: 3.5rem; margin-bottom: 0.3rem; border-radius: 999px; background: #e0eaff; color: #1d65db; font-size: 1.5rem; }
+        #scannerModal .scan-drop.is-over { border-color: #398c62; background: #f5f8f6; }
+        #scannerModal .scan-drop-icon { display: inline-flex; align-items: center; justify-content: center; width: 3.5rem; height: 3.5rem; margin-bottom: 0.3rem; border-radius: 999px; background: #ecf3f0; color: #2f7452; font-size: 1.5rem; }
         #scannerModal .scan-drop-title { margin: 0; color: #0f172a; font-size: 0.975rem; font-weight: 600; }
         #scannerModal .scan-drop-or { margin: 0; color: #94a3b8; font-size: 0.8125rem; }
         #scannerModal .scan-drop-types { margin: 0.35rem 0 0; color: #64748b; font-size: 0.75rem; font-weight: 600; letter-spacing: 0.04em; }
-        #scannerModal .scan-file-status { margin: 0.5rem 0 0; color: #1d4fd8; font-size: 0.875rem; font-weight: 600; }
+        #scannerModal .scan-file-status { margin: 0.5rem 0 0; color: #2f7250; font-size: 0.875rem; font-weight: 600; }
 
         #scannerModal .scan-note { display: flex; align-items: flex-start; gap: 0.5rem; margin: 0.85rem 0 0; padding: 0.6rem 0.75rem; border-radius: 0.6rem; background: #fffbeb; color: #92400e; font-size: 0.8125rem; line-height: 1.5; }
         #scannerModal .scan-note > i { margin-top: 0.2rem; }
@@ -270,7 +270,7 @@
                                     class="tw-m-0 tw-h-10 tw-min-w-0 tw-flex-1 tw-border-0 tw-bg-transparent tw-p-0 tw-text-sm tw-font-medium tw-text-slate-900 tw-shadow-none tw-outline-none placeholder:tw-font-normal placeholder:tw-text-slate-400 focus:tw-outline-none focus:tw-ring-0"
                                     placeholder="{{ __('requisition.pending_manage.scan_placeholder') }}">
                                 <button type="button" id="btn-open-camera"
-                                    class="tw-inline-flex tw-h-10 tw-w-11 tw-flex-none tw-items-center tw-justify-center tw-rounded-xl tw-border-0 tw-bg-gradient-to-br tw-from-sky-500 tw-to-indigo-600 tw-text-white tw-shadow-md tw-shadow-indigo-600/30 tw-transition hover:tw-brightness-110 active:tw-scale-95 focus:tw-outline-none focus-visible:tw-ring-4 focus-visible:tw-ring-brand-500/40"
+                                    class="tw-inline-flex tw-h-10 tw-w-11 tw-flex-none tw-items-center tw-justify-center tw-rounded-xl tw-border-0 tw-bg-gradient-to-br tw-from-brand-500 tw-to-brand-700 tw-text-white tw-shadow-md tw-shadow-brand-700/30 tw-transition hover:tw-brightness-110 active:tw-scale-95 focus:tw-outline-none focus-visible:tw-ring-4 focus-visible:tw-ring-brand-500/40"
                                     title="{{ __('requisition.pending_manage.scan_camera') }}" aria-label="{{ __('requisition.pending_manage.scan_camera') }}">
                                     <i class="fas fa-camera tw-text-xl" aria-hidden="true"></i>
                                 </button>

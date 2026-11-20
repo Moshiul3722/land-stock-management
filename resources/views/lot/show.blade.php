@@ -162,7 +162,7 @@
                     icon: 'warning',
                     showCancelButton: true,
                     confirmButtonColor: '#28a745',
-                    cancelButtonColor: '#6c757d',
+                    cancelButtonColor: '#2c6c4c',
                     confirmButtonText: 'Yes, Approve it!',
                 }).then((result) => {
                     if (result.isConfirmed) {
@@ -180,7 +180,7 @@
                     icon: 'error',
                     showCancelButton: true,
                     confirmButtonColor: '#d33',
-                    cancelButtonColor: '#6c757d',
+                    cancelButtonColor: '#2c6c4c',
                     confirmButtonText: 'Yes, Reject it!',
                     inputValidator: (value) => {
                         if (!value) {

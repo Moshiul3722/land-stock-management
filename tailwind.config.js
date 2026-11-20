@@ -34,20 +34,20 @@ module.exports = {
                 sans: ['kalpurush', 'Hind-Siliguri', 'Nunito', 'system-ui', '-apple-system', 'Segoe UI', 'sans-serif'],
             },
             colors: {
-                // Brand blue, matching the AdminLTE primary used across the app.
+                // Brand: a calm government green (the colour theme of the app).
                 brand: {
-                    50: '#eef5ff',
-                    100: '#d9e8ff',
-                    200: '#bcd7ff',
-                    500: '#2f7cf6',
-                    600: '#1d65db',
-                    700: '#1a51b0',
+                    50: '#f2f7f4',
+                    100: '#e3eee8',
+                    200: '#c7ddd1',
+                    500: '#3a8a62',
+                    600: '#2f7452',
+                    700: '#255b40',
                 },
-                // Warm accent, used sparingly (header rule, highlights).
+                // Accent: a soft gold, used sparingly (header rule, highlights).
                 accent: {
-                    100: '#fde7df',
-                    500: '#d4532f',
-                    600: '#b9411f',
+                    100: '#f4ecdd',
+                    500: '#b08d57',
+                    600: '#94733f',
                 },
             },
             boxShadow: {

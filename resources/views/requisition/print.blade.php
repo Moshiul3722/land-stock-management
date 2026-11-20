@@ -188,7 +188,7 @@
            Nothing here applies to the ordinary print page. */
         body.is-preview {
             padding: 0;
-            background: #e5e7eb;
+            background: #e7e9e8;
         }
 
         body.is-preview .preview-bar {
@@ -202,7 +202,7 @@
             justify-content: center;
             gap: 8px;
             padding: 10px;
-            background: #0f1f47;
+            background: #1a3528;
         }
 
         body.is-preview .preview-bar button {
@@ -216,7 +216,7 @@
         }
 
         body.is-preview .preview-bar .preview-print {
-            background: #1d65db;
+            background: #2f7452;
             color: #fff;
         }
 

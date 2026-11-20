@@ -259,14 +259,14 @@
             margin: 0.75rem 0 0;
             padding: 0.6rem 0.75rem;
             align-items: center;
-            background: #e9eefb;
-            border: 1px solid #cfd9f3;
+            background: #eff5f2;
+            border: 1px solid #dbe7e1;
             border-radius: 0.5rem;
         }
 
         #departments_table_wrapper > .row:last-child .dt-info {
             padding-top: 0;
-            color: #1f2d5a;
+            color: #274838;
             font-weight: 600;
         }
 
@@ -592,7 +592,7 @@
                     text: text.confirmUpdate,
                     icon: 'warning',
                     showCancelButton: true,
-                    confirmButtonColor: '#3085d6',
+                    confirmButtonColor: '#327b57',
                     cancelButtonColor: '#d33',
                     confirmButtonText: text.confirmUpdateYes,
                     cancelButtonText: text.confirmNo

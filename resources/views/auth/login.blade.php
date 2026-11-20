@@ -41,16 +41,16 @@
 
         *, *::before, *::after { box-sizing: border-box; }
         html, body { height: 100%; }
-        body { margin: 0; font-family: 'Hind-Siliguri', system-ui, -apple-system, 'Segoe UI', sans-serif; font-weight: 400; line-height: 1.5; color: #0f172a; background: #0b1430; -webkit-font-smoothing: antialiased; }
+        body { margin: 0; font-family: 'Hind-Siliguri', system-ui, -apple-system, 'Segoe UI', sans-serif; font-weight: 400; line-height: 1.5; color: #0f172a; background: #12241b; -webkit-font-smoothing: antialiased; }
         button, input { font: inherit; }
         [hidden] { display: none !important; }
         .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
 
         /* ---- Page: the picture side and the form side ---- */
-        .auth { position: relative; display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr); min-height: 100vh; min-height: 100dvh; overflow: hidden; background: linear-gradient(135deg, #0b1430 0%, #13244f 38%, #1d4fd8 78%, #4f46e5 100%); }
+        .auth { position: relative; display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr); min-height: 100vh; min-height: 100dvh; overflow: hidden; background: linear-gradient(135deg, #12241b 0%, #1e3c2d 38%, #2f7250 78%, #3a8f65 100%); }
         .auth::before, .auth::after { content: ""; position: absolute; border-radius: 50%; filter: blur(70px); pointer-events: none; }
         .auth::before { top: -12rem; left: -10rem; width: 34rem; height: 34rem; background: rgba(56, 189, 248, 0.28); }
-        .auth::after { right: -12rem; bottom: -14rem; width: 38rem; height: 38rem; background: rgba(167, 139, 250, 0.32); }
+        .auth::after { right: -12rem; bottom: -14rem; width: 38rem; height: 38rem; background: rgba(84, 185, 134, 0.32); }
 
         /* ---- Background decoration (see the <svg class="auth-lines"> at the top of the page) ---- */
         .auth-lines { position: absolute; inset: 0; z-index: 0; width: 100%; height: 100%; pointer-events: none; }
@@ -92,7 +92,7 @@
         .auth-steps li { display: flex; align-items: center; gap: 0.5rem; min-width: 0; color: #94a3b8; font-size: 0.85rem; font-weight: 600; white-space: nowrap; }
         .auth-steps .auth-step-no { display: inline-flex; flex: 0 0 auto; align-items: center; justify-content: center; width: 2.25rem; height: 2.25rem; border: 1.5px solid #cbd5e1; border-radius: 50%; background: #fff; color: #64748b; font-family: 'Kohinoor Bangla', 'Nirmala UI', 'Noto Sans Bengali', 'Vrinda', system-ui, sans-serif; font-size: 1.15rem; font-weight: 600; line-height: 1; }
         .auth-steps li.is-current { color: #0f172a; }
-        .auth-steps li.is-current .auth-step-no { border-color: transparent; background: #1d4fd8; color: #fff; box-shadow: 0 0 0 4px rgba(47, 124, 246, 0.2); }
+        .auth-steps li.is-current .auth-step-no { border-color: transparent; background: #2f7250; color: #fff; box-shadow: 0 0 0 4px rgba(57, 140, 98, 0.2); }
         .auth-steps li.is-done { color: #047857; }
         .auth-steps li.is-done .auth-step-no { border-color: transparent; background: #10b981; color: #fff; font-size: 0.95rem; }
         .auth-steps .auth-step-line { flex: 1 1 auto; min-width: 1rem; height: 2px; border-radius: 2px; background: #e2e8f0; }
@@ -102,7 +102,7 @@
 
         .auth-label { display: block; margin-bottom: 0.4rem; color: #334155; font-size: 0.875rem; font-weight: 600; }
         .auth-field { display: flex; align-items: stretch; height: 3.25rem; overflow: hidden; border: 1.5px solid #cbd5e1; border-radius: 0.9rem; background: #fff; transition: border-color 0.15s, box-shadow 0.15s; }
-        .auth-field:focus-within { border-color: #2f7cf6; box-shadow: 0 0 0 4px rgba(47, 124, 246, 0.18); }
+        .auth-field:focus-within { border-color: #398c62; box-shadow: 0 0 0 4px rgba(57, 140, 98, 0.18); }
         .auth-field.is-invalid { border-color: #dc2626; }
         .auth-field > .auth-prefix { display: inline-flex; flex: 0 0 auto; align-items: center; gap: 0.45rem; padding: 0 0.85rem; border-right: 1.5px solid #e2e8f0; color: #475569; font-weight: 600; }
         /* Square inside the rounded field, so the browser's saved-value (autofill) colour fills
@@ -115,24 +115,24 @@
         .auth-error i { margin-top: 0.2rem; }
         .auth-ok { display: flex; align-items: center; gap: 0.5rem; margin: 0 0 1rem; padding: 0.6rem 0.8rem; border: 1px solid #a7f3d0; border-radius: 0.75rem; background: #ecfdf5; color: #065f46; font-size: 0.875rem; font-weight: 600; }
 
-        .auth-btn { display: flex; align-items: center; justify-content: center; gap: 0.55rem; width: 100%; min-height: 3.25rem; margin-top: 1.1rem; padding: 0 1rem; border: 0; border-radius: 0.9rem; background: linear-gradient(135deg, #1d65db, #4f46e5); color: #fff; font-size: 1.05rem; font-weight: 600; cursor: pointer; box-shadow: 0 14px 28px -12px rgba(37, 99, 235, 0.75); transition: transform 0.12s, box-shadow 0.15s, filter 0.15s; }
-        .auth-btn:hover { filter: brightness(1.07); box-shadow: 0 18px 32px -12px rgba(37, 99, 235, 0.85); }
+        .auth-btn { display: flex; align-items: center; justify-content: center; gap: 0.55rem; width: 100%; min-height: 3.25rem; margin-top: 1.1rem; padding: 0 1rem; border: 0; border-radius: 0.9rem; background: linear-gradient(135deg, #2f7452, #3a8f65); color: #fff; font-size: 1.05rem; font-weight: 600; cursor: pointer; box-shadow: 0 14px 28px -12px rgba(53, 129, 91, 0.75); transition: transform 0.12s, box-shadow 0.15s, filter 0.15s; }
+        .auth-btn:hover { filter: brightness(1.07); box-shadow: 0 18px 32px -12px rgba(53, 129, 91, 0.85); }
         .auth-btn:active { transform: translateY(1px); }
-        .auth-btn:focus-visible { outline: 0; box-shadow: 0 0 0 4px rgba(47, 124, 246, 0.35); }
+        .auth-btn:focus-visible { outline: 0; box-shadow: 0 0 0 4px rgba(57, 140, 98, 0.35); }
         .auth-btn:disabled { background: #cbd5e1; color: #64748b; box-shadow: none; cursor: not-allowed; filter: none; }
-        .auth-link { display: inline-flex; align-items: center; gap: 0.4rem; padding: 0.35rem 0.25rem; border: 0; background: transparent; color: #1d4fd8; font-size: 0.9rem; font-weight: 600; cursor: pointer; text-decoration: none; }
-        .auth-link:hover { color: #1a3f9f; text-decoration: underline; }
-        .auth-link:focus-visible { outline: 0; border-radius: 0.4rem; box-shadow: 0 0 0 3px rgba(47, 124, 246, 0.35); }
+        .auth-link { display: inline-flex; align-items: center; gap: 0.4rem; padding: 0.35rem 0.25rem; border: 0; background: transparent; color: #2f7250; font-size: 0.9rem; font-weight: 600; cursor: pointer; text-decoration: none; }
+        .auth-link:hover { color: #22523a; text-decoration: underline; }
+        .auth-link:focus-visible { outline: 0; border-radius: 0.4rem; box-shadow: 0 0 0 3px rgba(57, 140, 98, 0.35); }
         .auth-link:disabled { color: #94a3b8; cursor: not-allowed; text-decoration: none; }
         .auth-note { display: flex; align-items: flex-start; gap: 0.5rem; margin: 1.1rem 0 0; padding: 0.65rem 0.8rem; border-radius: 0.75rem; background: #f1f5f9; color: #475569; font-size: 0.8125rem; line-height: 1.45; }
-        .auth-note i { margin-top: 0.15rem; color: #1d65db; }
+        .auth-note i { margin-top: 0.15rem; color: #2f7452; }
 
         /* ---- The code: one box per digit ----
            Same Bangla font as the step numbers: the page font draws "১" as a small tick. */
         .otp-boxes { display: grid; grid-template-columns: repeat({{ $otpDigits }}, minmax(0, 1fr)); gap: 0.5rem; }
         .otp-boxes input { width: 100%; height: 3.5rem; padding: 0; border: 1.5px solid #cbd5e1; border-radius: 0.85rem; background: #fff; color: #0f172a; font-family: 'Kohinoor Bangla', 'Nirmala UI', 'Noto Sans Bengali', 'Vrinda', system-ui, sans-serif; font-size: 1.5rem; font-weight: 600; text-align: center; outline: 0; transition: border-color 0.15s, box-shadow 0.15s, background-color 0.15s; }
-        .otp-boxes input:focus { border-color: #2f7cf6; box-shadow: 0 0 0 4px rgba(47, 124, 246, 0.18); }
-        .otp-boxes input.is-filled { border-color: #93b4f5; background: #f5f8ff; }
+        .otp-boxes input:focus { border-color: #398c62; box-shadow: 0 0 0 4px rgba(57, 140, 98, 0.18); }
+        .otp-boxes input.is-filled { border-color: #55ba88; background: #f9fbfa; }
         .otp-boxes.is-invalid input { border-color: #dc2626; }
         .otp-meta { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 0.25rem 0.75rem; margin-top: 0.75rem; color: #475569; font-size: 0.875rem; }
         /* The timer's digits: the same Bangla font as the code boxes (Hind Siliguri's equal-width
@@ -173,13 +173,13 @@
                 <stop offset="1" stop-color="#fff" stop-opacity="0"/>
             </linearGradient>
             <linearGradient id="line-b" x1="0" y1="0" x2="1" y2="0">
-                <stop offset="0" stop-color="#c7d2fe" stop-opacity="0"/>
-                <stop offset="0.5" stop-color="#c7d2fe" stop-opacity="0.5"/>
+                <stop offset="0" stop-color="#dde8e2" stop-opacity="0"/>
+                <stop offset="0.5" stop-color="#dde8e2" stop-opacity="0.5"/>
                 <stop offset="1" stop-color="#a5f3fc" stop-opacity="0"/>
             </linearGradient>
             <linearGradient id="line-c" x1="0" y1="0" x2="0" y2="1">
                 <stop offset="0" stop-color="#fff" stop-opacity="0"/>
-                <stop offset="0.5" stop-color="#e0e7ff" stop-opacity="0.42"/>
+                <stop offset="0.5" stop-color="#ecf3f0" stop-opacity="0.42"/>
                 <stop offset="1" stop-color="#fff" stop-opacity="0"/>
             </linearGradient>
             <pattern id="dot-grid" width="34" height="34" patternUnits="userSpaceOnUse">
@@ -197,7 +197,7 @@
         <g fill="none" stroke-linecap="round" class="auth-rings">
             <circle cx="1310" cy="110" r="190" stroke="rgba(255,255,255,0.34)" stroke-width="1.6" stroke-dasharray="3 13"/>
             <circle cx="1310" cy="110" r="262" stroke="rgba(186,230,253,0.28)" stroke-width="1.4" stroke-dasharray="14 16"/>
-            <circle cx="110" cy="830" r="170" stroke="rgba(199,210,254,0.34)" stroke-width="1.6" stroke-dasharray="10 12"/>
+            <circle cx="110" cy="830" r="170" stroke="rgba(221, 232, 226,0.34)" stroke-width="1.6" stroke-dasharray="10 12"/>
             <circle cx="110" cy="830" r="238" stroke="rgba(255,255,255,0.26)" stroke-width="1.4" stroke-dasharray="2 12"/>
         </g>
 

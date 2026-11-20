@@ -266,14 +266,14 @@
             margin: 0.75rem 0 0;
             padding: 0.6rem 0.75rem;
             align-items: center;
-            background: #e9eefb;
-            border: 1px solid #cfd9f3;
+            background: #eff5f2;
+            border: 1px solid #dbe7e1;
             border-radius: 0.5rem;
         }
 
         #pending-lots-table_wrapper > .row:last-child .dt-info {
             padding-top: 0;
-            color: #1f2d5a;
+            color: #274838;
             font-weight: 600;
         }
 
@@ -289,7 +289,7 @@
             margin: 0 0 0.75rem;
             padding: 0.6rem 0.75rem;
             background: #f8f9fc;
-            border: 1px solid #e3e8f4;
+            border: 1px solid #e9eeec;
             border-radius: 0.5rem;
         }
 
@@ -340,13 +340,13 @@
             gap: 0.4rem 0.75rem;
             margin: 0 1rem 0.75rem;
             padding: 0.45rem 0.75rem;
-            background: #e9eefb;
-            border: 1px solid #cfd9f3;
+            background: #eff5f2;
+            border: 1px solid #dbe7e1;
             border-radius: 0.5rem;
         }
 
         .lot-items-info {
-            color: #1f2d5a;
+            color: #274838;
             font-size: 0.9em;
             font-weight: 600;
         }
@@ -559,7 +559,7 @@
                     confirmButtonText: text.approveYes,
                     cancelButtonText: text.cancel,
                     confirmButtonColor: '#28a745',
-                    cancelButtonColor: '#6c757d'
+                    cancelButtonColor: '#2c6c4c'
                 }).then(function(result) {
                     if (result.isConfirmed) {
                         submitDecision(actionUrl, '');
@@ -578,7 +578,7 @@
                     confirmButtonText: text.rejectYes,
                     cancelButtonText: text.cancel,
                     confirmButtonColor: '#dc3545',
-                    cancelButtonColor: '#6c757d',
+                    cancelButtonColor: '#2c6c4c',
                     preConfirm: function(comments) {
                         if (!comments || !comments.trim()) {
                             Swal.showValidationMessage(text.reasonRequired);

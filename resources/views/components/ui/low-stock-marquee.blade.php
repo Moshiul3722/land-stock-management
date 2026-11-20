@@ -284,8 +284,8 @@
         }
 
         .low-stock-page-btn.is-active {
-            border-color: #1d4ed8;
-            background: #1d4ed8;
+            border-color: #2f7250;
+            background: #2f7250;
             color: #fff;
         }
 

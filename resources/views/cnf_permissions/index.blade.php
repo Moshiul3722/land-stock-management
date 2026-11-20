@@ -111,11 +111,11 @@
             height: 1.6rem;
             margin: 0;
             cursor: pointer;
-            accent-color: #3f51b5;
+            accent-color: #2e7250;
         }
 
         #permission_table .permission-checkbox:focus-visible {
-            outline: 3px solid rgba(63, 81, 181, 0.45);
+            outline: 3px solid rgba(46, 114, 80, 0.45);
             outline-offset: 2px;
         }
 

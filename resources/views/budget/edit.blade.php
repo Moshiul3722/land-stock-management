@@ -108,7 +108,7 @@
                     text: "You are about to update this budget allocation.",
                     icon: 'info',
                     showCancelButton: true,
-                    confirmButtonColor: '#3085d6',
+                    confirmButtonColor: '#327b57',
                     cancelButtonColor: '#d33',
                     confirmButtonText: 'Yes, Update it!',
                     cancelButtonText: 'Cancel'

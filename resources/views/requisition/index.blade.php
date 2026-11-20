@@ -32,7 +32,7 @@
         }
         .table th {
             border-top: none;
-            color: #6c757d;
+            color: #2c6c4c;
             font-weight: 600;
             font-size: 0.85rem;
             text-transform: uppercase;

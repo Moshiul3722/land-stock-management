@@ -29,7 +29,7 @@
     position: absolute;
     inset: 0 0 auto 0;
     height: 4px;
-    background: linear-gradient(90deg, #1d65db, #4f46e5 55%, #c2410c);
+    background: linear-gradient(90deg, #2f7452, #3a8f65 55%, #c2410c);
 }
 
 .content-header:is(.list-page, :has(+ .content table.table)) .container-fluid {
@@ -80,7 +80,7 @@
 }
 
 .content-header:is(.list-page, :has(+ .content table.table)) .list-page-context-value {
-    color: #1d4fd8;
+    color: #2f7250;
     font-size: 1.375rem;
     font-weight: 700;
     line-height: 1.3;
@@ -113,7 +113,7 @@
 }
 
 .content-header:is(.list-page, :has(+ .content table.table)) .breadcrumb-item a:hover {
-    color: #1d65db;
+    color: #2f7452;
     text-decoration: none;
 }
 
@@ -147,7 +147,7 @@ div.content:is(.list-page, :has(table.table)) > [class*="col-"] {
 .content:is(.list-page, :has(table.table)) .card > .card-header {
     padding: 0.7rem 1.25rem;
     border: 0;
-    border-bottom: 1px solid #eef2f7;
+    border-bottom: 1px solid #f1f4f2;
     border-radius: 0;
     background: #fff !important;
     color: #0f172a !important;
@@ -172,9 +172,9 @@ div.content:is(.list-page, :has(table.table)) > [class*="col-"] {
     justify-content: center;
     min-height: 2.375rem;
     padding: 0 0.95rem;
-    border: 1px solid #1d65db;
+    border: 1px solid #2f7452;
     border-radius: 0.5rem;
-    background: #1d65db linear-gradient(to bottom, rgba(255, 255, 255, 0.14), rgba(255, 255, 255, 0));
+    background: #2f7452 linear-gradient(to bottom, rgba(255, 255, 255, 0.14), rgba(255, 255, 255, 0));
     color: #fff;
     font-size: 0.875rem;
     font-weight: 600;
@@ -185,20 +185,20 @@ div.content:is(.list-page, :has(table.table)) > [class*="col-"] {
 
 .content:is(.list-page, :has(table.table)) .card > .card-header .btn:hover,
 .content:is(.list-page, :has(table.table)) .card > .card-header .btn:focus {
-    border-color: #1a51b0;
-    background-color: #1a51b0;
+    border-color: #255b40;
+    background-color: #255b40;
     color: #fff;
     box-shadow: 0 3px 8px -2px rgba(15, 23, 42, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.2);
 }
 
 .content:is(.list-page, :has(table.table)) .card > .card-header .btn:focus-visible {
     outline: 0;
-    box-shadow: 0 0 0 4px rgba(47, 124, 246, 0.3);
+    box-shadow: 0 0 0 4px rgba(57, 140, 98, 0.3);
 }
 
 .content:is(.list-page, :has(table.table)) .card > .card-footer {
     padding: 0.7rem 1.25rem;
-    border-top: 1px solid #eef2f7;
+    border-top: 1px solid #f1f4f2;
     background: #f8fafc;
 }
 
@@ -232,8 +232,8 @@ div.content:is(.list-page, :has(table.table)) > [class*="col-"] {
 
 .content:is(.list-page, :has(table.table)) .card-body .form-control:focus,
 .content:is(.list-page, :has(table.table)) .card-body .custom-select:focus {
-    border-color: #2f7cf6;
-    box-shadow: 0 0 0 4px rgba(47, 124, 246, 0.15);
+    border-color: #398c62;
+    box-shadow: 0 0 0 4px rgba(57, 140, 98, 0.15);
 }
 
 .content:is(.list-page, :has(table.table)) .card-body .form-control::placeholder {
@@ -314,17 +314,17 @@ div.content:is(.list-page, :has(table.table)) > [class*="col-"] {
 
 .content:is(.list-page, :has(table.table)) .card table.table td .btn-primary,
 .content:is(.list-page, :has(table.table)) .card table.table td .btn-info {
-    border-color: #cfe0fb;
-    background: #eef4ff;
-    color: #1d65db;
+    border-color: #e0eae5;
+    background: #f5f8f6;
+    color: #2f7452;
 }
 
 .content:is(.list-page, :has(table.table)) .card table.table td .btn-primary:hover,
 .content:is(.list-page, :has(table.table)) .card table.table td .btn-primary:focus,
 .content:is(.list-page, :has(table.table)) .card table.table td .btn-info:hover,
 .content:is(.list-page, :has(table.table)) .card table.table td .btn-info:focus {
-    border-color: #1d65db;
-    background: #1d65db;
+    border-color: #2f7452;
+    background: #2f7452;
     color: #fff;
 }
 
@@ -447,14 +447,14 @@ div.content:is(.list-page, :has(table.table)) > [class*="col-"] {
 
 .content:is(.list-page, :has(table.table)) .card table.table td .badge.badge-primary,
 .content:is(.list-page, :has(table.table)) .card table.table td .badge.badge-info {
-    background: #eef4ff !important;
-    color: #1e40af !important;
-    box-shadow: inset 0 0 0 1px #bfdbfe;
+    background: #f5f8f6 !important;
+    color: #265d41 !important;
+    box-shadow: inset 0 0 0 1px #d8e5de;
 }
 
 .content:is(.list-page, :has(table.table)) .card table.table td .badge.badge-primary::before,
 .content:is(.list-page, :has(table.table)) .card table.table td .badge.badge-info::before {
-    background: #3b82f6;
+    background: #3c9267;
 }
 
 .content:is(.list-page, :has(table.table)) .card table.table td .badge.badge-secondary,
@@ -474,7 +474,7 @@ div.content:is(.list-page, :has(table.table)) > [class*="col-"] {
     margin-top: 0;
     padding: 0.65rem 0.25rem 0;
     border: 0;
-    border-top: 1px solid #eef2f7;
+    border-top: 1px solid #f1f4f2;
     border-radius: 0;
     background: transparent;
 }
@@ -517,8 +517,8 @@ div.content:is(.list-page, :has(table.table)) > [class*="col-"] {
 }
 
 .content:is(.list-page, :has(table.table)) .pagination .page-item.active .page-link {
-    border-color: #1d65db;
-    background: #1d65db;
+    border-color: #2f7452;
+    background: #2f7452;
     color: #fff;
 }
 
@@ -601,7 +601,7 @@ div.content:is(.list-page, :has(table.table)) > [class*="col-"] {
     margin: 0 !important;
     padding: 0.65rem 0.25rem 0 !important;
     border: 0 !important;
-    border-top: 1px solid #eef2f7 !important;
+    border-top: 1px solid #f1f4f2 !important;
     border-radius: 0 !important;
     background: transparent !important;
 }
@@ -666,8 +666,8 @@ div.content:is(.list-page, :has(table.table)) > [class*="col-"] {
 
 .content:is(.list-page, :has(table.table)) .card-body .select2-container--open .select2-selection--single,
 .content:is(.list-page, :has(table.table)) .card-body .select2-container--focus .select2-selection--single {
-    border-color: #2f7cf6;
-    box-shadow: 0 0 0 4px rgba(47, 124, 246, 0.15);
+    border-color: #398c62;
+    box-shadow: 0 0 0 4px rgba(57, 140, 98, 0.15);
     outline: 0;
 }
 
@@ -690,7 +690,7 @@ div.content:is(.list-page, :has(table.table)) > [class*="col-"] {
 
 .report-select-dropdown .select2-search--dropdown {
     padding: 0.5rem;
-    border-bottom: 1px solid #eef2f7;
+    border-bottom: 1px solid #f1f4f2;
 }
 
 .report-select-dropdown .select2-search--dropdown .select2-search__field {
@@ -704,8 +704,8 @@ div.content:is(.list-page, :has(table.table)) > [class*="col-"] {
 }
 
 .report-select-dropdown .select2-search--dropdown .select2-search__field:focus {
-    border-color: #2f7cf6;
-    box-shadow: 0 0 0 3px rgba(47, 124, 246, 0.15);
+    border-color: #398c62;
+    box-shadow: 0 0 0 3px rgba(57, 140, 98, 0.15);
 }
 
 .report-select-dropdown .select2-results > .select2-results__options {
@@ -723,14 +723,14 @@ div.content:is(.list-page, :has(table.table)) > [class*="col-"] {
 
 .report-select-dropdown .select2-results__option[aria-selected="true"],
 .report-select-dropdown .select2-results__option--selected {
-    background: #eef4ff;
-    color: #1d4fd8;
+    background: #f5f8f6;
+    color: #2f7250;
     font-weight: 600;
 }
 
 .report-select-dropdown .select2-results__option--highlighted[aria-selected],
 .report-select-dropdown .select2-results__option--highlighted {
-    background: #1d65db !important;
+    background: #2f7452 !important;
     color: #fff !important;
 }
 

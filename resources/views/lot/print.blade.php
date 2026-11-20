@@ -59,11 +59,11 @@
         .signature-line { border-top: 1px solid #000; padding-top: 5px; }
 
         /* Print preview (?preview=1): the page on an A4 sheet, with a bar to print or close */
-        body.is-preview { padding: 0; background: #e5e7eb; }
+        body.is-preview { padding: 0; background: #e7e9e8; }
         .preview-bar { display: none; }
-        body.is-preview .preview-bar { position: sticky; top: 0; z-index: 10; display: flex; align-items: center; justify-content: center; gap: 8px; padding: 10px; background: #0f1f47; }
+        body.is-preview .preview-bar { position: sticky; top: 0; z-index: 10; display: flex; align-items: center; justify-content: center; gap: 8px; padding: 10px; background: #1a3528; }
         body.is-preview .preview-bar button { min-height: 36px; padding: 0 16px; border: 1px solid transparent; border-radius: 8px; font: inherit; font-weight: 600; cursor: pointer; }
-        body.is-preview .preview-bar .preview-print { background: #1d65db; color: #fff; }
+        body.is-preview .preview-bar .preview-print { background: #2f7452; color: #fff; }
         body.is-preview .preview-bar .preview-close { border-color: #cbd5e1; background: #fff; color: #334155; }
         body.is-preview .preview-bar .preview-size { margin-left: 8px; color: #cbd5e1; font-size: 13px; }
 /* Before the pages are built, the content waits out of sight */

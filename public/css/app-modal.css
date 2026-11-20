@@ -69,7 +69,7 @@
 }
 
 .modal .modal-today > i {
-    color: #1d65db;
+    color: #2f7452;
 }
 
 .modal .modal-header .modal-today + .close {
@@ -153,7 +153,7 @@
 }
 
 .modal .modal-header .close:focus-visible {
-    box-shadow: 0 0 0 4px rgba(47, 124, 246, 0.25);
+    box-shadow: 0 0 0 4px rgba(57, 140, 98, 0.25);
 }
 
 /* ---- Body: labels and fields ---- */
@@ -199,8 +199,8 @@
 
 .modal .form-control:focus,
 .modal .custom-select:focus {
-    border-color: #2f7cf6;
-    box-shadow: 0 0 0 4px rgba(47, 124, 246, 0.15);
+    border-color: #398c62;
+    box-shadow: 0 0 0 4px rgba(57, 140, 98, 0.15);
     outline: 0;
 }
 
@@ -317,7 +317,7 @@
 .modal .modal-footer .btn:focus-visible,
 .modal .modal-actions .btn:focus-visible {
     outline: 0;
-    box-shadow: 0 0 0 4px rgba(47, 124, 246, 0.3);
+    box-shadow: 0 0 0 4px rgba(57, 140, 98, 0.3);
 }
 
 .modal .modal-footer .btn:disabled,
@@ -327,16 +327,16 @@
 }
 
 .modal .btn-primary {
-    border-color: #1d65db;
-    background-color: #1d65db;
+    border-color: #2f7452;
+    background-color: #2f7452;
     color: #fff;
 }
 
 .modal .btn-primary:hover,
 .modal .btn-primary:focus,
 .modal .btn-primary:not(:disabled):not(.disabled):active {
-    border-color: #1a51b0;
-    background-color: #1a51b0;
+    border-color: #255b40;
+    background-color: #255b40;
     color: #fff;
 }
 
@@ -470,8 +470,8 @@
 
 .modal .select2-container--focus .select2-selection--single,
 .modal .select2-container--open .select2-selection--single {
-    border-color: #2f7cf6 !important;
-    box-shadow: 0 0 0 4px rgba(47, 124, 246, 0.15) !important;
+    border-color: #398c62 !important;
+    box-shadow: 0 0 0 4px rgba(57, 140, 98, 0.15) !important;
 }
 
 .modal select.is-invalid + .select2-container .select2-selection--single {
@@ -500,8 +500,8 @@
 }
 
 .modal .select2-search--dropdown .select2-search__field:focus {
-    border-color: #2f7cf6 !important;
-    box-shadow: 0 0 0 2px rgba(47, 124, 246, 0.2);
+    border-color: #398c62 !important;
+    box-shadow: 0 0 0 2px rgba(57, 140, 98, 0.2);
 }
 
 .modal .select2-results__option {
@@ -511,7 +511,7 @@
 
 .modal .select2-container--default .select2-results__option--highlighted[aria-selected],
 .modal .select2-container--default .select2-results__option--highlighted.select2-results__option--selectable {
-    background-color: #1d65db;
+    background-color: #2f7452;
     color: #fff;
 }
 

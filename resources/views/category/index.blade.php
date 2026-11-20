@@ -101,7 +101,7 @@
                     text: "{{ __('sweetalert.delete_revert_text') }}",
                     icon: 'warning',
                     showCancelButton: true,
-                    confirmButtonColor: '#3085d6',
+                    confirmButtonColor: '#327b57',
                     cancelButtonColor: '#d33',
                     cancelButtonText: "{{ __('sweetalert.cancel') }}",
                     confirmButtonText: "{{ __('sweetalert.delete_notice') }}"

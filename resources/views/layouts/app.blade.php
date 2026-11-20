@@ -14,7 +14,7 @@
     <meta name="author" content="UltraCore Creatives Ltd. for Ministry of Land">
     <meta name="description" content="Inventory Management System for Ministry of Land.">
     <meta name="robots" content="noindex, nofollow">
-    <meta name="theme-color" content="#343a40">
+    <meta name="theme-color" content="#323935">
     {{-- Favicon --}}
     <link rel="icon" href="{{ asset('favicon.ico') }}" type="image/x-icon" />
 
@@ -56,7 +56,7 @@
     <link rel="stylesheet" href="{{ asset('css/app.css') }}">
 
     <!-- For Wait Loader & Custom CSS -->
-    <link rel="stylesheet" href="{{ asset('css/land.css') }}" />
+    <link rel="stylesheet" href="{{ asset('css/land.css') }}?v={{ @filemtime(public_path('css/land.css')) }}" />
     <!-- Select2 -->
     {{-- <link href="{{ asset('css/select2npm.min.css') }}" rel="stylesheet" /> --}}
 
@@ -134,7 +134,7 @@
         }
 
         input:checked+.custom-slider {
-            background-color: #1a4b96;
+            background-color: #204d37;
         }
 
         input:checked+.custom-slider:before {
@@ -204,6 +204,8 @@
     <link rel="stylesheet" href="{{ asset('css/app-sidebar.css') }}?v={{ @filemtime(public_path('css/app-sidebar.css')) }}">
     {{-- Site-wide responsive base font size (17px desktop, 16px tablet, 15px phone) --}}
     <link rel="stylesheet" href="{{ asset('css/base-font.css') }}?v={{ @filemtime(public_path('css/base-font.css')) }}">
+    {{-- Colour theme (green with a gold touch): last, so it overrides the library blues --}}
+    <link rel="stylesheet" href="{{ asset('css/theme.css') }}?v={{ @filemtime(public_path('css/theme.css')) }}">
 
     {{--
         Libraries live in <head> so they are loaded once: Livewire (wire:navigate) replaces

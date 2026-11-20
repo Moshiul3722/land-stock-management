@@ -296,7 +296,7 @@
                     icon: 'warning',
                     showCancelButton: true,
                     confirmButtonColor: '#d33',
-                    cancelButtonColor: '#3085d6',
+                    cancelButtonColor: '#327b57',
                     confirmButtonText: 'Yes, remove it!'
                 }).then((result) => {
                     if (result.isConfirmed) {
