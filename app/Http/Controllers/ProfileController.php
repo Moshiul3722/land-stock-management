@@ -43,7 +43,8 @@ class ProfileController extends Controller
         if ($request->hasFile('profile_photo')) {
             // Delete old photo if exists
             if ($user->profile_photo_path) {
-                Storage::delete($user->profile_photo_path);
+                // The photo is on the public disk (where it is stored below)
+                Storage::disk('public')->delete($user->profile_photo_path);
             }
 
             $path = $request->file('profile_photo')->store('profile-photos', 'public');
