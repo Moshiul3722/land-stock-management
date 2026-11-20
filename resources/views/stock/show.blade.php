@@ -84,6 +84,7 @@
                                     <tr class="tw-border-0 tw-border-b tw-border-solid tw-border-slate-200 tw-bg-slate-50/80 tw-text-base tw-font-semibold tw-uppercase tw-tracking-wide tw-text-slate-600">
                                         <th scope="col" class="tw-w-12 tw-whitespace-nowrap tw-px-2 tw-py-2 tw-text-center sm:tw-w-20 sm:tw-px-3">{{ __('stock.table_sl') }}</th>
                                         <th scope="col" class="tw-px-3 tw-py-2 sm:tw-px-5">{{ __('lot.table_lot_number') }}</th>
+                                        <th scope="col" class="tw-whitespace-nowrap tw-px-3 tw-py-2 tw-text-center sm:tw-px-5">{{ __('lot.table_entry_date') }}</th>
                                         <th scope="col" class="tw-hidden tw-px-3 tw-py-2 sm:tw-table-cell sm:tw-px-5">{{ __('lot.purchase_type') }}</th>
                                         <th scope="col" class="tw-whitespace-nowrap tw-px-3 tw-py-2 tw-text-center sm:tw-px-5">{{ __('stock.table_quantity') }}</th>
                                     </tr>
@@ -98,6 +99,7 @@
                                                 {{-- Phones: the purchase type is folded in here --}}
                                                 <span class="tw-block tw-text-sm tw-leading-tight tw-text-slate-500 sm:tw-hidden">{{ $purchaseType }}</span>
                                             </td>
+                                            <td class="tw-whitespace-nowrap tw-px-3 tw-py-1.5 tw-text-center tw-text-slate-700 sm:tw-px-5">{{ $stockEntry->lot?->entry_date ? $digits($stockEntry->lot->entry_date->copy()->locale(app()->getLocale() === 'bn' ? 'bn' : 'en')->translatedFormat(app()->getLocale() === 'bn' ? 'j F Y' : 'd M Y')) : '—' }}</td>
                                             <td class="tw-hidden tw-px-3 tw-py-1.5 tw-text-slate-700 sm:tw-table-cell sm:tw-px-5">{{ $purchaseType }}</td>
                                             <td class="tw-whitespace-nowrap tw-px-3 tw-py-1.5 tw-text-center tw-tabular-nums sm:tw-px-5">
                                                 <span class="tw-font-semibold tw-text-slate-900">{{ $digits($stockEntry->quantity) }}</span>
@@ -110,8 +112,8 @@
                                 </tbody>
                                 <tfoot>
                                     <tr class="tw-bg-slate-50/80">
-                                        <th scope="row" colspan="2" class="tw-px-3 tw-py-2.5 tw-text-right tw-font-semibold tw-text-slate-700 sm:tw-hidden">{{ $text['total_row'] }}</th>
-                                        <th scope="row" colspan="3" class="tw-hidden tw-px-3 tw-py-2.5 tw-text-right tw-font-semibold tw-text-slate-700 sm:tw-table-cell sm:tw-px-5">{{ $text['total_row'] }}</th>
+                                        <th scope="row" colspan="3" class="tw-px-3 tw-py-2.5 tw-text-right tw-font-semibold tw-text-slate-700 sm:tw-hidden">{{ $text['total_row'] }}</th>
+                                        <th scope="row" colspan="4" class="tw-hidden tw-px-3 tw-py-2.5 tw-text-right tw-font-semibold tw-text-slate-700 sm:tw-table-cell sm:tw-px-5">{{ $text['total_row'] }}</th>
                                         <td class="tw-whitespace-nowrap tw-px-3 tw-py-2.5 tw-text-center tw-tabular-nums sm:tw-px-5">
                                             <span class="tw-font-bold tw-text-slate-900">{{ $digits($totalQuantity) }}</span>
                                             @if ($unitLabel !== '')
