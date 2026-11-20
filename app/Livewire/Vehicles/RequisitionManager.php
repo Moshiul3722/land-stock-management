@@ -43,6 +43,13 @@ class RequisitionManager extends VehicleCrud
 
     public string $reportTime = '';
 
+    /** Message under the distance field about the automatic distance */
+    #[Locked]
+    public string $distanceNote = '';
+
+    #[Locked]
+    public bool $distanceFailed = false;
+
     public bool $showView = false;
 
     #[Locked]
@@ -144,6 +151,66 @@ class RequisitionManager extends VehicleCrud
     {
         parent::openCreate();
         $this->reportDate = now()->format('Y-m-d');
+    }
+
+    /** A changed place: the distance is worked out again (when both places are given). */
+    public function updatedDestination(): void
+    {
+        $this->autoDistance(false);
+    }
+
+    public function updatedReportPlace(): void
+    {
+        $this->autoDistance(false);
+    }
+
+    /** The "calculate distance" button */
+    public function calculateDistance(): void
+    {
+        $this->autoDistance(true);
+    }
+
+    /**
+     * Round-trip road distance (report place -> destination -> report place) from Google Maps,
+     * put in the distance field; it can still be changed by hand.
+     */
+    private function autoDistance(bool $asked): void
+    {
+        $from = trim($this->reportPlace);
+        $to = trim($this->destination);
+        if ($from === '' || $to === '') {
+            $this->distanceNote = $asked ? __('vehicle.requisitions.distance_need_places') : '';
+            $this->distanceFailed = $asked;
+
+            return;
+        }
+
+        $key = 'route-distance:' . Auth::id();
+        if (\Illuminate\Support\Facades\RateLimiter::tooManyAttempts($key, 30)) {
+            $this->distanceNote = __('vehicle.requisitions.distance_failed');
+            $this->distanceFailed = true;
+
+            return;
+        }
+        \Illuminate\Support\Facades\RateLimiter::hit($key, 60);
+
+        $result = app(\App\Services\RouteDistanceService::class)->drivingDistance($from, $to);
+        if ($result['status'] !== 'ok') {
+            $this->distanceNote = __('vehicle.requisitions.distance_' . ($result['status'] === 'no_key' ? 'no_key' : ($result['status'] === 'not_found' ? 'not_found' : 'failed')));
+            $this->distanceFailed = true;
+
+            return;
+        }
+
+        $oneWay = round($result['meters'] / 1000, 1);
+        $roundTrip = round($result['meters'] * 2 / 1000, 1);
+        $this->distanceKm = rtrim(rtrim(number_format($roundTrip, 1, '.', ''), '0'), '.');
+        $this->resetValidation('distanceKm');
+        $this->distanceNote = __('vehicle.requisitions.distance_auto', [
+            'one' => $this->localDigits(rtrim(rtrim(number_format($oneWay, 1, '.', ''), '0'), '.')),
+            'km' => $this->localDigits($this->distanceKm),
+        ]);
+        $this->distanceFailed = false;
     }
 
     public function openView(int $id): void
@@ -305,7 +372,7 @@ class RequisitionManager extends VehicleCrud
 
     protected function resetFields(): void
     {
-        $this->reset('purpose', 'officialDetails', 'destination', 'distanceKm', 'returnTime', 'reportPlace', 'reportDate', 'reportTime');
+        $this->reset('purpose', 'officialDetails', 'destination', 'distanceKm', 'returnTime', 'reportPlace', 'reportDate', 'reportTime', 'distanceNote', 'distanceFailed');
     }
 
     protected function beforeValidate(): void

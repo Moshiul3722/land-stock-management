@@ -9,17 +9,19 @@
       $lang      "bn" for Bangla input
       $hint      small help text under the field
       $wide      true: spans both columns
+      $blur      true: the value is sent to the server when the field is left (text / textarea)
 --}}
 @php
     $ui = \App\Livewire\Concerns\Ui::class;
     $type = $type ?? 'text';
     $fid = 'vf-' . \Illuminate\Support\Str::kebab($name);
     $hasError = $errors->has($name);
+    $model = 'wire:model' . (! empty($blur) ? '.blur' : '');
 @endphp
 <div class="{{ ! empty($wide) ? 'sm:tw-col-span-2' : '' }}">
     <label for="{{ $fid }}" class="{{ $ui::LABEL }}">{{ $label }} @if (! empty($required))<span class="tw-text-rose-600">*</span>@endif</label>
     @if ($type === 'textarea')
-        <textarea id="{{ $fid }}" rows="3" wire:model="{{ $name }}" @if (! empty($max)) maxlength="{{ $max }}" @endif
+        <textarea id="{{ $fid }}" rows="3" {{ $model }}="{{ $name }}" @if (! empty($max)) maxlength="{{ $max }}" @endif
             class="{{ $ui::INPUT }} tw-py-2 @if ($hasError) {{ $ui::INPUT_ERROR }} @endif" @if (! empty($lang)) lang="{{ $lang }}" @endif
             @if ($hasError) aria-invalid="true" aria-describedby="{{ $fid }}-error" @endif></textarea>
     @elseif ($type === 'select')
@@ -34,7 +36,7 @@
     @elseif ($type === 'date')
         <x-ui.date-field :id="$fid" wire:model="{{ $name }}" :invalid="$hasError" />
     @else
-        <input id="{{ $fid }}" type="{{ $type }}" wire:model="{{ $name }}" autocomplete="off"
+        <input id="{{ $fid }}" type="{{ $type }}" {{ $model }}="{{ $name }}" autocomplete="off"
             @if (! empty($max)) maxlength="{{ $max }}" @endif @if (! empty($lang)) lang="{{ $lang }}" @endif
             @if ($type === 'tel') inputmode="tel" placeholder="01XXXXXXXXX" @endif
             @if ($type === 'number') step="0.01" min="0" inputmode="decimal" @endif

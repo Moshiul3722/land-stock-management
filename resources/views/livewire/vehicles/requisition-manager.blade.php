@@ -132,10 +132,24 @@
                                 @if ($purpose === 'personal') <p class="{{ $ui::HINT }}"><i class="fas fa-info-circle tw-mr-1" aria-hidden="true"></i>{{ $t('personal_note') }}</p> @endif
                             </fieldset>
                             @include('livewire.vehicles.partials.field', ['name' => 'officialDetails', 'label' => $t('official_details'), 'type' => 'textarea', 'required' => $purpose === 'official', 'max' => 1000, 'wide' => true])
-                            @include('livewire.vehicles.partials.field', ['name' => 'destination', 'label' => $t('destination'), 'required' => true, 'max' => 255, 'wide' => true])
-                            @include('livewire.vehicles.partials.field', ['name' => 'distanceKm', 'label' => $t('distance') . ' (' . $t('km') . ')', 'type' => 'number'])
+                            @include('livewire.vehicles.partials.field', ['name' => 'destination', 'label' => $t('destination'), 'required' => true, 'max' => 255, 'wide' => true, 'blur' => true])
+                            <div>
+                                @include('livewire.vehicles.partials.field', ['name' => 'distanceKm', 'label' => $t('distance') . ' (' . $t('km') . ', ' . $t('round_trip') . ')', 'type' => 'number'])
+                                <div class="tw-mt-1.5 tw-flex tw-flex-wrap tw-items-center tw-gap-x-3 tw-gap-y-1">
+                                    <button type="button" wire:click="calculateDistance" wire:loading.attr="disabled" wire:target="calculateDistance, destination, reportPlace"
+                                        class="tw-inline-flex tw-items-center tw-gap-1.5 tw-border-0 tw-bg-transparent tw-p-0 tw-text-xs tw-font-semibold tw-text-brand-700 hover:tw-underline disabled:tw-opacity-50">
+                                        <i class="fas fa-route" aria-hidden="true"></i>{{ $t('distance_calc') }}
+                                    </button>
+                                    <span class="tw-text-xs tw-text-slate-500" wire:loading wire:target="calculateDistance, destination, reportPlace">
+                                        <i class="fas fa-circle-notch fa-spin tw-mr-1" aria-hidden="true"></i>{{ $t('distance_calculating') }}
+                                    </span>
+                                </div>
+                                @if ($distanceNote !== '')
+                                    <p class="{{ $ui::HINT }} {{ $distanceFailed ? '!tw-text-amber-700' : '!tw-text-emerald-700' }}" wire:loading.remove wire:target="calculateDistance, destination, reportPlace" role="status">{{ $distanceNote }}</p>
+                                @endif
+                            </div>
                             @include('livewire.vehicles.partials.field', ['name' => 'returnTime', 'label' => $t('return_time'), 'type' => 'time'])
-                            @include('livewire.vehicles.partials.field', ['name' => 'reportPlace', 'label' => $t('report_place'), 'required' => true, 'max' => 255, 'wide' => true])
+                            @include('livewire.vehicles.partials.field', ['name' => 'reportPlace', 'label' => $t('report_place'), 'required' => true, 'max' => 255, 'wide' => true, 'blur' => true])
                             @include('livewire.vehicles.partials.field', ['name' => 'reportDate', 'label' => $t('report_date'), 'type' => 'date', 'required' => true])
                             @include('livewire.vehicles.partials.field', ['name' => 'reportTime', 'label' => $t('report_time'), 'type' => 'time', 'required' => true])
                         </div>
