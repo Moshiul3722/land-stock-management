@@ -105,4 +105,47 @@ class NotificationService
             ->where('is_read', false)
             ->update(['is_read' => true, 'read_at' => now()]);
     }
+
+    /** Roles that see everyone's notifications (Super Admin, Admin); the rest see only their own. */
+    public const SEE_ALL_ROLES = [1, 2];
+
+    public function seesAll($user): bool
+    {
+        return $user && in_array((int) $user->role_id, self::SEE_ALL_ROLES, true);
+    }
+
+    /** Notifications the user may see: everyone's for Super Admin / Admin, else their own. */
+    public function visibleQuery($user)
+    {
+        return \App\Models\Notification::query()
+            ->when(! $this->seesAll($user), fn ($q) => $q->where('user_to_id', $user?->id ?? 0));
+    }
+
+    /**
+     * The bell's list: a user's own unread notifications; Super Admin / Admin get the latest
+     * notifications of everyone (read or not), newest first.
+     */
+    public function getRecentForBell($user, $limit = 5)
+    {
+        if (! $this->seesAll($user)) {
+            return $this->getRecentUnread($user?->id, $limit);
+        }
+
+        return $this->visibleQuery($user)
+            ->with('userTo:id,name,name_bn')
+            ->orderByDesc('created_at')
+            ->orderByDesc('id')
+            ->limit($limit)
+            ->get();
+    }
+
+    /** The notifications page: what the user may see, newest first, with the recipient. */
+    public function getVisiblePaginated($user, $perPage = 10)
+    {
+        return $this->visibleQuery($user)
+            ->with(['userFrom:id,name,name_bn', 'userTo:id,name,name_bn'])
+            ->orderByDesc('created_at')
+            ->orderByDesc('id')
+            ->paginate($perPage);
+    }
 }

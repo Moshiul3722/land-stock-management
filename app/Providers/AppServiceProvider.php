@@ -52,7 +52,8 @@ class AppServiceProvider extends ServiceProvider
             if (Auth::check()) {
                 $service = App::make(NotificationService::class);
                 $view->with('unreadCount', $service->getUnreadCount(Auth::id()));
-                $view->with('recentNotifications', $service->getRecentUnread(Auth::id(), 5)); // Limit 5
+                // Own unread ones; Super Admin / Admin see everyone's latest (limit 5)
+                $view->with('recentNotifications', $service->getRecentForBell(Auth::user(), 5));
             } else {
                 $view->with('unreadCount', 0);
                 $view->with('recentNotifications', collect([]));

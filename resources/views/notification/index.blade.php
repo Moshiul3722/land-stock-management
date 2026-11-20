@@ -138,6 +138,9 @@
                                 $npAt = $notification->created_at->timezone('Asia/Dhaka');
                                 $sender = $notification->userFrom;
                                 $npSender = $sender ? ($npBn && trim((string) $sender->name_bn) !== '' ? $sender->name_bn : $sender->name) : $npT['system'];
+                                // Super Admin / Admin also see others' notifications: whose it is
+                                $npTo = (int) $notification->user_to_id !== (int) Auth::id() ? $notification->userTo : null;
+                                $npToName = $npTo ? ($npBn && trim((string) $npTo->name_bn) !== '' ? $npTo->name_bn : $npTo->name) : '';
                             @endphp
                             <li class="np-item {{ $notification->is_read ? '' : 'is-unread' }}">
                                 <a href="{{ route('notifications.read', $notification->id) }}" class="np-link">
@@ -146,6 +149,9 @@
                                         <p class="np-text">{{ $notification->notification_text }}</p>
                                         <span class="np-meta">
                                             <span><i class="fas fa-user" aria-hidden="true"></i> {{ $npSender }}</span>
+                                            @if ($npToName !== '')
+                                                <span><i class="fas fa-user-tag" aria-hidden="true"></i> {{ $npBn ? 'প্রাপক' : 'To' }}: {{ $npToName }}</span>
+                                            @endif
                                             <span title="{{ $npAt->format('d M, Y h:i A') }}"><i class="fas fa-clock" aria-hidden="true"></i> {{ $npDigits($npAt->copy()->locale($npBn ? 'bn' : 'en')->diffForHumans()) }}</span>
                                             <span><i class="fas fa-calendar-alt" aria-hidden="true"></i> {{ $npDigits($npAt->copy()->locale($npBn ? 'bn' : 'en')->translatedFormat($npBn ? 'j F Y, g:i A' : 'd M, Y h:i A')) }}</span>
                                         </span>

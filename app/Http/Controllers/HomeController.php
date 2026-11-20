@@ -88,9 +88,9 @@ class HomeController extends Controller
             'deliveredRequisitions' => (int) (($byStatus['delivered'] ?? 0) + ($byStatus['completed'] ?? 0)),
             'pendingRequisitions' => (int) ($byStatus['pending'] ?? 0),
             'months' => $months,
-            'latestNotifications' => \App\Models\Notification::query()
-                ->where('user_to_id', $user->id)
-                ->with('userFrom:id,name,name_bn')
+            // Own notifications; Super Admin / Admin see everyone's
+            'latestNotifications' => app(\App\Services\NotificationService::class)->visibleQuery($user)
+                ->with(['userFrom:id,name,name_bn', 'userTo:id,name,name_bn'])
                 ->orderByDesc('created_at')
                 ->orderByDesc('id')
                 ->limit(5)

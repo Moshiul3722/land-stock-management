@@ -20,7 +20,8 @@ class NotificationController extends Controller
      */
     public function index()
     {
-        $notifications = $this->notificationService->getAllForUserPaginated(Auth::id());
+        // Own notifications; Super Admin / Admin see everyone's
+        $notifications = $this->notificationService->getVisiblePaginated(Auth::user());
         return view('notification.index', compact('notifications'));
     }
 
@@ -29,17 +30,18 @@ class NotificationController extends Controller
      */
     public function markAsRead($id)
     {
-        // A General User (role 5) can open only notifications addressed to them: someone
-        // else's is neither marked as read nor followed.
-        if ((int) Auth::user()->role_id === 5) {
-            $owned = \App\Models\Notification::whereKey($id)->where('user_to_id', Auth::id())->exists();
-            abort_unless($owned, 403);
+        // Only one's own notifications can be opened; Super Admin / Admin may open anyone's.
+        // Opening marks it as read only for its own recipient, so someone else's stays new for them.
+        $notification = \App\Models\Notification::find($id);
+        abort_unless($notification, 404);
+        $own = (int) $notification->user_to_id === (int) Auth::id();
+        abort_unless($own || $this->notificationService->seesAll(Auth::user()), 403);
+
+        if ($own) {
+            $this->notificationService->markAsRead($id);
         }
 
-        $this->notificationService->markAsRead($id);
-        
         // If there is a URL associated with the notification, redirect to it
-        $notification = \App\Models\Notification::find($id);
         if ($notification && $notification->url) {
             return redirect($this->withHighlight($notification->url, (string) $notification->notification_text));
         }

@@ -365,18 +365,26 @@
                                 @php
                                     [$notifyIcon, $notifyTone] = $notifyKind((string) $notification->notification_text);
                                     $notifyAt = $notification->created_at->timezone('Asia/Dhaka');
+                                    // Super Admin / Admin also see others' notifications: whose it is
+                                    $notifyTo = (int) $notification->user_to_id !== (int) Auth::id() ? $notification->userTo : null;
+                                    $notifyToName = $notifyTo ? ($notifyBn && trim((string) $notifyTo->name_bn) !== '' ? $notifyTo->name_bn : $notifyTo->name) : '';
                                 @endphp
                                 <a href="{{ route('notifications.read', $notification->id) }}" class="app-notify-item">
                                     <span class="app-notify-icon {{ $notifyTone }}" aria-hidden="true"><i class="fas {{ $notifyIcon }}"></i></span>
                                     <span class="app-notify-body">
                                         <span class="app-notify-text">{{ $notification->notification_text }}</span>
+                                        @if ($notifyToName !== '')
+                                            <span class="app-notify-time"><i class="fas fa-user" aria-hidden="true"></i> {{ $notifyBn ? 'প্রাপক' : 'To' }}: {{ $notifyToName }}</span>
+                                        @endif
                                         <span class="app-notify-time" title="{{ $notifyAt->format('d M, Y h:i A') }}">
                                             <i class="fas fa-clock" aria-hidden="true"></i>
                                             {{ $notifyDigits($notifyAt->copy()->locale($notifyBn ? 'bn' : 'en')->diffForHumans()) }}
                                             <span class="app-notify-date">· {{ $notifyDigits($notifyAt->copy()->locale($notifyBn ? 'bn' : 'en')->translatedFormat($notifyBn ? 'j M, g:i A' : 'd M, h:i A')) }}</span>
                                         </span>
                                     </span>
-                                    <span class="app-notify-dot" aria-hidden="true"></span>
+                                    @unless ($notification->is_read)
+                                        <span class="app-notify-dot" aria-hidden="true"></span>
+                                    @endunless
                                 </a>
                             @empty
                                 <div class="app-notify-empty">

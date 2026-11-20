@@ -361,6 +361,9 @@
                                 $at = $notification->created_at->timezone('Asia/Dhaka');
                                 $sender = $notification->userFrom;
                                 $senderName = $sender ? ($isBn && trim((string) $sender->name_bn) !== '' ? $sender->name_bn : $sender->name) : '';
+                                // Super Admin / Admin also see others' notifications: whose it is
+                                $noteTo = (int) $notification->user_to_id !== (int) $user->id ? $notification->userTo : null;
+                                $noteToName = $noteTo ? ($isBn && trim((string) $noteTo->name_bn) !== '' ? $noteTo->name_bn : $noteTo->name) : '';
                             @endphp
                             <li class="ud-note {{ $notification->is_read ? '' : 'is-unread' }}">
                                 <a href="{{ route('notifications.read', $notification->id) }}">
@@ -369,6 +372,9 @@
                                         <p class="ud-note-text">{{ $notification->notification_text }}</p>
                                         @if ($senderName !== '')
                                             <span class="ud-note-from"><i class="fas fa-user" aria-hidden="true"></i>{{ $senderName }}</span>
+                                        @endif
+                                        @if ($noteToName !== '')
+                                            <span class="ud-note-from"><i class="fas fa-user-tag" aria-hidden="true"></i>{{ $isBn ? 'প্রাপক' : 'To' }}: {{ $noteToName }}</span>
                                         @endif
                                     </span>
                                     <span class="ud-note-side">
