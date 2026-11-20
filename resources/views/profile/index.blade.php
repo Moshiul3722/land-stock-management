@@ -219,7 +219,7 @@
                                     <div class="pp-fields">
                                         <div class="pp-field">
                                             <label class="pp-label" for="signature">{{ __('profile.signature') }}</label>
-                                            <div class="pp-preview">
+                                            <div class="pp-preview" id="signature-preview">
                                                 @if ($signatureUri)
                                                     <img src="{{ $signatureUri }}" alt="{{ __('profile.signature_current') }}">
                                                 @else
@@ -237,7 +237,7 @@
                                         </div>
                                         <div class="pp-field">
                                             <label class="pp-label" for="profile_photo">{{ __('profile.photo') }}</label>
-                                            <div class="pp-preview">
+                                            <div class="pp-preview" id="profile_photo-preview">
                                                 <img class="pp-preview-photo" src="{{ $photoUrl }}" alt="{{ __('profile.photo_alt') }}">
                                             </div>
                                             <div class="custom-file">
@@ -306,6 +306,31 @@
 <script>
     $(function () {
         bsCustomFileInput.init();
+
+        // A chosen signature / photo is shown in its box at once, before the form is saved
+        // (choosing nothing, or a file that is not an image, puts the saved one back).
+        [['signature', ''], ['profile_photo', 'pp-preview-photo']].forEach(function (pair) {
+            var input = document.getElementById(pair[0]);
+            var box = document.getElementById(pair[0] + '-preview');
+            if (!input || !box) return;
+            var saved = box.innerHTML;
+            var url = null;
+            input.addEventListener('change', function () {
+                if (url) { URL.revokeObjectURL(url); url = null; }
+                var file = input.files && input.files[0];
+                if (!file || !/^image\//.test(file.type)) {
+                    box.innerHTML = saved;
+                    return;
+                }
+                url = URL.createObjectURL(file);
+                var img = document.createElement('img');
+                img.src = url;
+                img.alt = file.name;
+                if (pair[1]) img.className = pair[1];
+                box.innerHTML = '';
+                box.appendChild(img);
+            });
+        });
     });
 </script>
 @endpush
