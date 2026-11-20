@@ -43,6 +43,10 @@ class RequisitionManager extends VehicleCrud
 
     public string $reportTime = '';
 
+    /** List filter: demands with this reporting date only (YYYY-MM-DD), '' = any date */
+    #[\Livewire\Attributes\Url(as: 'date', except: '')]
+    public string $dateFilter = '';
+
     /** Message under the distance field about the automatic distance */
     #[Locked]
     public string $distanceNote = '';
@@ -121,6 +125,7 @@ class RequisitionManager extends VehicleCrud
                 ->orWhere('report_place', 'like', $like)->orWhere('official_details', 'like', $like)
                 ->orWhereHas('vehicle', fn ($v) => $v->where('vehicle_no', 'like', $like))
                 ->orWhereHas('driver', fn ($d) => $d->where('name', 'like', $like)->orWhere('name_bn', 'like', $like))))
+            ->when($this->dateFilter !== '', fn ($q) => $q->whereDate('report_date', $this->dateFilter))
             ->orderByRaw("CASE WHEN status = 'pending' THEN 0 ELSE 1 END")
             ->orderByDesc('id')
             ->paginate($this->perPage);
@@ -149,6 +154,23 @@ class RequisitionManager extends VehicleCrud
                 ->mapWithKeys(fn ($d) => [$d->id => $d->label . ($d->mobile ? ' · ' . $this->localDigits($d->mobile) : '')])->all(),
             'units' => array_combine(VehicleRequisition::FUEL_UNITS, VehicleRequisition::FUEL_UNITS),
         ];
+    }
+
+    /** A changed date filter starts the list again from page one (a bad value is dropped). */
+    public function updatedDateFilter(): void
+    {
+        if ($this->dateFilter !== '' && ! preg_match('/^\d{4}-\d{2}-\d{2}$/', $this->dateFilter)) {
+            $this->dateFilter = '';
+        }
+        $this->resetPage();
+    }
+
+    /** The "clear filter" button: empties the search and the date. */
+    public function clearFilters(): void
+    {
+        $this->search = '';
+        $this->dateFilter = '';
+        $this->resetPage();
     }
 
     public function openCreate(): void

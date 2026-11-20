@@ -25,7 +25,7 @@
         <div class="card card-primary">
             @include('livewire.vehicles.partials.card-head')
             <div class="card-body position-relative">
-                @include('livewire.partials.toolbar', ['id' => 'vreq', 'placeholder' => $t('search')])
+                @include('livewire.partials.toolbar', ['id' => 'vreq', 'placeholder' => $t('search'), 'dateFilter' => ['model' => 'dateFilter', 'label' => $t('report_date')]])
                 @include('livewire.vehicles.partials.loading')
 
                 <div class="table-responsive">
