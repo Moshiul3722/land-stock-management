@@ -115,6 +115,14 @@ class DemandManager extends VehicleCrud
         $this->resetPage();
     }
 
+    /** The "clear filter" button: empties the search and the date. */
+    public function clearFilters(): void
+    {
+        $this->search = '';
+        $this->dateFilter = '';
+        $this->resetPage();
+    }
+
     /** Units by demand type (stored as written here); "other" offers all of them. */
     private const UNITS = [
         'fuel' => ['লিটার', 'মিলিলিটার', 'গ্যালন', 'ব্যারেল', 'ঘনমিটার', 'কেজি'],
