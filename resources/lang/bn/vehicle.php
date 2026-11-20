@@ -124,6 +124,7 @@ return [
         'return_time' => 'গাড়ী ফেরত প্রদানের সময়',
         'report_place' => 'গাড়ী রিপোর্ট স্থান',
         'report_date' => 'তারিখ',
+        'report_time_field' => 'গাড়ী রিপোর্ট করার সময়',
         'report_time' => 'সময়',
         'applicant' => 'আবেদনকারী',
         'applicant_name' => 'আবেদনকারীর নাম',

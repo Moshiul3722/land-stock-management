@@ -124,6 +124,7 @@ return [
         'return_time' => 'Vehicle return time',
         'report_place' => 'Vehicle reporting place',
         'report_date' => 'Date',
+        'report_time_field' => 'Vehicle reporting time',
         'report_time' => 'Time',
         'applicant' => 'Applicant',
         'applicant_name' => 'Applicant name',

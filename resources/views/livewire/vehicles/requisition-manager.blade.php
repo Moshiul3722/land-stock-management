@@ -133,7 +133,7 @@
                             </fieldset>
                             @include('livewire.vehicles.partials.field', ['name' => 'officialDetails', 'label' => $t('official_details'), 'type' => 'textarea', 'required' => $purpose === 'official', 'max' => 1000, 'wide' => true])
                             @include('livewire.vehicles.partials.field', ['name' => 'reportDate', 'label' => $t('report_date'), 'type' => 'date', 'required' => true])
-                            @include('livewire.vehicles.partials.field', ['name' => 'reportTime', 'label' => $t('report_time'), 'type' => 'time', 'required' => true])
+                            @include('livewire.vehicles.partials.field', ['name' => 'reportTime', 'label' => $t('report_time_field'), 'type' => 'time', 'required' => true])
                             @include('livewire.vehicles.partials.field', ['name' => 'reportPlace', 'label' => $t('report_place'), 'required' => true, 'max' => 255, 'blur' => true])
                             @include('livewire.vehicles.partials.field', ['name' => 'destination', 'label' => $t('destination'), 'required' => true, 'max' => 255, 'blur' => true])
                             <div>
