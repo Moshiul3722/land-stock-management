@@ -132,6 +132,8 @@
                                 @if ($purpose === 'personal') <p class="{{ $ui::HINT }}"><i class="fas fa-info-circle tw-mr-1" aria-hidden="true"></i>{{ $t('personal_note') }}</p> @endif
                             </fieldset>
                             @include('livewire.vehicles.partials.field', ['name' => 'officialDetails', 'label' => $t('official_details'), 'type' => 'textarea', 'required' => $purpose === 'official', 'max' => 1000, 'wide' => true])
+                            @include('livewire.vehicles.partials.field', ['name' => 'reportDate', 'label' => $t('report_date'), 'type' => 'date', 'required' => true])
+                            @include('livewire.vehicles.partials.field', ['name' => 'reportTime', 'label' => $t('report_time'), 'type' => 'time', 'required' => true])
                             @include('livewire.vehicles.partials.field', ['name' => 'reportPlace', 'label' => $t('report_place'), 'required' => true, 'max' => 255, 'blur' => true])
                             @include('livewire.vehicles.partials.field', ['name' => 'destination', 'label' => $t('destination'), 'required' => true, 'max' => 255, 'blur' => true])
                             <div>
@@ -150,8 +152,6 @@
                                 @endif
                             </div>
                             @include('livewire.vehicles.partials.field', ['name' => 'returnTime', 'label' => $t('return_time'), 'type' => 'time'])
-                            @include('livewire.vehicles.partials.field', ['name' => 'reportDate', 'label' => $t('report_date'), 'type' => 'date', 'required' => true])
-                            @include('livewire.vehicles.partials.field', ['name' => 'reportTime', 'label' => $t('report_time'), 'type' => 'time', 'required' => true])
                         </div>
                     </div>
                     @include('livewire.vehicles.partials.modal-foot')
