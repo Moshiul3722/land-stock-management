@@ -32,6 +32,9 @@
             'preview' => 'প্রিন্ট প্রিভিউ',
             'print' => 'প্রিন্ট',
             'close' => 'বন্ধ করুন',
+            'prev' => 'আগের পাতা',
+            'next' => 'পরের পাতা',
+            'showing' => 'মোট :totalটির মধ্যে :from থেকে :to পর্যন্ত দেখানো হচ্ছে',
         ] : [
             'label' => 'Low stock',
             'hint' => 'Products with less than ' . $lowStockLimit . ' in stock',
@@ -47,7 +50,11 @@
             'preview' => 'Print preview',
             'print' => 'Print',
             'close' => 'Close',
+            'prev' => 'Previous page',
+            'next' => 'Next page',
+            'showing' => 'Showing :from to :to of :total',
         ];
+        $lowStockPerPage = 10;
         $canOpenStock = app(\App\Services\MenuPermissionService::class)->allowsRoute($lowStockUser, 'stock.show');
         // About 4 seconds per product, so the speed stays readable however long the list is
         $lowStockSeconds = max(25, $lowStockItems->count() * 4);
@@ -98,8 +105,13 @@
                     </div>
                     <button type="button" class="close" data-dismiss="modal" aria-label="{{ $lowStockTexts['close'] }}"><span aria-hidden="true">&times;</span></button>
                 </div>
-                <div class="modal-body p-0">
-                    <div class="table-responsive">
+                {{-- 10 products at a time, with page buttons under the list --}}
+                <div class="modal-body p-0" x-data="{ page: 0, per: {{ $lowStockPerPage }}, total: {{ $lowStockItems->count() }},
+                        get pages() { return Math.max(1, Math.ceil(this.total / this.per)) },
+                        bn(n) { return @js($isBn) ? String(n).replace(/[0-9]/g, (d) => '০১২৩৪৫৬৭৮৯'[d]) : String(n) },
+                        go(p) { this.page = Math.min(Math.max(0, p), this.pages - 1); this.$refs.list.scrollTop = 0 } }"
+                    x-on:show.bs.modal.window="page = 0">
+                    <div class="table-responsive" x-ref="list">
                         <table class="table table-hover mb-0 low-stock-table">
                             <thead>
                                 <tr>
@@ -111,7 +123,7 @@
                             </thead>
                             <tbody>
                                 @foreach ($lowStockItems as $item)
-                                    <tr>
+                                    <tr x-show="Math.floor({{ $loop->index }} / per) === page">
                                         <td class="text-center">{{ $digits($loop->iteration) }}</td>
                                         <td class="font-weight-bold">
                                             @if ($canOpenStock)
@@ -129,6 +141,22 @@
                             </tbody>
                         </table>
                     </div>
+                    @if ($lowStockItems->count() > $lowStockPerPage)
+                        <nav class="low-stock-pager" aria-label="{{ $lowStockTexts['title'] }}">
+                            <span class="low-stock-pager-info" aria-live="polite"
+                                x-text="@js($lowStockTexts['showing']).replace(':total', bn(total)).replace(':from', bn(page * per + 1)).replace(':to', bn(Math.min(total, (page + 1) * per)))"></span>
+                            <span class="low-stock-pager-buttons">
+                                <button type="button" class="low-stock-page-btn" x-on:click="go(page - 1)" x-bind:disabled="page === 0"
+                                    aria-label="{{ $lowStockTexts['prev'] }}" title="{{ $lowStockTexts['prev'] }}"><i class="fas fa-chevron-left" aria-hidden="true"></i></button>
+                                <template x-for="p in pages" x-bind:key="p">
+                                    <button type="button" class="low-stock-page-btn" x-on:click="go(p - 1)" x-bind:class="p - 1 === page && 'is-active'"
+                                        x-bind:aria-current="p - 1 === page ? 'page' : null" x-text="bn(p)"></button>
+                                </template>
+                                <button type="button" class="low-stock-page-btn" x-on:click="go(page + 1)" x-bind:disabled="page >= pages - 1"
+                                    aria-label="{{ $lowStockTexts['next'] }}" title="{{ $lowStockTexts['next'] }}"><i class="fas fa-chevron-right" aria-hidden="true"></i></button>
+                            </span>
+                        </nav>
+                    @endif
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-outline-secondary" data-dismiss="modal">{{ $lowStockTexts['close'] }}</button>
@@ -215,6 +243,55 @@
 
         .low-stock-table td {
             vertical-align: middle;
+        }
+
+        .low-stock-pager {
+            position: sticky;
+            bottom: 0;
+            z-index: 1;
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: space-between;
+            gap: 0.5rem 1rem;
+            padding: 0.65rem 1rem;
+            border-top: 1px solid #e2e8f0;
+            background: #fff;
+            font-size: 0.8125rem;
+            color: #475569;
+        }
+
+        .low-stock-pager-buttons {
+            display: inline-flex;
+            gap: 0.3rem;
+        }
+
+        .low-stock-page-btn {
+            min-width: 2.1rem;
+            height: 2.1rem;
+            padding: 0 0.5rem;
+            border: 1px solid #e2e8f0;
+            border-radius: 0.5rem;
+            background: #fff;
+            color: #334155;
+            font: inherit;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .low-stock-page-btn:hover:not(:disabled) {
+            background: #f1f5f9;
+        }
+
+        .low-stock-page-btn.is-active {
+            border-color: #1d4ed8;
+            background: #1d4ed8;
+            color: #fff;
+        }
+
+        .low-stock-page-btn:disabled {
+            opacity: 0.45;
+            cursor: not-allowed;
         }
 
         .low-stock-badge {
