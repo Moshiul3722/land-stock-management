@@ -161,6 +161,14 @@
                             </div>
                         </div>
 
+                        {{-- A similar product already exists: save only after confirming it is a different one --}}
+                        @if ($similarNames)
+                            <label class="tw-m-0 tw-flex tw-cursor-pointer tw-items-start tw-gap-2 tw-rounded-lg tw-border tw-border-solid tw-border-amber-200 tw-bg-amber-50 tw-px-3 tw-py-2 tw-text-sm tw-font-medium tw-text-amber-900">
+                                <input type="checkbox" wire:model="confirmSimilar" class="tw-mt-0.5 tw-h-4 tw-w-4 tw-flex-none">
+                                <span>{{ __('product.manage.confirm_different') }}</span>
+                            </label>
+                        @endif
+
                         {{-- Category, sub-category and unit share one row (stacked on phones) --}}
                         <div class="tw-grid tw-grid-cols-1 tw-gap-4 sm:tw-grid-cols-3">
                             <div class="tw-min-w-0">

@@ -50,6 +50,13 @@ class ProductManager extends Component
 
     public string $unit = '';
 
+    /** Products with a name close to the one typed (shown as a warning before saving). */
+    #[Locked]
+    public array $similarNames = [];
+
+    /** "Yes, this is a different product": save even though a similar name exists. */
+    public bool $confirmSimilar = false;
+
     public bool $showDelete = false;
 
     #[Locked]
@@ -166,6 +173,21 @@ class ProductManager extends Component
             'subCategoryId' => __('product.manage.sub_category'),
             'unit' => __('product.manage.unit'),
         ]);
+
+        // Duplicates: the same name written differently (case, spaces, punctuation) is refused;
+        // a name only a letter or two away (e.g. "Toilate" / "Toilet") needs a confirmation.
+        [$same, $similar] = $this->lookAlikes($data['name'], $data['nameBn']);
+        if ($same) {
+            $this->addError('name', __('product.manage.exists_as', ['name' => $same]));
+
+            return;
+        }
+        if ($similar && ! $this->confirmSimilar) {
+            $this->similarNames = $similar;
+            $this->addError('name', __('product.manage.similar_exists', ['names' => implode(', ', $similar)]));
+
+            return;
+        }
 
         $payload = [
             'name' => $data['name'],
@@ -290,9 +312,64 @@ class ProductManager extends Component
         return view('livewire.catalog.product-manager', $this->tableViewData() + ['rows' => $this->products]);
     }
 
+    /** A new name clears the earlier similar-name warning and its confirmation. */
+    public function updatedName(): void
+    {
+        $this->reset('similarNames', 'confirmSimilar');
+    }
+
+    public function updatedNameBn(): void
+    {
+        $this->reset('similarNames', 'confirmSimilar');
+    }
+
+    /**
+     * Products (other than the one being edited) whose name is the same once case, spaces and
+     * punctuation are ignored, and those whose name differs by only one or two letters (with the
+     * same numbers, so "Patch Cord (5m)" and "(10m)" are not counted), in English or Bangla.
+     *
+     * @return array{0: ?string, 1: array<int, string>}  [same name, similar names]
+     */
+    private function lookAlikes(string $name, string $nameBn): array
+    {
+        $plain = fn (string $text) => preg_replace('/[^\p{L}\p{N}]+/u', '', mb_strtolower($text));
+        $letters = fn (string $text) => preg_replace('/\p{N}+/u', '', $plain($text));
+        $numbers = fn (string $text) => preg_replace('/[^\p{N}]+/u', ' ', $plain($text));
+        $distance = function (string $a, string $b): int {
+            $x = mb_str_split($a); $y = mb_str_split($b);
+            $row = range(0, count($y));
+            foreach ($x as $i => $cx) {
+                $prev = $row; $row = [$i + 1];
+                foreach ($y as $j => $cy) {
+                    $row[] = min($prev[$j + 1] + 1, $row[$j] + 1, $prev[$j] + ($cx === $cy ? 0 : 1));
+                }
+            }
+
+            return end($row);
+        };
+        $close = fn (string $a, string $b) => $a !== '' && $b !== ''
+            && $numbers($a) === $numbers($b)
+            && min(mb_strlen($letters($a)), mb_strlen($letters($b))) >= 5
+            && $distance($letters($a), $letters($b)) <= 2;
+
+        $same = null;
+        $similar = [];
+        $others = Product::query()->when($this->productId, fn ($q) => $q->whereKeyNot($this->productId))->get(['id', 'name', 'name_bn']);
+        foreach ($others as $other) {
+            $label = trim($other->name . ($other->name_bn ? ' (' . $other->name_bn . ')' : ''));
+            if ($plain($other->name) === $plain($name) || ($nameBn !== '' && $plain((string) $other->name_bn) === $plain($nameBn))) {
+                $same ??= $label;
+            } elseif ($close($other->name, $name) || ($nameBn !== '' && $close((string) $other->name_bn, $nameBn))) {
+                $similar[] = $label;
+            }
+        }
+
+        return [$same, array_slice($similar, 0, 5)];
+    }
+
     private function resetForm(): void
     {
-        $this->reset('productId', 'name', 'nameBn', 'description', 'categoryId', 'subCategoryId', 'unit');
+        $this->reset('productId', 'name', 'nameBn', 'description', 'categoryId', 'subCategoryId', 'unit', 'similarNames', 'confirmSimilar');
         $this->resetValidation();
     }
 }
